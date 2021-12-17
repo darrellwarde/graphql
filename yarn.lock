@@ -7904,16 +7904,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-airbnb-typescript@npm:10.0.0":
-  version: 10.0.0
-  resolution: "eslint-config-airbnb-typescript@npm:10.0.0"
+"eslint-config-airbnb-typescript@npm:10.0.2":
+  version: 10.0.2
+  resolution: "eslint-config-airbnb-typescript@npm:10.0.2"
   dependencies:
     "@typescript-eslint/parser": ^4.0.1
     eslint-config-airbnb: ^18.2.0
     eslint-config-airbnb-base: ^14.2.0
   peerDependencies:
     "@typescript-eslint/eslint-plugin": ^4.0.1
-  checksum: e5717879d1d04055cedf918f1f26b52e9d51cfef1693605690cc992e136473d9b26c5e518daa5400611a466ce5c391e2eb8745541008db54dfaea96b8672f4c7
+  checksum: 7a5b094d25d12a11185c2b2746a17b8bd149775d68082a08c546b5c74c2c2755ef049a15204efe306202d8e39d1c68551e4c25cfdfea95f62e687f2b4a1468c3
   languageName: node
   linkType: hard
 
@@ -13331,7 +13331,7 @@ fsevents@^1.2.7:
     "@typescript-eslint/parser": 4.15.1
     concurrently: 6.0.0
     eslint: 7.9.0
-    eslint-config-airbnb-typescript: 10.0.0
+    eslint-config-airbnb-typescript: 10.0.2
     eslint-config-prettier: 6.11.0
     eslint-import-resolver-typescript: ^2.4.0
     eslint-plugin-eslint-comments: 3.2.0
