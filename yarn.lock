@@ -2051,7 +2051,7 @@ __metadata:
     randomstring: 1.1.5
     semver: 7.3.5
     ts-jest: 26.1.4
-    typescript: 3.9.7
+    typescript: 3.9.10
   peerDependencies:
     graphql: ^15.0.0
     neo4j-driver: ^4.1.0
@@ -2102,7 +2102,7 @@ __metadata:
     supertest: ^6.1.6
     ts-jest: 26.1.4
     ts-node: ^10.0.0
-    typescript: 3.9.7
+    typescript: 3.9.10
   peerDependencies:
     graphql: ^15.0.0
     neo4j-driver: ^4.1.0
@@ -2122,7 +2122,7 @@ __metadata:
     jest: 26.2.2
     pluralize: ^8.0.0
     ts-jest: 26.1.4
-    typescript: 3.9.7
+    typescript: 3.9.10
   peerDependencies:
     neo4j-driver: ^4.1.0
   languageName: unknown
@@ -13348,7 +13348,7 @@ fsevents@^1.2.7:
     prettier: 2.1.2
     set-tz: 0.2.0
     ts-jest: ^26.5.4
-    typescript: 3.9.7
+    typescript: 3.9.10
   languageName: unknown
   linkType: soft
 
@@ -18245,13 +18245,13 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-typescript@3.9.7:
-  version: 3.9.7
-  resolution: "typescript@npm:3.9.7"
+typescript@3.9.10:
+  version: 3.9.10
+  resolution: "typescript@npm:3.9.10"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10848a9c35fd8c70a8792b8bd9485317534bcd58768793d3b7d9c7486e9fd30cf345f83fa2a324e0bf6088bc8a4d8d061d58fda38b18c2ff187cf01fbbff6267
+  checksum: 544f3810ac3d3fcd141907e7f52f0b8c70af178adc83af47e2b8a48351e5a119919a4d3bfbe2f62d5165b5aa203e896fe0432024cfbda670dbd03a4f53ce7748
   languageName: node
   linkType: hard
 
@@ -18265,13 +18265,13 @@ typescript@4.1.3:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@3.9.7#builtin<compat/typescript>":
-  version: 3.9.7
-  resolution: "typescript@patch:typescript@npm%3A3.9.7#builtin<compat/typescript>::version=3.9.7&hash=a45b0e"
+"typescript@patch:typescript@3.9.10#builtin<compat/typescript>":
+  version: 3.9.10
+  resolution: "typescript@patch:typescript@npm%3A3.9.10#builtin<compat/typescript>::version=3.9.10&hash=a45b0e"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: ee9b64dafd9997a7f659c402dc4500792e05724a39a9071a0b79fd513466d6f4497e7d4963e092804a387b77e9cb9d4bfe365433fcbf2ca9eea44476ba3df14d
+  checksum: 744dab471ae59659b1618be636ab56b9c0afbca801e0640c3cdfad0a894315c87d30a290b7063c6a3f1860bf47fe44d9188cb85e46b2bdadda7f207d67e6b4e1
   languageName: node
   linkType: hard
 
