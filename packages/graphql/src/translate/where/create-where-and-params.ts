@@ -180,6 +180,14 @@ function createWhereAndParams({
                 nodeEntries = { [connectionField.relationship.typeMeta.name]: value };
             }
 
+            if (connectionField.relationship.interface) {
+                nodeEntries =
+                    connectionField.relationship.interface.implementations?.reduce((nodes, imp) => {
+                        nodes[imp] = value;
+                        return nodes;
+                    }, {}) || {};
+            }
+
             Object.entries(nodeEntries).forEach((entry) => {
                 const refNode = context.nodes.find((x) => x.name === entry[0]) as Node;
                 const relationship = context.relationships.find(
