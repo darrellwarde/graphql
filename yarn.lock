@@ -2790,9 +2790,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neo4j/create-grandstack-app@workspace:packages/create-grandstack-app":
+"@neo4j/create-graphql-app@workspace:packages/create-graphql-app":
   version: 0.0.0-use.local
-  resolution: "@neo4j/create-grandstack-app@workspace:packages/create-grandstack-app"
+  resolution: "@neo4j/create-graphql-app@workspace:packages/create-graphql-app"
   dependencies:
     "@babel/cli": ^7.8.4
     "@babel/core": ^7.9.0
@@ -2803,6 +2803,8 @@ __metadata:
     "@babel/preset-react": ^7.9.4
     "@babel/preset-typescript": ^7.9.0
     "@babel/runtime-corejs3": ^7.9.2
+    "@neo4j/introspector": 1.0.1
+    "@types/fs-extra": ^9.0.13
     "@types/inquirer": ^8.2.1
     "@types/node": 16.11.26
     arg: ^4.1.3
@@ -2816,6 +2818,7 @@ __metadata:
     eslint-config-prettier: ^6.11.0
     eslint-plugin-prettier: ^3.1.4
     execa: ^4.0.3
+    fs-extra: ^10.1.0
     husky: ^4.2.5
     inquirer: ^7.3.3
     lint-staged: ^10.2.11
@@ -2825,12 +2828,11 @@ __metadata:
     pkg-install: ^1.0.0
     prettier: ^2.0.5
     prettier-eslint-cli: ^5.0.0
-    rimraf: ^3.0.2
     tmp: ^0.1.0
     typescript: 4.6.3
     util: ^0.12.3
   bin:
-    create-grandstack-app: ./dist/create-grandstack-app.js
+    create-graphql-app: ./dist/create-graphql-app.js
   languageName: unknown
   linkType: soft
 
@@ -3001,7 +3003,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@neo4j/introspector@^1.0.1, @neo4j/introspector@workspace:packages/introspector":
+"@neo4j/introspector@1.0.1, @neo4j/introspector@^1.0.1, @neo4j/introspector@workspace:packages/introspector":
   version: 0.0.0-use.local
   resolution: "@neo4j/introspector@workspace:packages/introspector"
   dependencies:
@@ -3584,6 +3586,15 @@ __metadata:
     "@types/qs": "*"
     "@types/serve-static": "*"
   checksum: e1d6388ec28ab67db5559011d16c63d6fcfb128f27daf217a02ecdb2ede968d2187e83ef3f7c54cbd050686aaed4c80585b64f055c76e79c055d7d4efb7bc3b1
+  languageName: node
+  linkType: hard
+
+"@types/fs-extra@npm:^9.0.13":
+  version: 9.0.13
+  resolution: "@types/fs-extra@npm:9.0.13"
+  dependencies:
+    "@types/node": "*"
+  checksum: add79e212acd5ac76b97b9045834e03a7996aef60a814185e0459088fd290519a3c1620865d588fa36c4498bf614210d2a703af5cf80aa1dbc125db78f6edac3
   languageName: node
   linkType: hard
 
@@ -7041,25 +7052,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:^5.2.0":
-  version: 5.3.0
-  resolution: "concurrently@npm:5.3.0"
-  dependencies:
-    chalk: ^2.4.2
-    date-fns: ^2.0.1
-    lodash: ^4.17.15
-    read-pkg: ^4.0.1
-    rxjs: ^6.5.2
-    spawn-command: ^0.0.2-1
-    supports-color: ^6.1.0
-    tree-kill: ^1.2.2
-    yargs: ^13.3.0
-  bin:
-    concurrently: bin/concurrently.js
-  checksum: e12f32eab48e50fc5b7752dc43db7c78f5b553efc625d3b8741c3dd3088ba0050cb8e506f008c8a5fe30d7980849639d12b359a5aea88fd16707a0161b05babb
-  languageName: node
-  linkType: hard
-
 "configstore@npm:^5.0.1":
   version: 5.0.1
   resolution: "configstore@npm:5.0.1"
@@ -7663,7 +7655,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^2.0.1, date-fns@npm:^2.16.1":
+"date-fns@npm:^2.16.1":
   version: 2.28.0
   resolution: "date-fns@npm:2.28.0"
   checksum: a0516b2e4f99b8bffc6cc5193349f185f195398385bdcaf07f17c2c4a24473c99d933eb0018be4142a86a6d46cb0b06be6440ad874f15e795acbedd6fd727a1f
@@ -8879,7 +8871,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-prettier@npm:^3.1.3, eslint-plugin-prettier@npm:^3.1.4":
+"eslint-plugin-prettier@npm:^3.1.4":
   version: 3.4.1
   resolution: "eslint-plugin-prettier@npm:3.4.1"
   dependencies:
@@ -8894,7 +8886,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-react@npm:7.29.4, eslint-plugin-react@npm:^7.20.0":
+"eslint-plugin-react@npm:7.29.4":
   version: 7.29.4
   resolution: "eslint-plugin-react@npm:7.29.4"
   dependencies:
@@ -9099,7 +9091,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^7.19.0, eslint@npm:^7.6.0":
+"eslint@npm:^7.6.0":
   version: 7.32.0
   resolution: "eslint@npm:7.32.0"
   dependencies:
@@ -9304,7 +9296,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"execa@npm:^4.0.2, execa@npm:^4.0.3, execa@npm:^4.1.0":
+"execa@npm:^4.0.3, execa@npm:^4.1.0":
   version: 4.1.0
   resolution: "execa@npm:4.1.0"
   dependencies:
@@ -10013,7 +10005,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fs-extra@npm:^10.0.0":
+"fs-extra@npm:^10.0.0, fs-extra@npm:^10.1.0":
   version: 10.1.0
   resolution: "fs-extra@npm:10.1.0"
   dependencies:
@@ -10481,42 +10473,6 @@ __metadata:
   checksum: 3f109d70ae123951905d85032ebeae3c2a5a7a997430df00ea30df0e3a6c60cf6689b109654d6fdacd28810a053348c4d14642da1d075049e6be1ba5216218da
   languageName: node
   linkType: hard
-
-"grandstack-template-ac199b@workspace:packages/grandstack-template":
-  version: 0.0.0-use.local
-  resolution: "grandstack-template-ac199b@workspace:packages/grandstack-template"
-  dependencies:
-    concurrently: ^5.2.0
-    dotenv: ^8.2.0
-    eslint: ^7.19.0
-    eslint-config-prettier: ^6.11.0
-    eslint-plugin-prettier: ^3.1.3
-    eslint-plugin-react: ^7.20.0
-    execa: ^4.0.2
-    husky: ">=4"
-    lint-staged: ">=10"
-    prettier: ^2.0.5
-    prettier-eslint-cli: ^5.0.0
-  languageName: unknown
-  linkType: soft
-
-"grandstack-template-ts-46eb91@workspace:packages/grandstack-template-ts":
-  version: 0.0.0-use.local
-  resolution: "grandstack-template-ts-46eb91@workspace:packages/grandstack-template-ts"
-  dependencies:
-    concurrently: ^5.2.0
-    dotenv: ^8.2.0
-    eslint: ^7.19.0
-    eslint-config-prettier: ^6.11.0
-    eslint-plugin-prettier: ^3.1.3
-    eslint-plugin-react: ^7.20.0
-    execa: ^4.0.2
-    husky: ">=4"
-    lint-staged: ">=10"
-    prettier: ^2.0.5
-    prettier-eslint-cli: ^5.0.0
-  languageName: unknown
-  linkType: soft
 
 "graphiql-explorer@npm:^0.9.0":
   version: 0.9.0
@@ -11267,7 +11223,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"husky@npm:7.0.4, husky@npm:>=4":
+"husky@npm:7.0.4":
   version: 7.0.4
   resolution: "husky@npm:7.0.4"
   bin:
@@ -13709,7 +13665,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lint-staged@npm:12.4.1, lint-staged@npm:>=10":
+"lint-staged@npm:12.4.1":
   version: 12.4.1
   resolution: "lint-staged@npm:12.4.1"
   dependencies:
@@ -14088,7 +14044,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:4.17.21, lodash@npm:^4.17.11, lodash@npm:^4.17.12, lodash@npm:^4.17.14, lodash@npm:^4.17.15, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4, lodash@npm:^4.7.0, lodash@npm:~4.17.0":
+"lodash@npm:4.17.21, lodash@npm:^4.17.11, lodash@npm:^4.17.12, lodash@npm:^4.17.14, lodash@npm:^4.17.19, lodash@npm:^4.17.20, lodash@npm:^4.17.21, lodash@npm:^4.17.4, lodash@npm:^4.7.0, lodash@npm:~4.17.0":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: eb835a2e51d381e561e508ce932ea50a8e5a68f4ebdd771ea240d3048244a8d13658acbd502cd4829768c56f2e16bdd4340b9ea141297d472517b83868e677f7
@@ -17911,17 +17867,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"read-pkg@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "read-pkg@npm:4.0.1"
-  dependencies:
-    normalize-package-data: ^2.3.2
-    parse-json: ^4.0.0
-    pify: ^3.0.0
-  checksum: 56193535486c50a0a40039e4a92f68676362f5a7160628ca4d856c62509e125220f69c562a32940dcc51e3dcd38211af69756bbb5b8a1aed1d09be1bedd1e1a5
-  languageName: node
-  linkType: hard
-
 "read-pkg@npm:^5.1.1":
   version: 5.2.0
   resolution: "read-pkg@npm:5.2.0"
@@ -19757,15 +19702,6 @@ __metadata:
   dependencies:
     has-flag: ^3.0.0
   checksum: 95f6f4ba5afdf92f495b5a912d4abee8dcba766ae719b975c56c084f5004845f6f5a5f7769f52d53f40e21952a6d87411bafe34af4a01e65f9926002e38e1dac
-  languageName: node
-  linkType: hard
-
-"supports-color@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "supports-color@npm:6.1.0"
-  dependencies:
-    has-flag: ^3.0.0
-  checksum: 74358f9535c83ee113fbaac354b11e808060f6e7d8722082ee43af3578469134e89d00026dce2a6b93ce4e5b89d0e9a10f638b2b9f64c7838c2fb2883a47b3d5
   languageName: node
   linkType: hard
 
@@ -22281,7 +22217,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yargs@npm:^13.2.4, yargs@npm:^13.3.0":
+"yargs@npm:^13.2.4":
   version: 13.3.2
   resolution: "yargs@npm:13.3.2"
   dependencies:
