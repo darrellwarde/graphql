@@ -37,8 +37,14 @@ describe("https://github.com/neo4j/graphql/issues/1287", () => {
                 id: ID! @id
             }
 
-            type MyImplementation implements MyInterface {
+            type MyImplementation1 implements MyInterface {
                 id: ID! @id
+                field1: String!
+            }
+
+            type MyImplementation2 implements MyInterface {
+                id: ID! @id
+                field2: String!
             }
         `;
 
@@ -63,12 +69,16 @@ describe("https://github.com/neo4j/graphql/issues/1287", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Screening)
-            WHERE EXISTS((this)-[:INTERFACE_CONNECTION]->(:MyImplementation)) AND ANY(this_interfaceConnection_MyImplementation_map IN [(this)-[this_interfaceConnection_MyImplementation_ScreeningInterfaceRelationship:INTERFACE_CONNECTION]->(this_interfaceConnection_MyImplementation:MyImplementation)  | { node: this_interfaceConnection_MyImplementation, relationship: this_interfaceConnection_MyImplementation_ScreeningInterfaceRelationship } ] WHERE this_interfaceConnection_MyImplementation_map.node.id = $this_screenings.where.interfaceConnection.node.id)
+            WHERE EXISTS((this)-[:INTERFACE_CONNECTION]->(:MyImplementation1)) AND ANY(this_interfaceConnection_MyImplementation1_map IN [(this)-[this_interfaceConnection_MyImplementation1_ScreeningInterfaceRelationship:INTERFACE_CONNECTION]->(this_interfaceConnection_MyImplementation1:MyImplementation1)  | { node: this_interfaceConnection_MyImplementation1, relationship: this_interfaceConnection_MyImplementation1_ScreeningInterfaceRelationship } ] WHERE this_interfaceConnection_MyImplementation1_map.node.id = $this_screenings.where.interfaceConnection.node.id) AND EXISTS((this)-[:INTERFACE_CONNECTION]->(:MyImplementation2)) AND ANY(this_interfaceConnection_MyImplementation2_map IN [(this)-[this_interfaceConnection_MyImplementation2_ScreeningInterfaceRelationship:INTERFACE_CONNECTION]->(this_interfaceConnection_MyImplementation2:MyImplementation2)  | { node: this_interfaceConnection_MyImplementation2, relationship: this_interfaceConnection_MyImplementation2_ScreeningInterfaceRelationship } ] WHERE this_interfaceConnection_MyImplementation2_map.node.id = $this_screenings.where.interfaceConnection.node.id)
             WITH this
             CALL {
             WITH this
-            MATCH (this)-[:INTERFACE_CONNECTION]->(this_MyImplementation:MyImplementation)
-            RETURN { __resolveType: \\"MyImplementation\\", id: this_MyImplementation.id } AS interface
+            MATCH (this)-[:INTERFACE_CONNECTION]->(this_MyImplementation1:MyImplementation1)
+            RETURN { __resolveType: \\"MyImplementation1\\", id: this_MyImplementation1.id } AS interface
+            UNION
+            WITH this
+            MATCH (this)-[:INTERFACE_CONNECTION]->(this_MyImplementation2:MyImplementation2)
+            RETURN { __resolveType: \\"MyImplementation2\\", id: this_MyImplementation2.id } AS interface
             }
             RETURN this { .id, interface: interface } as this"
         `);
@@ -80,6 +90,64 @@ describe("https://github.com/neo4j/graphql/issues/1287", () => {
                         \\"interfaceConnection\\": {
                             \\"node\\": {
                                 \\"id\\": \\"some-id\\"
+                            }
+                        }
+                    }
+                }
+            }"
+        `);
+    });
+
+    test("Works for filtering using _on", async () => {
+        const query = gql`
+            query queryScreening {
+                screenings(
+                    where: {
+                        interfaceConnection: {
+                            node: {
+                                id: "some-id"
+                                _on: {
+                                    MyImplementation1: { field1: "value1" }
+                                    MyImplementation2: { field2: "value2" }
+                                }
+                            }
+                        }
+                    }
+                ) {
+                    id
+                    interface {
+                        id
+                    }
+                }
+            }
+        `;
+
+        const result = await translateQuery(neoSchema, query);
+
+        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
+            "MATCH (this:Screening)
+            WHERE EXISTS((this)-[:INTERFACE_CONNECTION]->(:MyImplementation1)) AND ANY(this_interfaceConnection_MyImplementation1_map IN [(this)-[this_interfaceConnection_MyImplementation1_ScreeningInterfaceRelationship:INTERFACE_CONNECTION]->(this_interfaceConnection_MyImplementation1:MyImplementation1)  | { node: this_interfaceConnection_MyImplementation1, relationship: this_interfaceConnection_MyImplementation1_ScreeningInterfaceRelationship } ] WHERE this_interfaceConnection_MyImplementation1_map.node.id = $this_screenings.where.interfaceConnection.node.id AND this_interfaceConnection_MyImplementation1_map.node.id = $this_screenings.where.interfaceConnection.node._on.MyImplementation1.id AND this_interfaceConnection_MyImplementation1_map.node.field1 = $this_screenings.where.interfaceConnection.node._on.MyImplementation1.field1) AND EXISTS((this)-[:INTERFACE_CONNECTION]->(:MyImplementation2)) AND ANY(this_interfaceConnection_MyImplementation2_map IN [(this)-[this_interfaceConnection_MyImplementation2_ScreeningInterfaceRelationship:INTERFACE_CONNECTION]->(this_interfaceConnection_MyImplementation2:MyImplementation2)  | { node: this_interfaceConnection_MyImplementation2, relationship: this_interfaceConnection_MyImplementation2_ScreeningInterfaceRelationship } ] WHERE this_interfaceConnection_MyImplementation2_map.node.id = $this_screenings.where.interfaceConnection.node.id AND this_interfaceConnection_MyImplementation2_map.node.id = $this_screenings.where.interfaceConnection.node._on.MyImplementation2.id AND this_interfaceConnection_MyImplementation2_map.node.field2 = $this_screenings.where.interfaceConnection.node._on.MyImplementation2.field2)
+            WITH this
+            CALL {
+            WITH this
+            MATCH (this)-[:INTERFACE_CONNECTION]->(this_MyImplementation1:MyImplementation1)
+            RETURN { __resolveType: \\"MyImplementation1\\", id: this_MyImplementation1.id } AS interface
+            UNION
+            WITH this
+            MATCH (this)-[:INTERFACE_CONNECTION]->(this_MyImplementation2:MyImplementation2)
+            RETURN { __resolveType: \\"MyImplementation2\\", id: this_MyImplementation2.id } AS interface
+            }
+            RETURN this { .id, interface: interface } as this"
+        `);
+
+        expect(formatParams(result.params)).toMatchInlineSnapshot(`
+            "{
+                \\"this_screenings\\": {
+                    \\"where\\": {
+                        \\"interfaceConnection\\": {
+                            \\"node\\": {
+                                \\"id\\": \\"some-id\\",
+                                \\"field2\\": \\"value2\\"
                             }
                         }
                     }
