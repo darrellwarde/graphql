@@ -18,7 +18,6 @@
  */
 
 import type { DocumentNode } from "graphql";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { createBearerToken } from "../../utils/create-bearer-token";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
@@ -29,7 +28,7 @@ describe("Interface filtering operations", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeEach(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Show {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -66,7 +65,7 @@ describe("Interface filtering operations", () => {
     });
 
     test("Logical operator filter (top level)", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query actedInWhere {
                 shows(where: { OR: [{ title: "The Office" }, { title: "The Office 2" }] }) {
                     title
@@ -104,7 +103,7 @@ describe("Interface filtering operations", () => {
     });
 
     test("Logical operator filter on relationship", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query actedInWhere {
                 actors {
                     actedIn(where: { OR: [{ title: "The Office" }, { title: "The Office 2" }] }) {

@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Connections Alias", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -49,7 +48,7 @@ describe("Connections Alias", () => {
     });
 
     test("Alias Top Level Connection Field", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 movies {
                     actors: actorsConnection {
@@ -83,7 +82,7 @@ describe("Connections Alias", () => {
     });
 
     test("Alias Top Level Connection Field Multiple Times", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { title: "Forrest Gump" }) {
                     title

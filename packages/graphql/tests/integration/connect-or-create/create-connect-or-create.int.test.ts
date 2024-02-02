@@ -18,7 +18,6 @@
  */
 
 import type { Driver, Session, Integer } from "neo4j-driver";
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
 import Neo4j from "../neo4j";
@@ -42,7 +41,7 @@ describe("Create -> ConnectOrCreate", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
         type ${typeMovie.name} {
             title: String!
             id: Int! @unique
@@ -76,7 +75,7 @@ describe("Create -> ConnectOrCreate", () => {
     });
 
     test("ConnectOrCreate creates new node", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [
@@ -133,7 +132,7 @@ describe("Create -> ConnectOrCreate", () => {
     test("ConnectOrCreate on existing node", async () => {
         const testActorName = "aRandomActor";
         await session.run(`CREATE (m:${typeMovie.name} { title: "Terminator2", id: 2222})`);
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [
@@ -220,7 +219,7 @@ describe("Create -> ConnectOrCreate", () => {
 
     test("ConnectOrCreate creates new node with edge data", async () => {
         const actorName = "Tommy Hanks The Little";
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [
@@ -277,7 +276,7 @@ describe("Create -> ConnectOrCreate", () => {
         expect(actedInRelation.screentime.toNumber()).toBe(105);
     });
     test("ConnectOrCreate creates a new node with the correct relationship direction", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
           mutation {
             ${typeMovie.operations.create}(
               input: [{

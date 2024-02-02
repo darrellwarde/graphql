@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Enums", () => {
     test("Enum Relationship Properties", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")

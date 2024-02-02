@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { GraphQLError } from "graphql";
 import { graphql } from "graphql";
 import type { Driver, Session } from "neo4j-driver";
@@ -53,7 +52,7 @@ describe("array-pop-errors", () => {
     test("should throw an error when trying to pop an element from a non-existing array", async () => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [String]
@@ -101,7 +100,7 @@ describe("array-pop-errors", () => {
     test("should throw an error when trying to pop an element from multiple non-existing arrays", async () => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [String]
@@ -202,7 +201,7 @@ describe("array-pop-errors", () => {
     test("should throw an error when input is invalid", async () => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [String]
@@ -251,7 +250,7 @@ describe("array-pop-errors", () => {
     test("should throw an error when performing an ambiguous property update", async () => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [String]

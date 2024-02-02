@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Cypher Aggregations where edge with ID", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type User {
                 name: String!
             }
@@ -49,7 +48,7 @@ describe("Cypher Aggregations where edge with ID", () => {
     });
 
     test("EQUAL", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 posts(where: { likesAggregate: { edge: { id_EQUAL: "10" } } }) {
                     content
@@ -79,7 +78,7 @@ describe("Cypher Aggregations where edge with ID", () => {
     });
 
     test("EQUAL with alias", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 posts(where: { likesAggregate: { edge: { someIdAlias_EQUAL: "10" } } }) {
                     content

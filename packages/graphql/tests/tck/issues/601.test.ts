@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -28,7 +27,7 @@ describe("#601", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]!
             }
@@ -73,7 +72,7 @@ describe("#601", () => {
     });
 
     test("Example 1", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query Document {
                 stakeholders {
                     documents {

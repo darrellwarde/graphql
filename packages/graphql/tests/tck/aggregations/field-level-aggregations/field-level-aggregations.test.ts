@@ -18,7 +18,6 @@
  */
 
 import type { DocumentNode } from "graphql";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, formatParams, translateQuery } from "../../utils/tck-test-utils";
 
@@ -27,7 +26,7 @@ describe("Field Level Aggregations", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Movie {
                 title: String
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -47,7 +46,7 @@ describe("Field Level Aggregations", () => {
     });
 
     test("Count Aggregation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies {
                     title
@@ -74,7 +73,7 @@ describe("Field Level Aggregations", () => {
     });
 
     test("Node Aggregations and Count", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies {
                     actorsAggregate {
@@ -114,7 +113,7 @@ describe("Field Level Aggregations", () => {
     });
 
     test("Node Aggregations - Number", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies {
                     actorsAggregate {
@@ -147,7 +146,7 @@ describe("Field Level Aggregations", () => {
     });
 
     test("Node Aggregations - String", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies {
                     title
@@ -182,7 +181,7 @@ describe("Field Level Aggregations", () => {
     });
 
     test("Node Aggregations - DateTime", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     moviesAggregate {
@@ -212,7 +211,7 @@ describe("Field Level Aggregations", () => {
     });
 
     test("Node Aggregations - Multiple node fields", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies {
                     actorsAggregate {

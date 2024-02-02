@@ -18,7 +18,6 @@
  */
 
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { generate } from "randomstring";
 
@@ -51,7 +50,7 @@ describe("array-pop-and-push", () => {
     test("should push to and pop from two different arrays in the same update", async () => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [String]

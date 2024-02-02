@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { GraphQLError, GraphQLSchema } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 
@@ -26,7 +25,7 @@ describe("schema/rfc/003", () => {
 
     describe("ObjectType", () => {
         test("should not throw when using valid relationship", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Source {
                     targets: [Target!]! @relationship(type: "HAS_TARGET", direction: OUT)
                     target1: SecondTarget! @relationship(type: "HAS_TARGET", direction: OUT)
@@ -52,7 +51,7 @@ describe("schema/rfc/003", () => {
         });
 
         test("If there are no relationships, then should always be empty array and not null", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Source {
                     targets: [Target!] @relationship(type: "HAS_TARGET", direction: OUT)
                 }
@@ -68,7 +67,7 @@ describe("schema/rfc/003", () => {
         });
 
         test("This suggests a relationship with no target node", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Source {
                     targets: [Target]! @relationship(type: "HAS_TARGET", direction: OUT)
                 }
@@ -83,7 +82,7 @@ describe("schema/rfc/003", () => {
         });
 
         test("should throw when ListType and not NonNullNamedType inside it", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Source {
                     targets: [Target] @relationship(type: "HAS_TARGET", direction: OUT)
                 }
@@ -101,7 +100,7 @@ describe("schema/rfc/003", () => {
 
     describe("InterfaceType", () => {
         test("should not throw when using valid relationship", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface SourceInterface {
                     targets: [Target!]! @relationship(type: "HAS_TARGET", direction: OUT)
                     target1: Target! @relationship(type: "HAS_TARGET", direction: OUT)
@@ -126,7 +125,7 @@ describe("schema/rfc/003", () => {
         });
 
         test("If there are no relationships, then should always be empty array and not null", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface SourceInterface {
                     targets: [Target!] @relationship(type: "HAS_TARGET", direction: OUT)
                 }
@@ -147,7 +146,7 @@ describe("schema/rfc/003", () => {
         });
 
         test("This suggests a relationship with no target node", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface SourceInterface {
                     targets: [Target]! @relationship(type: "HAS_TARGET", direction: OUT)
                 }
@@ -168,7 +167,7 @@ describe("schema/rfc/003", () => {
         });
 
         test("should throw when ListType and not NonNullNamedType inside it", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface SourceInterface {
                     targets: [Target] @relationship(type: "HAS_TARGET", direction: OUT)
                 }

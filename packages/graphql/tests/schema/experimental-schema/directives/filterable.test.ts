@@ -20,7 +20,6 @@
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import type { GraphQLInputObjectType } from "graphql";
 import { lexicographicSortSchema } from "graphql";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../../src";
 import { TestSubscriptionsEngine } from "../../../utils/TestSubscriptionsEngine";
 
@@ -33,7 +32,7 @@ describe("@filterable directive", () => {
 
     describe("on SCALAR", () => {
         test("default arguments should disable aggregation", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -102,7 +101,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable value and aggregation filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -209,7 +208,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable only aggregation filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -299,7 +298,7 @@ describe("@filterable directive", () => {
 
     describe("on RELATIONSHIP FIELD", () => {
         test("default arguments should disable aggregation", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -347,7 +346,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable value and aggregation filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -397,7 +396,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable only aggregation filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -447,7 +446,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable only value filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -499,7 +498,7 @@ describe("@filterable directive", () => {
 
     describe("on INTERFACE RELATIONSHIP FIELD, (aggregation are not generated for abstract types)", () => {
         test("default arguments should disable aggregation", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor implements Person {
                     username: String!
                     password: String!
@@ -551,7 +550,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable value and aggregation filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor implements Person {
                     username: String!
                     password: String!
@@ -605,7 +604,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable only value filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor implements Person {
                     username: String!
                     password: String!
@@ -659,7 +658,7 @@ describe("@filterable directive", () => {
         });
 
         test("disable value filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor implements Person {
                     username: String!
                     password: String!
@@ -715,7 +714,7 @@ describe("@filterable directive", () => {
 
     describe("on UNION RELATIONSHIP FIELD, (aggregation are no generated for abstract types)", () => {
         test("default arguments should disable aggregation", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -771,7 +770,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable value and aggregation filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -829,7 +828,7 @@ describe("@filterable directive", () => {
         });
 
         test("enable only value filters", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -890,7 +889,7 @@ describe("@filterable directive", () => {
     describe("snapshot tests", () => {
         describe("on SCALAR", () => {
             test("default arguments should disable aggregation", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -1708,7 +1707,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable value and aggregation filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -2568,7 +2567,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable only aggregation filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -3392,7 +3391,7 @@ describe("@filterable directive", () => {
 
         describe("on RELATIONSHIP FIELD", () => {
             test("default arguments should disable aggregation", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -4164,7 +4163,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable value and aggregation filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -5026,7 +5025,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable only aggregation filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -5860,7 +5859,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable only value filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -6635,7 +6634,7 @@ describe("@filterable directive", () => {
 
         describe("on INTERFACE RELATIONSHIP FIELD, (aggregation does not exists on abstract types)", () => {
             test("default arguments should disable aggregation", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor implements Person {
                         username: String!
                         password: String!
@@ -7503,7 +7502,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable value and aggregation filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor implements Person {
                         username: String!
                         password: String!
@@ -8356,7 +8355,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable only value filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor implements Person {
                         username: String!
                         password: String!
@@ -9211,7 +9210,7 @@ describe("@filterable directive", () => {
 
         describe("on UNION RELATIONSHIP FIELD, (aggregation does not exists on abstract types)", () => {
             test("default arguments should disable aggregation", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -10440,7 +10439,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable value and aggregation filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -11671,7 +11670,7 @@ describe("@filterable directive", () => {
             });
 
             test("enable only value filters", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!

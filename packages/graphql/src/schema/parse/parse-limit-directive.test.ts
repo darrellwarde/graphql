@@ -18,7 +18,6 @@
  */
 
 import type { DirectiveNode, ObjectTypeDefinitionNode } from "graphql";
-import gql from "graphql-tag";
 import * as neo4j from "neo4j-driver";
 import { LimitDirective } from "../../classes/LimitDirective";
 import { parseLimitDirective } from "./parse-limit-directive";
@@ -28,7 +27,7 @@ describe("parseLimitDirective", () => {
         const maxLimit = 100;
         const defaultLimit = 10;
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @limit(max: ${maxLimit}, default: ${defaultLimit}) {
                 id: ID
             }
@@ -46,7 +45,7 @@ describe("parseLimitDirective", () => {
     });
 
     test("should return correct object if default limit is undefined", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @limit {
                 id: ID
             }
@@ -66,7 +65,7 @@ describe("parseLimitDirective", () => {
         const maxLimit = 10;
         const defaultLimit = 100;
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @limit(max: ${maxLimit}, default: ${defaultLimit}) {
                 id: ID
             }
@@ -88,7 +87,7 @@ describe("parseLimitDirective", () => {
     describe("default argument", () => {
         test("should throw error when default limit is less than or equal to 0", () => {
             [-10, -100, 0].forEach((i) => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                 type Movie @limit(default: ${i}) {
                     id: ID
                 }
@@ -108,7 +107,7 @@ describe("parseLimitDirective", () => {
 
     describe("max argument", () => {
         test("should fail if value is 0", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @limit(max: 0) {
                     id: ID
                 }
@@ -125,7 +124,7 @@ describe("parseLimitDirective", () => {
         });
 
         test("should fail if value is less 0", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @limit(max: -10) {
                     id: ID
                 }

@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { GatewayServer } from "../setup/gateway-server";
 import type { Server } from "../setup/server";
 import { TestSubgraph } from "../setup/subgraph";
@@ -41,7 +40,7 @@ describe("Tests copied from https://github.com/apollographql/apollo-federation-s
     let gatewayUrl: string;
 
     beforeAll(async () => {
-        const products = gql`
+        const products = /* GraphQL */ `
             extend schema
                 @link(
                     url: "https://specs.apollo.dev/federation/v2.0"

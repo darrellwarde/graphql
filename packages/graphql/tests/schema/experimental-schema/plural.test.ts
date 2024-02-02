@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Experimental Plural option", () => {
     test("Plural on interface and union", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Animal @plural(value: "animales") {
                 name: String
             }

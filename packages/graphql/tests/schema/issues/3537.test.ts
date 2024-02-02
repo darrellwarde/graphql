@@ -18,14 +18,13 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
 
 describe("Extending the schema in when using getSubgraphSchema", () => {
     test("Should be able to extend the schema using @query", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
 
             type Actor {
@@ -299,7 +298,7 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
     });
 
     test("Should be able to extend the schema using @mutation", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
 
             type Actor {
@@ -519,7 +518,7 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
     });
 
     test("Should be able to extend the schema using @subscription", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
 
             type Actor {

@@ -22,7 +22,6 @@ import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 import type { GraphQLResponse } from "@apollo/server";
 import { ApolloServer } from "@apollo/server";
-import gql from "graphql-tag";
 
 describe("https://github.com/neo4j/graphql/issues/4056", () => {
     let driver: Driver;
@@ -80,7 +79,7 @@ describe("https://github.com/neo4j/graphql/issues/4056", () => {
       }
     `;
 
-    const ADD_TENANT = gql`
+    const ADD_TENANT = /* GraphQL */ `
         mutation addTenant($input: [TenantCreateInput!]!) {
             createTenants(input: $input) {
                 tenants {
@@ -96,7 +95,7 @@ describe("https://github.com/neo4j/graphql/issues/4056", () => {
         }
     `;
 
-    const ADD_OPENING_DAYS = gql`
+    const ADD_OPENING_DAYS = /* GraphQL */ `
         mutation addOpeningDays($input: [OpeningDayCreateInput!]!) {
             createOpeningDays(input: $input) {
                 openingDays {

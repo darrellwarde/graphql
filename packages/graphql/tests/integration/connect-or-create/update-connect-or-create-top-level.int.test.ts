@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { Driver, Session, Integer } from "neo4j-driver";
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
@@ -41,7 +40,7 @@ describe("Update -> ConnectOrCreate Top Level", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
         type ${typeMovie.name} {
             title: String!
             id: Int! @unique
@@ -76,7 +75,7 @@ describe("Update -> ConnectOrCreate Top Level", () => {
     test("Update with ConnectOrCreate creates new node", async () => {
         await session.run(`CREATE (:${typeActor.name} { name: "Tom Hanks"})`);
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.update}(
                 update: {
@@ -133,7 +132,7 @@ describe("Update -> ConnectOrCreate Top Level", () => {
         await session.run(`CREATE (m:${typeMovie.name} { title: "Terminator2", id: 2222})`);
         await session.run(`CREATE (:${typeActor.name} { name: "${testActorName}"})`);
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.update}(
                 update: {

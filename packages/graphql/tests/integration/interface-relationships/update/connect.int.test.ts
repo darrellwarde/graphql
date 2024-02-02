@@ -19,7 +19,6 @@
 
 import { faker } from "@faker-js/faker";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
 import { Neo4jGraphQL } from "../../../../src/classes";
@@ -34,7 +33,7 @@ describe("interface relationships", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Episode {
                 runtime: Int!
                 series: Series! @relationship(type: "HAS_EPISODE", direction: IN)

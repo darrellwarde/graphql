@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Sort", () => {
     test("sort argument is not present when nothing to sort", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Node1 {
                 property: String!
                 relatedTo: [Node2!]! @relationship(type: "RELATED_TO", direction: OUT)

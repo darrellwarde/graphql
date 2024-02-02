@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Algebraic", () => {
     test("Int fields should be extended with Increment/Decrement operators", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 viewers: Int!
@@ -195,7 +194,7 @@ describe("Algebraic", () => {
     });
 
     test("BigInt fields should be extended with Increment/Decrement operators", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 viewers: BigInt!
@@ -371,7 +370,7 @@ describe("Algebraic", () => {
     });
 
     test("Float fields should be extended with Add/Subtract/Multiply/Divide operators", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 viewers: Float!
@@ -545,7 +544,7 @@ describe("Algebraic", () => {
     });
 
     test("Operators should be presents in nested updates", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 viewers: Int!
@@ -1131,7 +1130,7 @@ describe("Algebraic", () => {
     });
 
     test("Should be supported in interfaces", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 viewers: Int!
             }
@@ -1770,7 +1769,7 @@ describe("Algebraic", () => {
     });
 
     test("Should be supported in Relationship properties", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Person {
                 name: String!
                 actedInMovies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)

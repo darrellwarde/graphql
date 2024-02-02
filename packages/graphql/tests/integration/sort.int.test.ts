@@ -19,7 +19,6 @@
 
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { generate } from "randomstring";
 import { Neo4jGraphQL } from "../../src/classes";
@@ -38,7 +37,7 @@ describe("sort", () => {
     const seriesType = new UniqueType("Series");
     const actorType = new UniqueType("Actor");
 
-    const typeDefs = gql`
+    const typeDefs = /* GraphQL */ `
         interface Production {
             id: ID!
             title: String!

@@ -18,7 +18,6 @@
  */
 
 import type { Driver } from "neo4j-driver";
-import { gql } from "graphql-tag";
 import type { GraphQLSchema } from "graphql";
 import { graphql, defaultFieldResolver } from "graphql";
 import { getDirective, MapperKind, mapSchema } from "@graphql-tools/utils";
@@ -71,7 +70,7 @@ describe("Custom Directives", () => {
         const neoSchema = new Neo4jGraphQL({
             typeDefs: [
                 upperDirectiveTypeDefs,
-                gql`
+                /* GraphQL */ `
                     directive @uppercase on FIELD_DEFINITION
 
                     type Movie {

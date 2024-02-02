@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
 
@@ -67,7 +66,7 @@ describe("typename_IN", () => {
     });
 
     test("top-level", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 productions(
                     where: {
@@ -112,7 +111,7 @@ describe("typename_IN", () => {
     });
 
     test("top-level + connection where", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 actors(
                     where: {
@@ -175,7 +174,7 @@ describe("typename_IN", () => {
     });
 
     test("nested", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 actors {
                     actedIn(
@@ -233,7 +232,7 @@ describe("typename_IN", () => {
     });
 
     test("aggregation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 productionsAggregate(where: { OR: [{ title: "the matrix" }, { typename_IN: [Movie, Series] }] }) {
                     count
@@ -270,7 +269,7 @@ describe("typename_IN", () => {
     });
 
     test("nested aggregation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 actors {
                     actedInAggregate(where: { typename_IN: [Movie, Series] }) {

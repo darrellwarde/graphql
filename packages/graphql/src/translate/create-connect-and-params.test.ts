@@ -28,7 +28,6 @@ import createConnectAndParams from "./create-connect-and-params";
 import type { Node } from "../../src/classes";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import { SchemaModelBuilder } from "../../tests/utils/builders/schema-model-builder";
-import { gql } from "graphql-tag";
 
 describe("createConnectAndParams", () => {
     let node: Node;
@@ -92,7 +91,7 @@ describe("createConnectAndParams", () => {
             pointFields: [],
             objectFields: [],
         }).instance();
-        const types = gql`
+        const types = /* GraphQL */ `
             type Movie {
                 title: String!
                 similarMovies: [Movie!]! @relationship(type: "SIMILAR", direction: OUT)

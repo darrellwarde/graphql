@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -40,7 +39,7 @@ describe("587: Dates in edges can cause wrongly generated cypher", () => {
     test("should not throw when returning a date in an edge", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Genre {
                 id: ID!
                 movies: [Movie!]! @relationship(type: "MOVIE", direction: OUT)

@@ -19,7 +19,6 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
 
@@ -31,7 +30,7 @@ describe("@selectable", () => {
     });
 
     test("Disable read fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @query(aggregate: true) {
                 title: String!
                 description: String @selectable(onRead: false, onAggregate: true)
@@ -199,7 +198,7 @@ describe("@selectable", () => {
     });
 
     test("Disable aggregation fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @query(aggregate: true) {
                 title: String!
                 description: String @selectable(onRead: true, onAggregate: false)
@@ -362,7 +361,7 @@ describe("@selectable", () => {
     });
 
     test("Disable read and aggregate fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @query(aggregate: true) {
                 title: String!
                 description: String @selectable(onRead: false, onAggregate: false)
@@ -524,7 +523,7 @@ describe("@selectable", () => {
     });
 
     test("Disable read fields on subscriptions", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @query(aggregate: true) {
                 title: String!
                 description: String @selectable(onRead: false, onAggregate: true)
@@ -757,7 +756,7 @@ describe("@selectable", () => {
 
     describe("relationships fields to a concrete type", () => {
         test("Disable read on relationship field", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -1204,7 +1203,7 @@ describe("@selectable", () => {
             `);
         });
         test("Disable aggregation on relationship field (no-op as controlled by @relationship(aggregate: false))", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -1671,7 +1670,7 @@ describe("@selectable", () => {
 
     describe("relationships fields to a union type", () => {
         test("Disable read on relationship field", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -2183,7 +2182,7 @@ describe("@selectable", () => {
             `);
         });
         test("Disable aggregation on relationship field (no-op as controlled by @relationship(aggregate: false))", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -2724,7 +2723,7 @@ describe("@selectable", () => {
 
     describe("relationships fields to an interface type", () => {
         test("Disable read on relationship field", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Production {
                     title: String!
                     description: String
@@ -3208,7 +3207,7 @@ describe("@selectable", () => {
             `);
         });
         test("Disable aggregation on relationship field (no-op as controlled by @relationship(aggregate: false))", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Production {
                     title: String!
                     description: String

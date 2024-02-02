@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("https://github.com/neo4j/graphql/issues/3816", () => {
     test("Combination of nested operations in reported issue", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 name: String!
                 genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT, nestedOperations: [CONNECT, DISCONNECT])
@@ -566,7 +565,7 @@ describe("https://github.com/neo4j/graphql/issues/3816", () => {
     });
 
     test("No nested operations in one type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 name: String!
                 genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT, nestedOperations: [])

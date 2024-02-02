@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -44,7 +43,7 @@ describe("https://github.com/neo4j/graphql/pull/2068", () => {
         const userType = new UniqueType("User");
         const commentType = new UniqueType("Comment");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${contentType.name} {
                 id: ID
                 content: String

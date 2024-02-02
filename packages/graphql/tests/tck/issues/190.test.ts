@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("#190", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type User {
                 client_id: String
                 uid: String
@@ -48,7 +47,7 @@ describe("#190", () => {
     });
 
     test("Example 1", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 users(where: { demographics: { type: "Gender", value: "Female" } }) {
                     uid
@@ -86,7 +85,7 @@ describe("#190", () => {
     });
 
     test("Example 2", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 users(
                     where: {

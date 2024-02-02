@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import type { GraphQLFieldMap } from "graphql";
 import { GraphQLError } from "graphql";
@@ -25,7 +24,7 @@ import { GraphQLError } from "graphql";
 describe("@mutation directive", () => {
     describe("on OBJECT", () => {
         test("default arguments should enable CREATE, UPDATE, DELETE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -60,7 +59,7 @@ describe("@mutation directive", () => {
         });
 
         test("should disable CREATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -95,7 +94,7 @@ describe("@mutation directive", () => {
         });
 
         test("should disable UPDATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -131,7 +130,7 @@ describe("@mutation directive", () => {
         });
 
         test("should disable DELETE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -167,7 +166,7 @@ describe("@mutation directive", () => {
         });
 
         test("should disable CREATE, DELETE, UPDATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -203,7 +202,7 @@ describe("@mutation directive", () => {
         });
 
         test("should not throw an Error when is mixed with @query", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     name: String
                 }
@@ -221,7 +220,7 @@ describe("@mutation directive", () => {
 
     describe("on SCHEMA", () => {
         test("default arguments should enable CREATE, UPDATE, DELETE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -257,7 +256,7 @@ describe("@mutation directive", () => {
         });
 
         test("should disable CREATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -293,7 +292,7 @@ describe("@mutation directive", () => {
         });
 
         test("should disable UPDATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -330,7 +329,7 @@ describe("@mutation directive", () => {
         });
 
         test("should disable DELETE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -367,7 +366,7 @@ describe("@mutation directive", () => {
         });
 
         test("should disable CREATE, DELETE, UPDATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -387,7 +386,7 @@ describe("@mutation directive", () => {
         });
 
         test("should throw an Error when is used in both schema on object", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor @mutation(operations: []) {
                     name: String
                 }
@@ -409,7 +408,7 @@ describe("@mutation directive", () => {
         });
 
         test("should not throw an Error when is mixed with @query", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     name: String
                 }

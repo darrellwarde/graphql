@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { graphql } from "graphql";
 import type { Driver } from "neo4j-driver";
 import { Neo4jGraphQL } from "../../../src";
@@ -38,7 +37,7 @@ describe("Subscriptions Single Instance Plugin", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
         plugin = new Neo4jGraphQLSubscriptionsDefaultEngine();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 id: ID!
             }

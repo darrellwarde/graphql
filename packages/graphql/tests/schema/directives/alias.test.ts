@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Alias", () => {
     test("Custom Directive Simple", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String!
                 city: String @alias(property: "cityPropInDb")

@@ -20,7 +20,6 @@
 import type { Driver } from "neo4j-driver";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
-import gql from "graphql-tag";
 import { graphql } from "graphql";
 import { UniqueType } from "../../utils/graphql-types";
 
@@ -34,7 +33,7 @@ describe("https://github.com/neo4j/graphql/issues/4170", () => {
     const OpeningDay = new UniqueType("OpeningDay");
     const OpeningHoursInterval = new UniqueType("OpeningHoursInterval");
 
-    const typeDefs = gql`
+    const typeDefs = /* GraphQL */ `
         type JWT @jwt {
             id: String
             roles: [String]

@@ -18,7 +18,6 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { GraphQLError, lexicographicSortSchema } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { getErrorAsync, NoErrorThrownError } from "../../utils/get-error";
@@ -27,7 +26,7 @@ describe("@populatedBy tests", () => {
     describe("Node property tests", () => {
         describe("Directive combinations", () => {
             test("PopulatedBy and default directives", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Movie {
                         id: ID
                         callback1: String!
@@ -65,7 +64,7 @@ describe("@populatedBy tests", () => {
             });
 
             test("PopulatedBy and id directives", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Movie {
                         id: ID
                         callback1: ID! @populatedBy(operations: [CREATE], callback: "callback1") @id
@@ -102,7 +101,7 @@ describe("@populatedBy tests", () => {
         });
 
         test("PopulatedBy - existence", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie {
                     id: ID
                     callback1: String! @populatedBy(operations: [CREATE], callback: "callback1")
@@ -132,7 +131,7 @@ describe("@populatedBy tests", () => {
             const callback2 = () => "random-string";
             const callback3 = () => "random-string";
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie {
                     id: ID
                     callback1: String! @populatedBy(operations: [CREATE], callback: "callback1")
@@ -345,7 +344,7 @@ describe("@populatedBy tests", () => {
             const callback2 = () => "random-int";
             const callback3 = () => "random-int";
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie {
                     id: ID
                     callback1: Int! @populatedBy(operations: [CREATE], callback: "callback1")
@@ -552,7 +551,7 @@ describe("@populatedBy tests", () => {
     describe("Relationship property tests", () => {
         describe("Directive combinations", () => {
             test("PopulatedBy and default directives", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Movie {
                         id: ID
                         genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
@@ -599,7 +598,7 @@ describe("@populatedBy tests", () => {
             });
 
             test("PopulatedBy and id directives", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Movie {
                         id: ID
                         genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
@@ -645,7 +644,7 @@ describe("@populatedBy tests", () => {
         });
 
         test("PopulatedBy - existence", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie {
                     id: ID
                     genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
@@ -689,7 +688,7 @@ describe("@populatedBy tests", () => {
             const callback2 = () => "random-string";
             const callback3 = () => "random-string";
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie {
                     id: ID
                     genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")
@@ -1295,7 +1294,7 @@ describe("@populatedBy tests", () => {
             const callback2 = () => "random-int";
             const callback3 = () => "random-int";
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie {
                     id: ID
                     genres: [Genre!]! @relationship(type: "IN_GENRE", direction: OUT, properties: "RelProperties")

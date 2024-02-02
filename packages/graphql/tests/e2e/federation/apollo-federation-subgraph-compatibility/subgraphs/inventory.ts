@@ -1,4 +1,3 @@
-import { gql } from "graphql-tag";
 import { GraphQLError } from "graphql";
 import { buildSubgraphSchema } from "@apollo/subgraph";
 
@@ -12,7 +11,7 @@ class DeliveryEstimates {
     }
 }
 
-const typeDefs = gql`
+const typeDefs = /* GraphQL */ `
     extend schema
         @link(
             url: "https://specs.apollo.dev/federation/v2.0"

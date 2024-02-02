@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import gql from "graphql-tag";
 import { OGM } from "../../src";
 import neo4j from "../integration/neo4j";
 import type { Driver, Session } from "neo4j-driver";
@@ -50,7 +49,7 @@ describe("https://github.com/neo4j/graphql/issues/3773", () => {
     });
 
     test("should re-create issue and return types without throwing", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${EventType} {
                 name: String!
                 userAttending: Boolean!

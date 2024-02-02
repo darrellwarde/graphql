@@ -20,7 +20,6 @@
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
 import type { Driver, Session, Integer } from "neo4j-driver";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { getQuerySource } from "../../utils/get-query-source";
 import { UniqueType } from "../../utils/graphql-types";
@@ -39,7 +38,7 @@ describe("https://github.com/neo4j/graphql/issues/923", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${testBlogpost.name} @fulltext(indexes: [{ name: "BlogTitle", fields: ["title"] }]) {
                 title: String!
                 slug: String! @unique
@@ -69,7 +68,7 @@ describe("https://github.com/neo4j/graphql/issues/923", () => {
     });
 
     test("should query nested connection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 ${testCategory.operations.create}(
                     input: [

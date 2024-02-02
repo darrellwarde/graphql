@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Cypher -> fulltext -> Aggregate", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Movie @fulltext(indexes: [{ name: "MovieTitle", fields: ["title"] }]) {
                 title: String
             }
@@ -39,7 +38,7 @@ describe("Cypher -> fulltext -> Aggregate", () => {
     });
 
     test("simple aggregate with single fulltext property", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 moviesAggregate(fulltext: { MovieTitle: { phrase: "something AND something" } }) {
                     count

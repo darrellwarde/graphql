@@ -20,7 +20,6 @@
 import { type Driver } from "neo4j-driver";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
-import gql from "graphql-tag";
 import { graphql } from "graphql";
 import { UniqueType } from "../../utils/graphql-types";
 import { cleanNodes } from "../../utils/clean-nodes";
@@ -34,7 +33,7 @@ describe("https://github.com/neo4j/graphql/issues/4239", () => {
     beforeAll(async () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
                 type ${Movie.name}
                 @authorization(
                     validate: [

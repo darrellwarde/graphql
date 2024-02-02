@@ -20,7 +20,6 @@
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
 import { offsetToCursor } from "graphql-relay";
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -66,7 +65,7 @@ describe("Relationship properties - read", () => {
            `
         );
 
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)

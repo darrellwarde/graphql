@@ -19,7 +19,6 @@
 
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src";
@@ -38,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/1320", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${riskType.name} {
                 code: String!
                 ownedBy: ${teamType.name} @relationship(type: "OWNS_RISK", direction: IN)

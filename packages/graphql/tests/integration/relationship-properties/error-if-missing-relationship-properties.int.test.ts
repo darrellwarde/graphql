@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import gql from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { getErrorAsync } from "../../utils/get-error";
@@ -37,7 +36,7 @@ describe("Throw error if missing @relationshipProperties", () => {
     });
 
     test("should throw error if the @relationshipProperties directive is not used", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -70,7 +69,7 @@ describe("Throw error if missing @relationshipProperties", () => {
     });
 
     test("should not throw error if the @relationshipProperties directive is used", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)

@@ -19,7 +19,6 @@
 
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src";
@@ -35,7 +34,7 @@ describe("https://github.com/neo4j/graphql/issues/1150", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWTPayload @jwt {
                 roles: [String!]!
             }

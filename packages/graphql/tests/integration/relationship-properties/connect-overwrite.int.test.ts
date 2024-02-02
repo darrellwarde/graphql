@@ -20,7 +20,6 @@
 import type { Driver, Session } from "neo4j-driver";
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { UniqueType } from "../../utils/graphql-types";
@@ -58,7 +57,7 @@ describe("Relationship properties - connect with and without `overwrite` argumen
             typeActor = new UniqueType("Actor");
             typeMovie = new UniqueType("Movie");
 
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
                 type ${typeMovie.name} {
                     title: String!
                     directors: [${typeActor.name}!]! @relationship(type: "DIRECTED", properties: "Directed", direction: IN)
@@ -302,7 +301,7 @@ describe("Relationship properties - connect with and without `overwrite` argumen
             typeActor = new UniqueType("Actor");
             typeMovie = new UniqueType("Movie");
 
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
                 type ${typeMovie.name} {
                     title: String!
                     actors: ${typeActor.name}! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -698,7 +697,7 @@ describe("Relationship properties - connect with and without `overwrite` argumen
 
         // update + update + connectOrCreate
         test("update with connectOrCreate is a no-op when relationship field has cardinality 1, overwrite not an option", async () => {
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
                 type ${typeMovie.name} {
                     title: String!
                     actors: ${typeActor.name}! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -1342,7 +1341,7 @@ describe("Relationship properties - connect with and without `overwrite` argumen
             typeActor = new UniqueType("Actor");
             typeMovie = new UniqueType("Movie");
 
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
                 type ${typeMovie.name} {
                     title: String!
                     directors: [${typeActor.name}!]! @relationship(type: "DIRECTED", properties: "Directed", direction: IN)

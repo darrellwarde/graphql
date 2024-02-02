@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../utils/tck-test-utils";
@@ -29,7 +28,7 @@ describe("Auth projections for interface relationship fields", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
             }
@@ -67,7 +66,7 @@ describe("Auth projections for interface relationship fields", () => {
     });
 
     test("Simple Interface Relationship Query for protected type", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedIn {

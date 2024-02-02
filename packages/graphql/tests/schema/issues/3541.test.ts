@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Extending the schema in when using getSubgraphSchema", () => {
     test("Should be able to use @mutation and @key on the same type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
 
             type Movie @mutation(operations: []) @shareable @key(fields: "title") {
@@ -344,7 +343,7 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
     });
 
     test("Should be able to use @query and multiple @key directives on the same type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable"])
 
             type Movie @query(read: false) @shareable @key(fields: "title") @key(fields: "id") {

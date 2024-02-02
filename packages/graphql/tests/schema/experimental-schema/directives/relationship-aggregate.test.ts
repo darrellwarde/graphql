@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../../src";
 import type { GraphQLFieldMap, GraphQLObjectType } from "graphql";
 import { lexicographicSortSchema } from "graphql";
@@ -25,7 +24,7 @@ import { printSchemaWithDirectives } from "@graphql-tools/utils";
 
 describe("@relationship directive, aggregate argument", () => {
     test("the default behavior should enable nested aggregation (this will change in 4.0)", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 username: String!
                 password: String!
@@ -53,7 +52,7 @@ describe("@relationship directive, aggregate argument", () => {
     });
 
     test("should disable nested aggregation", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 username: String!
                 password: String!
@@ -81,7 +80,7 @@ describe("@relationship directive, aggregate argument", () => {
     });
 
     test("should enable nested aggregation", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 username: String!
                 password: String!
@@ -109,7 +108,7 @@ describe("@relationship directive, aggregate argument", () => {
     });
 
     test("should work in conjunction with @query aggregate:false and @relationship aggregate:true", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor @query(aggregate: false) {
                 username: String!
                 password: String!
@@ -157,7 +156,7 @@ describe("@relationship directive, aggregate argument", () => {
     });
 
     test("should work in conjunction with @query aggregate:true and @relationship aggregate:false", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor @query(aggregate: true) {
                 username: String!
                 password: String!
@@ -206,7 +205,7 @@ describe("@relationship directive, aggregate argument", () => {
 
     describe("snapshot tests", () => {
         test("aggregate argument set as false", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -660,7 +659,7 @@ describe("@relationship directive, aggregate argument", () => {
         });
 
         test("argument set as true", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -1126,7 +1125,7 @@ describe("@relationship directive, aggregate argument", () => {
 
         describe("on INTERFACE", () => {
             test("aggregate argument set as false, (no-op as abstract does not support aggregation)", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor implements Person {
                         username: String!
                         password: String!
@@ -1556,7 +1555,7 @@ describe("@relationship directive, aggregate argument", () => {
                 `);
             });
             test("aggregate argument set as true, (no-op as abstract does not support aggregation)", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor implements Person {
                         username: String!
                         password: String!
@@ -2000,7 +1999,7 @@ describe("@relationship directive, aggregate argument", () => {
 
         describe("on UNION", () => {
             test("aggregate argument set as false, (no-op as abstract does not support aggregation)", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!
@@ -2533,7 +2532,7 @@ describe("@relationship directive, aggregate argument", () => {
                 `);
             });
             test("aggregate argument set as true, (no-op as abstract does not support aggregation)", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Actor {
                         username: String!
                         password: String!

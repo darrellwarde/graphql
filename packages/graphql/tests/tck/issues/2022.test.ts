@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/2022", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type ArtPiece {
                 dbId: ID! @id @unique @relayId @alias(property: "id")
                 title: String!
@@ -61,7 +60,7 @@ describe("https://github.com/neo4j/graphql/issues/2022", () => {
     });
 
     test("query nested relations under a root connection field", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 artPiecesConnection {
                     totalCount

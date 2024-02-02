@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Inputs", () => {
     test("Inputs", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             input NodeInput {
                 id: ID
             }

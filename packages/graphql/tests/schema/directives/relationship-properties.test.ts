@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Relationship-properties", () => {
     test("Relationship Properties", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -773,7 +772,7 @@ describe("Relationship-properties", () => {
     });
 
     test("should filter out generated fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -1572,7 +1571,7 @@ describe("Relationship-properties", () => {
     });
 
     test("should not create or use <RelationshipProperties>{Create,Update}Input if only generated fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")

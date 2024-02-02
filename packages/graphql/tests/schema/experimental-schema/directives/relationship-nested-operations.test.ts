@@ -19,14 +19,13 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import type { GraphQLNamedInputType } from "graphql";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../../src";
 
 describe("Relationship nested operations", () => {
     describe("Related to a concrete type", () => {
         test("Should not generate UpdateFieldInput input with no nested operations", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -383,7 +382,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation CREATE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -754,7 +753,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation CONNECT specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -1133,7 +1132,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation UPDATE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -1495,7 +1494,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation DELETE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -1861,7 +1860,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation DISCONNECT specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -2227,7 +2226,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Should not generate any nested operations if only CONNECT_OR_CREATE is specified and the related type does not have a unique field", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -2580,7 +2579,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship to type with unique field with nested operation CONNECT_OR_CREATE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     id: ID! @id @unique
                     name: String
@@ -2990,7 +2989,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Two relationships with nested operations specified on one", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -3531,7 +3530,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Two relationships with nested operations specified on both", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Person {
                     name: String
                 }
@@ -4036,7 +4035,7 @@ describe("Relationship nested operations", () => {
 
     describe("Related to a union type", () => {
         test("Should not generate UpdateFieldInput input with no nested operations", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -4434,7 +4433,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation CREATE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -4874,7 +4873,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation CONNECT specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -5322,7 +5321,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation UPDATE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -5739,7 +5738,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation DELETE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -6165,7 +6164,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation DISCONNECT specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -6591,7 +6590,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Should not generate any nested operations if only CONNECT_OR_CREATE is specified and the related type does not have a unique field", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -6985,7 +6984,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship to type with unique field with nested operation CONNECT_OR_CREATE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     id: ID! @id @unique
                     name: String
@@ -7493,7 +7492,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Two relationships with nested operations specified on one", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -8103,7 +8102,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Two relationships with nested operations specified on both", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type PersonOne {
                     name: String
                 }
@@ -8641,7 +8640,7 @@ describe("Relationship nested operations", () => {
 
     describe("Related to an interface type", () => {
         test("Should not generate UpdateFieldInput input with no nested operations", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Person {
                     name: String
                 }
@@ -9077,7 +9076,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation CREATE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Person {
                     name: String
                 }
@@ -9532,7 +9531,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation CONNECT specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Person {
                     name: String
                 }
@@ -9986,7 +9985,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation UPDATE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Person {
                     name: String
                 }
@@ -10437,7 +10436,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation DELETE specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Person {
                     name: String
                 }
@@ -10882,7 +10881,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Single relationship with nested operation DISCONNECT specified", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Person {
                     name: String
                 }
@@ -11327,7 +11326,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Two relationships with nested operations specified on one", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Person {
                     name: String
                 }
@@ -11894,7 +11893,7 @@ describe("Relationship nested operations", () => {
         });
 
         test("Two relationships with nested operations specified on both", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Person {
                     name: String
                 }

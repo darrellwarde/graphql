@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/583", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Show {
                 title: String
             }
@@ -63,7 +62,7 @@ describe("https://github.com/neo4j/graphql/issues/583", () => {
     });
 
     test("Should resolve properties from common interface", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query shows {
                 actors {
                     name

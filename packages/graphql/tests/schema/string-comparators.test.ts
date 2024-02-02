@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("String Comparators", () => {
     test("String comparators should be present if explicitly defined in the configuration", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String
             }
@@ -189,7 +188,7 @@ describe("String Comparators", () => {
     });
 
     test("String comparators should not be present if not explicitly defined in the configuration", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String
             }
@@ -340,7 +339,7 @@ describe("String Comparators", () => {
     });
 
     test("If String comparators are partially defined, then only the defined ones should be present", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String
             }
@@ -502,7 +501,7 @@ describe("String Comparators", () => {
     });
 
     test("string comparator relationship and relationship properties", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")

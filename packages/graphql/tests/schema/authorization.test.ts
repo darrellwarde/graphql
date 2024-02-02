@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Authorization", () => {
     test("Authorization", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                 id: ID!
                 name: String!

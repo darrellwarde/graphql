@@ -18,7 +18,6 @@
  */
 
 import { graphql } from "graphql";
-import gql from "graphql-tag";
 import { type Driver } from "neo4j-driver";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { cleanNodes } from "../../utils/clean-nodes";
@@ -37,7 +36,7 @@ describe("https://github.com/neo4j/graphql/issues/4287", () => {
     beforeAll(async () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Actor} {
                 name: String
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", properties: "actedIn", direction: OUT)

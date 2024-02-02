@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Relationship Properties Cypher", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -50,7 +49,7 @@ describe("Relationship Properties Cypher", () => {
     });
 
     test("Projecting node and relationship properties with no arguments", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { title: "Forrest Gump" }) {
                     title
@@ -95,7 +94,7 @@ describe("Relationship Properties Cypher", () => {
     });
 
     test("Projecting node and relationship properties with where argument", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { title: "Forrest Gump" }) {
                     title
@@ -142,7 +141,7 @@ describe("Relationship Properties Cypher", () => {
     });
 
     test("Projecting node and relationship properties with sort argument", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { title: "Forrest Gump" }) {
                     title
@@ -189,7 +188,7 @@ describe("Relationship Properties Cypher", () => {
     });
 
     test("Projecting node and relationship properties with sort argument ordered edge first", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies {
                     actorsConnection(sort: [{ edge: { year: DESC } }, { node: { name: ASC } }]) {
@@ -229,7 +228,7 @@ describe("Relationship Properties Cypher", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`"{}"`);
     });
     test("Projecting node and relationship properties with sort argument ordered node first", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies {
                     actorsConnection(sort: [{ node: { name: ASC } }, { edge: { year: DESC } }]) {
@@ -270,7 +269,7 @@ describe("Relationship Properties Cypher", () => {
     });
 
     test("Projecting twice nested node and relationship properties with no arguments", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { title: "Forrest Gump" }) {
                     title
@@ -336,7 +335,7 @@ describe("Relationship Properties Cypher", () => {
     });
 
     test("Projecting thrice nested node and relationship properties with no arguments", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { title: "Forrest Gump" }) {
                     title

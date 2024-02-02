@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { graphql } from "graphql";
 import Neo4j from "../../neo4j";
@@ -47,7 +46,7 @@ describe("@alias directive", () => {
         typeSeries = new UniqueType("Series");
         typeActor = new UniqueType("Actor");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 titleAgain: String @alias(property: "title")

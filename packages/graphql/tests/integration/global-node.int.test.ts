@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import Neo4j from "./neo4j";
 import { Neo4jGraphQL } from "../../src/classes";
 import { toGlobalId } from "../../src/utils/global-ids";
@@ -184,7 +183,7 @@ describe("Global node resolution", () => {
         }
     });
     test("return the correct id when the underlying field is an aliased id db property", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
         type ${typeFilm.name} {
           dbId: ID! @relayId @alias(property: "id")
           title: String!
@@ -265,7 +264,7 @@ describe("Global node resolution", () => {
         });
     });
     test("return the correct id when the underlying field is of type Int", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
         type ${typeFilm.name} {
           dbId: Int! @relayId @alias(property: "id")
           title: String!

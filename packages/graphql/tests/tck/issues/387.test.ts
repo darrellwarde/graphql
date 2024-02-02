@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/387", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             scalar URL
 
             type Place {
@@ -69,7 +68,7 @@ describe("https://github.com/neo4j/graphql/issues/387", () => {
     });
 
     test("Should project custom scalars from custom Cypher correctly", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 places {
                     url_works

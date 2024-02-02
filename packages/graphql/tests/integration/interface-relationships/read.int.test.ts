@@ -19,7 +19,6 @@
 
 import { faker } from "@faker-js/faker";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { generate } from "randomstring";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -48,7 +47,7 @@ describe("interface relationships", () => {
         typeActor = new UniqueType("Actor");
         session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
             }
@@ -204,7 +203,7 @@ describe("interface relationships", () => {
             screenTime: faker.number.int({ max: 100000 }),
         };
 
-        const query = gql`
+        const query = /* GraphQL */ `
             query Actors($name: String) {
                 ${typeActor.plural}(where: { name: $name }) {
                     name

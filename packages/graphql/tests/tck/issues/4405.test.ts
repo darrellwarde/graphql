@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import gql from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { createBearerToken } from "../../utils/create-bearer-token";
 import { translateQuery, formatCypher, formatParams } from "../utils/tck-test-utils";
@@ -46,7 +45,7 @@ describe("https://github.com/neo4j/graphql/issues/4405", () => {
 
         const neoSchema = new Neo4jGraphQL({ typeDefs, features: { authorization: { key: "secret" } } });
 
-        const query = gql`
+        const query = /* GraphQL */ `
             query actors {
                 actors {
                     name
@@ -105,7 +104,7 @@ describe("https://github.com/neo4j/graphql/issues/4405", () => {
 
         const neoSchema = new Neo4jGraphQL({ typeDefs, features: { authorization: { key: "secret" } } });
 
-        const query = gql`
+        const query = /* GraphQL */ `
             query actors {
                 actors {
                     name

@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("#582", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Entity {
                 children: [Entity!]! @relationship(type: "EDGE", properties: "Edge", direction: OUT)
                 parents: [Entity!]! @relationship(type: "EDGE", properties: "Edge", direction: IN)
@@ -45,7 +44,7 @@ describe("#582", () => {
     });
 
     test("should be able to nest connection where inputs", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($where: EntityWhere) {
                 entities(where: $where) {
                     type
@@ -93,7 +92,7 @@ describe("#582", () => {
     });
 
     test("should be able to nest connection where inputs down more levels", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($where: EntityWhere) {
                 entities(where: $where) {
                     type

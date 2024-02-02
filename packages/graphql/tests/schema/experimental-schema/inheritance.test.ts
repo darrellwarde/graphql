@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("inheritance", () => {
     test("various graphql entities should correctly perform inheritance", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             directive @customDirectiveField on FIELD_DEFINITION
             directive @customDirectiveObj on OBJECT
             directive @customDirectiveInter on INTERFACE

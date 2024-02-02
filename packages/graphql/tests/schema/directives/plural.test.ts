@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Plural option", () => {
     test("Partial types with plural", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Tech @plural(value: "Techs") {
                 name: String
             }
@@ -192,7 +191,7 @@ describe("Plural option", () => {
     });
 
     test("Partial types with same plural in both", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Tech @plural(value: "Techs") {
                 name: String
             }
@@ -360,7 +359,7 @@ describe("Plural option", () => {
     });
 
     test("Partial types with different plural", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Tech @plural(value: "Techs") {
                 name: String
             }
@@ -528,7 +527,7 @@ describe("Plural option", () => {
     });
 
     test("Collision between Type and plural", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Tech @plural(value: "Techs") {
                 name: String
             }
@@ -681,7 +680,7 @@ describe("Plural option", () => {
     });
 
     test("Same plural on multiple nodes", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Tech @plural(value: "Techs") {
                 name: String
             }
@@ -834,7 +833,7 @@ describe("Plural option", () => {
     });
 
     test("Collision with pluralize", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Tech @plural(value: "Users") {
                 name: String
             }
@@ -987,7 +986,7 @@ describe("Plural option", () => {
     });
 
     test("Type collision with pluralize", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type User {
                 name: String
             }

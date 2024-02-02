@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -40,7 +39,7 @@ describe("433", () => {
     test("should recreate issue and return correct data", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             # Cannot use 'type Node'
             type Movie {
                 title: String

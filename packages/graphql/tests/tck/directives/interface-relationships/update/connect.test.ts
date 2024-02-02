@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Interface Relationships - Update connect", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +60,7 @@ describe("Interface Relationships - Update connect", () => {
     });
 
     test("Update connect to an interface relationship", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     connect: { actedIn: { edge: { screenTime: 90 }, where: { node: { title_STARTS_WITH: "The " } } } }
@@ -136,7 +135,7 @@ describe("Interface Relationships - Update connect", () => {
     });
 
     test("Update connect to an interface relationship and nested connect", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     connect: {
@@ -263,7 +262,7 @@ describe("Interface Relationships - Update connect", () => {
     });
 
     test("Update connect to an interface relationship and nested connect using _on to connect only one implementation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     connect: {
@@ -371,7 +370,7 @@ describe("Interface Relationships - Update connect", () => {
     });
 
     test("Update connect to an interface relationship and nested connect using _on to override connection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     connect: {

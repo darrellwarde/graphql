@@ -20,7 +20,6 @@
 import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { UniqueType } from "../../utils/graphql-types";
@@ -88,7 +87,7 @@ describe("assertIndexesAndConstraints/unique", () => {
         const isbn = generate({ readable: true });
         const title = generate({ readable: true });
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Book {
                 isbn: String! @unique
                 title: String!

@@ -19,7 +19,6 @@
 
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
-import gql from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { INVALID_REQUIRED_FIELD_ERROR } from "../../../src/schema/get-custom-resolver-meta";
@@ -433,7 +432,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 street: String!
                 city: String!
@@ -500,7 +499,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 street: String!
                 city: String!
@@ -544,7 +543,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 street: String!
                 city: String!
@@ -588,7 +587,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 street: String!
                 city: String!
@@ -665,7 +664,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 street: String!
                 city: String!
@@ -751,7 +750,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 street: String!
                 city: String!
@@ -839,7 +838,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${City} {
                 name: String!
                 population: Int
@@ -939,7 +938,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${State} {
                 someValue: Int!
             }
@@ -1055,7 +1054,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             union ${Publication} = ${Book} | ${Journal}
 
             type ${Author} {
@@ -1150,7 +1149,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql` 
+        const typeDefs = /* GraphQL */ ` 
             type ${City} {
                 name: String!
                 population: Int @alias(property: "cityPopulation")
@@ -1258,7 +1257,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]!
             }
@@ -1345,7 +1344,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]!
             }
@@ -1434,7 +1433,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]!
             }
@@ -1523,7 +1522,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]!
             }
@@ -1619,7 +1618,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${Publication} {
                 publicationYear: Int!
             }
@@ -1716,7 +1715,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${Publication} {
                 publicationYear: Int!
             }
@@ -1824,7 +1823,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${User} {
                 id: ID!
                 firstName: String!
@@ -1927,7 +1926,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${User} {
                 id: ID!
                 firstName: String!
@@ -1984,7 +1983,7 @@ describe("Related Fields", () => {
     });
 
     test("should throw an error when requiring another @customResolver field", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${Publication} {
                 publicationYear: Int!
             }
@@ -2045,7 +2044,7 @@ describe("Related Fields", () => {
     });
 
     test("should throw an error when requiring another @customResolver field on a nested type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${Publication} {
                 publicationYear: Int! @customResolver
             }
@@ -2108,7 +2107,7 @@ describe("Related Fields", () => {
     });
 
     test("should throw an error when requiring another @customResolver field on an implementation of a nested interface", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${Publication} {
                 publicationYear: Int!
             }
@@ -2171,7 +2170,7 @@ describe("Related Fields", () => {
     });
 
     test("should throw an error when requiring another @customResolver field using ...on on an implementation of a nested interface", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${Publication} {
                 publicationYear: Int!
             }
@@ -2234,7 +2233,7 @@ describe("Related Fields", () => {
     });
 
     test("should not throw an error if there is another @customResolver field on the same type that is not required", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${Publication} {
                 publicationYear: Int!
             }
@@ -2295,7 +2294,7 @@ describe("Related Fields", () => {
     });
 
     test("should not throw an error if there is another @customResolver field on a different implementation of the same interface when using ...on", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface ${Publication} {
                 publicationYear: Int!
             }
@@ -2368,7 +2367,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 houseNumber: Int! @cypher(statement: "RETURN 12 AS number", columnName: "number")
                 street: String!
@@ -2437,7 +2436,7 @@ describe("Related Fields", () => {
             await session.close();
         }
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 houseNumber: Int! @cypher(statement: "RETURN 12 AS number", columnName: "number")
                 street: String!
@@ -2496,7 +2495,7 @@ describe("Related Fields", () => {
     });
 
     test("should not throw an error for invalid type defs when validate is false", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Address} {
                 houseNumber: Int! @cypher(statement: "RETURN 12 AS number", columnName: "number")
                 street: String!

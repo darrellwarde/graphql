@@ -20,7 +20,6 @@
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
 import { generate } from "randomstring";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { UniqueType } from "../../utils/graphql-types";
@@ -45,7 +44,7 @@ describe("Connections Alias", () => {
     test("should alias top level connection field and return correct totalCount", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -105,7 +104,7 @@ describe("Connections Alias", () => {
     test("should alias totalCount", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -166,7 +165,7 @@ describe("Connections Alias", () => {
     test("should alias pageInfo top level key", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -228,7 +227,7 @@ describe("Connections Alias", () => {
     test("should alias startCursor", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -288,7 +287,7 @@ describe("Connections Alias", () => {
     test("should alias endCursor", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -348,7 +347,7 @@ describe("Connections Alias", () => {
     test("should alias hasPreviousPage", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -408,7 +407,7 @@ describe("Connections Alias", () => {
     test("should alias hasNextPage", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -468,7 +467,7 @@ describe("Connections Alias", () => {
     test("should alias the top level edges key", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -528,7 +527,7 @@ describe("Connections Alias", () => {
     test("should alias cursor", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -588,7 +587,7 @@ describe("Connections Alias", () => {
     test("should alias the top level node key", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -650,7 +649,7 @@ describe("Connections Alias", () => {
     test("should alias a property on the node", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -712,7 +711,7 @@ describe("Connections Alias", () => {
     test("should alias a property on the relationship", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -776,7 +775,7 @@ describe("Connections Alias", () => {
     test("should alias many keys on a connection", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -868,7 +867,7 @@ describe("Connections Alias", () => {
     test("should allow multiple aliases on the same connection", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Post {
                 title: String!
                 comments: [Comment!]! @relationship(type: "HAS_COMMENT", direction: OUT)
@@ -946,7 +945,7 @@ describe("Connections Alias", () => {
         const actorName = "Keanu Reeves";
         const screenTime = 120;
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)

@@ -20,7 +20,6 @@
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
 import { generate } from "randomstring";
-import { gql } from "graphql-tag";
 import Neo4j from "./neo4j";
 import { Neo4jGraphQL } from "../../src/classes";
 
@@ -154,7 +153,7 @@ describe("delete", () => {
     test("should delete a single movie and a single nested actor", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -236,7 +235,7 @@ describe("delete", () => {
     test("should delete a movie, a single nested actor and another movie they act in", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -338,7 +337,7 @@ describe("delete", () => {
     test("should delete a movie using a connection where filter", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)

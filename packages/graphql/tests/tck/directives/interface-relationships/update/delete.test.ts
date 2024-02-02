@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Interface Relationships - Update delete", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +60,7 @@ describe("Interface Relationships - Update delete", () => {
     });
 
     test("Update delete an interface relationship", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(delete: { actedIn: { where: { node: { title_STARTS_WITH: "The " } } } }) {
                     actors {
@@ -128,7 +127,7 @@ describe("Interface Relationships - Update delete", () => {
     });
 
     test("Update delete an interface relationship with nested delete", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     delete: {
@@ -239,7 +238,7 @@ describe("Interface Relationships - Update delete", () => {
     });
 
     test("Update delete an interface relationship with nested delete using _on to delete from only one implementation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     delete: {
@@ -343,7 +342,7 @@ describe("Interface Relationships - Update delete", () => {
     });
 
     test("Update delete an interface relationship with nested delete using _on to override deletion", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     delete: {

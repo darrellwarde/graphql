@@ -18,7 +18,6 @@
  */
 
 import type { DocumentNode } from "graphql";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { createBearerToken } from "../../utils/create-bearer-token";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
@@ -29,7 +28,7 @@ describe("Interface top level operations", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeEach(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type SomeNodeType implements MyOtherInterface & MyInterface {
                 id: ID! @id @unique
                 something: String
@@ -65,7 +64,7 @@ describe("Interface top level operations", () => {
         });
     });
     test("Read interface (interface target of a relationship)", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 myInterfaces {
                     id
@@ -98,7 +97,7 @@ describe("Interface top level operations", () => {
     });
 
     test("Read interface (interface target of a relationship) with implementation projection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 myInterfaces {
                     id
@@ -134,7 +133,7 @@ describe("Interface top level operations", () => {
     });
 
     test("Read interface (interface target of a relationship) with interface implementation projection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 myInterfaces {
                     id
@@ -172,7 +171,7 @@ describe("Interface top level operations", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`"{}"`);
     });
     test("Read interface (interface target of a relationship) with interface implementation and implementation of it projection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 myInterfaces {
                     id
@@ -214,7 +213,7 @@ describe("Interface top level operations", () => {
     });
 
     test("Read interface", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 myOtherInterfaces {
                     id
@@ -251,7 +250,7 @@ describe("Interface top level operations", () => {
     });
 
     test("Read interface with shared filters", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 myOtherInterfaces(where: { id_STARTS_WITH: "1" }) {
                     id
@@ -281,7 +280,7 @@ describe("Interface top level operations", () => {
     });
 
     test("Read interface with shared filters and concrete projection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 myOtherInterfaces(where: { id_STARTS_WITH: "4" }) {
                     id

@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/1263", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
             }
@@ -58,7 +57,7 @@ describe("https://github.com/neo4j/graphql/issues/1263", () => {
     });
 
     test("doesn't have redundant check of non-existent parameter", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     name

@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Cypher LocalTime", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 time: LocalTime
@@ -40,7 +39,7 @@ describe("Cypher LocalTime", () => {
     });
 
     test("Simple Read", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { time: "12:00:00" }) {
                     time
@@ -69,7 +68,7 @@ describe("Cypher LocalTime", () => {
     });
 
     test("GTE Read", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { time_GTE: "13:45:33.250" }) {
                     time
@@ -98,7 +97,7 @@ describe("Cypher LocalTime", () => {
     });
 
     test("Simple Create", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 createMovies(input: [{ time: "22:00:15.555" }]) {
                     movies {
@@ -140,7 +139,7 @@ describe("Cypher LocalTime", () => {
     });
 
     test("Simple Update", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateMovies(update: { time: "09:24:40.845512" }) {
                     movies {

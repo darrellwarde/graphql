@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/1687", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Production {
                 id: ID
                 title: String
@@ -52,7 +51,7 @@ describe("https://github.com/neo4j/graphql/issues/1687", () => {
     });
 
     test("should be able to return all the genres related to the Matrix movie using connection fields", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query Genres {
                 genres(where: { moviesConnection_ALL: { node: { _on: { Movie: { title: "Matrix" } } } } }) {
                     name

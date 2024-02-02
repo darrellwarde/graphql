@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("https://github.com/neo4j/graphql/issues/2377", () => {
     test("enums should be available in onCreateInput type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             enum ResourceType {
                 ResourceA
                 ResourceB

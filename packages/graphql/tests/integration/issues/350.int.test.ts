@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -39,7 +38,7 @@ describe("https://github.com/neo4j/graphql/issues/350", () => {
 
     test("Retain attributes when aliasing the same field multiple times in a single query", async () => {
         const session = await neo4j.getSession();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Post {
                 id: ID!
                 title: String!

@@ -19,7 +19,6 @@
 
 import { faker } from "@faker-js/faker";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { generate } from "randomstring";
 import { Neo4jGraphQL } from "../../src";
@@ -58,7 +57,7 @@ describe("delete union relationships", () => {
     beforeAll(async () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${episodeType.name} {
                 runtime: Int!
                 series: ${seriesType.name} ! @relationship(type: "HAS_EPISODE", direction: IN)

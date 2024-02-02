@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { Driver, Session, Integer } from "neo4j-driver";
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
@@ -45,7 +44,7 @@ describe("connectOrCreate", () => {
             neo4j = new Neo4j();
             driver = await neo4j.getDriver();
 
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
             type JWTPayload @jwt {
                 roles: [String!]!
             }
@@ -60,7 +59,7 @@ describe("connectOrCreate", () => {
             }
             `;
 
-            queryUpdate = gql`
+            queryUpdate = /* GraphQL */ `
                 mutation {
                   ${typeMovie.operations.update}(
                     update: {
@@ -80,7 +79,7 @@ describe("connectOrCreate", () => {
                 }
                 `;
 
-            queryCreate = gql`
+            queryCreate = /* GraphQL */ `
                 mutation {
                     ${typeMovie.operations.create}(
                         input: [
@@ -191,7 +190,7 @@ describe("connectOrCreate", () => {
             neo4j = new Neo4j();
             driver = await neo4j.getDriver();
 
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
             type JWTPayload @jwt {
                 roles: [String!]!
             }
@@ -206,7 +205,7 @@ describe("connectOrCreate", () => {
             }
             `;
 
-            queryUpdate = gql`
+            queryUpdate = /* GraphQL */ `
                 mutation {
                   ${typeMovie.operations.update}(
                     update: {
@@ -226,7 +225,7 @@ describe("connectOrCreate", () => {
                 }
                 `;
 
-            queryCreate = gql`
+            queryCreate = /* GraphQL */ `
                 mutation {
                     ${typeMovie.operations.create}(
                         input: [

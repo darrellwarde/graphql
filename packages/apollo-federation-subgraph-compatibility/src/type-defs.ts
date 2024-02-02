@@ -17,9 +17,7 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
-
-export const typeDefs = gql`
+export const typeDefs = /* GraphQL */ `
     extend schema
         @link(
             url: "https://specs.apollo.dev/federation/v2.3"

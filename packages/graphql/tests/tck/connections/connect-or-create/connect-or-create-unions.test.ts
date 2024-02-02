@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Create or connect with unions", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 isan: String! @unique
@@ -56,7 +55,7 @@ describe("Create or connect with unions", () => {
     });
 
     test("Create with createOrConnect operation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 createActors(
                     input: [
@@ -156,7 +155,7 @@ describe("Create or connect with unions", () => {
     });
 
     test("Update with createOrConnect operation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     update: {

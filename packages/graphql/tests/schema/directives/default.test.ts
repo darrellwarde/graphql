@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("@default directive", () => {
     test("sets default values in schema", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface UserInterface {
                 fromInterface: String! @default(value: "Interface default value")
                 toBeOverridden: String! @default(value: "Interface override value")

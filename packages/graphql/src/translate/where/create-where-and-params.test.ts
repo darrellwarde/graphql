@@ -23,7 +23,6 @@ import { NodeBuilder } from "../../../tests/utils/builders/node-builder";
 import type { Neo4jGraphQLTranslationContext } from "../../types/neo4j-graphql-translation-context";
 import type { Node } from "../../../src/classes";
 import { SchemaModelBuilder } from "../../../tests/utils/builders/schema-model-builder";
-import { gql } from "graphql-tag";
 
 describe("createWhereAndParams", () => {
     let context: Neo4jGraphQLTranslationContext;
@@ -41,7 +40,7 @@ describe("createWhereAndParams", () => {
             globalIdField: "title",
         }).instance();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String! @relayId
             }

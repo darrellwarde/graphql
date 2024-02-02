@@ -19,14 +19,13 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 
 describe("https://github.com/neo4j/graphql/issues/190", () => {
     let driver: Driver;
     let neo4j: Neo4j;
-    const typeDefs = gql`
+    const typeDefs = /* GraphQL */ `
         type User {
             client_id: String
             uid: String

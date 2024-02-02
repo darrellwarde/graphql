@@ -18,7 +18,6 @@
  */
 
 import { mergeTypeDefs } from "@graphql-tools/merge";
-import { gql } from "graphql-tag";
 import {
     AuthorizationFilterOperationRule,
     AuthorizationValidateOperationRule,
@@ -37,7 +36,7 @@ import type { AttributeTypeHelper } from "./attribute/AttributeTypeHelper";
 
 describe("Schema model generation", () => {
     test("parses @authentication directive with no arguments", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @authentication
         `;
 
@@ -59,7 +58,7 @@ describe("Schema model generation", () => {
     });
 
     test("parses @authentication directive with operations", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @authentication(operations: [CREATE])
         `;
 
@@ -75,7 +74,7 @@ describe("ConcreteEntity generation", () => {
         let schemaModel: Neo4jGraphQLSchemaModel;
 
         beforeAll(() => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type User
                     @authorization(
                         validate: [
@@ -167,7 +166,7 @@ describe("ConcreteEntity generation", () => {
         let schemaModel: Neo4jGraphQLSchemaModel;
 
         beforeAll(() => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                     id: ID!
                     name: String!
@@ -239,7 +238,7 @@ describe("ComposeEntity generation", () => {
     let schemaModel: Neo4jGraphQLSchemaModel;
 
     beforeAll(() => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             union Tool = Screwdriver | Pencil
 
             type Screwdriver {
@@ -325,7 +324,7 @@ describe("Relationship", () => {
     let schemaModel: Neo4jGraphQLSchemaModel;
 
     beforeAll(() => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type User {
                 id: ID!
                 name: String!
@@ -519,7 +518,7 @@ describe("ConcreteEntity Annotations & Attributes", () => {
     let accountEntity: ConcreteEntity;
 
     beforeAll(() => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type User @query @mutation @subscription {
                 id: ID!
                 name: String! @selectable(onAggregate: true) @alias(property: "dbName")
@@ -596,7 +595,7 @@ describe("ConcreteEntity Annotations & Attributes", () => {
 
     describe("Arguments", () => {
         test("attribute argument scalar", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type User {
                     id: ID!
                     name(something: Int): String!
@@ -618,7 +617,7 @@ describe("ConcreteEntity Annotations & Attributes", () => {
         });
 
         test("attribute argument object", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type User {
                     id: ID!
                     favoritePet(from: [Animal]!): String!
@@ -645,7 +644,7 @@ describe("ConcreteEntity Annotations & Attributes", () => {
 
 describe("ComposeEntity Annotations & Attributes and Inheritance", () => {
     test("concrete entity inherits from composite entity", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 year: Int @populatedBy(callback: "thisCallback", operations: [CREATE])
                 defaultName: String! @default(value: "AwesomeProduction")
@@ -719,7 +718,7 @@ describe("ComposeEntity Annotations & Attributes and Inheritance", () => {
     });
 
     test("composite entity inherits from composite entity", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 year: Int @populatedBy(callback: "thisCallback", operations: [CREATE])
                 defaultName: String! @default(value: "AwesomeProduction")
@@ -825,7 +824,7 @@ describe("GraphQL adapters", () => {
     let cartesianPoint: AttributeTypeHelper;
 
     beforeAll(() => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type User {
                 id: ID!
                 name: String!

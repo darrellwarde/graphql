@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Connect Or Create", () => {
     test("Connect Or Create", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 isan: String! @unique
@@ -511,7 +510,7 @@ describe("Connect Or Create", () => {
     });
 
     test("Connect Or Create with relation properties", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 isan: String! @unique

@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -40,7 +39,7 @@ describe("https://github.com/neo4j/graphql/issues/567", () => {
     test("should not throw when only returning info on update", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID!
                 title: String!
@@ -105,7 +104,7 @@ describe("https://github.com/neo4j/graphql/issues/567", () => {
     test("should not throw when only returning info on create", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID!
                 title: String!

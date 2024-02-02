@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { graphql } from "graphql";
 import type { Driver, Session } from "neo4j-driver";
 import { cleanNodes } from "../../../utils/clean-nodes";
@@ -48,7 +47,7 @@ describe("Subscriptions update", () => {
         typeMovie = new UniqueType("Movie");
 
         plugin = new TestSubscriptionsEngine();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeActor.name} {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -83,7 +82,7 @@ describe("Subscriptions update", () => {
     test("should delete a nested actor and one of their nested movies, within an update block abc", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
                 type ${typeActor.name} {
                     name: String
                     movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)

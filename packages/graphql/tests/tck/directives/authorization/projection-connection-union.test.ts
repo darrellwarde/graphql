@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../utils/tck-test-utils";
@@ -29,7 +28,7 @@ describe("Cypher Auth Projection On Connections On Unions", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Post {
                 content: String
                 creator: User! @relationship(type: "HAS_POST", direction: IN)
@@ -59,7 +58,7 @@ describe("Cypher Auth Projection On Connections On Unions", () => {
     });
 
     test("Two connection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 users {
                     contentConnection {

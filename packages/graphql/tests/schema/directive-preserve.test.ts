@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Directive-preserve", () => {
     test("Custom directives preserved", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             directive @preservedTopLevel(string: String, int: Int, float: Float, boolean: Boolean) on OBJECT
             directive @preservedFieldLevel(string: String, int: Int, float: Float, boolean: Boolean) on FIELD_DEFINITION
 
@@ -180,7 +179,7 @@ describe("Directive-preserve", () => {
     });
 
     test("Directives on relations preserved", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String
                 year: Int
@@ -871,7 +870,7 @@ describe("Directive-preserve", () => {
     });
 
     test("Directives on implemented interface relations preserved", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
                 actors: [Actor!]!
@@ -1849,7 +1848,7 @@ describe("Directive-preserve", () => {
     });
 
     test("Directives on base interface preserved", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
                 actors: [Actor!]! @deprecated(reason: "Do not use")
@@ -2825,7 +2824,7 @@ describe("Directive-preserve", () => {
     });
 
     test("Directives on unions preserved", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             union Content = Blog | Post
 
             type Blog {

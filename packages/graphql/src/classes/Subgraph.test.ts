@@ -17,13 +17,12 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { Subgraph } from "./Subgraph";
 
 describe("Subgraph", () => {
     describe("findFederationLinkMeta", () => {
         test("can find link directive in schema definition", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Query {
                     "The full list of locations presented by the Interplanetary Space Tourism department"
                     locations: [Location!]!
@@ -51,7 +50,7 @@ describe("Subgraph", () => {
         });
 
         test("can find link directive in schema extension", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key"])
 
                 type Query {
@@ -79,7 +78,7 @@ describe("Subgraph", () => {
         });
 
         test("returns undefined if link directive imports non-Federation schema", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 extend schema
                     @link(
                         url: "https://example.com/otherSchema"
@@ -112,7 +111,7 @@ describe("Subgraph", () => {
         });
 
         test("returns undefined if directive is not defined", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Query {
                     "The full list of locations presented by the Interplanetary Space Tourism department"
                     locations: [Location!]!
@@ -141,7 +140,7 @@ describe("Subgraph", () => {
 
     describe("parseLinkImportArgument", () => {
         test("parses valid directive", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 extend schema
                     @link(
                         url: "https://specs.apollo.dev/federation/v2.0"
@@ -197,7 +196,7 @@ describe("Subgraph", () => {
         });
 
         test("throws an error for invalid Federation directive", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 extend schema
                     @link(
                         url: "https://specs.apollo.dev/federation/v2.0"
@@ -232,7 +231,7 @@ describe("Subgraph", () => {
         });
 
         test("throws an error alias of non-string type", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 extend schema
                     @link(
                         url: "https://specs.apollo.dev/federation/v2.0"

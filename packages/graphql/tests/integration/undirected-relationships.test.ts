@@ -19,7 +19,6 @@
 
 import type { Driver, Session } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import Neo4j from "./neo4j";
 import { Neo4jGraphQL } from "../../src/classes";
 import { getQuerySource } from "../utils/get-query-source";
@@ -49,7 +48,7 @@ describe("undirected relationships", () => {
 
     test("query for an undirected relationship", async () => {
         const userType = new UniqueType("User");
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${userType.name} {
                 name: String!
                 friends: [${userType.name}!]! @relationship(type: "FRIENDS_WITH", direction: OUT)
@@ -59,7 +58,7 @@ describe("undirected relationships", () => {
         const neoSchema = new Neo4jGraphQL({
             typeDefs,
         });
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 ${userType.plural}(where: {name: "Ford"}) {
                     name
@@ -102,7 +101,7 @@ describe("undirected relationships", () => {
 
     test("query for an undirected relationship on single relationship", async () => {
         const userType = new UniqueType("User");
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${userType.name} {
                 name: String!
                 friend: ${userType.name} @relationship(type: "FRIENDS_WITH", direction: OUT)
@@ -112,7 +111,7 @@ describe("undirected relationships", () => {
         const neoSchema = new Neo4jGraphQL({
             typeDefs,
         });
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 ${userType.plural}(where: {name: "Ford"}) {
                     name

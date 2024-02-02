@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/1131", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type BibliographicReference @node(labels: ["BibliographicReference", "Resource"]) {
                 iri: ID! @unique @alias(property: "uri")
                 prefLabel: [String]
@@ -46,7 +45,7 @@ describe("https://github.com/neo4j/graphql/issues/1131", () => {
     });
 
     test("where with multiple filters and params", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateBibliographicReferences(
                     where: { iri: "urn:myiri2" }

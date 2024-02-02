@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Interface Relationships - Update update", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +60,7 @@ describe("Interface Relationships - Update update", () => {
     });
 
     test("Update update an interface relationship", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     update: {
@@ -137,7 +136,7 @@ describe("Interface Relationships - Update update", () => {
     });
 
     test("Update update an interface relationship with nested update", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     update: {
@@ -236,7 +235,7 @@ describe("Interface Relationships - Update update", () => {
     });
 
     test("Update update an interface relationship with nested update using _on to only update one implementation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     update: {
@@ -334,7 +333,7 @@ describe("Interface Relationships - Update update", () => {
     });
 
     test("Update update an interface relationship with nested update using _on to override update", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     update: {

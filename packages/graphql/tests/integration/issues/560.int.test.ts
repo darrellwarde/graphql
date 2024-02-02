@@ -19,7 +19,6 @@
 
 import type { Driver, Session } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -50,7 +49,7 @@ describe("https://github.com/neo4j/graphql/issues/560", () => {
     test("should not throw when Point is null", async () => {
         const testLog = new UniqueType("Log");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${testLog.name} {
                 id: ID!
                 location: Point
@@ -107,7 +106,7 @@ describe("https://github.com/neo4j/graphql/issues/560", () => {
     test("should not throw when CartesianPoint is null", async () => {
         const testLog = new UniqueType("Log");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${testLog.name} {
                 id: ID!
                 location: CartesianPoint

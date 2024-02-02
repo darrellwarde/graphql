@@ -20,7 +20,6 @@
 import { faker } from "@faker-js/faker";
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
 import { Neo4jGraphQL } from "../../src/classes";
@@ -34,7 +33,7 @@ describe("fragments", () => {
     let neo4j: Neo4j;
     let schema: GraphQLSchema;
 
-    const typeDefs = gql`
+    const typeDefs = /* GraphQL */ `
         interface Production {
             title: String!
             runtime: Int!
@@ -120,7 +119,7 @@ describe("fragments", () => {
     });
 
     test("should be able project fragment on type", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($actorName: String!) {
                 actors(where: { name: $actorName }) {
                     ...FragmentOnType
@@ -147,7 +146,7 @@ describe("fragments", () => {
     });
 
     test("should be able project fragment on interface", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($actorName: String!) {
                 actors(where: { name: $actorName }) {
                     name
@@ -182,7 +181,7 @@ describe("fragments", () => {
     });
 
     test("should be able to project nested fragments", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($actorName: String!) {
                 actors(where: { name: $actorName }) {
                     name

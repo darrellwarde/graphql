@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../../src";
 
 describe("Interface Top Level Aggregations", () => {
     test("Interfaces", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
                 cost: Float!
@@ -285,7 +284,7 @@ describe("Interface Top Level Aggregations", () => {
     });
 
     test("Interfaces With Relationships", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
                 cost: Float!

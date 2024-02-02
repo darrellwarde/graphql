@@ -17,12 +17,11 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src/classes";
 
 describe("https://github.com/neo4j/graphql/issues/586", () => {
     test("should not throw when using values in BigInt", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             input TestInput {
                 id: BigInt = "0"
             }

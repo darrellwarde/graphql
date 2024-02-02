@@ -24,7 +24,6 @@ import { translateQuery } from "./utils/translate-query";
 import type * as Performance from "../types";
 import { colorText, TTYColors } from "../utils/formatters/color-tty-text";
 import { typeDefs } from "../typedefs";
-import gql from "graphql-tag";
 import { getArgumentValue } from "../utils/get-argument-value";
 import { getLargeSchema } from "../schema/schema-performance";
 

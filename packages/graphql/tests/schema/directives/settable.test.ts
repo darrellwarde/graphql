@@ -19,7 +19,6 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
 
@@ -31,7 +30,7 @@ describe("@settable", () => {
     });
 
     test("Disable create fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @query(aggregate: true) {
                 title: String!
                 description: String @settable(onCreate: false, onUpdate: true)
@@ -199,7 +198,7 @@ describe("@settable", () => {
     });
 
     test("Disable update fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @query(aggregate: true) {
                 title: String!
                 description: String @settable(onCreate: true, onUpdate: false)
@@ -367,7 +366,7 @@ describe("@settable", () => {
     });
 
     test("Disable create and update fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @query(aggregate: true) {
                 title: String!
                 description: String @settable(onCreate: false, onUpdate: false)
@@ -600,7 +599,7 @@ describe("@settable", () => {
 
     describe("Relationships to a concrete type", () => {
         test("Prevent relationship field creation", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -1059,7 +1058,7 @@ describe("@settable", () => {
         });
 
         test("Prevent relationship field update", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -1510,7 +1509,7 @@ describe("@settable", () => {
         });
 
         test("Prevent update on nested relationships", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -2143,7 +2142,7 @@ describe("@settable", () => {
         });
 
         test("Prevent create on nested relationships", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -2785,7 +2784,7 @@ describe("@settable", () => {
     });
     describe("Relationships to a union type", () => {
         test("Prevent relationship field creation", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -3308,7 +3307,7 @@ describe("@settable", () => {
         });
 
         test("Prevent relationship field update", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -3815,7 +3814,7 @@ describe("@settable", () => {
         });
 
         test("Prevent update on nested relationships", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -4504,7 +4503,7 @@ describe("@settable", () => {
         });
 
         test("Prevent create on nested relationships", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie @query(aggregate: true) {
                     title: String!
                     description: String
@@ -5211,7 +5210,7 @@ describe("@settable", () => {
 
     describe("Relationships to an interface type", () => {
         test("Prevent relationship field creation", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Production {
                     title: String!
                     description: String
@@ -5724,7 +5723,7 @@ describe("@settable", () => {
         });
 
         test("Prevent relationship field update", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Production {
                     title: String!
                     description: String
@@ -6218,7 +6217,7 @@ describe("@settable", () => {
         });
 
         test("Prevent update on nested relationships", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Production {
                     title: String!
                     description: String
@@ -7122,7 +7121,7 @@ describe("@settable", () => {
         });
 
         test("Prevent create on nested relationships", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Production {
                     title: String!
                     description: String

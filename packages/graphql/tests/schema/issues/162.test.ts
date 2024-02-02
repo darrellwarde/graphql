@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("162", () => {
     test("2 instances of DeleteInput type created", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Tiger {
                 x: Int
             }

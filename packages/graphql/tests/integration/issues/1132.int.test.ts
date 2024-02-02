@@ -20,7 +20,6 @@
 import { graphql } from "graphql";
 import type { Driver, Session } from "neo4j-driver";
 import { generate } from "randomstring";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { getQuerySource } from "../../utils/get-query-source";
 import { UniqueType } from "../../utils/graphql-types";
@@ -52,7 +51,7 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const testSource = new UniqueType("Source");
             const testTarget = new UniqueType("Target");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${testSource.name} @authorization(validate: [{ when: BEFORE, operations: [CREATE_RELATIONSHIP], where: { node: { id: "$jwt.sub" } } }]) {
                     id: ID!
                     targets: [${testTarget.name}!]! @relationship(type: "HAS_TARGET", direction: OUT)
@@ -80,7 +79,7 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const targetId = generate({
                 charset: "alphabetic",
             });
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     ${testSource.operations.update}(where: { id: "${sourceId}" }, connect: { targets: { where: { node: { id: "${targetId}" } } } }) {
                         ${testSource.plural} {
@@ -124,7 +123,7 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const testSource = new UniqueType("Source");
             const testTarget = new UniqueType("Target");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${testSource.name} {
                     id: ID!
                     targets: [${testTarget.name}!]! @relationship(type: "HAS_TARGET", direction: OUT)
@@ -155,7 +154,7 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const sub = generate({
                 charset: "alphabetic",
             });
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     ${testSource.operations.update}(where: { id: "${sourceId}" }, disconnect: { targets: { where: { node: { id: "${targetId}" } } } }) {
                         ${testSource.plural} {
@@ -183,7 +182,7 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const testSource = new UniqueType("Source");
             const testTarget = new UniqueType("Target");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${testSource.name} {
                     id: ID!
                     targets: [${testTarget.name}!]! @relationship(type: "HAS_TARGET", direction: OUT)
@@ -211,7 +210,7 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const targetId = generate({
                 charset: "alphabetic",
             });
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     ${testSource.operations.update}(where: { id: "${sourceId}" }, disconnect: { targets: { where: { node: { id: "${targetId}" } } } }) {
                         ${testSource.plural} {

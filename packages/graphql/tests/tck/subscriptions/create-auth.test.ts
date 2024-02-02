@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
 import { Neo4jGraphQL } from "../../../src";
@@ -31,7 +30,7 @@ describe("Subscriptions metadata on create", () => {
 
     beforeAll(() => {
         plugin = new TestSubscriptionsEngine();
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Actor {
                 id: String!
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -54,7 +53,7 @@ describe("Subscriptions metadata on create", () => {
         });
     });
     test("Multi Create", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 createActors(input: [{ id: "1" }, { id: "2" }]) {
                     actors {

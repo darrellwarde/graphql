@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Unions", () => {
     test("Unions", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             union Search = Movie | Genre
 
             type Genre {

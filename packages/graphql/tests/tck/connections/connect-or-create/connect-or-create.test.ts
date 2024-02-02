@@ -18,7 +18,6 @@
  */
 
 import type { DocumentNode } from "graphql";
-import gql from "graphql-tag";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, formatParams, translateQuery } from "../../utils/tck-test-utils";
 
@@ -28,7 +27,7 @@ describe("Create or Connect", () => {
         let neoSchema: Neo4jGraphQL;
 
         beforeAll(() => {
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
                 type Movie {
                     title: String! @unique
                     actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -50,7 +49,7 @@ describe("Create or Connect", () => {
         });
 
         test("Create with createOrConnect operation", async () => {
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     createActors(
                         input: [
@@ -113,7 +112,7 @@ describe("Create or Connect", () => {
         });
 
         test("Update with createOrConnect operation", async () => {
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     updateActors(
                         update: {
@@ -175,7 +174,7 @@ describe("Create or Connect", () => {
         let neoSchema: Neo4jGraphQL;
 
         beforeAll(() => {
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
                 type Movie {
                     id: ID! @id @unique
                     createdAt: DateTime! @timestamp(operations: [CREATE])
@@ -199,7 +198,7 @@ describe("Create or Connect", () => {
         });
 
         test("Create with createOrConnect operation", async () => {
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     createActors(
                         input: [
@@ -264,7 +263,7 @@ describe("Create or Connect", () => {
         });
 
         test("Create with createOrConnect operation - with @id in where", async () => {
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     createActors(
                         input: [
@@ -328,7 +327,7 @@ describe("Create or Connect", () => {
         });
 
         test("Update with createOrConnect operation", async () => {
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     updateActors(
                         update: {
@@ -387,7 +386,7 @@ describe("Create or Connect", () => {
         });
 
         test("Update with createOrConnect operation - with @id in where", async () => {
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     updateActors(
                         update: {
@@ -450,7 +449,7 @@ describe("Create or Connect", () => {
         let neoSchema: Neo4jGraphQL;
 
         beforeAll(() => {
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
                 type Movie {
                     title: String! @unique
                     actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -475,7 +474,7 @@ describe("Create or Connect", () => {
         });
 
         test("Create with createOrConnect operation", async () => {
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     createActors(
                         input: [
@@ -540,7 +539,7 @@ describe("Create or Connect", () => {
         });
 
         test("Update with createOrConnect operation", async () => {
-            const query = gql`
+            const query = /* GraphQL */ `
                 mutation {
                     updateActors(
                         update: {

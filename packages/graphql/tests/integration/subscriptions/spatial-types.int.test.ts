@@ -19,7 +19,6 @@
 
 import { faker } from "@faker-js/faker";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { int } from "neo4j-driver";
 import { Neo4jGraphQL } from "../../../src";
@@ -41,7 +40,7 @@ describe("Subscriptions to spatial types", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
         plugin = new TestSubscriptionsEngine();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String!
                 synopsis: String

@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Interfaces", () => {
     test("Interfaces", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface MovieNode {
                 id: ID
                 movies: [Movie!]! @relationship(type: "HAS_MOVIE", direction: OUT)
@@ -350,7 +349,7 @@ describe("Interfaces", () => {
         `);
     });
     test("Interface with directive", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             directive @something(something: String) on INTERFACE
 
             interface MovieNode @something(something: "test") {

@@ -20,7 +20,6 @@
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
 import { generate } from "randomstring";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 
@@ -38,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/247", () => {
     });
 
     test("should return the correct number of results following connect", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 owners: [User!]! @relationship(type: "OWNS", direction: IN)

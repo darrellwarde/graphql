@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
 
@@ -93,7 +92,7 @@ describe("https://github.com/neo4j/graphql/issues/2709", () => {
     });
 
     test("should use the correct node label for connection rel when defined in node _on - Netflix label", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(
                     where: { OR: [{ distributionConnection_SOME: { node: { _on: { Netflix: {} }, name: "test" } } }] }
@@ -121,7 +120,7 @@ describe("https://github.com/neo4j/graphql/issues/2709", () => {
     });
 
     test("should use the correct node label for connection rel when defined in node _on - Dishney label", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(
                     where: { OR: [{ distributionConnection_SOME: { node: { _on: { Dishney: {} }, name: "test2" } } }] }
@@ -149,7 +148,7 @@ describe("https://github.com/neo4j/graphql/issues/2709", () => {
     });
 
     test("should use the correct node label for connection rel when defined in node _on - without OR operator", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { distributionConnection_SOME: { node: { _on: { Dishney: {} }, name: "test3" } } }) {
                     title
@@ -175,7 +174,7 @@ describe("https://github.com/neo4j/graphql/issues/2709", () => {
     });
 
     test("should not use a node label so it covers all nodes implementing the interface for connection rel", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { distributionConnection_SOME: { node: { name: "test4" } } }) {
                     title
@@ -268,7 +267,7 @@ describe("https://github.com/neo4j/graphql/issues/2709 union parity", () => {
     });
 
     test("should use the correct node label for connection rel when defined in node _on - Netflix label", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { OR: [{ distributionConnection_SOME: { Netflix: { node: { name: "test" } } } }] }) {
                     title
@@ -294,7 +293,7 @@ describe("https://github.com/neo4j/graphql/issues/2709 union parity", () => {
     });
 
     test("should use the correct node label for connection rel when defined in node _on - Dishney label", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { OR: [{ distributionConnection_SOME: { Dishney: { node: { name: "test2" } } } }] }) {
                     title
@@ -320,7 +319,7 @@ describe("https://github.com/neo4j/graphql/issues/2709 union parity", () => {
     });
 
     test("should use the correct node label for connection rel when defined in node _on - without OR operator", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 movies(where: { distributionConnection_SOME: { Dishney: { node: { name: "test3" } } } }) {
                     title

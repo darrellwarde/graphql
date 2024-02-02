@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
@@ -28,7 +27,7 @@ describe("https://github.com/neo4j/graphql/issues/1760", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]!
             }
@@ -78,7 +77,7 @@ describe("https://github.com/neo4j/graphql/issues/1760", () => {
     });
 
     test("Cypher fields should be calculated early in query if needed for sort, sort applied after initial match", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query getApplicationVariants($where: ApplicationVariantWhere, $options: ApplicationVariantOptions) {
                 applicationVariants(where: $where, options: $options) {
                     relatedId

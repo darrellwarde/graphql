@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Relationship Properties Cypher", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -55,7 +54,7 @@ describe("Relationship Properties Cypher", () => {
     });
 
     test("Projecting node and relationship properties with no arguments", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 moviesConnection(first: 5, sort: { title: ASC }) {
                     edges {
@@ -116,7 +115,7 @@ describe("Relationship Properties Cypher", () => {
     });
 
     test("Sort by cypher fields", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 moviesConnection(first: 2, sort: { title: DESC, numberOfActors: ASC }) {
                     edges {

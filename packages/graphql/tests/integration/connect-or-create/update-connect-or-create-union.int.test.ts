@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { Driver, Session, Integer } from "neo4j-driver";
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
@@ -42,7 +41,7 @@ describe("Update -> ConnectOrCreate Union", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
         type ${typeMovie.name} {
         	title: String!
         	isan: String! @unique
@@ -85,7 +84,7 @@ describe("Update -> ConnectOrCreate Union", () => {
         const movieIsan = "0000-0000-03B6-0000-O-0000-0006-P";
         const seriesIsan = "0000-0001-ECC5-0000-8-0000-0001-B";
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(
                     update: {
@@ -176,7 +175,7 @@ describe("Update -> ConnectOrCreate Union", () => {
         await session.run(`CREATE (m:${typeMovie.name} { title: "Forrest Gump", isan:"${movieIsan}"})`);
         await session.run(`CREATE (m:${typeSeries.name} { title: "Band of Brothers", isan:"${seriesIsan}"})`);
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 ${typeActor.operations.update}(
                     update: {

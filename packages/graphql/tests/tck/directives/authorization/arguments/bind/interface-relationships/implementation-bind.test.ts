@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../../../../utils/tck-test-utils";
@@ -29,7 +28,7 @@ describe("Cypher Auth Allow", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Content {
                 id: ID
                 creator: User! @relationship(type: "HAS_CONTENT", direction: IN)
@@ -83,7 +82,7 @@ describe("Cypher Auth Allow", () => {
     });
 
     test("Create Nested Node with bind", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 createUsers(
                     input: [
@@ -171,7 +170,7 @@ describe("Cypher Auth Allow", () => {
     });
 
     test("Create Nested Node without bind", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 createUsers(
                     input: [
@@ -256,7 +255,7 @@ describe("Cypher Auth Allow", () => {
     });
 
     test("Update Nested Node", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateUsers(
                     where: { id: "id-01" }
@@ -393,7 +392,7 @@ describe("Cypher Auth Allow", () => {
     });
 
     test("Connect Node", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateUsers(where: { id: "user-id" }, connect: { content: { where: { node: { id: "content-id" } } } }) {
                     users {
@@ -475,7 +474,7 @@ describe("Cypher Auth Allow", () => {
     });
 
     test("Disconnect Node", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateUsers(
                     where: { id: "user-id" }

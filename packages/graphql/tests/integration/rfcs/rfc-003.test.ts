@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -40,7 +39,7 @@ describe("integration/rfc/003", () => {
     describe("one-to-one", () => {
         describe("create", () => {
             test("should throw when creating node without a required relationship", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Director {
                         id: ID!
                     }
@@ -79,7 +78,7 @@ describe("integration/rfc/003", () => {
 
             describe("nested mutations", () => {
                 test("should throw when creating node without a required relationship", async () => {
-                    const typeDefs = gql`
+                    const typeDefs = /* GraphQL */ `
                         type Address {
                             street: String!
                         }
@@ -131,7 +130,7 @@ describe("integration/rfc/003", () => {
             test("should throw error when updating a node without a required relationship", async () => {
                 const session = await neo4j.getSession();
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Director {
                         id: ID!
                     }
@@ -180,7 +179,7 @@ describe("integration/rfc/003", () => {
                 test("should throw when creating node without relationship", async () => {
                     const session = await neo4j.getSession();
 
-                    const typeDefs = gql`
+                    const typeDefs = /* GraphQL */ `
                         type Address {
                             street: String!
                         }
@@ -240,7 +239,7 @@ describe("integration/rfc/003", () => {
                 test("should throw error when creating a node without a required relationship through a nested mutation", async () => {
                     const session = await neo4j.getSession();
 
-                    const typeDefs = gql`
+                    const typeDefs = /* GraphQL */ `
                         type Address {
                             street: String!
                         }
@@ -304,7 +303,7 @@ describe("integration/rfc/003", () => {
                 test("should throw error when deleting a required relationship", async () => {
                     const session = await neo4j.getSession();
 
-                    const typeDefs = gql`
+                    const typeDefs = /* GraphQL */ `
                         type Director {
                             id: ID!
                         }
@@ -365,7 +364,7 @@ describe("integration/rfc/003", () => {
 
         describe("connect", () => {
             test("should throw error when connecting to a required relationship that is not found", async () => {
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Director {
                         id: ID!
                     }
@@ -410,7 +409,7 @@ describe("integration/rfc/003", () => {
                 test("should throw error when connecting to a required node that is not found", async () => {
                     const session = await neo4j.getSession();
 
-                    const typeDefs = gql`
+                    const typeDefs = /* GraphQL */ `
                         type Address {
                             street: String!
                         }
@@ -483,7 +482,7 @@ describe("integration/rfc/003", () => {
                 test("should throw error when disconnecting a required relationship", async () => {
                     const session = await neo4j.getSession();
 
-                    const typeDefs = gql`
+                    const typeDefs = /* GraphQL */ `
                         type Director {
                             id: ID!
                         }
@@ -538,7 +537,7 @@ describe("integration/rfc/003", () => {
             test("should disconnect and then reconnect to a new node on a required relationship", async () => {
                 const session = await neo4j.getSession();
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Director {
                         id: ID!
                     }
@@ -614,7 +613,7 @@ describe("integration/rfc/003", () => {
             test("should disconnect and then reconnect to a new node on a non required relationship", async () => {
                 const session = await neo4j.getSession();
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Director {
                         id: ID!
                     }
@@ -692,7 +691,7 @@ describe("integration/rfc/003", () => {
             test("should throw if connecting to more than one node", async () => {
                 const session = await neo4j.getSession();
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type Director {
                         id: ID!
                     }

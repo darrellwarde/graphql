@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("https://github.com/neo4j/graphql/issues/3905", () => {
     test("custom Cypher result type with list of lists generates without error", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Query {
                 paths: pathList!
                     @cypher(

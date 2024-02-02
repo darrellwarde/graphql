@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { UniqueType } from "../../utils/graphql-types";
@@ -40,7 +39,7 @@ describe("Revert https://github.com/neo4j/graphql/pull/572", () => {
     test("should create user without related friend in many-to-many relationship", async () => {
         const user = new UniqueType("User");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${user.name} {
                 name: String!
                 friends: [${user.name}!]! @relationship(type: "FRIENDS_WITH", direction: OUT)

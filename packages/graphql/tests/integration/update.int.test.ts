@@ -18,7 +18,6 @@
  */
 
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
 import { Neo4jGraphQL } from "../../src/classes";
@@ -147,7 +146,7 @@ describe("update", () => {
     test("should connect through interface relationship", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie implements Production @subscription(events: []) {
                 title: String!
                 id: ID @unique
@@ -466,7 +465,7 @@ describe("update", () => {
     test("should delete a nested actor from a movie abc", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -540,7 +539,7 @@ describe("update", () => {
     test("should delete a nested actor from a movie within an update block", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -614,7 +613,7 @@ describe("update", () => {
     test("should delete a nested actor and one of their nested movies, within an update block abc", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -715,7 +714,7 @@ describe("update", () => {
     test("should delete multiple nested actors from a movie", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)

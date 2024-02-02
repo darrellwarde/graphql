@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Cypher TimeStamps On Time Fields", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface MovieInterface {
                 interfaceTimestamp: Time @timestamp(operations: [CREATE, UPDATE])
                 overrideTimestamp: Time @timestamp(operations: [CREATE, UPDATE])
@@ -49,7 +48,7 @@ describe("Cypher TimeStamps On Time Fields", () => {
     });
 
     test("Simple Create", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 createMovies(input: [{ id: "123" }]) {
                     movies {
@@ -89,7 +88,7 @@ describe("Cypher TimeStamps On Time Fields", () => {
     });
 
     test("Simple Update", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateMovies(update: { id: "123", name: "dan" }) {
                     movies {

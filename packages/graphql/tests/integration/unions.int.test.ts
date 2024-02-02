@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
@@ -832,7 +831,7 @@ describe("unions", () => {
         let neoSchema: Neo4jGraphQL;
 
         beforeEach(() => {
-            typeDefs = gql`
+            typeDefs = /* GraphQL */ `
                 union Search = ${MovieType} | ${GenreType}
 
 

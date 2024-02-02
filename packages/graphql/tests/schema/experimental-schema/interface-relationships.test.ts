@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Interface Relationships", () => {
     test("Interface Relationships - single", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
             }
@@ -598,7 +597,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Interface Relationships - multiple", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Episode {
                 runtime: Int!
                 series: Series! @relationship(type: "HAS_EPISODE", direction: IN)
@@ -2120,7 +2119,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Interface Relationships - nested interface relationships", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Interface1 {
                 field1: String!
                 interface2: [Interface2!]! @relationship(type: "INTERFACE_TWO", direction: OUT)
@@ -3118,7 +3117,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Interface Relationships - nested relationships", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface Content {
                 id: ID
                 content: String

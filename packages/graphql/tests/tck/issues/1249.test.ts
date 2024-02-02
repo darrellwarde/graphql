@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/1249", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Bulk @mutation(operations: []) @node(labels: ["Bulk", "$tenant"]) {
                 id: ID!
                 supplierMaterialNumber: String!
@@ -59,7 +58,7 @@ describe("https://github.com/neo4j/graphql/issues/1249", () => {
     });
 
     test("should contain the cypherParams that are passed via the context", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 bulks {
                     supplierMaterialNumber

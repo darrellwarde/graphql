@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Cypher Aggregations where with count and node", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type User {
                 name: String!
             }
@@ -48,7 +47,7 @@ describe("Cypher Aggregations where with count and node", () => {
     });
 
     test("Equality Count and node", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 posts(where: { likesAggregate: { count: 10, node: { name_EQUAL: "potato" } } }) {
                     content
@@ -82,7 +81,7 @@ describe("Cypher Aggregations where with count and node", () => {
     });
 
     test("Equality Count, node and edge", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 posts(
                     where: {
@@ -121,7 +120,7 @@ describe("Cypher Aggregations where with count and node", () => {
     });
 
     test("Equality Count, node, edge and logical", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 posts(
                     where: {

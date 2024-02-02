@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -38,7 +37,7 @@ describe("Relationship properties - connect", () => {
     });
 
     test("should create a movie while connecting a relationship that has properties", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -130,7 +129,7 @@ describe("Relationship properties - connect", () => {
     });
 
     test("should create an actor while connecting a relationship that has properties(with Union)", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
             }
@@ -221,7 +220,7 @@ describe("Relationship properties - connect", () => {
     });
 
     test("should update a movie while connecting a relationship that has properties", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -310,7 +309,7 @@ describe("Relationship properties - connect", () => {
     });
 
     test("should update an actor while connecting a relationship that has properties(with Union)", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 title: String!
             }

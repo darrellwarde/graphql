@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Cypher Where Aggregations with @node directive", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type User @node(labels: ["_User", "additionalUser"]) {
                 someName: String
             }
@@ -44,7 +43,7 @@ describe("Cypher Where Aggregations with @node directive", () => {
     });
 
     test("GT with node directive", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             {
                 posts(where: { likesAggregate: { node: { someName_GT: 1 } } }) {
                     content

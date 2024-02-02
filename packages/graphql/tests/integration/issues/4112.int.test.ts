@@ -21,7 +21,6 @@ import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
-import gql from "graphql-tag";
 import { createBearerToken } from "../../utils/create-bearer-token";
 import { UniqueType } from "../../utils/graphql-types";
 
@@ -62,7 +61,7 @@ describe("https://github.com/neo4j/graphql/issues/4112", () => {
     });
 
     test("should use jwtClaim alias without dots", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]! @jwtClaim(path: "groups")
             }
@@ -118,7 +117,7 @@ describe("https://github.com/neo4j/graphql/issues/4112", () => {
     });
 
     test("should use jwtClaim alias with dots", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]! @jwtClaim(path: "myApplication.roles")
             }
@@ -174,7 +173,7 @@ describe("https://github.com/neo4j/graphql/issues/4112", () => {
     });
 
     test("should use jwtClaim alias with dots and slash", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]! @jwtClaim(path: "https://github\\\\.com/claims.https://github\\\\.com/claims/roles")
             }
@@ -230,7 +229,7 @@ describe("https://github.com/neo4j/graphql/issues/4112", () => {
     });
 
     test("should use jwtClaim alias on top-level cypher fields", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWT @jwt {
                 roles: [String!]! @jwtClaim(path: "myApplication.roles")
             }

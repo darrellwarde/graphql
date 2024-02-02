@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
 import type { Driver } from "neo4j-driver";
@@ -35,7 +34,7 @@ describe("https://github.com/neo4j/graphql/issues/1760", () => {
     beforeAll(async () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type JWTPayload @jwt {
                 roles: [String!]!
             }
@@ -86,7 +85,7 @@ describe("https://github.com/neo4j/graphql/issues/1760", () => {
     });
 
     test("provided query does not result in an error", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query getApplicationVariants($where: ApplicationVariantWhere, $options: ApplicationVariantOptions) {
                 applicationVariants(where: $where, options: $options) {
                     relatedId

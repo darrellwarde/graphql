@@ -20,7 +20,6 @@
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
 import { generate } from "randomstring";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { UniqueType } from "../../utils/graphql-types";
@@ -44,7 +43,7 @@ describe("https://github.com/neo4j/graphql/issues/4007", () => {
     test("should return name from aliased selection", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie.name} {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)

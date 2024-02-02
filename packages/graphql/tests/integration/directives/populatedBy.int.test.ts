@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -48,7 +47,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => Promise.resolve(string1);
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         callback: String! @populatedBy(callback: "callback", operations: [CREATE])
@@ -108,7 +107,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => Promise.resolve(string1);
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         callback: String! @populatedBy(operations: [UPDATE], callback: "callback")
@@ -190,7 +189,7 @@ describe("@populatedBy directive", () => {
                     return Promise.resolve(string2);
                 };
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         callback: String! @populatedBy(operations: [CREATE, UPDATE], callback: "callback")
@@ -269,7 +268,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => Promise.resolve(int1);
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         callback: Int! @populatedBy(operations: [CREATE], callback: "callback")
@@ -332,7 +331,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => Promise.resolve(int1);
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         callback: Int! @populatedBy(operations: [UPDATE], callback: "callback")
@@ -420,7 +419,7 @@ describe("@populatedBy directive", () => {
                     return Promise.resolve(int2);
                 };
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         callback: Int! @populatedBy(operations: [CREATE, UPDATE], callback: "callback")
@@ -496,7 +495,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => undefined;
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         callback: String @populatedBy(operations: [UPDATE], callback: "callback")
@@ -565,7 +564,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => null;
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         callback: String @populatedBy(operations: [UPDATE], callback: "callback")
@@ -630,7 +629,7 @@ describe("@populatedBy directive", () => {
                 const testMovie = new UniqueType("Movie");
                 const callback = (parent) => `${parent.title}-slug`;
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID!
                         title: String!
@@ -693,7 +692,7 @@ describe("@populatedBy directive", () => {
                 const testMovie = new UniqueType("Movie");
                 const callback = (parent) => `${parent.title}-slug`;
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID!
                         title: String!
@@ -766,7 +765,7 @@ describe("@populatedBy directive", () => {
                 const testMovie = new UniqueType("Movie");
                 const callback = (_parent, _args, context) => context.testValue;
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID!
                         title: String!
@@ -841,7 +840,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => Promise.resolve(string1);
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         genres: [${testGenre.name}!]! @relationship(
@@ -953,7 +952,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => Promise.resolve(string1);
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         genres: [${testGenre.name}!]! @relationship(
@@ -1083,7 +1082,7 @@ describe("@populatedBy directive", () => {
                     return Promise.resolve(string2);
                 };
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         genres: [${testGenre.name}!]! @relationship(
@@ -1242,7 +1241,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => Promise.resolve(int1);
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         genres: [${testGenre.name}!]! @relationship(
@@ -1357,7 +1356,7 @@ describe("@populatedBy directive", () => {
 
                 const callback = () => Promise.resolve(int1);
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         genres: [${testGenre.name}!]! @relationship(
@@ -1493,7 +1492,7 @@ describe("@populatedBy directive", () => {
                     return Promise.resolve(int2);
                 };
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         genres: [${testGenre.name}!]! @relationship(
@@ -1645,7 +1644,7 @@ describe("@populatedBy directive", () => {
                 const testGenre = new UniqueType("Genre");
                 const callback = (parent) => `${parent.title}-slug`;
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         genres: [${testGenre.name}!]! @relationship(
@@ -1760,7 +1759,7 @@ describe("@populatedBy directive", () => {
                 const testGenre = new UniqueType("Genre");
                 const callback = (parent) => `${parent.title}-slug`;
 
-                const typeDefs = gql`
+                const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} {
                         id: ID
                         genres: [${testGenre.name}!]! @relationship(

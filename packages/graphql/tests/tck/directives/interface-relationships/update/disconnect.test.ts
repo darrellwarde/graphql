@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Interface Relationships - Update disconnect", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
@@ -61,7 +60,7 @@ describe("Interface Relationships - Update disconnect", () => {
     });
 
     test("Update disconnect from an interface relationship", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(disconnect: { actedIn: { where: { node: { title_STARTS_WITH: "The " } } } }) {
                     actors {
@@ -129,7 +128,7 @@ describe("Interface Relationships - Update disconnect", () => {
     });
 
     test("Update disconnect from an interface relationship with nested disconnect", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     disconnect: {
@@ -240,7 +239,7 @@ describe("Interface Relationships - Update disconnect", () => {
     });
 
     test("Update disconnect from an interface relationship with nested disconnect using _on to disconnect from only one implementation", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     disconnect: {
@@ -345,7 +344,7 @@ describe("Interface Relationships - Update disconnect", () => {
     });
 
     test("Update disconnect from an interface relationship with nested disconnect using _on to override disconnection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 updateActors(
                     disconnect: {

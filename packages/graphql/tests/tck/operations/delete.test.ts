@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, translateQuery, formatParams } from "../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Cypher Delete", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -46,7 +45,7 @@ describe("Cypher Delete", () => {
     });
 
     test("Simple Delete", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 deleteMovies(where: { id: "123" }) {
                     nodesDeleted
@@ -70,7 +69,7 @@ describe("Cypher Delete", () => {
     });
 
     test("Single Nested Delete", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 deleteMovies(where: { id: 123 }, delete: { actors: { where: { node: { name: "Actor to delete" } } } }) {
                     nodesDeleted
@@ -108,7 +107,7 @@ describe("Cypher Delete", () => {
     });
 
     test("Single Nested Delete deleting multiple", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 deleteMovies(
                     where: { id: 123 }
@@ -166,7 +165,7 @@ describe("Cypher Delete", () => {
     });
 
     test("Double Nested Delete", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 deleteMovies(
                     where: { id: 123 }
@@ -225,7 +224,7 @@ describe("Cypher Delete", () => {
     });
 
     test("Triple Nested Delete", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 deleteMovies(
                     where: { id: 123 }

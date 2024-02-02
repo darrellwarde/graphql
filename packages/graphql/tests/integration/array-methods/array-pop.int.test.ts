@@ -19,7 +19,6 @@
 
 import { faker } from "@faker-js/faker";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { generate } from "randomstring";
 
@@ -112,7 +111,7 @@ describe("array-pop", () => {
         async ({ inputType, initialValue, expectedOutputValue }) => {
             const typeMovie = new UniqueType("Movie");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [${inputType}]
@@ -216,7 +215,7 @@ describe("array-pop", () => {
         async ({ inputType, initialValue, expectedOutputValue }) => {
             const typeMovie = new UniqueType("Movie");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [${inputType}]
@@ -320,7 +319,7 @@ describe("array-pop", () => {
         async ({ inputType, initialValue, expectedOutputValue }) => {
             const typeMovie = new UniqueType("Movie");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [${inputType}]
@@ -404,7 +403,7 @@ describe("array-pop", () => {
     ])("should pop $description", async ({ elementsToPop, tags, expectedOutputValue }) => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [Point]
@@ -521,7 +520,7 @@ describe("array-pop", () => {
     ])("should pop $description", async ({ elementsToPop, tags, expectedOutputValue }) => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [CartesianPoint]
@@ -603,7 +602,7 @@ describe("array-pop", () => {
     test("should pop from two different arrays in the same update", async () => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [String]

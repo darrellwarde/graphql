@@ -17,13 +17,12 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { validateSchema } from "graphql";
 import { Neo4jGraphQL } from "../../../src/classes";
 
 describe("https://github.com/neo4j/graphql/issues/556", () => {
     test("should compile type defs with no errors", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Journalist {
                 articles: [Article!]! @relationship(type: "HAS_ARTICLE", direction: OUT, properties: "HasArticle")
             }

@@ -1,4 +1,3 @@
-import { gql } from "graphql-tag";
 import { buildSubgraphSchema } from "@apollo/subgraph";
 
 const users = [
@@ -10,7 +9,7 @@ const users = [
     },
 ];
 
-const typeDefs = gql`
+const typeDefs = /* GraphQL */ `
     type User @key(fields: "email") {
         email: ID!
         name: String

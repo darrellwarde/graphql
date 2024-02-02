@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Comments", () => {
     test("Simple", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             "A custom scalar."
             scalar CustomScalar
 
@@ -287,7 +286,7 @@ describe("Comments", () => {
 
     describe("Relationship", () => {
         test("Simple", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     name: String
                 }
@@ -701,7 +700,7 @@ describe("Comments", () => {
         });
 
         test("Interface", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 interface Production {
                     title: String!
                 }
@@ -1252,7 +1251,7 @@ describe("Comments", () => {
         });
 
         test("Unions", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 union Search = Movie | Genre
 
                 type Genre {

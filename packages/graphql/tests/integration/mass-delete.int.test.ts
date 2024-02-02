@@ -24,7 +24,6 @@ import { cleanNodes } from "../utils/clean-nodes";
 import { Neo4jGraphQL } from "../../src";
 import { UniqueType } from "../utils/graphql-types";
 import Neo4j from "./neo4j";
-import { gql } from "graphql-tag";
 
 describe("Mass Delete", () => {
     let driver: Driver;
@@ -45,7 +44,7 @@ describe("Mass Delete", () => {
         personType = new UniqueType("Person");
         movieType = new UniqueType("Movie");
 
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type ${personType.name} {
                 name: String!
                 born: Int!

@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -46,7 +45,7 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
         const typeBook = new UniqueType("Book");
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeAuthor.name} {
                 id: ID!
             }
@@ -171,7 +170,7 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
         const typeBook = new UniqueType("Book");
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeAuthor.name} {
                 id: ID!
             }

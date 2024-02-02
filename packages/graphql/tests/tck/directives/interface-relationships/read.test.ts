@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { Neo4jGraphQL } from "../../../../src";
 import { formatCypher, translateQuery, formatParams } from "../../utils/tck-test-utils";
@@ -27,7 +26,7 @@ describe("Interface Relationships", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             interface Production {
                 title: String!
             }
@@ -59,7 +58,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Simple Interface Relationship Query", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedIn {
@@ -102,7 +101,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Simple Interface Relationship Query For Non-Array Field", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     currentlyActingIn {
@@ -145,7 +144,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Simple Interface Relationship Query with offset and limit", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedIn(options: { offset: 5, limit: 10, sort: [{ title: DESC }] }) {
@@ -202,7 +201,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Type filtering using onType", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedIn(where: { _on: { Movie: { title_STARTS_WITH: "The " } } }) {
@@ -242,7 +241,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Filter overriding using onType", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedIn(where: { title_STARTS_WITH: "A ", _on: { Movie: { title_STARTS_WITH: "The " } } }) {
@@ -292,7 +291,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Interface Relationship Query through connection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedInConnection {
@@ -341,7 +340,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Interface Relationship Query through connection with where", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedInConnection(where: { node: { title_STARTS_WITH: "The " }, edge: { screenTime_GT: 60 } }) {
@@ -405,7 +404,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Interface Relationship Query through connection with where excluding type", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedInConnection(
@@ -457,7 +456,7 @@ describe("Interface Relationships", () => {
     });
 
     test("Interface Relationship Query through connection with where overriding", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 actors {
                     actedInConnection(

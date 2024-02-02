@@ -18,7 +18,6 @@
  */
 
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { UniqueType } from "../../utils/graphql-types";
@@ -32,7 +31,7 @@ describe("Connections -> Interfaces", () => {
     const typeSeries = new UniqueType("Series");
     const typeActor = new UniqueType("Actor");
 
-    const typeDefs = gql`
+    const typeDefs = /* GraphQL */ `
         interface Production {
             title: String!
         }

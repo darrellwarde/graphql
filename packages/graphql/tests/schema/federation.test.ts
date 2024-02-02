@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Apollo Federation", () => {
     test("@shareable", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
             type User @shareable {
@@ -638,7 +637,7 @@ describe("Apollo Federation", () => {
     });
 
     test("@key(resolvable: false)", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key"])
 
             type User @key(fields: "name", resolvable: false) {

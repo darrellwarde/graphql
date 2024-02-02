@@ -20,7 +20,6 @@
 import type { Driver, Session } from "neo4j-driver";
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { UniqueType } from "../../utils/graphql-types";
@@ -42,7 +41,7 @@ describe("Connections Filtering", () => {
         movieType = new UniqueType("Movie");
         actorType = new UniqueType("Actor");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${movieType} {
                 title: String!
                 actors: [${actorType}!]! @relationship(type: "ACTED_IN", direction: IN)

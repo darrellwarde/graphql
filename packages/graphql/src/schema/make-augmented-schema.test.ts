@@ -28,7 +28,6 @@ import {
     type ObjectTypeDefinitionNode,
 } from "graphql";
 import { pluralize } from "graphql-compose";
-import { gql } from "graphql-tag";
 import { Node } from "../classes";
 import { generateModel } from "../schema-model/generate-model";
 import makeAugmentedSchema from "./make-augmented-schema";
@@ -39,7 +38,7 @@ describe("makeAugmentedSchema", () => {
     });
 
     test("should return the correct schema", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Actor {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -95,7 +94,7 @@ describe("makeAugmentedSchema", () => {
 
     describe("REGEX", () => {
         test("should remove the MATCHES filter by default", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie {
                     name: String
                 }
@@ -116,7 +115,7 @@ describe("makeAugmentedSchema", () => {
         });
 
         test("should add the name_MATCHES filter when Features.Filters.String.MATCHES is set", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type User {
                     name: String
                 }
@@ -148,7 +147,7 @@ describe("makeAugmentedSchema", () => {
         });
 
         test("should add the id_MATCHES filter when Features.Filters.ID.MATCHES is set", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type User {
                     id: ID
                     name: String
@@ -181,7 +180,7 @@ describe("makeAugmentedSchema", () => {
         });
 
         test("should not add the id_MATCHES filter when Features.Filters.String.MATCHES is set but Features.Filters.ID.MATCHES is not set", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type User {
                     id: ID
                     name: String
@@ -221,7 +220,7 @@ describe("makeAugmentedSchema", () => {
         });
 
         test("should not add the name_MATCHES filter when Features.Filters.ID.MATCHES is set but Features.Filters.Name.MATCHES is not set", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type User {
                     id: ID
                     name: String
@@ -265,7 +264,7 @@ describe("makeAugmentedSchema", () => {
         test("158", () => {
             // https://github.com/neo4j/graphql/issues/158
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Movie {
                     createdAt: DateTime
                 }
@@ -285,7 +284,7 @@ describe("makeAugmentedSchema", () => {
         });
 
         test("3270 - should not throw if directive has arguments of input type", () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 directive @testDirective(action_mapping: [ActionMapping]) on OBJECT | FIELD_DEFINITION | QUERY
                 input ActionMapping {
                     action: [String!]

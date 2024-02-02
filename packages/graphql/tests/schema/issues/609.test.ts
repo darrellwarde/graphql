@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("609", () => {
     test("@deprecated directive should remain in output", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Deprecated {
                 deprecatedField: String @deprecated
             }

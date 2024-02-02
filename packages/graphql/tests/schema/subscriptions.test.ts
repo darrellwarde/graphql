@@ -19,7 +19,6 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 import { TestSubscriptionsEngine } from "../utils/TestSubscriptionsEngine";
 
@@ -31,7 +30,7 @@ describe("Subscriptions", () => {
     });
 
     test("Subscriptions", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 actorCount: Int
@@ -670,7 +669,7 @@ describe("Subscriptions", () => {
     });
 
     test("Empty EventPayload type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 actorCount: Int
@@ -1431,7 +1430,7 @@ describe("Subscriptions", () => {
     });
 
     test("Empty EventPayload type on Union type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 actorCount: Int
@@ -2570,7 +2569,7 @@ describe("Subscriptions", () => {
     });
 
     test("Empty EventPayload type, but @relationshipProperty exists", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 actorCount: Int
@@ -3455,7 +3454,7 @@ describe("Subscriptions", () => {
     });
 
     test("Subscriptions excluded", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @subscription(events: []) {
                 id: ID
                 actorCount: Int
@@ -3981,7 +3980,7 @@ describe("Subscriptions", () => {
     });
 
     test("Type with relationship to a subscriptions excluded type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type User @mutation(operations: []) @subscription(events: []) {
                 username: String!
                 name: String
@@ -4579,7 +4578,7 @@ describe("Subscriptions", () => {
     });
 
     test("Type with relationship to a subscriptions excluded type + Union type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie {
                 id: ID
                 actorCount: Int
@@ -5656,7 +5655,7 @@ describe("Subscriptions", () => {
     });
 
     test("Type with relationship to a subscriptions excluded type + Interface type", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie implements Production @subscription(events: []) {
                 title: String!
                 id: ID @unique

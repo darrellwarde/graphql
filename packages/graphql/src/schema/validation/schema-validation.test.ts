@@ -19,7 +19,6 @@
 
 import type { ASTVisitor, FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { GraphQLError, parse } from "graphql";
-import { gql } from "graphql-tag";
 import type { SDLValidationContext } from "graphql/validation/ValidationContext";
 import { NoErrorThrownError, getError } from "../../../tests/utils/get-error";
 import { Subgraph } from "../../classes/Subgraph";
@@ -37,7 +36,7 @@ describe("schema validation", () => {
                         myClaim: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authorization(filter: [{ where: { jwt: { myClaim: "something" } } }]) {
                         id: ID!
@@ -62,7 +61,7 @@ describe("schema validation", () => {
                         myClaim: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User
                         @authorization(filter: [{ where: { jwt: { myClaim: "something" }, node: { name: "John" } } }]) {
@@ -88,7 +87,7 @@ describe("schema validation", () => {
                         myClaim: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authorization(filter: [{ where: { jwt: { thisClaimDoesNotExist: "something" } } }]) {
                         id: ID!
@@ -121,7 +120,7 @@ describe("schema validation", () => {
                         myClaim: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authorization(filter: [{ where: { jwt: { iss: "something" } } }]) {
                         id: ID!
@@ -146,7 +145,7 @@ describe("schema validation", () => {
                         myClaim: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authorization(filter: [{ where: { node: { myClaim: "something" } } }]) {
                         id: ID!
@@ -181,7 +180,7 @@ describe("schema validation", () => {
                     groups: [String!]! @jwtClaim(path: "applications[0].groups")
                 }
             `;
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 ${jwtType}
                 type User @authorization(filter: [{ where: { jwt: { groups_INCLUDES: "something" } } }]) {
                     id: ID!
@@ -207,7 +206,7 @@ describe("schema validation", () => {
                         intClaim: Int
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testInt: "$jwt.intClaim" } } }]) {
                         id: ID!
                         name: String!
@@ -227,7 +226,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when is correctly used: standard field sub on OBJECT", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testStr: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -251,7 +250,7 @@ describe("schema validation", () => {
                         intClaim: [Int]
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testInt: "$jwt.intClaim" } } }]) {
                         id: ID!
                         name: String!
@@ -276,7 +275,7 @@ describe("schema validation", () => {
                         boolClaim: Boolean
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testBool: "$jwt.boolClaim" } } }]) {
                         id: ID!
                         name: String!
@@ -296,7 +295,7 @@ describe("schema validation", () => {
             });
 
             test("should return error when types do not match: standard field sub on OBJECT", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testInt: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -335,7 +334,7 @@ describe("schema validation", () => {
                         intClaim: [Int]
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testInts: "$jwt.intClaim" } } }]) {
                         id: ID!
                         name: String!
@@ -375,7 +374,7 @@ describe("schema validation", () => {
                         stringClaim: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testInt: "$jwt.stringClaim" } } }]) {
                         id: ID!
                         name: String!
@@ -415,7 +414,7 @@ describe("schema validation", () => {
                         sub: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authorization(filter: [{ where: { node: { testInt: "$jwt.sub" } } }])
                         name: String!
@@ -458,7 +457,7 @@ describe("schema validation", () => {
                         intClaim: Int
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authorization(filter: [{ where: { node: { testStr: "$jwt.intClaim" } } }])
                         name: String!
@@ -501,7 +500,7 @@ describe("schema validation", () => {
                         intClaim: Int @jwtClaim(path: "this.is.a.path")
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authorization(filter: [{ where: { node: { testStr: "$jwt.intClaim" } } }])
                         name: String!
@@ -544,7 +543,7 @@ describe("schema validation", () => {
                         boolClaim: Boolean
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authorization(filter: [{ where: { node: { testStr: "$jwt.boolClaim" } } }])
                         name: String!
@@ -587,7 +586,7 @@ describe("schema validation", () => {
                         stringClaim: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testBool: "$jwt.stringClaim" } } }]) {
                         id: ID!
                         name: String!
@@ -628,7 +627,7 @@ describe("schema validation", () => {
                         intClaim: Int
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { testBool: "$jwt.intClaim" } } }]) {
                         id: ID!
                         name: String!
@@ -668,7 +667,7 @@ describe("schema validation", () => {
     describe("@subscriptionsAuthorization", () => {
         describe("on OBJECT", () => {
             test("should not returns errors when is correctly used", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -687,7 +686,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when is correctly used, with specifiedDirective", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String! @deprecated(reason: "name is deprecated")
@@ -706,7 +705,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in several place", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -730,7 +729,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -761,7 +760,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User
                         @plural(value: "Users")
                         @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
@@ -783,7 +782,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User
                         @plural(value: "Users")
                         @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
@@ -818,7 +817,7 @@ describe("schema validation", () => {
 
         describe("on FIELD", () => {
             test("should not returns errors with a correct usage", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
                         name: String!
@@ -838,7 +837,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
                         name: String!
@@ -869,7 +868,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -895,7 +894,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -935,7 +934,7 @@ describe("schema validation", () => {
 
         describe("on INTERFACE", () => {
             test("should error", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User implements Member {
                         id: ID!
                         name: String!
@@ -966,7 +965,7 @@ describe("schema validation", () => {
 
         describe("on OBJECT_EXTENSION", () => {
             test("should not returns errors when is correctly used", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -986,7 +985,7 @@ describe("schema validation", () => {
             });
 
             test("should returns errors when used correctly in both type and extension", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1018,7 +1017,7 @@ describe("schema validation", () => {
             });
 
             test("should returns errors when used correctly in both a type field and an extension for the same field", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
@@ -1052,7 +1051,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in both type and an extension field", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1079,7 +1078,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in multiple extension fields", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1107,7 +1106,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in different type and field across several extensions", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1139,7 +1138,7 @@ describe("schema validation", () => {
             });
 
             test("should returns errors when used correctly in more than one extension", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -1173,7 +1172,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -1205,7 +1204,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -1227,7 +1226,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -1263,7 +1262,7 @@ describe("schema validation", () => {
 
         describe("on INTERFACE_EXTENSION", () => {
             test("should error", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User implements Member {
                         id: ID!
                         name: String!
@@ -1296,7 +1295,7 @@ describe("schema validation", () => {
 
         describe("mixed usage", () => {
             test("should not returns errors when used correctly in several place", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1334,7 +1333,7 @@ describe("schema validation", () => {
                 expect(executeValidate).not.toThrow();
             });
             test("should returns errors when incorrectly used in several place", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1388,7 +1387,7 @@ describe("schema validation", () => {
 
         describe("with federated schema", () => {
             test("should not returns errors when is correctly used", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User
@@ -1423,7 +1422,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when is correctly used, with specifiedDirective", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User
@@ -1458,7 +1457,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in several place", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User
@@ -1493,7 +1492,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User
@@ -1540,7 +1539,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User
@@ -1576,7 +1575,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User
@@ -1628,7 +1627,7 @@ describe("schema validation", () => {
     describe("@authorization", () => {
         describe("on OBJECT", () => {
             test("should not returns errors when is correctly used", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1646,7 +1645,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when is correctly used, with specifiedDirective", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String! @deprecated(reason: "name is deprecated")
@@ -1664,7 +1663,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in several place", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1687,7 +1686,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1712,7 +1711,7 @@ describe("schema validation", () => {
             });
 
             test("should validate operations value", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ operations: [NEVER], where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -1738,7 +1737,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User
                         @plural(value: "Users")
                         @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
@@ -1759,7 +1758,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User
                         @plural(value: "Users")
                         @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
@@ -1788,7 +1787,7 @@ describe("schema validation", () => {
 
         describe("on FIELD", () => {
             test("should not returns errors with a correct usage", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
                         name: String!
@@ -1807,7 +1806,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
                         name: String!
@@ -1833,7 +1832,7 @@ describe("schema validation", () => {
             });
 
             test("should validate when value", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authorization(validate: [{ when: [NEVER], where: { node: { id: "$jwt.sub" } } }])
                         name: String!
@@ -1859,7 +1858,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @authentication
@@ -1883,7 +1882,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -1918,7 +1917,7 @@ describe("schema validation", () => {
 
         describe("on INTERFACE", () => {
             test("should error", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User implements Member {
                         id: ID!
                         name: String!
@@ -1950,7 +1949,7 @@ describe("schema validation", () => {
 
         describe("on OBJECT_EXTENSION", () => {
             test("should not returns errors when is correctly used", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -1969,7 +1968,7 @@ describe("schema validation", () => {
             });
 
             test("should returns errors when used correctly in both type and extension", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -2000,7 +1999,7 @@ describe("schema validation", () => {
             });
 
             test("should returns errors when used correctly in both a type field and an extension for the same field", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
@@ -2033,7 +2032,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in both type and an extension field", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -2059,7 +2058,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in multiple extension fields", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -2086,7 +2085,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in different type and field across several extensions", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -2117,7 +2116,7 @@ describe("schema validation", () => {
             });
 
             test("should returns errors when used correctly in more than one extension", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -2150,7 +2149,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -2176,7 +2175,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -2198,7 +2197,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -2227,7 +2226,7 @@ describe("schema validation", () => {
 
         describe("on INTERFACE_EXTENSION", () => {
             test("should error", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User implements Member {
                         id: ID!
                         name: String!
@@ -2260,7 +2259,7 @@ describe("schema validation", () => {
 
         describe("mixed usage", () => {
             test("should not returns errors when used correctly in several place", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -2294,7 +2293,7 @@ describe("schema validation", () => {
                 expect(executeValidate).not.toThrow();
             });
             test("should returns errors when incorrectly used in several place", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
@@ -2337,7 +2336,7 @@ describe("schema validation", () => {
 
         describe("with federated schema", () => {
             test("should not returns errors when is correctly used", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User @shareable @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
@@ -2370,7 +2369,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when is correctly used, with specifiedDirective", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User @shareable @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
@@ -2403,7 +2402,7 @@ describe("schema validation", () => {
             });
 
             test("should not returns errors when used correctly in several place", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User @shareable @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
@@ -2436,7 +2435,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User @shareable @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
@@ -2476,7 +2475,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User
@@ -2512,7 +2511,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User
@@ -2559,7 +2558,7 @@ describe("schema validation", () => {
     describe("@authentication", () => {
         describe("on OBJECT", () => {
             test("should not returns errors when is correctly used", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authentication {
                         id: ID!
                         name: String!
@@ -2582,7 +2581,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -2606,7 +2605,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -2630,7 +2629,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authentication(ops: [CREATE]) {
                         id: ID!
                         name: String!
@@ -2653,7 +2652,7 @@ describe("schema validation", () => {
 
             // TODO: custom rule
             test("should validate operations value", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authentication(operations: [NEVER]) {
                         id: ID!
                         name: String!
@@ -2683,7 +2682,7 @@ describe("schema validation", () => {
                         sub: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @plural(value: "Users") @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -2708,7 +2707,7 @@ describe("schema validation", () => {
                         sub: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @plural(value: "Users") @authentication(jwtWrongField: { sub: "test" }) {
                         id: ID!
@@ -2736,7 +2735,7 @@ describe("schema validation", () => {
 
         describe("on FIELD", () => {
             test("should not returns errors with a correct usage", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authentication
                         name: String!
@@ -2755,7 +2754,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authentication(ops: [CREATE])
                         name: String!
@@ -2778,7 +2777,7 @@ describe("schema validation", () => {
             });
 
             test("should validate enum field value", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User @authentication(operations: [NEVER]) {
                         id: ID!
                         name: String!
@@ -2804,7 +2803,7 @@ describe("schema validation", () => {
             });
 
             test("validation should works when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID! @authentication(operations: [CREATE]) @unique
                         name: String!
@@ -2828,7 +2827,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -2868,7 +2867,7 @@ describe("schema validation", () => {
                         myClaim: String
                     }
                 `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User implements Member {
                         id: ID!
@@ -2912,7 +2911,7 @@ describe("schema validation", () => {
                     }
                 `;
 
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User {
                         id: ID!
@@ -2939,7 +2938,7 @@ describe("schema validation", () => {
                     }
                 `;
 
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -2978,7 +2977,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User {
                         id: ID!
@@ -3018,7 +3017,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -3051,7 +3050,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -3085,7 +3084,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -3118,7 +3117,7 @@ describe("schema validation", () => {
             });
 
             test("should returns errors when used correctly in more than one extension", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -3151,7 +3150,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -3179,7 +3178,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User {
                         id: ID!
@@ -3200,7 +3199,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     type User {
                         id: ID!
                         name: String!
@@ -3232,7 +3231,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User implements Member {
                         id: ID!
@@ -3275,7 +3274,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -3316,7 +3315,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     type User @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
@@ -3363,7 +3362,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
@@ -3404,7 +3403,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
@@ -3445,7 +3444,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
@@ -3481,7 +3480,7 @@ describe("schema validation", () => {
             });
 
             test("should validate directive argument name", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     type User @shareable @authentication(wrongField: { sub: "test" }) {
@@ -3526,7 +3525,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     ${jwtType}
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
@@ -3570,7 +3569,7 @@ describe("schema validation", () => {
                     sub: String
                 }
             `;
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     ${jwtType}
@@ -3613,7 +3612,7 @@ describe("schema validation", () => {
 
     describe("validate using custom rules", () => {
         test("should not returns errors when is correctly used", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 type User {
                     id: ID!
                     name: String!
@@ -3638,7 +3637,7 @@ describe("schema validation", () => {
             expect(executeValidate).not.toThrow();
         });
         test("should returns errors when is not correctly used", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 type User {
                     id: ID!
                     keanu: String!
@@ -3674,7 +3673,7 @@ describe("schema validation", () => {
         describe("on OBJECT", () => {
             describe("correct usage", () => {
                 test("should not returns errors with a valid @authorization filter argument", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                             id: ID!
                             name: String!
@@ -3698,7 +3697,7 @@ describe("schema validation", () => {
                 });
 
                 test("should not returns errors with valid @authorization validate argument", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User @authorization(validate: [{ operations: [CREATE] }]) {
                             id: ID!
                             name: String!
@@ -3722,7 +3721,7 @@ describe("schema validation", () => {
                 });
 
                 test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID!
                             name: String!
@@ -3751,7 +3750,7 @@ describe("schema validation", () => {
                 });
 
                 test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID!
                             name: String!
@@ -3782,7 +3781,7 @@ describe("schema validation", () => {
 
             describe("incorrect usage", () => {
                 test("should returns errors when an @authorization filter contains an unknown operation", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User @authorization(filter: [{ seemsNotAWhereToMe: { node: { id: "$jwt.sub" } } }]) {
                             id: ID!
                             name: String!
@@ -3813,7 +3812,7 @@ describe("schema validation", () => {
                 });
 
                 test("should return error when both @authorization and @subscriptionAuthorization present", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             name: String!
                             id: ID!
@@ -3842,7 +3841,7 @@ describe("schema validation", () => {
                 });
 
                 test("should returns errors when an @authorization filter has a wrong where definition", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User @authorization(filter: [{ where: { notANode: { id: "$jwt.sub" } } }]) {
                             id: ID!
                             name: String!
@@ -3873,7 +3872,7 @@ describe("schema validation", () => {
                 });
 
                 test("should returns errors when an @authorization filter has a wrong where predicate", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User @authorization(filter: [{ where: { node: { notAValidID: "$jwt.sub" } } }]) {
                             id: ID!
                             name: String!
@@ -3904,7 +3903,7 @@ describe("schema validation", () => {
                 });
 
                 test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID!
                             name: String!
@@ -3948,7 +3947,7 @@ describe("schema validation", () => {
                 });
 
                 test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID!
                             name: String!
@@ -3991,7 +3990,7 @@ describe("schema validation", () => {
         describe("on Field", () => {
             describe("correct usage", () => {
                 test("should not returns errors with a valid @authorization filter argument", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
                             name: String!
@@ -4015,7 +4014,7 @@ describe("schema validation", () => {
                 });
 
                 test("should not returns errors with valid @authorization validate argument", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID! @authorization(validate: [{ operations: [CREATE] }])
                             name: String!
@@ -4039,7 +4038,7 @@ describe("schema validation", () => {
                 });
 
                 test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID!
                             name: String!
@@ -4069,7 +4068,7 @@ describe("schema validation", () => {
                 });
 
                 test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID!
                             name: String!
@@ -4101,7 +4100,7 @@ describe("schema validation", () => {
 
             describe("incorrect usage", () => {
                 test("should returns errors when an @authorization filter contains an unknown operation", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID! @authorization(filter: [{ seemsNotAWhereToMe: { node: { id: "$jwt.sub" } } }])
                             name: String!
@@ -4132,7 +4131,7 @@ describe("schema validation", () => {
                 });
 
                 test("should returns errors when an @authorization filter has a wrong where definition", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID! @authorization(filter: [{ where: { notANode: { id: "$jwt.sub" } } }])
                             name: String!
@@ -4163,7 +4162,7 @@ describe("schema validation", () => {
                 });
 
                 test("should returns errors when an @authorization filter has a wrong where predicate", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID! @authorization(filter: [{ where: { node: { notAValidID: "$jwt.sub" } } }])
                             name: String!
@@ -4202,7 +4201,7 @@ describe("schema validation", () => {
                 });
 
                 test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID!
                             name: String!
@@ -4248,7 +4247,7 @@ describe("schema validation", () => {
                 });
 
                 test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
+                    const userDocument = /* GraphQL */ `
                         type User {
                             id: ID!
                             name: String!

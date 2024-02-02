@@ -18,7 +18,6 @@
  */
 
 import type { DocumentNode } from "graphql";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
@@ -27,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/1566", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeAll(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Content {
                 id: Int!
                 name: String!
@@ -61,7 +60,7 @@ describe("https://github.com/neo4j/graphql/issues/1566", () => {
     });
 
     test("collect unions returned by cypher directive", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 communities(where: { id: 4656564 }) {
                     id

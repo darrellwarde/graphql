@@ -19,7 +19,6 @@
 
 import { faker } from "@faker-js/faker";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { generate } from "randomstring";
 
@@ -240,7 +239,7 @@ describe("array-push", () => {
         async ({ inputType, inputValue, expectedOutputValue }) => {
             const typeMovie = new UniqueType("Movie");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [${inputType}]
@@ -270,11 +269,11 @@ describe("array-push", () => {
 
             await session.run(cypher, { movieTitle });
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: update,
-            contextValue: neo4j.getContextValues(),
-        });
+            const gqlResult = await graphql({
+                schema: await neoSchema.getSchema(),
+                source: update,
+                contextValue: neo4j.getContextValues(),
+            });
 
             if (gqlResult.errors) {
                 console.log(JSON.stringify(gqlResult.errors, null, 2));
@@ -318,7 +317,7 @@ describe("array-push", () => {
         async ({ inputType, inputValue, expectedOutputValue }) => {
             const typeMovie = new UniqueType("Movie");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [${inputType}]
@@ -352,12 +351,12 @@ describe("array-push", () => {
 
             await session.run(cypher, { movieTitle });
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: update,
-            contextValue: neo4j.getContextValues(),
-            variableValues: { inputValue },
-        });
+            const gqlResult = await graphql({
+                schema: await neoSchema.getSchema(),
+                source: update,
+                contextValue: neo4j.getContextValues(),
+                variableValues: { inputValue },
+            });
 
             if (gqlResult.errors) {
                 console.log(JSON.stringify(gqlResult.errors, null, 2));
@@ -400,7 +399,7 @@ describe("array-push", () => {
         async ({ inputType, inputValue, expectedOutputValue }) => {
             const typeMovie = new UniqueType("Movie");
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [${inputType}]
@@ -433,12 +432,12 @@ describe("array-push", () => {
 
             await session.run(cypher, { movieTitle });
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: update,
-            contextValue: neo4j.getContextValues(),
-            variableValues: { inputValue },
-        });
+            const gqlResult = await graphql({
+                schema: await neoSchema.getSchema(),
+                source: update,
+                contextValue: neo4j.getContextValues(),
+                variableValues: { inputValue },
+            });
 
             if (gqlResult.errors) {
                 console.log(JSON.stringify(gqlResult.errors, null, 2));
@@ -455,7 +454,7 @@ describe("array-push", () => {
     test("should push to two different arrays in the same update", async () => {
         const typeMovie = new UniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} {
                 title: String
                 tags: [String]

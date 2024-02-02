@@ -23,7 +23,6 @@ import type {
     ObjectTypeDefinitionNode,
     UnionTypeDefinitionNode,
 } from "graphql";
-import { gql } from "graphql-tag";
 import { NoErrorThrownError, getError } from "../../../tests/utils/get-error";
 import { RESERVED_TYPE_NAMES } from "../../constants";
 import { AuthorizationAnnotationArguments } from "../../schema-model/annotation/AuthorizationAnnotation";
@@ -49,7 +48,7 @@ describe("experimental flag warning", () => {
     });
 
     test("experimental warning happens when flag is true", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             type Movie {
                 id: ID
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -74,7 +73,7 @@ describe("experimental flag warning", () => {
     });
 
     test("experimental warning does not happen when flag is false", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             type Movie {
                 id: ID
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -111,7 +110,7 @@ describe("authorization warning", () => {
     });
 
     test("authorization warning only occurs once for multiple directives", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             type Movie @authorization(validate: [{ where: { id: "1" } }]) {
                 id: ID @authorization(validate: [{ where: { id: "1" } }])
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -148,7 +147,7 @@ describe("list of lists warning", () => {
     });
 
     test("list of lists warning only occurs once for multiple fields", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             type Movie {
                 id: [[ID]]
             }
@@ -172,7 +171,7 @@ describe("list of lists warning", () => {
     });
 
     test("works for non-nullable lists", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             type Movie {
                 id: [[ID!]!]!
             }
@@ -203,7 +202,7 @@ describe("default max limit bypass warning", () => {
     });
 
     test("max limit on interface does not trigger warning if no limit on concrete", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             interface Production @limit(max: 10) {
                 title: String
             }
@@ -227,7 +226,7 @@ describe("default max limit bypass warning", () => {
     });
 
     test("max limit on concrete should trigger warning if no limit on interface", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             interface Production {
                 title: String
             }
@@ -254,7 +253,7 @@ describe("default max limit bypass warning", () => {
     });
 
     test("max limit lower on interface than concrete does not trigger warning", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             interface Production @limit(max: 2) {
                 title: String
             }
@@ -278,7 +277,7 @@ describe("default max limit bypass warning", () => {
     });
 
     test("Max limit higher on interface than concrete should trigger warning", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             interface Production @limit(max: 10) {
                 title: String
             }
@@ -305,7 +304,7 @@ describe("default max limit bypass warning", () => {
     });
 
     test("Max limit higher on interface than concrete should not trigger warning if experimental: false", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             interface Production @limit(max: 10) {
                 title: String
             }
@@ -326,7 +325,7 @@ describe("default max limit bypass warning", () => {
     });
 
     test("Max limit higher on interface than concrete should trigger warning - multiple implementing types", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             interface Production @limit(max: 10) {
                 title: String
             }
@@ -357,7 +356,7 @@ describe("default max limit bypass warning", () => {
     });
 
     test("Max limit higher on interface than concrete should trigger warning - on both implementing types", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             interface Production @limit(max: 10) {
                 title: String
             }
@@ -391,7 +390,7 @@ describe("default max limit bypass warning", () => {
     });
 
     test("Max limit on interface does not trigger warning if only default limit set on concrete", () => {
-        const doc = gql`
+        const doc = /* GraphQL */ `
             interface Production @limit(max: 10) {
                 title: String
             }
@@ -423,7 +422,7 @@ describe("validation 2.0", () => {
     describe("Directive Argument (existence)", () => {
         describe("@cypher", () => {
             test("@cypher columnName required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                             @cypher(
@@ -441,7 +440,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@cypher statement required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @cypher(columnName: "x")
                     }
@@ -454,7 +453,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@cypher ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                             @cypher(
@@ -473,7 +472,7 @@ describe("validation 2.0", () => {
         });
         describe("@alias", () => {
             test("@alias property required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @alias
                     }
@@ -486,7 +485,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@cypher ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @alias(property: "sub")
                     }
@@ -499,7 +498,7 @@ describe("validation 2.0", () => {
         });
         describe("@coalesce", () => {
             test("@coalesce property required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @coalesce
                     }
@@ -518,7 +517,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@coalesce ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @coalesce(value: "dummy")
                     }
@@ -536,7 +535,7 @@ describe("validation 2.0", () => {
         });
         describe("@default", () => {
             test("@default property required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @default
                     }
@@ -555,7 +554,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@default ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @default(value: "dummy")
                     }
@@ -573,7 +572,7 @@ describe("validation 2.0", () => {
         });
         describe("@fulltext", () => {
             test("@fulltext property required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @fulltext {
                         name: String
                     }
@@ -586,7 +585,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@fulltext ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @fulltext(indexes: [{ fields: ["name"] }]) {
                         name: String
                     }
@@ -599,7 +598,7 @@ describe("validation 2.0", () => {
         });
         describe("@jwtClaim", () => {
             test("@jwtClaim property required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @jwtClaim
                     }
@@ -612,7 +611,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@jwtClaim ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @jwt {
                         name: String @jwtClaim(path: "dummy")
                     }
@@ -625,7 +624,7 @@ describe("validation 2.0", () => {
         });
         describe("@node", () => {
             test("@node ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @node(labels: ["awesome"]) {
                         name: String
                     }
@@ -638,7 +637,7 @@ describe("validation 2.0", () => {
         });
         describe("@plural", () => {
             test("@plural property required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @plural {
                         name: String
                     }
@@ -651,7 +650,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@plural ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @plural(value: "kings") {
                         name: String
                     }
@@ -664,7 +663,7 @@ describe("validation 2.0", () => {
         });
         describe("@populatedBy", () => {
             test("@populatedBy property required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @populatedBy
                     }
@@ -682,7 +681,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@populatedBy ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @populatedBy(callback: "myCallback")
                     }
@@ -700,7 +699,7 @@ describe("validation 2.0", () => {
         });
         describe("@relationship", () => {
             test("@relationship properties required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: Post @relationship
                     }
@@ -721,7 +720,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@relationship type required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: Post @relationship(direction: IN)
                     }
@@ -742,7 +741,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@relationship direction required", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: Post @relationship(type: "HAS_POST")
                     }
@@ -763,7 +762,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("@relationship ok", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: Post @relationship(direction: IN, type: "HAS_POST")
                     }
@@ -786,7 +785,7 @@ describe("validation 2.0", () => {
 
     describe("Directive Argument Type", () => {
         test("@fulltext.indexes property required", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User @fulltext(indexes: [{ name: "something" }]) {
                     name: String
                 }
@@ -805,7 +804,7 @@ describe("validation 2.0", () => {
         });
 
         test("@fulltext.indexes property required extension", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     name: String
                 }
@@ -825,7 +824,7 @@ describe("validation 2.0", () => {
         });
 
         test("@relationship.direction property must be enum value", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     post: Post @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
                 }
@@ -852,7 +851,7 @@ describe("validation 2.0", () => {
         });
 
         test("@relationship.direction property must be enum value extension", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     id: ID
                 }
@@ -882,7 +881,7 @@ describe("validation 2.0", () => {
         });
 
         test("@relationship.type property must be string", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     post: Post @relationship(type: 42, direction: IN)
                 }
@@ -909,12 +908,12 @@ describe("validation 2.0", () => {
         });
 
         test("@relationship.type property must be string inherited", () => {
-            const interfaceDoc = gql`
+            const interfaceDoc = /* GraphQL */ `
                 interface Person {
                     post: Post @relationship(type: 42, direction: IN)
                 }
             `;
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User implements Person {
                     post: Post
                 }
@@ -943,7 +942,7 @@ describe("validation 2.0", () => {
         });
 
         test("@relationship.type property must be string inherited extension", () => {
-            const interfaceDoc = gql`
+            const interfaceDoc = /* GraphQL */ `
                 interface Person {
                     id: ID
                 }
@@ -951,7 +950,7 @@ describe("validation 2.0", () => {
                     post: Post @relationship(type: 42, direction: IN)
                 }
             `;
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User implements Person {
                     id: ID
                     post: Post
@@ -981,7 +980,7 @@ describe("validation 2.0", () => {
         });
 
         test("@customResolver.required property must be string", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     myStuff: String @customResolver(requires: 42)
                 }
@@ -999,7 +998,7 @@ describe("validation 2.0", () => {
         });
 
         test("@cypher.columnName property must be string", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     name: String @cypher(statement: 42, columnName: "x")
                 }
@@ -1018,7 +1017,7 @@ describe("validation 2.0", () => {
         });
 
         test("@cypher.columnName property must be string extension", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     id: ID
                 }
@@ -1040,12 +1039,12 @@ describe("validation 2.0", () => {
         });
 
         test("@cypher.columnName property must be string inherited", () => {
-            const interfaceDoc = gql`
+            const interfaceDoc = /* GraphQL */ `
                 interface Person {
                     name: String @cypher(statement: 42, columnName: "x")
                 }
             `;
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User implements Person {
                     name: String
                 }
@@ -1071,7 +1070,7 @@ describe("validation 2.0", () => {
         });
 
         test("@cypher.columnName property must be string inherited extension", () => {
-            const interfaceDoc = gql`
+            const interfaceDoc = /* GraphQL */ `
                 interface Person {
                     id: ID
                 }
@@ -1079,7 +1078,7 @@ describe("validation 2.0", () => {
                     name: String @cypher(statement: 42, columnName: "x")
                 }
             `;
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User implements Person {
                     id: ID
                     name: String
@@ -1105,7 +1104,7 @@ describe("validation 2.0", () => {
             expect(errors[0]).toHaveProperty("path", ["Person", "name", "@cypher", "statement"]);
         });
         test("@cypher.statement property must be string", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     name: String
                         @cypher(
@@ -1130,7 +1129,7 @@ describe("validation 2.0", () => {
         });
 
         test("@node.labels property required", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User @node(labels: [null]) {
                     name: String
                 }
@@ -1148,7 +1147,7 @@ describe("validation 2.0", () => {
         });
 
         test("@node.labels property required extension", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     name: String
                 }
@@ -1170,7 +1169,7 @@ describe("validation 2.0", () => {
     describe("Directive Argument Value", () => {
         describe("@default", () => {
             test("@default on datetime must be valid datetime", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         updatedAt: DateTime @default(value: "dummy")
                     }
@@ -1193,7 +1192,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on datetime must be valid datetime extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         id: ID
                     }
@@ -1219,7 +1218,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on datetime must be valid datetime correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         updatedAt: DateTime @default(value: "2023-07-06T09:45:11.336Z")
                     }
@@ -1237,13 +1236,13 @@ describe("validation 2.0", () => {
             });
 
             test("@default on enum must be enum", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         status: Status @default(value: "dummy")
@@ -1269,18 +1268,18 @@ describe("validation 2.0", () => {
             });
 
             test("@default on enum must be enum inherited", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         status: Status @default(value: "dummy")
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User implements Person {
                         status: Status
@@ -1307,13 +1306,13 @@ describe("validation 2.0", () => {
             });
 
             test("@default on enum must be enum inherited extension", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         id: ID
                     }
@@ -1321,7 +1320,7 @@ describe("validation 2.0", () => {
                         status: Status @default(value: "dummy")
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User implements Person {
                         id: ID
@@ -1349,13 +1348,13 @@ describe("validation 2.0", () => {
             });
 
             test("@default on enum must be enum correct", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         status: Status @default(value: REGISTERED)
@@ -1377,13 +1376,13 @@ describe("validation 2.0", () => {
             });
 
             test("@default on enum list must be list", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         statuses: [Status] @default(value: "dummy")
@@ -1412,13 +1411,13 @@ describe("validation 2.0", () => {
             });
 
             test("@default on enum list must be list of enum values", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         statuses: [Status] @default(value: ["dummy"])
@@ -1447,13 +1446,13 @@ describe("validation 2.0", () => {
             });
 
             test("@default on enum list must be list of enum values correct", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         statuses: [Status] @default(value: [PENDING])
@@ -1474,7 +1473,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on int must be int", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         age: Int @default(value: "dummy")
                     }
@@ -1496,7 +1495,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on int must be int correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         age: Int @default(value: 23)
                     }
@@ -1514,7 +1513,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on int list must be list of int values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         ages: [Int] @default(value: ["dummy"])
                     }
@@ -1539,7 +1538,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on int list must be list of int values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         ages: [Int] @default(value: [12])
                     }
@@ -1557,7 +1556,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on float must be float", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         avg: Float @default(value: 2)
                     }
@@ -1579,7 +1578,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on float must be float correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         avg: Float @default(value: 2.3)
                     }
@@ -1597,7 +1596,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on float list must be list of float values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         avgs: [Float] @default(value: [1])
                     }
@@ -1622,7 +1621,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on float list must be list of float values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         avgs: [Float] @default(value: [1.2])
                     }
@@ -1640,7 +1639,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on boolean must be boolean", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         registered: Boolean @default(value: 2)
                     }
@@ -1662,7 +1661,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on boolean must be boolean correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         registered: Boolean @default(value: false)
                     }
@@ -1680,7 +1679,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on boolean list must be list of boolean values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         statuses: [Boolean] @default(value: [2])
                     }
@@ -1705,7 +1704,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on boolean list must be list of boolean values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         statuses: [Boolean] @default(value: [true])
                     }
@@ -1723,7 +1722,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on string must be string", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @default(value: 2)
                     }
@@ -1745,7 +1744,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on string must be string correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         registered: String @default(value: "Bob")
                     }
@@ -1763,7 +1762,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on string list must be list of string values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         names: [String] @default(value: [2])
                     }
@@ -1788,7 +1787,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on string list must be list of string values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         names: [String] @default(value: ["Bob"])
                     }
@@ -1806,7 +1805,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on ID must be ID", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         uid: ID @default(value: 2)
                     }
@@ -1828,7 +1827,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on ID list must be list of ID values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         ids: [ID] @default(value: [2])
                     }
@@ -1853,7 +1852,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on ID list must be list of ID values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         ids: [ID] @default(value: ["123-223"])
                     }
@@ -1871,7 +1870,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default on ID must be ID correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         uid: ID @default(value: "234-432")
                     }
@@ -1889,7 +1888,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default not supported on Spatial types", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         updatedAt: Point @default(value: "test")
                     }
@@ -1911,7 +1910,7 @@ describe("validation 2.0", () => {
             });
 
             test("@default only supported on scalar types", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         post: Post @default(value: "test")
                     }
@@ -1941,13 +1940,13 @@ describe("validation 2.0", () => {
 
         describe("@coalesce", () => {
             test("@coalesce on enum must be enum", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         status: Status @coalesce(value: "dummy")
@@ -1973,13 +1972,13 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on enum must be enum extension", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         id: ID
@@ -2008,13 +2007,13 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on enum must be enum correct", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         status: Status @default(value: REGISTERED)
@@ -2036,13 +2035,13 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on enum list must be list", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         statuses: [Status] @coalesce(value: "dummy")
@@ -2071,18 +2070,18 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on enum list must be list inherited", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         statuses: [Status] @coalesce(value: "dummy")
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User implements Person {
                         statuses: [Status]
@@ -2112,13 +2111,13 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on enum list must be list inherited extsnion", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         id: ID
                     }
@@ -2126,7 +2125,7 @@ describe("validation 2.0", () => {
                         statuses: [Status] @coalesce(value: "dummy")
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User implements Person {
                         id: ID
@@ -2157,13 +2156,13 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on enum list must be list of enum values", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         statuses: [Status] @coalesce(value: ["dummy"])
@@ -2192,13 +2191,13 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on enum list must be list of enum values correct", () => {
-                const enumTypes = gql`
+                const enumTypes = /* GraphQL */ `
                     enum Status {
                         REGISTERED
                         PENDING
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${enumTypes}
                     type User {
                         statuses: [Status] @coalesce(value: [PENDING])
@@ -2220,7 +2219,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on int must be int", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         age: Int @coalesce(value: "dummy")
                     }
@@ -2242,7 +2241,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on int must be int correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         age: Int @coalesce(value: 23)
                     }
@@ -2260,7 +2259,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on int list must be list of int values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         ages: [Int] @coalesce(value: ["dummy"])
                     }
@@ -2285,7 +2284,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on int list must be list of int values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         ages: [Int] @coalesce(value: [12])
                     }
@@ -2303,7 +2302,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on float must be float", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         avg: Float @coalesce(value: 2)
                     }
@@ -2325,7 +2324,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on float must be float correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         avg: Float @coalesce(value: 2.3)
                     }
@@ -2343,7 +2342,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on float list must be list of float values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         avgs: [Float] @coalesce(value: [1])
                     }
@@ -2368,7 +2367,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on float list must be list of float values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         avgs: [Float] @coalesce(value: [1.2])
                     }
@@ -2386,7 +2385,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on boolean must be boolean", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         registered: Boolean @coalesce(value: 2)
                     }
@@ -2411,7 +2410,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on boolean must be boolean correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         registered: Boolean @coalesce(value: false)
                     }
@@ -2429,7 +2428,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on boolean list must be list of boolean values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         statuses: [Boolean] @coalesce(value: [2])
                     }
@@ -2454,7 +2453,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on boolean list must be list of boolean values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         statuses: [Boolean] @coalesce(value: [true])
                     }
@@ -2472,7 +2471,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on string must be string", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @coalesce(value: 2)
                     }
@@ -2494,7 +2493,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on string must be string correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         registered: String @coalesce(value: "Bob")
                     }
@@ -2512,7 +2511,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on string list must be list of string values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         names: [String] @coalesce(value: [2])
                     }
@@ -2537,7 +2536,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on string list must be list of string values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         names: [String] @coalesce(value: ["Bob"])
                     }
@@ -2555,7 +2554,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on ID must be ID", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         uid: ID @coalesce(value: 2)
                     }
@@ -2577,7 +2576,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on ID list must be list of ID values", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         ids: [ID] @coalesce(value: [2])
                     }
@@ -2602,7 +2601,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on ID list must be list of ID values correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         ids: [ID] @coalesce(value: ["123-223"])
                     }
@@ -2620,7 +2619,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce on ID must be ID correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         uid: ID @coalesce(value: "234-432")
                     }
@@ -2638,7 +2637,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce not supported on Spatial types", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         updatedAt: Point @coalesce(value: "test")
                     }
@@ -2660,7 +2659,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce not supported on Temporal types", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         updatedAt: DateTime @coalesce(value: "test")
                     }
@@ -2682,7 +2681,7 @@ describe("validation 2.0", () => {
             });
 
             test("@coalesce only supported on scalar types", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         post: Post @coalesce(value: "test")
                     }
@@ -2712,7 +2711,7 @@ describe("validation 2.0", () => {
 
         describe("@limit", () => {
             test("@limit default must be > 0 on Interface", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     interface Person @limit(default: -1) {
                         name: String
                     }
@@ -2735,7 +2734,7 @@ describe("validation 2.0", () => {
             });
 
             test("@limit default must be > 0", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @limit(default: -1) {
                         name: String
                     }
@@ -2755,7 +2754,7 @@ describe("validation 2.0", () => {
             });
 
             test("@limit default must be > 0 extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                     }
@@ -2776,7 +2775,7 @@ describe("validation 2.0", () => {
             });
 
             test("@limit max must be > 0", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @limit(max: -1) {
                         name: String
                     }
@@ -2793,7 +2792,7 @@ describe("validation 2.0", () => {
             });
 
             test("@limit default must be < max", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @limit(default: 10, max: 9) {
                         name: String
                     }
@@ -2813,7 +2812,7 @@ describe("validation 2.0", () => {
             });
 
             test("@limit empty limit argument is correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @limit {
                         name: String
                     }
@@ -2825,7 +2824,7 @@ describe("validation 2.0", () => {
             });
 
             test("@limit correct", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @limit(default: 1, max: 2) {
                         name: String
                     }
@@ -2839,7 +2838,7 @@ describe("validation 2.0", () => {
 
         describe("@fulltext", () => {
             test("@fulltext duplicate index names", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User
                         @fulltext(indexes: [{ indexName: "a", fields: ["name"] }, { indexName: "a", fields: ["id"] }]) {
                         name: String
@@ -2858,7 +2857,7 @@ describe("validation 2.0", () => {
             });
 
             test("@fulltext duplicate index names extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                         id: ID
@@ -2878,7 +2877,7 @@ describe("validation 2.0", () => {
             });
 
             test("@fulltext index on type not String or ID", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @fulltext(indexes: [{ indexName: "a", fields: ["age"] }]) {
                         age: Int
                     }
@@ -2898,7 +2897,7 @@ describe("validation 2.0", () => {
             });
 
             test("@fulltext correct usage", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User
                         @fulltext(indexes: [{ indexName: "a", fields: ["name"] }, { indexName: "b", fields: ["id"] }]) {
                         id: ID
@@ -2914,7 +2913,7 @@ describe("validation 2.0", () => {
 
         describe("@relationship", () => {
             test("@relationship duplicate [type, direction, fieldType] combination", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
@@ -2945,12 +2944,12 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship duplicate [type, direction, fieldType] combination on interface", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Site {
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type SomeSite implements Site {
                         name: String
@@ -2981,7 +2980,7 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship duplicate [type, direction, fieldType] combination on interface extension", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Site {
                         name: String
                     }
@@ -2989,7 +2988,7 @@ describe("validation 2.0", () => {
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type SomeSite implements Site {
                         name: String
@@ -3020,7 +3019,7 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship no relationshipProperties interface found", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT, properties: "Poster")
@@ -3048,7 +3047,7 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship no relationshipProperties interface found extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                     }
@@ -3078,7 +3077,7 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship two relationshipProperties interface found", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Poster @relationshipProperties {
                         createdAt: String
                     }
@@ -3086,7 +3085,7 @@ describe("validation 2.0", () => {
                         updatedAt: String
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT, properties: "Poster")
@@ -3118,12 +3117,12 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship relationshipProperties interface not annotated with @relationshipProperties", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Poster {
                         createdAt: String
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT, properties: "Poster")
@@ -3155,12 +3154,12 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship correct usage", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Poster @relationshipProperties {
                         createdAt: String
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT, properties: "Poster")
@@ -3188,12 +3187,12 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship correct usage with interface", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Site {
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type SomeSite implements Site {
                         name: String
@@ -3219,7 +3218,7 @@ describe("validation 2.0", () => {
             });
 
             test("@relationship correct usage when different type", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type SomeSite {
                         name: String
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
@@ -3251,7 +3250,7 @@ describe("validation 2.0", () => {
 
         describe("@populatedBy", () => {
             test("@populatedBy callback not provided", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @populatedBy(operations: [CREATE], callback: "getUName")
                     }
@@ -3270,12 +3269,12 @@ describe("validation 2.0", () => {
             });
 
             test("@populatedBy callback not provided inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         name: String @populatedBy(operations: [CREATE], callback: "getUName")
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type User implements Person {
                         id: ID
@@ -3302,7 +3301,7 @@ describe("validation 2.0", () => {
             });
 
             test("@populatedBy callback not provided inherited extension", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         id: ID
                     }
@@ -3310,7 +3309,7 @@ describe("validation 2.0", () => {
                         name: String @populatedBy(operations: [CREATE], callback: "getUName")
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User implements Person {
                         id: ID
                         name: String
@@ -3337,7 +3336,7 @@ describe("validation 2.0", () => {
             });
 
             test("@populatedBy callback not a function", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @populatedBy(operations: [CREATE], callback: "getUName")
                     }
@@ -3367,7 +3366,7 @@ describe("validation 2.0", () => {
             });
 
             test("@populatedBy callback not a function extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         id: ID
                     }
@@ -3400,7 +3399,7 @@ describe("validation 2.0", () => {
             });
 
             test("@populatedBy correct usage", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @populatedBy(operations: [CREATE], callback: "getUName")
                     }
@@ -3419,7 +3418,7 @@ describe("validation 2.0", () => {
 
         describe("@unique", () => {
             test("@unique valid", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @unique
                     }
@@ -3430,7 +3429,7 @@ describe("validation 2.0", () => {
                 expect(executeValidate).not.toThrow();
             });
             test("@unique cannot be used on fields of Interface types", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     interface IUser {
                         name: String @unique
                     }
@@ -3447,7 +3446,7 @@ describe("validation 2.0", () => {
             });
         });
         test("should throw cannot auto-generate a non ID field", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie {
                     name: String! @id
                 }
@@ -3464,7 +3463,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw cannot auto-generate an array", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie {
                     name: [ID] @id
                 }
@@ -3482,7 +3481,7 @@ describe("validation 2.0", () => {
 
         describe("@timestamp", () => {
             test("@timestamp valid", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         lastSeenAt: DateTime @timestamp
                     }
@@ -3494,12 +3493,12 @@ describe("validation 2.0", () => {
             });
 
             test("@timestamp valid inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         lastSeenAt: DateTime @timestamp
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type User implements Person {
                         lastSeenAt: DateTime
@@ -3518,7 +3517,7 @@ describe("validation 2.0", () => {
             });
 
             test("@timestamp cannot autogenerate array", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         lastSeenAt: [DateTime] @timestamp
                     }
@@ -3535,7 +3534,7 @@ describe("validation 2.0", () => {
             });
 
             test("should throw cannot timestamp on array of DateTime", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         name: [DateTime] @timestamp(operations: [CREATE])
                     }
@@ -3551,12 +3550,12 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["Movie", "name", "@timestamp"]);
             });
             test("should throw cannot timestamp on array of DateTime inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         name: [DateTime] @timestamp(operations: [CREATE])
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type User implements Person {
                         name: [DateTime]
@@ -3580,7 +3579,7 @@ describe("validation 2.0", () => {
             });
 
             test("@timestamp cannot timestamp temporal fields lacking time zone information", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         lastSeenAt: Date @timestamp
                     }
@@ -3602,7 +3601,7 @@ describe("validation 2.0", () => {
 
         describe("@id", () => {
             test("@id autogenerate valid", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         uid: ID @id
                     }
@@ -3614,12 +3613,12 @@ describe("validation 2.0", () => {
             });
 
             test("@id autogenerate valid inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         uid: ID @id
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type User implements Person {
                         uid: ID
@@ -3638,7 +3637,7 @@ describe("validation 2.0", () => {
             });
 
             test("@id autogenerate cannot autogenerate array", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         uid: [ID] @id
                     }
@@ -3655,12 +3654,12 @@ describe("validation 2.0", () => {
             });
 
             test("@id autogenerate cannot autogenerate array inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         uid: [ID] @id
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User implements Person {
                         uid: [ID]
                     }
@@ -3683,7 +3682,7 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["Person", "uid", "@id"]);
             });
             test("@id autogenerate cannot autogenerate a non ID field", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         uid: String @id
                     }
@@ -3709,7 +3708,7 @@ describe("validation 2.0", () => {
     describe("Directive Combination", () => {
         describe("valid", () => {
             test("@cypher with @timestamp on Field", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         id: ID
                         name: DateTime
@@ -3729,12 +3728,12 @@ describe("validation 2.0", () => {
             });
 
             test("@cypher with @timestamp on Field inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         name: DateTime @timestamp
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User implements Person {
                         id: ID
                         name: DateTime
@@ -3760,7 +3759,7 @@ describe("validation 2.0", () => {
             });
 
             test("@cypher with @timestamp on Field inherited extension", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Person {
                         id: ID
                     }
@@ -3768,7 +3767,7 @@ describe("validation 2.0", () => {
                         name: DateTime @timestamp
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User implements Person {
                         id: ID
                         name: DateTime
@@ -3794,7 +3793,7 @@ describe("validation 2.0", () => {
             });
 
             test("@node with @query on Object", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @node(labels: ["Person"]) @query(read: false) {
                         id: ID
                         name: String
@@ -3807,7 +3806,7 @@ describe("validation 2.0", () => {
             });
 
             test("@query and @mutation", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @query(read: false) {
                         id: ID
                         name: String
@@ -3822,7 +3821,7 @@ describe("validation 2.0", () => {
         });
         describe("invalid", () => {
             test("@unique can't be used with @relationship", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID
                         actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT) @unique
@@ -3853,7 +3852,7 @@ describe("validation 2.0", () => {
             });
 
             test("@authentication can't be used with @relationship", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID
                         actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT) @authentication
@@ -3884,12 +3883,12 @@ describe("validation 2.0", () => {
             });
 
             test("@authentication can't be used with @relationship inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Production {
                         actors: [Actor!]! @authentication
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type Movie implements Production {
                         id: ID
@@ -3923,7 +3922,7 @@ describe("validation 2.0", () => {
             });
 
             test("@authentication can't be used with @relationship inherited extension", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Production {
                         id: ID
                     }
@@ -3931,7 +3930,7 @@ describe("validation 2.0", () => {
                         actors: [Actor!]! @authentication
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type Movie implements Production {
                         id: ID
@@ -3964,7 +3963,7 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["Movie", "actors"]);
             });
             test("@subscriptionsAuthorization can't be used with @relationship", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID
                         actors: [Actor!]!
@@ -3996,12 +3995,12 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["Movie", "actors"]);
             });
             test("@subscriptionsAuthorization can't be used with @relationship inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Production {
                         actors: [Actor!]! @subscriptionsAuthorization(filter: [{ where: { id: "1" } }])
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie implements Production {
                         id: ID
                         actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -4033,7 +4032,7 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["Production", "actors"]);
             });
             test("@authorization can't be used with @relationship", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID
                         actors: [Actor!]!
@@ -4066,7 +4065,7 @@ describe("validation 2.0", () => {
             });
 
             test("@cypher with @relationship on Field", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         id: ID
                         post: [Post!]!
@@ -4103,7 +4102,7 @@ describe("validation 2.0", () => {
             });
 
             test("@cypher with inherited @relationship on Field", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     interface Person {
                         post: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
                     }
@@ -4142,7 +4141,7 @@ describe("validation 2.0", () => {
             });
 
             test("@cypher with inherited @relationship on Field reverse order", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User implements Person {
                         id: ID
                         post: [Post!]!
@@ -4181,7 +4180,7 @@ describe("validation 2.0", () => {
             });
 
             test("@cypher double", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         id: ID
                         post: [Post]
@@ -4216,7 +4215,7 @@ describe("validation 2.0", () => {
             });
 
             test("@query both on extension and object", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @query(read: false) {
                         id: ID
                         name: String
@@ -4237,7 +4236,7 @@ describe("validation 2.0", () => {
             });
 
             test("@query both on schema and object", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @query(read: false) {
                         id: ID
                         name: String
@@ -4261,7 +4260,7 @@ describe("validation 2.0", () => {
 
     describe("Valid directives on fields of root types (Query|Mutation|Subscription)", () => {
         test("@relationship can't be used on the field of a root type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     someActors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }
@@ -4291,7 +4290,7 @@ describe("validation 2.0", () => {
         });
 
         test("@relationship can't be used on the field of a root type extension", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     me: String
                 }
@@ -4325,7 +4324,7 @@ describe("validation 2.0", () => {
         });
 
         test("@authentication can't be used on the field of a root type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     someActors: [Actor!]! @authentication
                 }
@@ -4355,7 +4354,7 @@ describe("validation 2.0", () => {
         });
 
         test("@authorization can't be used on the field of a root type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     someActors: [Actor!]! @authorization(filter: [{ where: { jwt: { roles_INCLUDES: "admin" } } }])
                 }
@@ -4385,7 +4384,7 @@ describe("validation 2.0", () => {
         });
 
         test("@authorization can't be used on the field of a root type extension", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     me: String
                 }
@@ -4418,7 +4417,7 @@ describe("validation 2.0", () => {
         });
 
         test("@authorization with @cypher suggest to use @authentication instead", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     someActors: [Actor!]!
                         @cypher(
@@ -4455,7 +4454,7 @@ describe("validation 2.0", () => {
         });
 
         test("@populatedBy can't be used on the field of a root type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     someActors: [Actor!]! @populatedBy(callback: "myCallback")
                 }
@@ -4491,7 +4490,7 @@ describe("validation 2.0", () => {
         });
 
         test("@authentication with @cypher ok to be used on the field of a root type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     someActors: [Actor!]!
                         @cypher(
@@ -4520,7 +4519,7 @@ describe("validation 2.0", () => {
         });
 
         test("@cypher ok to be used on the field of a root type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Query {
                     someActors: [Actor!]!
                         @cypher(
@@ -4548,7 +4547,7 @@ describe("validation 2.0", () => {
         });
 
         test("@cypher can't be used on the field of the Subscription type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Subscription {
                     someActors: [Actor!]!
                         @cypher(
@@ -4586,7 +4585,7 @@ describe("validation 2.0", () => {
 
     describe("Valid directives on fields of interface types", () => {
         test("@cypher can't be used on the field of an interface type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface Person {
                     name: String
                         @cypher(
@@ -4622,7 +4621,7 @@ describe("validation 2.0", () => {
         });
 
         test("@relationship ok to be used on the field of an interface type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface Person {
                     actor: [Actor!]! @relationship(type: "IS_ACTOR", direction: IN)
                 }
@@ -4645,7 +4644,7 @@ describe("validation 2.0", () => {
         });
 
         test("@private ok to be used on the field of an interface type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface Person {
                     name: String @private
                     id: ID
@@ -4669,7 +4668,7 @@ describe("validation 2.0", () => {
         });
 
         test("@settable ok to be used on the field of an interface type", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface Person {
                     name: String @settable(onCreate: false)
                 }
@@ -4693,7 +4692,7 @@ describe("validation 2.0", () => {
     describe("JWT directives", () => {
         describe("invalid", () => {
             test("@jwt cannot combined", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type JWTPayload @jwt @query(read: false) {
                         id: ID
                     }
@@ -4713,7 +4712,7 @@ describe("validation 2.0", () => {
             });
 
             test("@jwt cannot combined extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type JWTPayload @query(read: false) {
                         id: ID
                     }
@@ -4734,7 +4733,7 @@ describe("validation 2.0", () => {
             });
 
             test("@jwtClaim cannot combined", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type JWTPayload @jwt {
                         id: ID
                             @jwtClaim(path: "user.id")
@@ -4761,7 +4760,7 @@ describe("validation 2.0", () => {
             });
 
             test("@jwtClaim cannot combined inherited extension", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Something {
                         id: ID
                             @cypher(
@@ -4772,7 +4771,7 @@ describe("validation 2.0", () => {
                             )
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type JWTPayload implements Something {
                         id: ID @jwtClaim(path: "user.id")
@@ -4800,7 +4799,7 @@ describe("validation 2.0", () => {
             });
 
             test("@jwtClaim cannot combined inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Something {
                         id: ID
                             @cypher(
@@ -4811,7 +4810,7 @@ describe("validation 2.0", () => {
                             )
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type JWTPayload implements Something @jwt {
                         id: ID @jwtClaim(path: "user.id")
@@ -4838,7 +4837,7 @@ describe("validation 2.0", () => {
             });
 
             test("@jwtClaim incorrect location outside @jwt", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type JWTPayload {
                         id: ID @jwtClaim(path: "user.id")
                     }
@@ -4858,7 +4857,7 @@ describe("validation 2.0", () => {
             });
 
             test("multiple @jwt in type defs", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type JWTPayload @jwt {
                         id: ID @jwtClaim(path: "sub")
                     }
@@ -4888,7 +4887,7 @@ describe("validation 2.0", () => {
             });
 
             test("@jwt fields not scalars", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type JWTPayload @jwt {
                         post: Post
                     }
@@ -4911,7 +4910,7 @@ describe("validation 2.0", () => {
             });
 
             test("@jwt fields not scalars extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type JWTPayload @jwt {
                         me: String
                     }
@@ -4937,12 +4936,12 @@ describe("validation 2.0", () => {
             });
 
             test("@jwt fields not scalars inherited", () => {
-                const interfaceDoc = gql`
+                const interfaceDoc = /* GraphQL */ `
                     interface Something {
                         post: Post
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceDoc}
                     type JWTPayload implements Something @jwt {
                         me: String
@@ -4975,7 +4974,7 @@ describe("validation 2.0", () => {
 
         describe("valid", () => {
             test("@jwt and @jwtClaim", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type JWTPayload @jwt {
                         id: ID @jwtClaim(path: "sub")
                     }
@@ -4991,7 +4990,7 @@ describe("validation 2.0", () => {
     describe("relayId", () => {
         describe("global nodes", () => {
             test("should throw error if more than one @relayId directive field", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         email: ID! @relayId
                         name: ID! @relayId
@@ -5010,7 +5009,7 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["User", "name", "@relayId"]);
             });
             test("should throw error if more than one @relayId directive field extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         email: ID! @relayId
                     }
@@ -5032,7 +5031,7 @@ describe("validation 2.0", () => {
             });
 
             test("should throw if a type already contains an id field", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         id: ID!
                         email: ID! @relayId
@@ -5053,7 +5052,7 @@ describe("validation 2.0", () => {
             });
 
             test("should throw if a type already contains an id field extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         email: ID! @relayId
                     }
@@ -5075,7 +5074,7 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["User", "id"]);
             });
             test("should not throw if a type already contains an id field but the field is aliased", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         id: Int @alias(property: "other")
                         dbId: ID! @relayId
@@ -5087,7 +5086,7 @@ describe("validation 2.0", () => {
             });
 
             test("should not throw if a type already contains an id field but the field is aliased on extension", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         dbId: ID! @relayId
                     }
@@ -5102,7 +5101,7 @@ describe("validation 2.0", () => {
         });
 
         test("only one field can be @relayId", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie {
                     rottenid: ID! @relayId
                     imdbid: ID @relayId
@@ -5124,7 +5123,7 @@ describe("validation 2.0", () => {
         });
 
         test("only one field can be @relayId with interface", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface MovieInterface {
                     imdbid: ID! @relayId
                 }
@@ -5150,7 +5149,7 @@ describe("validation 2.0", () => {
         });
 
         test("only one field can be @relayId with interface reverse order", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie implements MovieInterface {
                     rottenid: ID! @relayId
                     imdbid: ID!
@@ -5175,7 +5174,7 @@ describe("validation 2.0", () => {
         });
 
         test("only one field can be @relayId with interface implementing interface", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface ScorableInterface {
                     imdbid: ID! @relayId
                 }
@@ -5205,7 +5204,7 @@ describe("validation 2.0", () => {
         });
 
         test("field named id already exists and not aliased on interface - multiple interfaces", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface ScorableInterface {
                     id: ID!
                 }
@@ -5235,7 +5234,7 @@ describe("validation 2.0", () => {
         });
 
         test("only one field can be global @id with interface implementing interface reverse order", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface MovieInterface implements ScorableInterface {
                     imdbid: ID!
                 }
@@ -5264,7 +5263,7 @@ describe("validation 2.0", () => {
         });
 
         test("field named id already exists", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie {
                     id: ID!
                     imdbd: ID @relayId
@@ -5286,7 +5285,7 @@ describe("validation 2.0", () => {
         });
 
         test("field named id already exists and not aliased on interface", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie implements MovieInterface {
                     rottenid: ID! @relayId
                     id: ID!
@@ -5310,7 +5309,7 @@ describe("validation 2.0", () => {
         });
 
         test("valid", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie {
                     rottenid: ID! @id
                     imdbId: ID! @relayId
@@ -5324,7 +5323,7 @@ describe("validation 2.0", () => {
         });
 
         test("field named id already exists but aliased on interface", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie implements MovieInterface {
                     rottenid: ID! @relayId
                     id: ID!
@@ -5342,7 +5341,7 @@ describe("validation 2.0", () => {
 
     describe("union has no types", () => {
         test("union has no types - invalid", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie {
                     id: ID!
                     title: String
@@ -5364,7 +5363,7 @@ describe("validation 2.0", () => {
         });
 
         test("union has types - valid", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Movie {
                     id: ID!
                     title: String
@@ -5385,12 +5384,12 @@ describe("validation 2.0", () => {
     describe("Objects and Interfaces must have one or more fields", () => {
         describe("@private", () => {
             test("should throw error if @private would leave no fields in interface", () => {
-                const interfaceTypes = gql`
+                const interfaceTypes = /* GraphQL */ `
                     interface UserInterface {
                         private: String @private
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceTypes}
                     type User implements UserInterface {
                         id: ID
@@ -5418,12 +5417,12 @@ describe("validation 2.0", () => {
             });
 
             test("should throw error if @private would leave no fields in object", () => {
-                const interfaceTypes = gql`
+                const interfaceTypes = /* GraphQL */ `
                     interface UserInterface {
                         private: String @private
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceTypes}
                     type User implements UserInterface {
                         id: ID
@@ -5451,12 +5450,12 @@ describe("validation 2.0", () => {
             });
 
             test("should throw error if @private would leave no fields in object extension", () => {
-                const interfaceTypes = gql`
+                const interfaceTypes = /* GraphQL */ `
                     interface UserInterface {
                         private: String
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceTypes}
                     type User implements UserInterface {
                         password: String @private
@@ -5485,7 +5484,7 @@ describe("validation 2.0", () => {
             });
 
             test("Interfaces must have one or more fields", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     interface Production
                     type Movie implements Production {
                         id: ID!
@@ -5503,7 +5502,7 @@ describe("validation 2.0", () => {
             });
 
             test("valid", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie implements Production {
                         id: ID!
                         title: String
@@ -5521,7 +5520,7 @@ describe("validation 2.0", () => {
         });
         describe("@authorization", () => {
             test("should throw error if there are no arguments", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID!
                         title: String @authorization
@@ -5542,7 +5541,7 @@ describe("validation 2.0", () => {
             });
 
             test("should not throw error when there is a valid argument", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID!
                         title: String @authorization(filter: ["filter"])
@@ -5555,7 +5554,7 @@ describe("validation 2.0", () => {
             });
 
             test("should throw error when there is an invalid argument", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID!
                         title: String @authorization(test: "test")
@@ -5577,7 +5576,7 @@ describe("validation 2.0", () => {
         });
         describe("@subscriptionsAuthorization", () => {
             test("should throw error if there are no arguments", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID!
                         title: String @subscriptionsAuthorization
@@ -5597,7 +5596,7 @@ describe("validation 2.0", () => {
             });
 
             test("should not throw error when there is a valid argument", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID!
                         title: String @subscriptionsAuthorization(filter: ["filter"])
@@ -5610,7 +5609,7 @@ describe("validation 2.0", () => {
             });
 
             test("should throw error when there is an invalid argument", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         id: ID!
                         title: String @subscriptionsAuthorization(test: "test")
@@ -5637,12 +5636,12 @@ describe("validation 2.0", () => {
         describe("@relationshipProperties", () => {
             describe("invalid", () => {
                 test("should throw error if @authorization is used on relationship property", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface ActedIn @relationshipProperties {
                             screenTime: Int @authorization(validate: [{ where: { id: "1" } }])
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type Movie {
                             actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -5677,7 +5676,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("should throw error if @authorization is used on relationship property extension", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface ActedIn @relationshipProperties {
                             me: String
                         }
@@ -5685,7 +5684,7 @@ describe("validation 2.0", () => {
                             screenTime: Int @authorization(validate: [{ where: { id: "1" } }])
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type Movie {
                             actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -5719,12 +5718,12 @@ describe("validation 2.0", () => {
                     expect(errors[0]).toHaveProperty("path", ["ActedIn", "screenTime"]);
                 });
                 test("should throw error if @authentication is used on relationship property", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface ActedIn @relationshipProperties {
                             screenTime: Int @authentication
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type Movie {
                             actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -5758,12 +5757,12 @@ describe("validation 2.0", () => {
                     expect(errors[0]).toHaveProperty("path", ["ActedIn", "screenTime"]);
                 });
                 test("should throw error if @subscriptionsAuthorization is used on relationship property", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface ActedIn @relationshipProperties {
                             screenTime: Int @subscriptionsAuthorization(filter: [{ where: { id: "1" } }])
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type Movie {
                             actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -5798,12 +5797,12 @@ describe("validation 2.0", () => {
                 });
 
                 test("should throw error if @relationship is used on relationship property", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface ActedIn @relationshipProperties {
                             actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type Movie {
                             actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -5838,13 +5837,13 @@ describe("validation 2.0", () => {
                 });
 
                 test("should throw error if @cypher is used on relationship property", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface ActedIn @relationshipProperties {
                             id: ID @cypher(statement: "RETURN id(this) as id", columnName: "id")
                             roles: [String]
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type Movie {
                             actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -5879,12 +5878,12 @@ describe("validation 2.0", () => {
                 });
 
                 test("@relationshipProperties reserved field name", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface HasPost @relationshipProperties {
                             cursor: Int
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type User {
                             name: String
@@ -5919,7 +5918,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("@cypher forbidden on @relationshipProperties field", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface HasPost @relationshipProperties {
                             review: Float
                                 @cypher(
@@ -5930,7 +5929,7 @@ describe("validation 2.0", () => {
                                 )
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type User {
                             name: String
@@ -5967,12 +5966,12 @@ describe("validation 2.0", () => {
 
             describe("valid", () => {
                 test("@relationshipProperties", () => {
-                    const interfaceTypes = gql`
+                    const interfaceTypes = /* GraphQL */ `
                         interface HasPost @relationshipProperties {
                             review: Float
                         }
                     `;
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         ${interfaceTypes}
                         type User {
                             name: String
@@ -6003,7 +6002,7 @@ describe("validation 2.0", () => {
         describe("Field Type", () => {
             describe("invalid", () => {
                 test("@relationship nullable list type", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type User {
                             posts: [Post!] @relationship(type: "HAS_POST", direction: OUT)
                         }
@@ -6031,7 +6030,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("@relationship non-nullable list of nullable type", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type User {
                             posts: [Post]! @relationship(type: "HAS_POST", direction: OUT)
                         }
@@ -6059,7 +6058,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("@relationship non-nullable list of nullable type extension", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type User {
                             name: String
                         }
@@ -6093,7 +6092,7 @@ describe("validation 2.0", () => {
 
             describe("valid", () => {
                 test("simple list", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type Post {
                             titles: [String]
                         }
@@ -6105,7 +6104,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("@relationship non-null list of non-nullable type", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type User {
                             posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
                         }
@@ -6129,12 +6128,12 @@ describe("validation 2.0", () => {
 
         describe("Reserved Type Name", () => {
             test("should throw when using 'node' as a relationship property", () => {
-                const interfaceTypes = gql`
+                const interfaceTypes = /* GraphQL */ `
                     interface ActedIn @relationshipProperties {
                         node: ID
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceTypes}
                     type Movie {
                         id: ID
@@ -6168,7 +6167,7 @@ describe("validation 2.0", () => {
             });
 
             test("should throw when using 'node' as a relationship property extension", () => {
-                const interfaceTypes = gql`
+                const interfaceTypes = /* GraphQL */ `
                     interface ActedIn @relationshipProperties {
                         me: String
                     }
@@ -6176,7 +6175,7 @@ describe("validation 2.0", () => {
                         node: ID
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceTypes}
                     type Movie {
                         id: ID
@@ -6210,12 +6209,12 @@ describe("validation 2.0", () => {
             });
 
             test("should throw when using 'cursor' as a relationship property", () => {
-                const interfaceTypes = gql`
+                const interfaceTypes = /* GraphQL */ `
                     interface ActedIn @relationshipProperties {
                         cursor: ID
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceTypes}
                     type Movie {
                         id: ID
@@ -6249,7 +6248,7 @@ describe("validation 2.0", () => {
             });
 
             test("PageInfo type", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type PageInfo {
                         id: ID
                     }
@@ -6268,7 +6267,7 @@ describe("validation 2.0", () => {
             });
 
             test("PageInfo interface", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     interface PageInfo {
                         id: ID
                     }
@@ -6287,7 +6286,7 @@ describe("validation 2.0", () => {
             });
 
             test("PageInfo union", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     union PageInfo
                     {
                         id: ID
@@ -6307,7 +6306,7 @@ describe("validation 2.0", () => {
             });
 
             test("PageInfo enum", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     enum PageInfo {
                         FIRST
                         SECOND
@@ -6327,7 +6326,7 @@ describe("validation 2.0", () => {
             });
 
             test("PageInfo scalar", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     scalar PageInfo
                 `;
 
@@ -6344,7 +6343,7 @@ describe("validation 2.0", () => {
             });
 
             test("Connection", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type SomeConnection {
                         id: ID
                     }
@@ -6363,7 +6362,7 @@ describe("validation 2.0", () => {
             });
 
             test("Node type", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Node {
                         id: ID
                     }
@@ -6382,7 +6381,7 @@ describe("validation 2.0", () => {
             });
 
             test("Node interface", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     interface Node {
                         id: ID
                     }
@@ -6401,7 +6400,7 @@ describe("validation 2.0", () => {
             });
 
             test("Node union", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     union Node
                     {
                         id: ID
@@ -6421,7 +6420,7 @@ describe("validation 2.0", () => {
             });
 
             test("Node enum", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     enum Node {
                         ONE
                         TWO
@@ -6441,7 +6440,7 @@ describe("validation 2.0", () => {
             });
 
             test("Node scalar", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     scalar Node
                 `;
 
@@ -6461,7 +6460,7 @@ describe("validation 2.0", () => {
 
     describe("validateDocument", () => {
         test("should throw an error if a directive is in the wrong location", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User @coalesce {
                     name: String
                 }
@@ -6483,7 +6482,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw an error if a directive is missing an argument", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     name: String @coalesce
                 }
@@ -6507,7 +6506,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw a missing scalar error", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     name: Unknown
                 }
@@ -6519,7 +6518,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw an error if a user tries to pass in their own Point definition", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Point {
                     latitude: Float!
                     longitude: Float!
@@ -6536,7 +6535,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw an error if a user tries to pass in their own DateTime definition", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 scalar DateTime
 
                 type User {
@@ -6552,7 +6551,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw an error if a user tries to user @fulltext incorrectly", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type User {
                     name: String
                 }
@@ -6568,7 +6567,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw an error if a user tries to pass in their own PointInput definition", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 input PointInput {
                     latitude: Float!
                     longitude: Float!
@@ -6587,7 +6586,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw an error if an interface is incorrectly implemented", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 interface UserInterface {
                     age: Int!
                 }
@@ -6603,7 +6602,7 @@ describe("validation 2.0", () => {
         });
 
         test("should throw an error a user tries to redefine one of our directives", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 directive @relationship on FIELD_DEFINITION
 
                 type Movie {
@@ -6617,7 +6616,7 @@ describe("validation 2.0", () => {
         });
 
         test("should not throw error on use of internal node input types", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Mutation {
                     login: String
                     createPost(input: PostCreateInput!, options: PostOptions): Post!
@@ -6652,12 +6651,12 @@ describe("validation 2.0", () => {
 
         describe("relationshipProperties directive", () => {
             test("should not throw when used correctly on an interface", () => {
-                const interfaceTypes = gql`
+                const interfaceTypes = /* GraphQL */ `
                     interface ActedIn @relationshipProperties {
                         screenTime: Int!
                     }
                 `;
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     ${interfaceTypes}
 
                     type Actor {
@@ -6687,7 +6686,7 @@ describe("validation 2.0", () => {
             });
 
             test("should throw if used on an object type", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type ActedIn @relationshipProperties {
                         screenTime: Int!
                     }
@@ -6699,7 +6698,7 @@ describe("validation 2.0", () => {
             });
 
             test("should throw if used on a field", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type ActedIn {
                         screenTime: Int! @relationshipProperties
                     }
@@ -6712,7 +6711,7 @@ describe("validation 2.0", () => {
         });
 
         test("should not throw error on use of internal input types within input types", () => {
-            const doc = gql`
+            const doc = /* GraphQL */ `
                 type Salary {
                     salaryId: ID!
                     amount: Float
@@ -6799,7 +6798,7 @@ describe("validation 2.0", () => {
 
         describe("Github Issue 158", () => {
             test("should not throw error on validation of schema", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Test {
                         createdAt: DateTime
                     }
@@ -6821,7 +6820,7 @@ describe("validation 2.0", () => {
 
         describe("https://github.com/neo4j/graphql/issues/4232", () => {
             test("interface at the end", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Person {
                         name: String!
                     }
@@ -6863,7 +6862,7 @@ describe("validation 2.0", () => {
             });
 
             test("interface at the beginning", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Person {
                         name: String!
                     }
@@ -6907,7 +6906,7 @@ describe("validation 2.0", () => {
 
         describe("https://github.com/neo4j/graphql/issues/442", () => {
             test("should not throw error on validation of schema if MutationResponse used", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Post {
                         id: Int!
                         text: String!
@@ -6928,7 +6927,7 @@ describe("validation 2.0", () => {
             });
 
             test("should not throw error on validation of schema if SortDirection used", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Post {
                         id: Int!
                         text: String!
@@ -6951,7 +6950,7 @@ describe("validation 2.0", () => {
 
         describe("Issue https://codesandbox.io/s/github/johnymontana/training-v3/tree/master/modules/graphql-apis/supplemental/code/03-graphql-apis-custom-logic/end?file=/schema.graphql:64-86", () => {
             test("should not throw error on validation of schema", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Order {
                         orderID: ID! @id @unique
                         placedAt: DateTime @timestamp
@@ -7090,7 +7089,7 @@ describe("validation 2.0", () => {
 
         describe("Github Issue 213", () => {
             test("should not throw error on validation of schema", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     interface Vehicle {
                         id: ID!
                         color: String # NOTE: 'color' is optional on the interface
@@ -7118,7 +7117,7 @@ describe("validation 2.0", () => {
 
         describe("@alias directive", () => {
             test("should throw an error if missing an argument", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @alias
                     }
@@ -7130,7 +7129,7 @@ describe("validation 2.0", () => {
                 );
             });
             test("should throw an error if a directive is in the wrong location", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User @alias {
                         name: String
                     }
@@ -7140,7 +7139,7 @@ describe("validation 2.0", () => {
                 ).toThrow('Directive "@alias" may not be used on OBJECT.');
             });
             test("should not throw when used correctly", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type User {
                         name: String @alias(property: "dbName")
                     }
@@ -7158,7 +7157,7 @@ describe("validation 2.0", () => {
         describe("Reserved Names", () => {
             describe("Node", () => {
                 test("should throw when using PageInfo as node name", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type PageInfo {
                             id: ID
                         }
@@ -7175,7 +7174,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("should throw when using Connection in a node name", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type NodeConnection {
                             id: ID
                         }
@@ -7192,7 +7191,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("should throw when using Node as node name", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type Node {
                             id: ID
                         }
@@ -7211,7 +7210,7 @@ describe("validation 2.0", () => {
 
             describe("Interface", () => {
                 test("should throw when using PageInfo as relationship properties interface name", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type Movie {
                             id: ID
                             actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "PageInfo")
@@ -7237,7 +7236,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("should throw when using Connection in a properties interface name", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type Movie {
                             id: ID
                             actors: [Actor!]!
@@ -7264,7 +7263,7 @@ describe("validation 2.0", () => {
                 });
 
                 test("should throw when using Node as relationship properties interface name", () => {
-                    const doc = gql`
+                    const doc = /* GraphQL */ `
                         type Movie {
                             id: ID
                             actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "Node")
@@ -7293,7 +7292,7 @@ describe("validation 2.0", () => {
 
         describe("https://github.com/neo4j/graphql/issues/609 - specified directives", () => {
             test("should not throw error when using @deprecated directive", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Deprecated {
                         deprecatedField: String @deprecated
                     }
@@ -7311,7 +7310,7 @@ describe("validation 2.0", () => {
 
         describe("https://github.com/neo4j/graphql/issues/2325 - SortDirection", () => {
             test("should not throw error when using SortDirection", () => {
-                const doc = gql`
+                const doc = /* GraphQL */ `
                     type Movie {
                         title: String
                         actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)

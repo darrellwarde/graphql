@@ -18,7 +18,6 @@
  */
 
 import type { Driver, Session } from "neo4j-driver";
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
 import { generate } from "randomstring";
@@ -42,7 +41,7 @@ describe("connect-or-create with @id", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
         type ${typeMovie.name} {
             title: String! @unique
             subtitle: String @unique
@@ -76,7 +75,7 @@ describe("connect-or-create with @id", () => {
             charset: "alphabetic",
         });
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [
@@ -126,7 +125,7 @@ describe("connect-or-create with @id", () => {
             charset: "alphabetic",
         });
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [
@@ -165,7 +164,7 @@ describe("connect-or-create with @id", () => {
     });
 
     test("create -> connectOrCreate with specified ID should throw", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [
@@ -208,7 +207,7 @@ describe("connect-or-create with @id", () => {
             charset: "alphabetic",
         });
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [
@@ -256,7 +255,7 @@ describe("connect-or-create with @id", () => {
             charset: "alphabetic",
         });
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [

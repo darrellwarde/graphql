@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { DocumentNode } from "graphql";
 import { graphql } from "graphql";
 import type { Driver, Integer, Session } from "neo4j-driver";
@@ -44,7 +43,7 @@ describe("Create -> ConnectOrCreate", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
         type ${typeMovie.name} {
             title: String!
             id: Int! @unique
@@ -77,7 +76,7 @@ describe("Create -> ConnectOrCreate", () => {
     });
 
     test("ConnectOrCreate creates new node", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [

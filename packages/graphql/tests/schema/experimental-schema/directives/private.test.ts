@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../../src";
 
 describe("@private directive", () => {
     test("does not add fields to schema", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface UserInterface {
                 id: ID
                 private: String @private

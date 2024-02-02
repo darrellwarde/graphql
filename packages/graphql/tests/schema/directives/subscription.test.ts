@@ -18,7 +18,6 @@
  */
 
 import type { GraphQLFieldMap } from "graphql";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
 
@@ -31,7 +30,7 @@ describe("@subscription directive", () => {
 
     describe("on OBJECT", () => {
         test("default arguments should enable subscription for CREATE, UPDATE, DELETE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -84,7 +83,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for CREATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -133,7 +132,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for UPDATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -182,7 +181,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for DELETE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -231,7 +230,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for CREATE_RELATIONSHIP", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -280,7 +279,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for DELETE_RELATIONSHIP", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -329,7 +328,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for CREATE, DELETE, UPDATE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -378,7 +377,7 @@ describe("@subscription directive", () => {
         });
 
         test("should not throw an Error when is mixed with @query", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -399,7 +398,7 @@ describe("@subscription directive", () => {
 
     describe("on SCHEMA", () => {
         test("default arguments should enable subscription for CREATE, UPDATE, DELETE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -450,7 +449,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for CREATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -500,7 +499,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for UPDATE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -550,7 +549,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for DELETE", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -600,7 +599,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for CREATE_RELATIONSHIP", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -650,7 +649,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for DELETE_RELATIONSHIP", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -700,7 +699,7 @@ describe("@subscription directive", () => {
         });
 
         test("should disable subscription for CREATE, DELETE, UPDATE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!
@@ -721,7 +720,7 @@ describe("@subscription directive", () => {
         });
 
         test("should not throw an Error when is mixed with @query", async () => {
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type Actor {
                     username: String!
                     password: String!

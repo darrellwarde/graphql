@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -27,7 +26,7 @@ import { Neo4jGraphQL } from "../../../src/classes";
 describe("https://github.com/neo4j/graphql/issues/315", () => {
     let driver: Driver;
     let neo4j: Neo4j;
-    const typeDefs = gql`
+    const typeDefs = /* GraphQL */ `
         union Content = Post
 
         type Post {

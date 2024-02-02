@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("https://github.com/neo4j/graphql/issues/2981", () => {
     test("BookTranslatedTitleCreateFieldInput fields should not be of type List", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Book {
                 originalTitle: String!
                 translatedTitle: BookTitle @relationship(type: "TRANSLATED_BOOK_TITLE", direction: IN)

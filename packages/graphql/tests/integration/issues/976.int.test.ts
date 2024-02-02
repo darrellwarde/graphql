@@ -20,7 +20,6 @@
 import type { DocumentNode, GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
 import type { Driver, Integer, Session } from "neo4j-driver";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { getQuerySource } from "../../utils/get-query-source";
 import { Neo4jGraphQL } from "../../../src";
@@ -78,7 +77,7 @@ describe("https://github.com/neo4j/graphql/issues/976", () => {
     });
 
     test("should query nested connection", async () => {
-        const createBibRefQuery = gql`
+        const createBibRefQuery = /* GraphQL */ `
             mutation {
                 ${testBibliographicReference.operations.create}(
                     input: {
@@ -100,7 +99,7 @@ describe("https://github.com/neo4j/graphql/issues/976", () => {
                 }
             }
         `;
-        const updateBibRefQuery = gql`
+        const updateBibRefQuery = /* GraphQL */ `
             mutation {
                 ${testConcept.operations.delete}(where: { iri: "new-e" }) {
                     nodesDeleted

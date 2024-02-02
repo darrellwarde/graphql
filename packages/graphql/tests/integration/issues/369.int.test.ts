@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -40,7 +39,7 @@ describe("369", () => {
     test("should recreate issue and return correct data", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Dato {
                 uuid: ID
                 dependeTo: [Dato!]! @relationship(type: "DEPENDE", direction: OUT, properties: "Depende")
@@ -125,7 +124,7 @@ describe("369", () => {
     test("should recreate issue and return correct data using a where argument on the connection", async () => {
         const session = await neo4j.getSession();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Dato {
                 uuid: ID
                 dependeTo: [Dato!]! @relationship(type: "DEPENDE", direction: OUT, properties: "Depende")

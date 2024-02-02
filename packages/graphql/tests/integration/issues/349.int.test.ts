@@ -20,7 +20,6 @@
 import { getDirective, MapperKind, mapSchema } from "@graphql-tools/utils";
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver } from "neo4j-driver";
 import { Neo4jGraphQL } from "../../../src/classes";
 import Neo4j from "../neo4j";
@@ -65,7 +64,7 @@ describe("https://github.com/neo4j/graphql/issues/349", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs: [
                     disallowDirectiveTypeDefs,
-                    gql`
+                    /* GraphQL */ `
                         type Mutation {
                             doStuff: String! @disallow
                         }
@@ -106,7 +105,7 @@ describe("https://github.com/neo4j/graphql/issues/349", () => {
             const neoSchema = new Neo4jGraphQL({
                 typeDefs: [
                     disallowDirectiveTypeDefs,
-                    gql`
+                    /* GraphQL */ `
                         type NestedResult {
                             stuff: String! @disallow
                         }
@@ -213,7 +212,7 @@ describe("https://github.com/neo4j/graphql/issues/349", () => {
         const neo4jGraphQL = new Neo4jGraphQL({
             typeDefs: [
                 disallowDirectiveTypeDefs,
-                gql`
+                /* GraphQL */ `
                     directive @disallow on FIELD_DEFINITION
 
                     type Mutation {

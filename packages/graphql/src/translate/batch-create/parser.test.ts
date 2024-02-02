@@ -19,7 +19,6 @@
 
 import { mergeTreeDescriptors, getTreeDescriptor } from "./parser";
 import { Neo4jGraphQL } from "../../../src";
-import { gql } from "graphql-tag";
 import type { GraphQLCreateInput } from "./types";
 import type Node from "../../classes/Node";
 import { ContextBuilder } from "../../../tests/utils/builders/context-builder";
@@ -33,7 +32,7 @@ describe("TreeDescriptor Parser", () => {
     let relationships;
 
     beforeAll(async () => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             type Actor {
                 id: ID! @id @unique
                 name: String

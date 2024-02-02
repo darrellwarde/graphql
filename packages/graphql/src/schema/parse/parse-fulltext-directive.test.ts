@@ -18,13 +18,12 @@
  */
 
 import type { DirectiveNode, ObjectTypeDefinitionNode } from "graphql";
-import gql from "graphql-tag";
 import getObjFieldMeta from "../get-obj-field-meta";
 import parseFulltextDirective from "./parse-fulltext-directive";
 
 describe("parseFulltextDirective", () => {
     test("should throw error when directive has duplicate name", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie
                 @fulltext(
                     indexes: [{ indexName: "MyIndex", fields: ["title"] }, { indexName: "MyIndex", fields: ["title"] }]
@@ -56,7 +55,7 @@ describe("parseFulltextDirective", () => {
     });
 
     test("should throw error when directive field is missing", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie @fulltext(indexes: [{ indexName: "MyIndex", fields: ["title"] }]) {
                 description: String
                 imdbRating: Int
@@ -87,7 +86,7 @@ describe("parseFulltextDirective", () => {
     });
 
     test("should return valid Fulltext", () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Movie
                 @fulltext(
                     indexes: [

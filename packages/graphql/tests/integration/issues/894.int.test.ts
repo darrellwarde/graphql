@@ -20,7 +20,6 @@
 import type { DocumentNode, GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
 import type { Driver, Session } from "neo4j-driver";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { getQuerySource } from "../../utils/get-query-source";
 import { Neo4jGraphQL } from "../../../src";
@@ -78,7 +77,7 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
     });
 
     test("should query nested connection", async () => {
-        const createUserQuery = gql`
+        const createUserQuery = /* GraphQL */ `
             mutation {
                 ${testUser.operations.create}(
                     input: {
@@ -92,7 +91,7 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
                 }
             }
         `;
-        const createOrgQuery = gql`
+        const createOrgQuery = /* GraphQL */ `
             mutation {
                 ${testOrganization.operations.create}(input: { name: "The Empire" }) {
                     ${testOrganization.plural} {
@@ -109,7 +108,7 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
         const orgId = createOrgResult?.data[testOrganization.operations.create][testOrganization.plural][0]
             .id as string;
 
-        const swapSidesQuery = gql`
+        const swapSidesQuery = /* GraphQL */ `
                 mutation {
                     ${testUser.operations.update}(
                         where: { name: "Luke Skywalker" }

@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../../src";
 
 describe("@customResolver directive", () => {
     test("passes fields directly through with no generation", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface UserInterface {
                 customResolver: String @customResolver
             }

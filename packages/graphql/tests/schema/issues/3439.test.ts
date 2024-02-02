@@ -18,7 +18,6 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 import { TestSubscriptionsEngine } from "../../utils/TestSubscriptionsEngine";
@@ -26,7 +25,7 @@ import { validateSchema } from "graphql";
 
 describe("https://github.com/neo4j/graphql/issues/3439", () => {
     test("Type definitions implementing multiple interfaces", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface INode {
                 id: String!
             }
@@ -1288,7 +1287,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
     });
 
     test("Simple type definitions implementing just one interface", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface IProduct {
                 id: String!
 
@@ -2467,7 +2466,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
     });
 
     test("Example 3", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             interface IProduct {
                 id: String!
 

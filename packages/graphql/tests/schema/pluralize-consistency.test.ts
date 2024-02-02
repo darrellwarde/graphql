@@ -19,12 +19,11 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Pluralize consistency", () => {
     test("Schema with underscore types", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type super_user {
                 name: String!
                 my_friend: [super_friend!]! @relationship(type: "FRIEND", direction: OUT)

@@ -18,13 +18,12 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Relationship nested operations", () => {
     test("Single relationship to type with unique field with no nested operation specified", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type Person {
                 id: ID! @id @unique
                 name: String
@@ -397,7 +396,7 @@ describe("Relationship nested operations", () => {
     });
 
     test("Single relationship to union with unique fields with no nested operation specified", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type PersonOne {
                 name: String @unique
             }

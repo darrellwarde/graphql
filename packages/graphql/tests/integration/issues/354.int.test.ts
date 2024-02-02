@@ -19,7 +19,6 @@
 
 import type { Driver } from "neo4j-driver";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
@@ -44,7 +43,7 @@ describe("https://github.com/neo4j/graphql/issues/354", () => {
         const testComment = new UniqueType("Comment");
         const testPost = new UniqueType("Post");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${testComment.name} {
                 comment_id: ID!
                 post: ${testPost.name}! @relationship(type: "HAS_POST", direction: OUT)

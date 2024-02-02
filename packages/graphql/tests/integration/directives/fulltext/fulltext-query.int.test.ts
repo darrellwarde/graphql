@@ -19,7 +19,6 @@
 
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
-import { gql } from "graphql-tag";
 import type { Driver, Session } from "neo4j-driver";
 import { generate } from "randomstring";
 import { Neo4jGraphQL } from "../../../../src/classes";
@@ -2304,7 +2303,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
             type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) {
                     title: String!
                 }
@@ -2345,7 +2344,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }, { indexName: "${indexName2}", fields: ["description"] }]) {
                     title: String!
                     description: String!
@@ -2394,7 +2393,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) @node(labels: ["${label}"]) {
                     title: String!
                 }
@@ -2435,7 +2434,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) @node(labels: ["${label}"]) {
                     title: String! @alias(property: "${aliasName}")
                 }
@@ -2476,7 +2475,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) {
                     title: String!
                 }
@@ -2500,7 +2499,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title", "description"] }]) {
                     title: String!
                     description: String!
@@ -2539,7 +2538,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title", "description"] }]) {
                     title: String!
                     description: String! @alias(property: "${aliasName}")
@@ -2580,7 +2579,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title"] }]) {
                     title: String!
                 }
@@ -2612,7 +2611,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["title", "description"] }]) {
                     title: String!
                     description: String!
@@ -2654,7 +2653,7 @@ describe("@fulltext directive", () => {
                 return;
             }
 
-            const typeDefs = gql`
+            const typeDefs = /* GraphQL */ `
                 type ${type.name} @fulltext(indexes: [{ indexName: "${indexName1}", fields: ["id"] }]) {
                     id: ID!
                 }

@@ -18,7 +18,6 @@
  */
 
 import type { DocumentNode } from "graphql";
-import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 import { createBearerToken } from "../../utils/create-bearer-token";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
@@ -29,7 +28,7 @@ describe("Union relationship filtering operations", () => {
     let neoSchema: Neo4jGraphQL;
 
     beforeEach(() => {
-        typeDefs = gql`
+        typeDefs = /* GraphQL */ `
             union Production = Movie | Series
 
             type Movie {
@@ -63,7 +62,7 @@ describe("Union relationship filtering operations", () => {
     });
 
     test("Union filter (top level)", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query actedInWhere {
                 productions(where: { Movie: { title: "The Office" }, Series: { title: "The Office 2" } }) {
                     ... on Movie {
@@ -104,7 +103,7 @@ describe("Union relationship filtering operations", () => {
     });
 
     test("Filtering on nested-level relationship unions", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query actedInWhere {
                 actors(
                     where: {

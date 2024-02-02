@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
 import type { Driver } from "neo4j-driver";
@@ -33,7 +32,7 @@ describe("583", () => {
     let neo4j: Neo4j;
     let schema: GraphQLSchema;
 
-    const typeDefs = gql`
+    const typeDefs = /* GraphQL */ `
         interface Show {
             title: String
         }
@@ -123,7 +122,7 @@ describe("583", () => {
     });
 
     test("should project all interfaces of node", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($actorId: ID!) {
                 actors(where: { id: $actorId }) {
                     id

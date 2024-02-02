@@ -18,7 +18,6 @@
  */
 
 import type { GraphQLError } from "graphql";
-import { gql } from "graphql-tag";
 import { validateSDL } from "../validate-sdl";
 import { DirectiveArgumentOfCorrectType } from "./directive-argument-of-correct-type";
 
@@ -26,7 +25,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
     describe("for Scalar", () => {
         describe("for Int", () => {
             test("should returns no errors for valid Int", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Int) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: 1) {
@@ -40,7 +39,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
             });
 
             test("should returns errors for invalid Int (Enum)", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Int) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: CREATE) {
@@ -57,7 +56,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
             });
 
             test("should returns errors for invalid Int (Float)", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Int) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: 1.2) {
@@ -76,7 +75,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
 
         describe("for Float", () => {
             test("should returns no errors for valid Float", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Float) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: 1.2) {
@@ -90,7 +89,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
             });
 
             test("should returns errors for invalid Float (String)", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Float) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: "2.2") {
@@ -107,7 +106,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
             });
 
             test("should returns errors for invalid Float (Enum)", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Float) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: CREATE) {
@@ -126,7 +125,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
 
         describe("for String", () => {
             test("should returns no errors for valid String", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: String) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: "seems a string to me") {
@@ -140,7 +139,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
             });
 
             test("should returns errors for invalid String (Int)", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: String) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: 1) {
@@ -157,7 +156,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
             });
 
             test("should returns errors for invalid String (Float)", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: String) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: 1.2) {
@@ -176,7 +175,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
 
         describe("for Boolean", () => {
             test("should returns no errors for valid Boolean", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Boolean) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: true) {
@@ -190,7 +189,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
             });
 
             test("should returns errors for invalid Boolean (Int)", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Boolean) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: 1) {
@@ -207,7 +206,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
             });
 
             test("should returns errors for invalid Boolean (String)", () => {
-                const userDocument = gql`
+                const userDocument = /* GraphQL */ `
                     directive @WonderfulAuthorization(testValue: Boolean) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                     type User @WonderfulAuthorization(testValue: "string") {
@@ -227,7 +226,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
 
     describe("for Enum", () => {
         test("should returns no errors for valid Enums", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 enum WonderfulKind {
                     WONDERFUL
                     INCREDIBLE
@@ -246,7 +245,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns errors for invalid Enums", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 enum WonderfulKind {
                     WONDERFUL
                     INCREDIBLE
@@ -270,7 +269,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
 
     describe("for List", () => {
         test("should returns no errors for valid Enum List", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 enum WonderfulKind {
                     WONDERFUL
                     INCREDIBLE
@@ -289,7 +288,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns no errors for valid Int List", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 enum WonderfulKind {
                     WONDERFUL
                     INCREDIBLE
@@ -308,7 +307,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns errors for invalid Enum List", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 enum WonderfulKind {
                     WONDERFUL
                     INCREDIBLE
@@ -330,7 +329,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns errors for invalid Int List", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 directive @WonderfulAuthorization(testValue: [Int]) on OBJECT | FIELD_DEFINITION | INTERFACE
 
                 type User @WonderfulAuthorization(testValue: [1.2, 1.3]) {
@@ -349,7 +348,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
 
     describe("for Input", () => {
         test("should returns no errors for valid Input", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 input NestedWonderfulInput {
                     count: Int
                 }
@@ -372,7 +371,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns no errors for valid Input, nested value", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 input NestedWonderfulInput {
                     count: Int
                 }
@@ -395,7 +394,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns errors for invalid Input", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 input NestedWonderfulInput {
                     count: Int
                 }
@@ -421,7 +420,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns errors for invalid Input, nested value (Float)->(Int)", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 input NestedWonderfulInput {
                     count: Int
                 }
@@ -447,7 +446,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns errors for invalid Input, nested value (Input)->(Int)", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 input NestedWonderfulInput {
                     count: Int
                 }
@@ -473,7 +472,7 @@ describe("DirectiveArgumentOfCorrectType", () => {
         });
 
         test("should returns errors for invalid Input, no required fields", () => {
-            const userDocument = gql`
+            const userDocument = /* GraphQL */ `
                 input NestedWonderfulInput {
                     count: Int
                 }

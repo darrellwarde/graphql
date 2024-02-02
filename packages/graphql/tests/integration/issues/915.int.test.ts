@@ -22,7 +22,6 @@ import { int, isInt } from "neo4j-driver";
 import { generate } from "randomstring";
 import type { ValueNode } from "graphql";
 import { graphql, GraphQLError, GraphQLScalarType, Kind } from "graphql";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { Neo4jGraphQL } from "../../../src/classes";
 import { delay } from "../../../src/utils/utils";
@@ -132,7 +131,7 @@ describe("https://github.com/neo4j/graphql/issues/915", () => {
         const orderNo = 12;
         const name = generate({ readable: true });
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             scalar PositiveInt
             type Order {
                 orderNo: PositiveInt! @unique

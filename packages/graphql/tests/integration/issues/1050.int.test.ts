@@ -20,7 +20,6 @@
 import type { GraphQLSchema } from "graphql";
 import { graphql } from "graphql";
 import type { Driver, Session } from "neo4j-driver";
-import { gql } from "graphql-tag";
 import Neo4j from "../neo4j";
 import { getQuerySource } from "../../utils/get-query-source";
 import { UniqueType } from "../../utils/graphql-types";
@@ -42,7 +41,7 @@ describe("https://github.com/neo4j/graphql/issues/1050", () => {
         neo4j = new Neo4j();
         driver = await neo4j.getDriver();
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${testUser.name} {
                 id: String
                 inboxes: [${testInbox.name}!]! @relationship(type: "OWNS", direction: OUT)
@@ -132,7 +131,7 @@ describe("https://github.com/neo4j/graphql/issues/1050", () => {
             <-[:ATTACHED_TO]-(a:${testAttachment.name} {ownerId: 'abc', contents: 'something interesting'})
         `);
 
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 ${testUser.plural} {
                     inboxes {

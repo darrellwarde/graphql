@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { graphql } from "graphql";
 import type { Driver, Session } from "neo4j-driver";
 import { Neo4jGraphQL } from "../../../../src";
@@ -47,7 +46,7 @@ describe("Subscriptions delete", () => {
         typeMovie = new UniqueType("Movie");
 
         plugin = new TestSubscriptionsEngine();
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeActor.name} {
                 id: ID!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
