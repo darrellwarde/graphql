@@ -20,7 +20,8 @@
 import { Neo4jGraphQL } from "../../../src";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
-describe("https://github.com/neo4j/graphql/issues/3905", () => {
+// This has to be reintroduced when user defined types are supported as target for cypher fields
+describe.skip("https://github.com/neo4j/graphql/issues/3905", () => {
     let typeDefs: string;
     let neoSchema: Neo4jGraphQL;
 
@@ -37,19 +38,11 @@ describe("https://github.com/neo4j/graphql/issues/3905", () => {
                     )
             }
 
-            type pathList
-                @query(read: false, aggregate: false)
-                @mutation(operations: [])
-                @subscription(events: [])
-                @node {
-                paths: [[pathLink]]
+            type pathList @query(read: false, aggregate: false) @mutation(operations: []) @subscription(events: []) {
+                paths: [[pathLink!]]
             }
 
-            type pathLink
-                @query(read: false, aggregate: false)
-                @mutation(operations: [])
-                @subscription(events: [])
-                @node {
+            type pathLink @query(read: false, aggregate: false) @mutation(operations: []) @subscription(events: []) {
                 entity_id: Int
                 other_entity_id: Int
             }
