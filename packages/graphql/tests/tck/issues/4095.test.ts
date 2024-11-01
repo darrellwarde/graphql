@@ -29,17 +29,17 @@ describe("https://github.com/neo4j/graphql/issues/4095", () => {
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
             type User @node {
-                id: ID! @unique
+                id: ID!
             }
 
             type Family @node {
-                id: ID! @id @unique
+                id: ID! @id
                 members: [Person!]! @relationship(type: "MEMBER_OF", direction: IN)
                 creator: User! @relationship(type: "CREATOR_OF", direction: IN)
             }
 
             type Person @authorization(filter: [{ where: { node: { creator: { id_EQ: "$jwt.uid" } } } }]) @node {
-                id: ID! @id @unique
+                id: ID! @id
                 creator: User! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
                 family: Family! @relationship(type: "MEMBER_OF", direction: OUT)
             }

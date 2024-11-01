@@ -94,10 +94,6 @@ export class AttributeAdapter {
         );
     }
 
-    isUnique(): boolean {
-        return !!this.annotations.unique || this.isGlobalIDAttribute() === true;
-    }
-
     isCypher(): boolean {
         return !!this.annotations.cypher;
     }

@@ -684,12 +684,12 @@ describe("Subscription authentication", () => {
                 actors: [${typeActor}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
                 directors: [Director!]! @relationship(type: "DIRECTED", properties: "Directed", direction: IN)
                 reviewers: [Reviewer!]! @relationship(type: "REVIEWED", properties: "Review", direction: IN)
-                imdbId: Int @unique
+                imdbId: Int 
             } 
             
             type ${typeActor} @authentication(operations: [READ]) @node {
                 name: String!
-                id: Int @unique
+                id: Int
                 movies: [${typeMovie}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
             
@@ -708,8 +708,8 @@ describe("Subscription authentication", () => {
             type ${typePerson} implements Reviewer  @node {
                 name: String! 
                 reputation: Int! @authentication(operations: [READ])
-                id: Int @unique 
-                reviewerId: Int @unique @authentication(operations: [READ])
+                id: Int  
+                reviewerId: Int @authentication(operations: [READ])
                 movies: [${typeMovie}!]! @relationship(type: "REVIEWED", direction: OUT, properties: "Review")
             }
             

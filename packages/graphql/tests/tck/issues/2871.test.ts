@@ -25,19 +25,19 @@ describe("https://github.com/neo4j/graphql/issues/2871", () => {
 
     const typeDefs = /* GraphQL */ `
         type FirstLevel @node {
-            id: ID! @id @unique
+            id: ID! @id
             secondLevel: SecondLevel! @relationship(type: "HAS_SECOND_LEVEL", direction: OUT)
             createdAt: DateTime! @timestamp(operations: [CREATE])
         }
 
         type SecondLevel @node {
-            id: ID! @id @unique
+            id: ID! @id
             thirdLevel: [ThirdLevel!]! @relationship(type: "HAS_THIRD_LEVEL", direction: OUT)
             createdAt: DateTime! @timestamp(operations: [CREATE])
         }
 
         type ThirdLevel @node {
-            id: ID! @id @unique
+            id: ID! @id
             createdAt: DateTime! @timestamp(operations: [CREATE])
         }
     `;

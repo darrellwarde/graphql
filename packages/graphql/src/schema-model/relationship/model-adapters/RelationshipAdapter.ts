@@ -219,7 +219,7 @@ export class RelationshipAdapter {
             // The connectOrCreate field is not generated if the related type does not have a unique field
             (this.nestedOperations.has(RelationshipNestedOperationsOption.CONNECT_OR_CREATE) &&
                 relationshipTarget instanceof ConcreteEntityAdapter &&
-                relationshipTarget.uniqueFields.length > 0)
+                false)
         );
     }
 
@@ -235,11 +235,10 @@ export class RelationshipAdapter {
             if (!ifUnionRelationshipTargetEntity) {
                 throw new Error("Expected member entity");
             }
-            const onlyConnectOrCreateAndNoUniqueFields =
-                onlyConnectOrCreate && !ifUnionRelationshipTargetEntity.uniqueFields.length;
+            const onlyConnectOrCreateAndNoUniqueFields = onlyConnectOrCreate;
             return this.nestedOperations.size > 0 && !onlyConnectOrCreateAndNoUniqueFields;
         }
-        const onlyConnectOrCreateAndNoUniqueFields = onlyConnectOrCreate && !this.target.uniqueFields.length;
+        const onlyConnectOrCreateAndNoUniqueFields = onlyConnectOrCreate;
         return this.nestedOperations.size > 0 && !onlyConnectOrCreateAndNoUniqueFields;
     }
 

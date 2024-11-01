@@ -205,14 +205,14 @@ describe("Undirected relationships", () => {
     test("nested undirected relationship", async () => {
         typeDefs = /* GraphQL */ `
             type Foo @node {
-                id: ID @unique
+                id: ID
                 Name: String
                 Age: Int
                 DrinksAt: Bar @relationship(type: "DRINKS_AT", direction: OUT)
             }
 
             type Bar @node {
-                id: ID @unique
+                id: ID
                 Adress: String
                 Customers: [Foo!]! @relationship(type: "DRINKS_AT", direction: IN)
             }

@@ -22,7 +22,6 @@ import type { Driver, Session } from "neo4j-driver";
 import { DEBUG_EXECUTE } from "../../constants";
 import type { Neo4jGraphQLSchemaModel } from "../../schema-model/Neo4jGraphQLSchemaModel";
 import type { ConcreteEntity } from "../../schema-model/entity/ConcreteEntity";
-import { ConcreteEntityAdapter } from "../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import type { Neo4jGraphQLSessionConfig } from "../Executor";
 
 const debug = Debug(DEBUG_EXECUTE);
@@ -228,37 +227,6 @@ async function getMissingConstraints({
         });
 
     const missingConstraints: MissingConstraint[] = [];
-
-    for (const entity of schemaModel.concreteEntities) {
-        const entityAdapter = new ConcreteEntityAdapter(entity);
-        for (const uniqueField of entityAdapter.uniqueFields) {
-            if (!uniqueField.annotations.unique) {
-                continue;
-            }
-
-            let anyLabelHasConstraint = false;
-            for (const label of entity.labels) {
-                // If any of the constraints for the label already exist, skip to the next unique field
-                if (existingConstraints[label]?.includes(uniqueField.databaseName)) {
-                    anyLabelHasConstraint = true;
-                    break;
-                }
-            }
-
-            if (anyLabelHasConstraint === false) {
-                // TODO: The fallback value of `${entity.name}_${uniqueField.databaseName}` should be changed to use the main label of the entity
-                // But this can only be done once the translation layer has been updated to use the schema model instead of the Node class
-                const constraintName =
-                    uniqueField.annotations.unique.constraintName || `${entity.name}_${uniqueField.databaseName}`;
-
-                missingConstraints.push({
-                    constraintName,
-                    label: entityAdapter.getMainLabel(),
-                    property: uniqueField.databaseName,
-                });
-            }
-        }
-    }
 
     return missingConstraints;
 }

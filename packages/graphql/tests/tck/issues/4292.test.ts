@@ -25,8 +25,8 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
     test("authorization subqueries should be wrapped in a Cypher.CALL", async () => {
         const typeDefs = /* GraphQL */ `
             type User @node {
-                id: ID! @unique
-                email: String! @unique
+                id: ID!
+                email: String!
                 name: String
                 creator: [Group!]! @relationship(type: "CREATOR_OF", direction: OUT)
                 admin: [Admin!]! @relationship(type: "IS_USER", direction: IN)
@@ -36,7 +36,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
             }
 
             type Group @node {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String
                 members: [Person!]! @relationship(type: "MEMBER_OF", direction: IN)
                 creator: User!
@@ -78,7 +78,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                         }
                     ]
                 ) {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String!
                 creator: User!
                     @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
@@ -115,7 +115,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
             }
 
             type Admin implements Invitee @node {
-                id: ID! @unique @id
+                id: ID! @id
                 group: Group! @relationship(type: "ADMIN_OF", direction: OUT)
                 creator: User! @relationship(type: "CREATOR_OF", direction: IN)
                 email: String!
@@ -126,7 +126,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
             }
 
             type Contributor implements Invitee @node {
-                id: ID! @unique @id
+                id: ID! @id
                 group: Group! @relationship(type: "CONTRIBUTOR_TO", direction: OUT)
                 creator: User! @relationship(type: "CREATOR_OF", direction: IN)
                 email: String!

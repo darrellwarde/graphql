@@ -95,11 +95,6 @@ describe("ConcreteEntityAdapter", () => {
         expect(userAdapter.getMainLabel()).toBe("User");
     });
 
-    test("should return the correct unique fields", () => {
-        expect(userAdapter.uniqueFields).toHaveLength(1);
-        expect(userAdapter.uniqueFields).toStrictEqual([userId]);
-    });
-
     test("should return the correct singular name", () => {
         expect(userAdapter.singular).toBe("user");
     });

@@ -38,7 +38,6 @@ import { parseSettableAnnotation } from "../parser/annotations-parser/settable-a
 import { parseSubscriptionAnnotation } from "../parser/annotations-parser/subscription-annotation";
 import { parseSubscriptionsAuthorizationAnnotation } from "../parser/annotations-parser/subscriptions-authorization-annotation";
 import { parseTimestampAnnotation } from "../parser/annotations-parser/timestamp-annotation";
-import { parseUniqueAnnotation } from "../parser/annotations-parser/unique-annotation";
 import { parseVectorAnnotation } from "../parser/annotations-parser/vector-annotation";
 import type { AuthenticationAnnotation } from "./AuthenticationAnnotation";
 import type { AuthorizationAnnotation } from "./AuthorizationAnnotation";
@@ -64,7 +63,6 @@ import type { SettableAnnotation } from "./SettableAnnotation";
 import type { SubscriptionAnnotation } from "./SubscriptionAnnotation";
 import type { SubscriptionsAuthorizationAnnotation } from "./SubscriptionsAuthorizationAnnotation";
 import type { TimestampAnnotation } from "./TimestampAnnotation";
-import type { UniqueAnnotation } from "./UniqueAnnotation";
 import type { VectorAnnotation } from "./VectorAnnotation";
 
 export interface Annotation {
@@ -102,7 +100,6 @@ export type Annotations = CheckAnnotationName<{
     subscription: SubscriptionAnnotation;
     subscriptionsAuthorization: SubscriptionsAuthorizationAnnotation;
     timestamp: TimestampAnnotation;
-    unique: UniqueAnnotation;
 }>;
 
 export type AnnotationParser<T extends Annotation> = (
@@ -134,7 +131,6 @@ export const annotationsParsers: { [key in keyof Annotations]: AnnotationParser<
     subscription: parseSubscriptionAnnotation,
     subscriptionsAuthorization: parseSubscriptionsAuthorizationAnnotation,
     timestamp: parseTimestampAnnotation,
-    unique: parseUniqueAnnotation,
     relayId: () => new RelayIDAnnotation(),
     vector: parseVectorAnnotation,
 };

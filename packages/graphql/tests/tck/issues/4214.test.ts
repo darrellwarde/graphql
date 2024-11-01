@@ -34,21 +34,21 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
         }
 
         type User @node {
-            id: ID! @id @unique
+            id: ID! @id
             email: String!
             roles: [String!]!
             store: Store @relationship(type: "WORKS_AT", direction: OUT)
         }
 
         type Store @node {
-            id: ID! @id @unique
+            id: ID! @id
             name: String!
             employees: [User!]! @relationship(type: "WORKS_AT", direction: IN)
             transactions: [Transaction!]! @relationship(type: "TRANSACTION", direction: IN)
         }
 
         type Transaction @node {
-            id: ID! @id @unique
+            id: ID! @id
             store: Store! @relationship(type: "TRANSACTION", direction: OUT)
             type: String!
             items: [TransactionItem!]! @relationship(type: "ITEM_TRANSACTED", direction: IN)

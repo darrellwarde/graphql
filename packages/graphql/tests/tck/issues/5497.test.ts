@@ -58,7 +58,7 @@ describe("https://github.com/neo4j/graphql/issues/5497", () => {
             }
 
             type File @node {
-                id: ID! @unique
+                id: ID!
                 category: Category @relationship(type: "HAS_FILE", direction: IN)
             }
         `;
