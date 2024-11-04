@@ -1420,13 +1420,13 @@ describe("Advanced Filtering", () => {
 
                 const typeDefs = `
                 type ${Movie} @node {
-                    id: ID! @id @unique
+                    id: ID! @id
                     budget: Int!
                     actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
                 }
 
                 type ${Actor} @node {
-                    id: ID! @id @unique
+                    id: ID! @id
                     flag: Boolean!
                     actedIn: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
                 }

@@ -34,19 +34,19 @@ describe("RelayId projection", () => {
     beforeAll(async () => {
         const typeDefs = `
             type ${Movie} @node {
-                dbId: ID! @id @unique @relayId
+                dbId: ID! @id @relayId
                 title: String!
                 genre: ${Genre}! @relationship(type: "HAS_GENRE", direction: OUT)
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
             type ${Genre} @node {
-                dbId: ID! @id @unique @relayId
+                dbId: ID! @id @relayId
                 name: String!
             }
 
             type ${Actor} @node {
-                dbId: ID! @id @unique @relayId
+                dbId: ID! @id @relayId
                 name: String!
             }
         `;

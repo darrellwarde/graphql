@@ -37,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/3251", () => {
             }
 
             type ${Genre} @node {
-                name: String! @unique
+                name: String!
                 movies: [${Movie}!]! @relationship(type: "HAS_GENRE", direction: IN)
             }
         `;

@@ -40,7 +40,7 @@ describe("https://github.com/neo4j/graphql/issues/5586", () => {
 
         typeDefs = /* GraphQL */ `
             type ${Entity} {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String
             }
         `;

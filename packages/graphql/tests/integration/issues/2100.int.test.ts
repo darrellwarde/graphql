@@ -67,7 +67,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
             }
     
             type ${BacentaType} implements Church @authentication @node {
-                id: ID @id @unique
+                id: ID @id
                 name: String!
                 serviceLogs: [${ServiceLogType}!]! @relationship(type: "HAS_HISTORY", direction: OUT)
                 bussing(limit: Int!): [${BussingRecordType}!]!

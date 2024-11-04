@@ -61,7 +61,7 @@ describe("https://github.com/neo4j/graphql/issues/5635", () => {
                     operations: [UPDATE, DELETE, CREATE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP, SUBSCRIBE]
                     jwt: { roles_INCLUDES: "overlord" }
                 ) {
-                userId: String! @unique
+                userId: String!
                 adminAccess: [${Tenant}!]! @relationship(type: "ADMIN_IN", direction: OUT)
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])

@@ -42,7 +42,7 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
                     { where: { node: { createdBy: { id_EQ: "$jwt.sub" } } } },
                 ]
             ) {
-                id: ID! @id @unique
+                id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
                 createdBy: ${User}! @relationship(type: "CREATED_ADMIN_GROUP", direction: IN) @settable(onCreate: true, onUpdate: false)
@@ -53,10 +53,10 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
                     { where: { node: { NOT: { blockedUsers_SOME: { to: { id_EQ: "$jwt.sub" } } } } } },
                 ]
             ) {
-                id: ID! @unique @settable(onCreate: true, onUpdate: false)
+                id: ID! @settable(onCreate: true, onUpdate: false)
                 createdAt: DateTime! @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
-                username: String! @unique
+                username: String!
                 blockedUsers: [${UserBlockedUser}!]! @relationship(type: "HAS_BLOCKED", direction: OUT)
                 createdAdminGroups: [${AdminGroup}!]! @relationship(type: "CREATED_ADMIN_GROUP", direction: OUT)
             }
@@ -66,7 +66,7 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
                     { where: { node: { from: { id_EQ: "$jwt.sub" } } } }
                 ]
             ) {
-                id: ID! @id @unique
+                id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
                 from: ${User}! @relationship(type: "HAS_BLOCKED", direction: IN) @settable(onCreate: true, onUpdate: false)
@@ -81,7 +81,7 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
                     { where: { node: { createdByConnection: { ${AdminGroup}: { node: { createdBy: { id_EQ: "$jwt.sub" } } } } } } },
                 ]
             ){
-                id: ID! @id @unique
+                id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
                 createdBy: PartyCreator! @relationship(type: "CREATED_PARTY", direction: IN) @settable(onCreate: true, onUpdate: false)
