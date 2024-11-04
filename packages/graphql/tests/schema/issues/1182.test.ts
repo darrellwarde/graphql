@@ -26,13 +26,13 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
     test("DateTime and Point fields are included in onCreate", async () => {
         const typeDefs = gql`
             type Movie @node {
-                id: ID! @id @unique
+                id: ID! @id
                 title: String!
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
             type Actor @node {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String!
                 dob: DateTime!
                 homeAddress: Point!
@@ -61,10 +61,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               name: StringAggregateSelection!
             }
 
-            input ActorConnectOrCreateWhere {
-              node: ActorUniqueWhere!
-            }
-
             input ActorConnectWhere {
               node: ActorWhere!
             }
@@ -78,12 +74,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             type ActorEdge {
               cursor: String!
               node: Actor!
-            }
-
-            input ActorOnCreateInput {
-              dob: DateTime!
-              homeAddress: PointInput!
-              name: String!
             }
 
             input ActorOptions {
@@ -103,11 +93,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               homeAddress: SortDirection
               id: SortDirection
               name: SortDirection
-            }
-
-            input ActorUniqueWhere {
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_EQ: ID
             }
 
             input ActorUpdateInput {
@@ -234,15 +219,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               where: ActorConnectWhere
             }
 
-            input MovieActorsConnectOrCreateFieldInput {
-              onCreate: MovieActorsConnectOrCreateFieldInputOnCreate!
-              where: ActorConnectOrCreateWhere!
-            }
-
-            input MovieActorsConnectOrCreateFieldInputOnCreate {
-              node: ActorOnCreateInput!
-            }
-
             type MovieActorsConnection {
               edges: [MovieActorsRelationship!]!
               pageInfo: PageInfo!
@@ -274,7 +250,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
 
             input MovieActorsFieldInput {
               connect: [MovieActorsConnectFieldInput!]
-              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [MovieActorsCreateFieldInput!]
             }
 
@@ -330,7 +305,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
 
             input MovieActorsUpdateFieldInput {
               connect: [MovieActorsConnectFieldInput!]
-              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!]
               create: [MovieActorsCreateFieldInput!]
               delete: [MovieActorsDeleteFieldInput!]
               disconnect: [MovieActorsDisconnectFieldInput!]

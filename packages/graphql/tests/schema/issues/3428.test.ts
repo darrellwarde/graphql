@@ -26,7 +26,7 @@ describe("Relationship nested operations", () => {
     test("Single relationship to type with unique field with no nested operation specified", async () => {
         const typeDefs = gql`
             type Person @node {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String
             }
 
@@ -364,11 +364,11 @@ describe("Relationship nested operations", () => {
     test("Single relationship to union with unique fields with no nested operation specified", async () => {
         const typeDefs = gql`
             type PersonOne @node {
-                name: String @unique
+                name: String
             }
 
             type PersonTwo @node {
-                nameTwo: String @unique
+                nameTwo: String
             }
 
             union Person = PersonOne | PersonTwo

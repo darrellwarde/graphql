@@ -29,12 +29,12 @@ describe("Union Interface Relationships", () => {
                 actors: [Actor!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
                 directors: [Director!]! @relationship(type: "DIRECTED", properties: "Directed", direction: IN)
                 reviewers: [Reviewer!]! @relationship(type: "REVIEWED", properties: "Review", direction: IN)
-                imdbId: Int @unique
+                imdbId: Int
             }
 
             type Actor @node {
                 name: String!
-                id: Int @unique
+                id: Int
                 movies: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
 
@@ -53,8 +53,8 @@ describe("Union Interface Relationships", () => {
             type Person implements Reviewer @node {
                 name: String!
                 reputation: Int!
-                id: Int @unique
-                reviewerId: Int @unique
+                id: Int
+                reviewerId: Int
                 movies: [Movie!]! @relationship(type: "REVIEWED", direction: OUT, properties: "Review")
             }
 
@@ -160,10 +160,6 @@ describe("Union Interface Relationships", () => {
               movies: [ActorMoviesConnectFieldInput!]
             }
 
-            input ActorConnectOrCreateWhere {
-              node: ActorUniqueWhere!
-            }
-
             input ActorConnectWhere {
               node: ActorWhere!
             }
@@ -226,16 +222,6 @@ describe("Union Interface Relationships", () => {
               where: MovieConnectWhere
             }
 
-            input ActorMoviesConnectOrCreateFieldInput {
-              onCreate: ActorMoviesConnectOrCreateFieldInputOnCreate!
-              where: MovieConnectOrCreateWhere!
-            }
-
-            input ActorMoviesConnectOrCreateFieldInputOnCreate {
-              edge: ActedInCreateInput!
-              node: MovieOnCreateInput!
-            }
-
             type ActorMoviesConnection {
               edges: [ActorMoviesRelationship!]!
               pageInfo: PageInfo!
@@ -272,7 +258,6 @@ describe("Union Interface Relationships", () => {
 
             input ActorMoviesFieldInput {
               connect: [ActorMoviesConnectFieldInput!]
-              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorMoviesCreateFieldInput!]
             }
 
@@ -330,17 +315,11 @@ describe("Union Interface Relationships", () => {
 
             input ActorMoviesUpdateFieldInput {
               connect: [ActorMoviesConnectFieldInput!]
-              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!]
               create: [ActorMoviesCreateFieldInput!]
               delete: [ActorMoviesDeleteFieldInput!]
               disconnect: [ActorMoviesDisconnectFieldInput!]
               update: ActorMoviesUpdateConnectionInput
               where: ActorMoviesConnectionWhere
-            }
-
-            input ActorOnCreateInput {
-              id: Int
-              name: String!
             }
 
             input ActorOptions {
@@ -358,11 +337,6 @@ describe("Union Interface Relationships", () => {
             input ActorSort {
               id: SortDirection
               name: SortDirection
-            }
-
-            input ActorUniqueWhere {
-              id: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_EQ: Int
             }
 
             input ActorUpdateInput {
@@ -644,16 +618,6 @@ describe("Union Interface Relationships", () => {
               where: ActorConnectWhere
             }
 
-            input MovieActorsConnectOrCreateFieldInput {
-              onCreate: MovieActorsConnectOrCreateFieldInputOnCreate!
-              where: ActorConnectOrCreateWhere!
-            }
-
-            input MovieActorsConnectOrCreateFieldInputOnCreate {
-              edge: ActedInCreateInput!
-              node: ActorOnCreateInput!
-            }
-
             type MovieActorsConnection {
               edges: [MovieActorsRelationship!]!
               pageInfo: PageInfo!
@@ -690,7 +654,6 @@ describe("Union Interface Relationships", () => {
 
             input MovieActorsFieldInput {
               connect: [MovieActorsConnectFieldInput!]
-              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [MovieActorsCreateFieldInput!]
             }
 
@@ -748,7 +711,6 @@ describe("Union Interface Relationships", () => {
 
             input MovieActorsUpdateFieldInput {
               connect: [MovieActorsConnectFieldInput!]
-              connectOrCreate: [MovieActorsConnectOrCreateFieldInput!]
               create: [MovieActorsCreateFieldInput!]
               delete: [MovieActorsDeleteFieldInput!]
               disconnect: [MovieActorsDisconnectFieldInput!]
@@ -766,10 +728,6 @@ describe("Union Interface Relationships", () => {
               actors: [MovieActorsConnectFieldInput!]
               directors: MovieDirectorsConnectInput
               reviewers: [MovieReviewersConnectFieldInput!]
-            }
-
-            input MovieConnectOrCreateWhere {
-              node: MovieUniqueWhere!
             }
 
             input MovieConnectWhere {
@@ -794,16 +752,6 @@ describe("Union Interface Relationships", () => {
               connect: [ActorConnectInput!]
               edge: DirectedCreateInput!
               where: ActorConnectWhere
-            }
-
-            input MovieDirectorsActorConnectOrCreateFieldInput {
-              onCreate: MovieDirectorsActorConnectOrCreateFieldInputOnCreate!
-              where: ActorConnectOrCreateWhere!
-            }
-
-            input MovieDirectorsActorConnectOrCreateFieldInputOnCreate {
-              edge: DirectedCreateInput!
-              node: ActorOnCreateInput!
             }
 
             input MovieDirectorsActorConnectionWhere {
@@ -831,7 +779,6 @@ describe("Union Interface Relationships", () => {
 
             input MovieDirectorsActorFieldInput {
               connect: [MovieDirectorsActorConnectFieldInput!]
-              connectOrCreate: [MovieDirectorsActorConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [MovieDirectorsActorCreateFieldInput!]
             }
 
@@ -842,7 +789,6 @@ describe("Union Interface Relationships", () => {
 
             input MovieDirectorsActorUpdateFieldInput {
               connect: [MovieDirectorsActorConnectFieldInput!]
-              connectOrCreate: [MovieDirectorsActorConnectOrCreateFieldInput!]
               create: [MovieDirectorsActorCreateFieldInput!]
               delete: [MovieDirectorsActorDeleteFieldInput!]
               disconnect: [MovieDirectorsActorDisconnectFieldInput!]
@@ -891,16 +837,6 @@ describe("Union Interface Relationships", () => {
               where: PersonConnectWhere
             }
 
-            input MovieDirectorsPersonConnectOrCreateFieldInput {
-              onCreate: MovieDirectorsPersonConnectOrCreateFieldInputOnCreate!
-              where: PersonConnectOrCreateWhere!
-            }
-
-            input MovieDirectorsPersonConnectOrCreateFieldInputOnCreate {
-              edge: DirectedCreateInput!
-              node: PersonOnCreateInput!
-            }
-
             input MovieDirectorsPersonConnectionWhere {
               AND: [MovieDirectorsPersonConnectionWhere!]
               NOT: MovieDirectorsPersonConnectionWhere
@@ -926,7 +862,6 @@ describe("Union Interface Relationships", () => {
 
             input MovieDirectorsPersonFieldInput {
               connect: [MovieDirectorsPersonConnectFieldInput!]
-              connectOrCreate: [MovieDirectorsPersonConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [MovieDirectorsPersonCreateFieldInput!]
             }
 
@@ -937,7 +872,6 @@ describe("Union Interface Relationships", () => {
 
             input MovieDirectorsPersonUpdateFieldInput {
               connect: [MovieDirectorsPersonConnectFieldInput!]
-              connectOrCreate: [MovieDirectorsPersonConnectOrCreateFieldInput!]
               create: [MovieDirectorsPersonCreateFieldInput!]
               delete: [MovieDirectorsPersonDeleteFieldInput!]
               disconnect: [MovieDirectorsPersonDisconnectFieldInput!]
@@ -965,11 +899,6 @@ describe("Union Interface Relationships", () => {
             type MovieEdge {
               cursor: String!
               node: Movie!
-            }
-
-            input MovieOnCreateInput {
-              imdbId: Int
-              title: String!
             }
 
             input MovieOptions {
@@ -1124,11 +1053,6 @@ describe("Union Interface Relationships", () => {
             input MovieSort {
               imdbId: SortDirection
               title: SortDirection
-            }
-
-            input MovieUniqueWhere {
-              imdbId: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              imdbId_EQ: Int
             }
 
             input MovieUpdateInput {
@@ -1291,10 +1215,6 @@ describe("Union Interface Relationships", () => {
               movies: [PersonMoviesConnectFieldInput!]
             }
 
-            input PersonConnectOrCreateWhere {
-              node: PersonUniqueWhere!
-            }
-
             input PersonConnectWhere {
               node: PersonWhere!
             }
@@ -1359,16 +1279,6 @@ describe("Union Interface Relationships", () => {
               where: MovieConnectWhere
             }
 
-            input PersonMoviesConnectOrCreateFieldInput {
-              onCreate: PersonMoviesConnectOrCreateFieldInputOnCreate!
-              where: MovieConnectOrCreateWhere!
-            }
-
-            input PersonMoviesConnectOrCreateFieldInputOnCreate {
-              edge: ReviewCreateInput!
-              node: MovieOnCreateInput!
-            }
-
             type PersonMoviesConnection {
               edges: [PersonMoviesRelationship!]!
               pageInfo: PageInfo!
@@ -1405,7 +1315,6 @@ describe("Union Interface Relationships", () => {
 
             input PersonMoviesFieldInput {
               connect: [PersonMoviesConnectFieldInput!]
-              connectOrCreate: [PersonMoviesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [PersonMoviesCreateFieldInput!]
             }
 
@@ -1463,19 +1372,11 @@ describe("Union Interface Relationships", () => {
 
             input PersonMoviesUpdateFieldInput {
               connect: [PersonMoviesConnectFieldInput!]
-              connectOrCreate: [PersonMoviesConnectOrCreateFieldInput!]
               create: [PersonMoviesCreateFieldInput!]
               delete: [PersonMoviesDeleteFieldInput!]
               disconnect: [PersonMoviesDisconnectFieldInput!]
               update: PersonMoviesUpdateConnectionInput
               where: PersonMoviesConnectionWhere
-            }
-
-            input PersonOnCreateInput {
-              id: Int
-              name: String!
-              reputation: Int!
-              reviewerId: Int
             }
 
             input PersonOptions {
@@ -1495,13 +1396,6 @@ describe("Union Interface Relationships", () => {
               name: SortDirection
               reputation: SortDirection
               reviewerId: SortDirection
-            }
-
-            input PersonUniqueWhere {
-              id: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_EQ: Int
-              reviewerId: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              reviewerId_EQ: Int
             }
 
             input PersonUpdateInput {

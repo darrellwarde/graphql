@@ -58,7 +58,7 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
             }
 
             type Resource implements ResourceEntity @node {
-                id: ID! @unique
+                id: ID!
                 name: String
                 type: ResourceType!
                 externalIds: [ID!]
@@ -177,10 +177,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               containedBy: [ResourceContainedByConnectFieldInput!]
             }
 
-            input ResourceConnectOrCreateWhere {
-              node: ResourceUniqueWhere!
-            }
-
             input ResourceConnectWhere {
               node: ResourceWhere!
             }
@@ -205,15 +201,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               \\"\\"\\"
               overwrite: Boolean! = true
               where: ResourceConnectWhere
-            }
-
-            input ResourceContainedByConnectOrCreateFieldInput {
-              onCreate: ResourceContainedByConnectOrCreateFieldInputOnCreate!
-              where: ResourceConnectOrCreateWhere!
-            }
-
-            input ResourceContainedByConnectOrCreateFieldInputOnCreate {
-              node: ResourceOnCreateInput!
             }
 
             type ResourceContainedByConnection {
@@ -249,7 +236,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
 
             input ResourceContainedByFieldInput {
               connect: [ResourceContainedByConnectFieldInput!]
-              connectOrCreate: [ResourceContainedByConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ResourceContainedByCreateFieldInput!]
             }
 
@@ -315,7 +301,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
 
             input ResourceContainedByUpdateFieldInput {
               connect: [ResourceContainedByConnectFieldInput!]
-              connectOrCreate: [ResourceContainedByConnectOrCreateFieldInput!]
               create: [ResourceContainedByCreateFieldInput!]
               delete: [ResourceContainedByDeleteFieldInput!]
               disconnect: [ResourceContainedByDisconnectFieldInput!]
@@ -424,16 +409,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               typename_IN: [ResourceEntityImplementation!]
             }
 
-            input ResourceOnCreateInput {
-              externalIds: [ID!]
-              id: ID!
-              name: String
-              properties: [Property!]
-              tags: [Tag!]
-              type: ResourceType!
-              updatedAt: DateTime!
-            }
-
             input ResourceOptions {
               limit: Int
               offset: Int
@@ -470,11 +445,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               ResourceA
               ResourceB
               ResourceC
-            }
-
-            input ResourceUniqueWhere {
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_EQ: ID
             }
 
             input ResourceUpdateInput {

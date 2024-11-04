@@ -2325,7 +2325,7 @@ describe("Relationship nested operations", () => {
         test("Single relationship to type with unique field with nested operation CONNECT_OR_CREATE specified", async () => {
             const typeDefs = gql`
                 type Person @node {
-                    id: ID! @id @unique
+                    id: ID! @id
                     name: String
                 }
 
@@ -2395,15 +2395,6 @@ describe("Relationship nested operations", () => {
                   node: MovieActorsNodeAggregationWhereInput
                 }
 
-                input MovieActorsConnectOrCreateFieldInput {
-                  onCreate: MovieActorsConnectOrCreateFieldInputOnCreate!
-                  where: PersonConnectOrCreateWhere!
-                }
-
-                input MovieActorsConnectOrCreateFieldInputOnCreate {
-                  node: PersonOnCreateInput!
-                }
-
                 type MovieActorsConnection {
                   edges: [MovieActorsRelationship!]!
                   pageInfo: PageInfo!
@@ -2419,10 +2410,6 @@ describe("Relationship nested operations", () => {
                   NOT: MovieActorsConnectionWhere
                   OR: [MovieActorsConnectionWhere!]
                   node: PersonWhere
-                }
-
-                input MovieActorsFieldInput {
-                  connectOrCreate: [MovieActorsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
                 }
 
                 input MovieActorsNodeAggregationWhereInput {
@@ -2461,18 +2448,12 @@ describe("Relationship nested operations", () => {
                   node: Person!
                 }
 
-                input MovieActorsUpdateFieldInput {
-                  connectOrCreate: [MovieActorsConnectOrCreateFieldInput!]
-                  where: MovieActorsConnectionWhere
-                }
-
                 type MovieAggregateSelection {
                   count: Int!
                   id: IDAggregateSelection!
                 }
 
                 input MovieCreateInput {
-                  actors: MovieActorsFieldInput
                   id: ID
                 }
 
@@ -2508,7 +2489,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  actors: [MovieActorsUpdateFieldInput!]
                   id: ID
                 }
 
@@ -2589,10 +2569,6 @@ describe("Relationship nested operations", () => {
                   name: StringAggregateSelection!
                 }
 
-                input PersonConnectOrCreateWhere {
-                  node: PersonUniqueWhere!
-                }
-
                 input PersonCreateInput {
                   name: String
                 }
@@ -2600,10 +2576,6 @@ describe("Relationship nested operations", () => {
                 type PersonEdge {
                   cursor: String!
                   node: Person!
-                }
-
-                input PersonOnCreateInput {
-                  name: String
                 }
 
                 input PersonOptions {
@@ -2621,11 +2593,6 @@ describe("Relationship nested operations", () => {
                 input PersonSort {
                   id: SortDirection
                   name: SortDirection
-                }
-
-                input PersonUniqueWhere {
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-                  id_EQ: ID
                 }
 
                 input PersonUpdateInput {
@@ -6379,12 +6346,12 @@ describe("Relationship nested operations", () => {
         test("Single relationship to type with unique field with nested operation CONNECT_OR_CREATE specified", async () => {
             const typeDefs = gql`
                 type PersonOne @node {
-                    id: ID! @id @unique
+                    id: ID! @id
                     name: String
                 }
 
                 type PersonTwo @node {
-                    id: ID! @id @unique
+                    id: ID! @id
                     nameTwo: String
                 }
 
@@ -6458,43 +6425,11 @@ describe("Relationship nested operations", () => {
                   PersonTwo: MovieActorsPersonTwoConnectionWhere
                 }
 
-                input MovieActorsCreateInput {
-                  PersonOne: MovieActorsPersonOneFieldInput
-                  PersonTwo: MovieActorsPersonTwoFieldInput
-                }
-
-                input MovieActorsPersonOneConnectOrCreateFieldInput {
-                  onCreate: MovieActorsPersonOneConnectOrCreateFieldInputOnCreate!
-                  where: PersonOneConnectOrCreateWhere!
-                }
-
-                input MovieActorsPersonOneConnectOrCreateFieldInputOnCreate {
-                  node: PersonOneOnCreateInput!
-                }
-
                 input MovieActorsPersonOneConnectionWhere {
                   AND: [MovieActorsPersonOneConnectionWhere!]
                   NOT: MovieActorsPersonOneConnectionWhere
                   OR: [MovieActorsPersonOneConnectionWhere!]
                   node: PersonOneWhere
-                }
-
-                input MovieActorsPersonOneFieldInput {
-                  connectOrCreate: [MovieActorsPersonOneConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
-                }
-
-                input MovieActorsPersonOneUpdateFieldInput {
-                  connectOrCreate: [MovieActorsPersonOneConnectOrCreateFieldInput!]
-                  where: MovieActorsPersonOneConnectionWhere
-                }
-
-                input MovieActorsPersonTwoConnectOrCreateFieldInput {
-                  onCreate: MovieActorsPersonTwoConnectOrCreateFieldInputOnCreate!
-                  where: PersonTwoConnectOrCreateWhere!
-                }
-
-                input MovieActorsPersonTwoConnectOrCreateFieldInputOnCreate {
-                  node: PersonTwoOnCreateInput!
                 }
 
                 input MovieActorsPersonTwoConnectionWhere {
@@ -6504,23 +6439,9 @@ describe("Relationship nested operations", () => {
                   node: PersonTwoWhere
                 }
 
-                input MovieActorsPersonTwoFieldInput {
-                  connectOrCreate: [MovieActorsPersonTwoConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
-                }
-
-                input MovieActorsPersonTwoUpdateFieldInput {
-                  connectOrCreate: [MovieActorsPersonTwoConnectOrCreateFieldInput!]
-                  where: MovieActorsPersonTwoConnectionWhere
-                }
-
                 type MovieActorsRelationship {
                   cursor: String!
                   node: Person!
-                }
-
-                input MovieActorsUpdateInput {
-                  PersonOne: [MovieActorsPersonOneUpdateFieldInput!]
-                  PersonTwo: [MovieActorsPersonTwoUpdateFieldInput!]
                 }
 
                 type MovieAggregateSelection {
@@ -6529,7 +6450,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieCreateInput {
-                  actors: MovieActorsCreateInput
                   id: ID
                 }
 
@@ -6555,7 +6475,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  actors: MovieActorsUpdateInput
                   id: ID
                 }
 
@@ -6634,10 +6553,6 @@ describe("Relationship nested operations", () => {
                   name: StringAggregateSelection!
                 }
 
-                input PersonOneConnectOrCreateWhere {
-                  node: PersonOneUniqueWhere!
-                }
-
                 input PersonOneCreateInput {
                   name: String
                 }
@@ -6645,10 +6560,6 @@ describe("Relationship nested operations", () => {
                 type PersonOneEdge {
                   cursor: String!
                   node: PersonOne!
-                }
-
-                input PersonOneOnCreateInput {
-                  name: String
                 }
 
                 input PersonOneOptions {
@@ -6666,11 +6577,6 @@ describe("Relationship nested operations", () => {
                 input PersonOneSort {
                   id: SortDirection
                   name: SortDirection
-                }
-
-                input PersonOneUniqueWhere {
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-                  id_EQ: ID
                 }
 
                 input PersonOneUpdateInput {
@@ -6712,10 +6618,6 @@ describe("Relationship nested operations", () => {
                   nameTwo: StringAggregateSelection!
                 }
 
-                input PersonTwoConnectOrCreateWhere {
-                  node: PersonTwoUniqueWhere!
-                }
-
                 input PersonTwoCreateInput {
                   nameTwo: String
                 }
@@ -6723,10 +6625,6 @@ describe("Relationship nested operations", () => {
                 type PersonTwoEdge {
                   cursor: String!
                   node: PersonTwo!
-                }
-
-                input PersonTwoOnCreateInput {
-                  nameTwo: String
                 }
 
                 input PersonTwoOptions {
@@ -6744,11 +6642,6 @@ describe("Relationship nested operations", () => {
                 input PersonTwoSort {
                   id: SortDirection
                   nameTwo: SortDirection
-                }
-
-                input PersonTwoUniqueWhere {
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-                  id_EQ: ID
                 }
 
                 input PersonTwoUpdateInput {
