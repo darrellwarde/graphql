@@ -26,7 +26,6 @@ import type { GraphQLWhereArg, RelationField } from "../types";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import { compileCypher } from "../utils/compile-cypher";
 import createConnectAndParams from "./create-connect-and-params";
-import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
 import createCreateAndParams from "./create-create-and-params";
 import createDeleteAndParams from "./create-delete-and-params";
 import createDisconnectAndParams from "./create-disconnect-and-params";
@@ -283,22 +282,6 @@ export default async function translateUpdate({
             } else {
                 refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
             }
-
-            refNodes.forEach((refNode) => {
-                const { cypher, params } = createConnectOrCreateAndParams({
-                    input: input[refNode.name] || input, // Deals with different input from update -> connectOrCreate
-                    varName: `${varName}_connectOrCreate_${key}${relationField.union ? `_${refNode.name}` : ""}`,
-                    parentVar: varName,
-                    relationField,
-                    refNode,
-                    node,
-                    context,
-                    withVars,
-                    callbackBucket,
-                });
-                connectStrs.push(cypher);
-                cypherParams = { ...cypherParams, ...params };
-            });
         });
     }
 

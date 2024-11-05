@@ -22,11 +22,11 @@ import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
-describe("3817", () => {
+describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
     test("3817", async () => {
         const typeDefs = gql`
             type Person @node {
-                id: ID! @id @unique
+                id: ID! @id
                 friends: [Person!]!
                     @relationship(
                         type: "FRIEND_OF"
@@ -177,10 +177,6 @@ describe("3817", () => {
               friends: [PersonFriendsConnectFieldInput!]
             }
 
-            input PersonConnectOrCreateWhere {
-              node: PersonUniqueWhere!
-            }
-
             input PersonConnectWhere {
               node: PersonWhere!
             }
@@ -225,15 +221,6 @@ describe("3817", () => {
               where: PersonConnectWhere
             }
 
-            input PersonFriendsConnectOrCreateFieldInput {
-              onCreate: PersonFriendsConnectOrCreateFieldInputOnCreate!
-              where: PersonConnectOrCreateWhere!
-            }
-
-            input PersonFriendsConnectOrCreateFieldInputOnCreate {
-              node: PersonOnCreateInput!
-            }
-
             type PersonFriendsConnection {
               edges: [PersonFriendsRelationship!]!
               pageInfo: PageInfo!
@@ -269,7 +256,6 @@ describe("3817", () => {
 
             input PersonFriendsFieldInput {
               connect: [PersonFriendsConnectFieldInput!]
-              connectOrCreate: [PersonFriendsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [PersonFriendsCreateFieldInput!]
             }
 
@@ -302,19 +288,11 @@ describe("3817", () => {
 
             input PersonFriendsUpdateFieldInput {
               connect: [PersonFriendsConnectFieldInput!]
-              connectOrCreate: [PersonFriendsConnectOrCreateFieldInput!]
               create: [PersonFriendsCreateFieldInput!]
               delete: [PersonFriendsDeleteFieldInput!]
               disconnect: [PersonFriendsDisconnectFieldInput!]
               update: PersonFriendsUpdateConnectionInput
               where: PersonFriendsConnectionWhere
-            }
-
-            input PersonOnCreateInput {
-              \\"\\"\\"
-              Appears because this input type would be empty otherwise because this type is composed of just generated and/or relationship properties. See https://neo4j.com/docs/graphql-manual/current/troubleshooting/faqs/
-              \\"\\"\\"
-              _emptyInput: Boolean
             }
 
             input PersonOptions {
@@ -345,11 +323,6 @@ describe("3817", () => {
             \\"\\"\\"
             input PersonSort {
               id: SortDirection
-            }
-
-            input PersonUniqueWhere {
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_EQ: ID
             }
 
             input PersonUpdateInput {

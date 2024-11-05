@@ -31,7 +31,7 @@ describe("https://github.com/neo4j/graphql/issues/2812", () => {
         type Actor
             @authorization(validate: [{ when: [BEFORE], where: { node: { nodeCreatedBy_EQ: "$jwt.sub" } } }])
             @node {
-            id: ID! @id @unique
+            id: ID! @id
             name: String
             nodeCreatedBy: String
             fieldA: String

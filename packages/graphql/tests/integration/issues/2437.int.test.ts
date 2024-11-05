@@ -37,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/2437", () => {
             }
 
             type ${Agent} @mutation(operations: [CREATE, UPDATE]) @node {
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 archivedAt: DateTime
 
                 valuations: [${Valuation}!]! @relationship(type: "IS_VALUATION_AGENT", direction: OUT)
@@ -47,7 +47,7 @@ describe("https://github.com/neo4j/graphql/issues/2437", () => {
                 @authorization(validate: [{ operations: [CREATE], where: { jwt: { roles_INCLUDES: "Admin" } } }], filter: [{ where: { node: { archivedAt_EQ: null } } }])
 
             type ${Valuation} @mutation(operations: [CREATE, UPDATE]) @node {
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 archivedAt: DateTime
 
                 agent: ${Agent}! @relationship(type: "IS_VALUATION_AGENT", direction: IN)

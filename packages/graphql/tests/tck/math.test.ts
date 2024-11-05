@@ -36,7 +36,7 @@ describe("Math operators", () => {
             }
 
             type Movie @node {
-                id: ID! @id @unique
+                id: ID! @id
                 title: String!
                 viewers: Int
                 revenue: Float

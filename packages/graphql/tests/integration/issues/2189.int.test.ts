@@ -32,7 +32,7 @@ describe("https://github.com/neo4j/graphql/issues/2189", () => {
 
         const typeDefs = `
             type ${Test_Item} @node {
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 int: Int
                 str: String
                 bool: Boolean
@@ -49,7 +49,7 @@ describe("https://github.com/neo4j/graphql/issues/2189", () => {
                     )
             }
             type ${Test_Feedback} @node {
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 int: Int
                 str: String
                 bool: Boolean

@@ -38,7 +38,6 @@ import {
     createAuthorizationBeforeAndParamsField,
 } from "./authorization/compatibility/create-authorization-before-and-params";
 import createConnectAndParams from "./create-connect-and-params";
-import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
 import createCreateAndParams from "./create-create-and-params";
 import createDeleteAndParams from "./create-delete-and-params";
 import createDisconnectAndParams from "./create-disconnect-and-params";
@@ -368,22 +367,6 @@ export default function createUpdateAndParams({
                         subquery.push(connectAndParams[0]);
 
                         res.params = { ...res.params, ...connectAndParams[1] };
-                    }
-
-                    if (update.connectOrCreate) {
-                        const { cypher, params } = createConnectOrCreateAndParams({
-                            input: update.connectOrCreate,
-                            varName: `${variableName}_connectOrCreate`,
-                            parentVar: varName,
-                            relationField,
-                            refNode,
-                            node,
-                            context,
-                            withVars,
-                            callbackBucket,
-                        });
-                        subquery.push(cypher);
-                        res.params = { ...res.params, ...params };
                     }
 
                     if (update.create) {

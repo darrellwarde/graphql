@@ -29,7 +29,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
         typeDefs = /* GraphQL */ `
             type PostalCode @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                number: String! @unique
+                number: String!
 
                 address: [Address!]! @relationship(type: "HAS_POSTAL_CODE", direction: IN)
             }
@@ -40,11 +40,11 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
             type Address @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
-                address: String! @unique
+                address: String!
                 streetNumber: String
                 route: String! @coalesce(value: "")
                 postalCode: PostalCode! @relationship(type: "HAS_POSTAL_CODE", direction: OUT)
@@ -61,7 +61,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
             type Mandate @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                number: String! @unique
+                number: String!
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
@@ -74,7 +74,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
             type Valuation @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
@@ -100,7 +100,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
             type Estate @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 

@@ -24,12 +24,10 @@ import type {
     InputTypeComposerFieldConfigMapDefinition,
     SchemaComposer,
 } from "graphql-compose";
-import { RelationshipNestedOperationsOption } from "../../constants";
-import { ConcreteEntityAdapter } from "../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import type { ConcreteEntityAdapter } from "../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/UnionEntityAdapter";
 import type { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
-import { createOnCreateITC } from "../create-relationship-fields/create-connect-or-create-field";
 
 // TODO: refactor this
 export function withConnectOrCreateFieldInputType({
@@ -43,53 +41,55 @@ export function withConnectOrCreateFieldInputType({
     userDefinedFieldDirectives: Map<string, DirectiveNode[]>;
     ifUnionMemberEntity?: ConcreteEntityAdapter;
 }): InputTypeComposer | undefined {
-    if (!relationshipAdapter.nestedOperations.has(RelationshipNestedOperationsOption.CONNECT_OR_CREATE)) {
-        return;
-    }
+    return;
+    // TODO: Fix connectOrCreate without unique
+    // if (!relationshipAdapter.nestedOperations.has(RelationshipNestedOperationsOption.CONNECT_OR_CREATE)) {
+    //     return;
+    // }
 
-    let targetEntity: ConcreteEntityAdapter | undefined;
-    if (relationshipAdapter.target instanceof UnionEntityAdapter) {
-        if (!ifUnionMemberEntity) {
-            throw new Error("Expected member entity.");
-        }
-        targetEntity = ifUnionMemberEntity;
-    } else {
-        if (!(relationshipAdapter.target instanceof ConcreteEntityAdapter)) {
-            throw new Error("Expected concrete target");
-        }
-        targetEntity = relationshipAdapter.target;
-    }
-    if (
-        !relationshipAdapter.shouldGenerateFieldInputType(ifUnionMemberEntity) &&
-        !relationshipAdapter.shouldGenerateUpdateFieldInputType(ifUnionMemberEntity)
-    ) {
-        return;
-    }
+    // let targetEntity: ConcreteEntityAdapter | undefined;
+    // if (relationshipAdapter.target instanceof UnionEntityAdapter) {
+    //     if (!ifUnionMemberEntity) {
+    //         throw new Error("Expected member entity.");
+    //     }
+    //     targetEntity = ifUnionMemberEntity;
+    // } else {
+    //     if (!(relationshipAdapter.target instanceof ConcreteEntityAdapter)) {
+    //         throw new Error("Expected concrete target");
+    //     }
+    //     targetEntity = relationshipAdapter.target;
+    // }
+    // if (
+    //     !relationshipAdapter.shouldGenerateFieldInputType(ifUnionMemberEntity) &&
+    //     !relationshipAdapter.shouldGenerateUpdateFieldInputType(ifUnionMemberEntity)
+    // ) {
+    //     return;
+    // }
 
-    const hasUniqueFields = targetEntity.uniqueFields.length > 0;
-    if (hasUniqueFields !== true) {
-        return;
-    }
+    // const hasUniqueFields: boolean = false;
+    // if (hasUniqueFields !== true) {
+    //     return;
+    // }
 
-    createOnCreateITC({
-        schemaComposer: composer,
-        relationshipAdapter,
-        targetEntityAdapter: targetEntity,
-        userDefinedFieldDirectives,
-    });
+    // createOnCreateITC({
+    //     schemaComposer: composer,
+    //     relationshipAdapter,
+    //     targetEntityAdapter: targetEntity,
+    //     userDefinedFieldDirectives,
+    // });
 
-    // TODO: this should live in the where-fields.ts
-    composer.getOrCreateITC(targetEntity.operations.connectOrCreateWhereInputTypeName, (tc) => {
-        tc.addFields((targetEntity as ConcreteEntityAdapter).operations.connectOrCreateWhereInputFieldNames);
-    });
+    // // TODO: this should live in the where-fields.ts
+    // composer.getOrCreateITC(targetEntity.operations.connectOrCreateWhereInputTypeName, (tc) => {
+    //     tc.addFields((targetEntity as ConcreteEntityAdapter).operations.connectOrCreateWhereInputFieldNames);
+    // });
 
-    const connectOrCreateName = relationshipAdapter.operations.getConnectOrCreateFieldInputTypeName(targetEntity);
-    const connectOrCreateFieldInput = composer.getOrCreateITC(connectOrCreateName, (tc) => {
-        tc.addFields(
-            relationshipAdapter.operations.getConnectOrCreateInputFields(targetEntity as ConcreteEntityAdapter) || {}
-        );
-    });
-    return connectOrCreateFieldInput;
+    // const connectOrCreateName = relationshipAdapter.operations.getConnectOrCreateFieldInputTypeName(targetEntity);
+    // const connectOrCreateFieldInput = composer.getOrCreateITC(connectOrCreateName, (tc) => {
+    //     tc.addFields(
+    //         relationshipAdapter.operations.getConnectOrCreateInputFields(targetEntity as ConcreteEntityAdapter) || {}
+    //     );
+    // });
+    // return connectOrCreateFieldInput;
 }
 
 export function withConnectOrCreateInputType({

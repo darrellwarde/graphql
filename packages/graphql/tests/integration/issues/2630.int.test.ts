@@ -43,7 +43,7 @@ describe("https://github.com/neo4j/graphql/issues/2630", () => {
           }
 
           type ${Post} @node {
-            id: ID! @id @unique
+            id: ID! @id
             subject: ${PostSubject}! @relationship(type: "POST_FOR", direction: OUT)
           }
 

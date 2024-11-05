@@ -27,7 +27,7 @@ describe("https://github.com/neo4j/graphql/issues/1430", () => {
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
             type ABCE @node {
-                id: ID @id @unique
+                id: ID @id
                 name: String
                 interface: InterfaceMom @relationship(type: "HAS_INTERFACE", direction: OUT)
             }
@@ -38,13 +38,13 @@ describe("https://github.com/neo4j/graphql/issues/1430", () => {
             }
 
             type ChildOne implements InterfaceMom @node {
-                id: ID @id @unique
+                id: ID @id
                 name: String
                 feathur: String
             }
 
             type ChildTwo implements InterfaceMom @node {
-                id: ID @id @unique
+                id: ID @id
                 name: String
                 sth: String
             }

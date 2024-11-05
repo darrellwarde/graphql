@@ -40,7 +40,7 @@ describe("https://github.com/neo4j/graphql/issues/5270", () => {
                     { where: { node: { NOT: { blockedUsers_SOME: { to: { id_EQ: "$jwt.sub" } } } } } },
                 ]
             ) {
-                id: ID! @unique @id
+                id: ID! @id
                 blockedUsers: [${UserBlockedUser}!]! @relationship(type: "HAS_BLOCKED", direction: OUT)
             }
         
@@ -49,7 +49,7 @@ describe("https://github.com/neo4j/graphql/issues/5270", () => {
                     { where: { node: { from: { id_EQ: "$jwt.sub" } } } }
                 ]
             ) {
-                id: ID! @id @unique
+                id: ID! @id
                 from: ${User}! @relationship(type: "HAS_BLOCKED", direction: IN) @settable(onCreate: true, onUpdate: false)
                 to: ${User}! @relationship(type: "IS_BLOCKING", direction: OUT) @settable(onCreate: true, onUpdate: false)
             }

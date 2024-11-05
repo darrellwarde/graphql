@@ -34,19 +34,19 @@ describe("https://github.com/neo4j/graphql/issues/2574", () => {
 
         const typeDefs = `
             type ${A} @node {
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 child: ${D}! @relationship(type: "HAS_PARENT", direction: IN)
             }
 
             type ${B} @node {
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 child: ${D}! @relationship(type: "HAS_PARENT", direction: IN)
             }
 
             union C = ${A} | ${B}
 
             type ${D} @node {
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 test: String!
                 parent: C! @relationship(type: "HAS_PARENT", direction: OUT)
             }

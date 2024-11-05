@@ -26,7 +26,7 @@ describe("200", () => {
     test("Preserve schema array non null", async () => {
         const typeDefs = gql`
             type Category @node {
-                categoryId: ID! @id @unique
+                categoryId: ID! @id
                 name: String!
                 description: String! @default(value: "")
                 exampleImageLocations: [String!]

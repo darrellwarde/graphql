@@ -31,7 +31,7 @@ describe("https://github.com/neo4j/graphql/issues/5023", () => {
                 id: String
             }
             type User @authorization(filter: [{ where: { node: { userId_EQ: "$jwt.id" } } }]) @node {
-                userId: String! @unique
+                userId: String!
                 adminAccess: [Tenant!]! @relationship(type: "ADMIN_IN", direction: OUT, aggregate: false)
             }
 

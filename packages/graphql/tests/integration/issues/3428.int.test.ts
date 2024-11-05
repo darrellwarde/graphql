@@ -172,7 +172,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
         test("Should not error and should only be able to perform the disconnect nested op when only the DISCONNECT nestedOperation is specified on rel to a type with a unique field", async () => {
             const typeDefs = `#graphql
                 type ${Person} @node {
-                    id: ID! @id @unique
+                    id: ID! @id
                     name: String
                 }
 
@@ -224,70 +224,6 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             expect((updateWithNestedConnectOrCreateResult.errors as any)[0].message).toInclude(
                 'Field "connectOrCreate" is not defined by type'
             );
-            expect(updateWithNestedUpdateResult.errors).toBeDefined();
-            expect((updateWithNestedUpdateResult.errors as any)[0].message).toInclude(
-                'Field "update" is not defined by type'
-            );
-            expect(updateWithNestedDisconnectResult.errors).toBeFalsy();
-            expect(updateWithNestedDeleteResult.errors).toBeDefined();
-            expect((updateWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Field "delete" is not defined by type'
-            );
-            expect(deleteWithNestedDeleteResult.errors).toBeDefined();
-            expect((deleteWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Unknown argument "delete" on field'
-            );
-        });
-
-        test("Should only be able to perform the disconnect and connectOrCreate nested ops when DISCONNECT and CONNECT_OR_CREATE are the only nestedOperations specified", async () => {
-            const typeDefs = `#graphql
-                type ${Person} @node {
-                    id: ID! @id @unique
-                    name: String
-                }
-
-                type ${Movie} @node {
-                    id: ID
-                    actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT, CONNECT_OR_CREATE])
-                }
-            `;
-            await testHelper.initNeo4jGraphQL({ typeDefs });
-
-            const createWithNestedCreateResult = await testHelper.executeGraphQL(createMutationWithNestedCreate);
-            const createWithNestedConnectResult = await testHelper.executeGraphQL(createMutationWithNestedConnect);
-            const createWithNestedConnectOrCreateResult = await testHelper.executeGraphQL(
-                createMutationWithNestedConnectOrCreate
-            );
-            const updateWithNestedCreateResult = await testHelper.executeGraphQL(updateMutationWithNestedCreate);
-            const updateWithNestedConnectResult = await testHelper.executeGraphQL(updateMutationWithNestedConnect);
-            const updateWithNestedConnectOrCreateResult = await testHelper.executeGraphQL(
-                updateMutationWithNestedConnectOrCreate
-            );
-            const updateWithNestedUpdateResult = await testHelper.executeGraphQL(updateMutationWithNestedUpdate);
-            const updateWithNestedDisconnectResult = await testHelper.executeGraphQL(
-                updateMutationWithNestedDisconnect
-            );
-            const updateWithNestedDeleteResult = await testHelper.executeGraphQL(updateMutationWithNestedDelete);
-            const deleteWithNestedDeleteResult = await testHelper.executeGraphQL(deleteMutationWithNestedDelete);
-
-            expect(createWithNestedCreateResult.errors).toBeDefined();
-            expect((createWithNestedCreateResult.errors as any)[0].message).toInclude(
-                'Field "create" is not defined by type'
-            );
-            expect(createWithNestedConnectResult.errors).toBeDefined();
-            expect((createWithNestedConnectResult.errors as any)[0].message).toInclude(
-                'Field "connect" is not defined by type'
-            );
-            expect(createWithNestedConnectOrCreateResult.errors).toBeFalsy();
-            expect(updateWithNestedCreateResult.errors).toBeDefined();
-            expect((updateWithNestedCreateResult.errors as any)[0].message).toInclude(
-                'Field "create" is not defined by type'
-            );
-            expect(updateWithNestedConnectResult.errors).toBeDefined();
-            expect((updateWithNestedConnectResult.errors as any)[0].message).toInclude(
-                'Field "connect" is not defined by type'
-            );
-            expect(updateWithNestedConnectOrCreateResult.errors).toBeFalsy();
             expect(updateWithNestedUpdateResult.errors).toBeDefined();
             expect((updateWithNestedUpdateResult.errors as any)[0].message).toInclude(
                 'Field "update" is not defined by type'
@@ -451,7 +387,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
         test("Should not error and should only be able to perform the disconnect nested op when only the DISCONNECT nestedOperation is specified on rel to a type with a unique field", async () => {
             const typeDefs = `#graphql
                 type ${PersonOne} @node {
-                    name: String @unique
+                    name: String
                 }
 
                 type ${PersonTwo} @node {
@@ -508,75 +444,6 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             expect((updateWithNestedConnectOrCreateResult.errors as any)[0].message).toInclude(
                 'Field "connectOrCreate" is not defined by type'
             );
-            expect(updateWithNestedUpdateResult.errors).toBeDefined();
-            expect((updateWithNestedUpdateResult.errors as any)[0].message).toInclude(
-                'Field "update" is not defined by type'
-            );
-            expect(updateWithNestedDisconnectResult.errors).toBeFalsy();
-            expect(updateWithNestedDeleteResult.errors).toBeDefined();
-            expect((updateWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Field "delete" is not defined by type'
-            );
-            expect(deleteWithNestedDeleteResult.errors).toBeDefined();
-            expect((deleteWithNestedDeleteResult.errors as any)[0].message).toInclude(
-                'Unknown argument "delete" on field'
-            );
-        });
-
-        test("Should only be able to perform the disconnect and connectOrCreate nested ops when DISCONNECT and CONNECT_OR_CREATE are the only nestedOperations specified", async () => {
-            const typeDefs = `#graphql
-                type ${PersonOne} @node {
-                    name: String @unique
-                }
-
-                type ${PersonTwo} @node {
-                    nameTwo: String
-                }
-
-                union ${Person} = ${PersonOne} | ${PersonTwo}
-
-                type ${Movie} @node {
-                    id: ID
-                    actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN, nestedOperations: [DISCONNECT, CONNECT_OR_CREATE])
-                }
-            `;
-            await testHelper.initNeo4jGraphQL({ typeDefs });
-
-            const createWithNestedCreateResult = await testHelper.executeGraphQL(createMutationWithNestedCreate);
-            const createWithNestedConnectResult = await testHelper.executeGraphQL(createMutationWithNestedConnect);
-            const createWithNestedConnectOrCreateResult = await testHelper.executeGraphQL(
-                createMutationWithNestedConnectOrCreate
-            );
-            const updateWithNestedCreateResult = await testHelper.executeGraphQL(updateMutationWithNestedCreate);
-            const updateWithNestedConnectResult = await testHelper.executeGraphQL(updateMutationWithNestedConnect);
-            const updateWithNestedConnectOrCreateResult = await testHelper.executeGraphQL(
-                updateMutationWithNestedConnectOrCreate
-            );
-            const updateWithNestedUpdateResult = await testHelper.executeGraphQL(updateMutationWithNestedUpdate);
-            const updateWithNestedDisconnectResult = await testHelper.executeGraphQL(
-                updateMutationWithNestedDisconnect
-            );
-            const updateWithNestedDeleteResult = await testHelper.executeGraphQL(updateMutationWithNestedDelete);
-            const deleteWithNestedDeleteResult = await testHelper.executeGraphQL(deleteMutationWithNestedDelete);
-
-            expect(createWithNestedCreateResult.errors).toBeDefined();
-            expect((createWithNestedCreateResult.errors as any)[0].message).toInclude(
-                'Field "create" is not defined by type'
-            );
-            expect(createWithNestedConnectResult.errors).toBeDefined();
-            expect((createWithNestedConnectResult.errors as any)[0].message).toInclude(
-                'Field "connect" is not defined by type'
-            );
-            expect(createWithNestedConnectOrCreateResult.errors).toBeFalsy();
-            expect(updateWithNestedCreateResult.errors).toBeDefined();
-            expect((updateWithNestedCreateResult.errors as any)[0].message).toInclude(
-                'Field "create" is not defined by type'
-            );
-            expect(updateWithNestedConnectResult.errors).toBeDefined();
-            expect((updateWithNestedConnectResult.errors as any)[0].message).toInclude(
-                'Field "connect" is not defined by type'
-            );
-            expect(updateWithNestedConnectOrCreateResult.errors).toBeFalsy();
             expect(updateWithNestedUpdateResult.errors).toBeDefined();
             expect((updateWithNestedUpdateResult.errors as any)[0].message).toInclude(
                 'Field "update" is not defined by type'

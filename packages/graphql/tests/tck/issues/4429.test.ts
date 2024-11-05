@@ -29,7 +29,7 @@ describe("https://github.com/neo4j/graphql/issues/4429", () => {
             roles: [String]
         }
         type User @authorization(validate: [{ where: { node: { userId_EQ: "$jwt.id" } }, operations: [READ] }]) @node {
-            userId: String! @unique
+            userId: String!
             adminAccess: [Tenant!]! @relationship(type: "ADMIN_IN", direction: OUT)
         }
 

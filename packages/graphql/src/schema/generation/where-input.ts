@@ -32,14 +32,12 @@ import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/Uni
 import { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { Neo4jFeaturesSettings } from "../../types";
-import { DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "../constants";
 import { getWhereFieldsForAttributes } from "../get-where-fields";
 import { withAggregateInputType } from "./aggregate-types";
 import {
     augmentWhereInputTypeWithConnectionFields,
     augmentWhereInputTypeWithRelationshipFields,
 } from "./augment-where-input";
-import { shouldAddDeprecatedFields } from "./utils";
 
 function isEmptyObject(obj: Record<string, unknown>): boolean {
     return !Object.keys(obj).length;
@@ -55,17 +53,6 @@ export function withUniqueWhereInputType({
     features?: Neo4jFeaturesSettings;
 }): InputTypeComposer {
     const uniqueWhereFields: InputTypeComposerFieldConfigMapDefinition = {};
-    for (const attribute of concreteEntityAdapter.uniqueFields) {
-        if (shouldAddDeprecatedFields(features, "implicitEqualFilters")) {
-            uniqueWhereFields[attribute.name] = {
-                type: attribute.getFieldTypeName(),
-                directives: [DEPRECATE_IMPLICIT_EQUAL_FILTERS],
-            };
-        }
-        uniqueWhereFields[`${attribute.name}_EQ`] = {
-            type: attribute.getFieldTypeName(),
-        };
-    }
 
     const uniqueWhereInputType = composer.createInputTC({
         name: concreteEntityAdapter.operations.uniqueWhereInputTypeName,

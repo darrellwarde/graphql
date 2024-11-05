@@ -2986,38 +2986,6 @@ describe("validation 2.0", () => {
             });
         });
 
-        describe("@unique", () => {
-            test("@unique valid", () => {
-                const doc = gql`
-                    type User @node {
-                        name: String @unique
-                    }
-                `;
-
-                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
-                expect(executeValidate).not.toThrow();
-            });
-
-            test("@unique cannot be used on fields of Interface types", () => {
-                const doc = gql`
-                    interface IUser {
-                        name: String @unique
-                    }
-                `;
-
-                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
-                const errors = getError(executeValidate);
-
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty(
-                    "message",
-                    "Invalid directive usage: Directive @unique is not supported on fields of the IUser type."
-                );
-                expect(errors[0]).toHaveProperty("path", ["IUser", "name", "@unique"]);
-            });
-        });
-
         test("should throw cannot auto-generate a non ID field", () => {
             const doc = gql`
                 type Movie @node {
@@ -3212,36 +3180,6 @@ describe("validation 2.0", () => {
             });
         });
         describe("invalid", () => {
-            test("@unique can't be used with @relationship", () => {
-                const doc = gql`
-                    type Movie @node {
-                        id: ID
-                        actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT) @unique
-                    }
-
-                    type Actor @node {
-                        name: String
-                    }
-                `;
-
-                const executeValidate = () =>
-                    validateDocument({
-                        document: doc,
-                        additionalDefinitions,
-                        features: {},
-                    });
-
-                const errors = getError(executeValidate);
-
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty(
-                    "message",
-                    "Invalid directive usage: Directive @relationship cannot be used in combination with @unique"
-                );
-                expect(errors[0]).toHaveProperty("path", ["Movie", "actors"]);
-            });
-
             test("@authentication can't be used with @relationship", () => {
                 const doc = gql`
                     type Movie @node {
@@ -6026,7 +5964,7 @@ describe("validation 2.0", () => {
                 }
 
                 type Post @node {
-                    id: ID! @id @unique
+                    id: ID! @id
                     title: String!
                     datetime: DateTime @timestamp(operations: [CREATE])
                 }
@@ -6336,7 +6274,7 @@ describe("validation 2.0", () => {
             test("should not throw error on validation of schema", () => {
                 const doc = gql`
                     type Order @node {
-                        orderID: ID! @id @unique
+                        orderID: ID! @id
                         placedAt: DateTime @timestamp
                         shipTo: Address! @relationship(type: "SHIPS_TO", direction: OUT)
                         customer: Customer! @relationship(type: "PLACED", direction: IN)
