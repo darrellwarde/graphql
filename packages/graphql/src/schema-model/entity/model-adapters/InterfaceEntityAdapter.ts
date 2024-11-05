@@ -35,7 +35,6 @@ export class InterfaceEntityAdapter {
     public readonly attributes: Map<string, AttributeAdapter> = new Map();
     public readonly relationshipDeclarations: Map<string, RelationshipDeclarationAdapter> = new Map();
     public readonly annotations: Partial<Annotations>;
-    private uniqueFieldsKeys: string[] = [];
 
     private _singular: string | undefined;
     private _plural: string | undefined;

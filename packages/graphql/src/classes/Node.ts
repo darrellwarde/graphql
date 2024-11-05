@@ -74,8 +74,6 @@ type MutableField = PrimitiveField | CustomScalarField | CustomEnumField | Union
 
 type AuthableField = PrimitiveField | CustomScalarField | CustomEnumField | UnionField | TemporalField | CypherField;
 
-type ConstrainableField = PrimitiveField | CustomScalarField | CustomEnumField | TemporalField;
-
 export type RootTypeFieldNames = {
     create: string;
     read: string;
@@ -176,20 +174,6 @@ class Node extends GraphElement {
             ...this.pointFields,
             ...this.cypherFields,
         ];
-    }
-
-    public get constrainableFields(): ConstrainableField[] {
-        return [
-            ...this.primitiveFields,
-            ...this.scalarFields,
-            ...this.enumFields,
-            ...this.temporalFields,
-            ...this.pointFields,
-        ];
-    }
-
-    public get uniqueFields(): ConstrainableField[] {
-        return this.constrainableFields.filter((field) => field.unique);
     }
 
     private get pascalCaseSingular(): string {

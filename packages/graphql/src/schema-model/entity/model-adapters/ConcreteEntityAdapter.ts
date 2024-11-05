@@ -44,7 +44,6 @@ export class ConcreteEntityAdapter {
 
     // These keys allow to store the keys of the map in memory and avoid keep iterating over the map.
     private mutableFieldsKeys: string[] = [];
-    private constrainableFieldsKeys: string[] = [];
 
     private _relatedEntities: EntityAdapter[] | undefined;
 
@@ -75,10 +74,6 @@ export class ConcreteEntityAdapter {
             this.attributes.set(attributeName, attributeAdapter);
             if (attributeAdapter.isMutable()) {
                 this.mutableFieldsKeys.push(attribute.name);
-            }
-
-            if (attributeAdapter.isConstrainable()) {
-                this.constrainableFieldsKeys.push(attribute.name);
             }
 
             if (attributeAdapter.isGlobalIDAttribute()) {
@@ -151,10 +146,6 @@ export class ConcreteEntityAdapter {
 
     public get mutableFields(): AttributeAdapter[] {
         return this.mutableFieldsKeys.map((key) => getFromMap(this.attributes, key));
-    }
-
-    public get constrainableFields(): AttributeAdapter[] {
-        return this.constrainableFieldsKeys.map((key) => getFromMap(this.attributes, key));
     }
 
     public get relatedEntities(): EntityAdapter[] {

@@ -29,7 +29,6 @@ import {
     createAuthorizationAfterAndParamsField,
 } from "./authorization/compatibility/create-authorization-after-and-params";
 import createConnectAndParams from "./create-connect-and-params";
-import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
 import { createRelationshipValidationString } from "./create-relationship-validation-string";
 import createSetRelationshipPropertiesAndParams from "./create-set-relationship-properties-and-params";
 import { addCallbackAndSetParam } from "./utils/callback-utils";
@@ -218,22 +217,6 @@ function createCreateAndParams({
                     });
                     res.creates.push(connectAndParams[0]);
                     res.params = { ...res.params, ...connectAndParams[1] };
-                }
-
-                if (v.connectOrCreate) {
-                    const { cypher, params } = createConnectOrCreateAndParams({
-                        input: v.connectOrCreate,
-                        varName: `${varNameKey}${relationField.union ? "_" : ""}${unionTypeName}_connectOrCreate`,
-                        parentVar: varName,
-                        relationField,
-                        refNode,
-                        node,
-                        context,
-                        withVars,
-                        callbackBucket,
-                    });
-                    res.creates.push(cypher);
-                    res.params = { ...res.params, ...params };
                 }
             });
 

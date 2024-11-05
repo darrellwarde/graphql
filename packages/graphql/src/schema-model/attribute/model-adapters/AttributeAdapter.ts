@@ -98,17 +98,6 @@ export class AttributeAdapter {
         return !!this.annotations.cypher;
     }
 
-    isConstrainable(): boolean {
-        return (
-            this.typeHelper.isGraphQLBuiltInScalar() ||
-            this.typeHelper.isUserScalar() ||
-            this.typeHelper.isEnum() ||
-            this.typeHelper.isTemporal() ||
-            this.typeHelper.isSpatial() ||
-            this.typeHelper.isBigInt()
-        );
-    }
-
     isObjectField(): boolean {
         return (
             this.typeHelper.isScalar() ||
