@@ -38,10 +38,8 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
     describe("Related to a concrete type", () => {
         let createMutationWithNestedCreate: string;
         let createMutationWithNestedConnect: string;
-        let createMutationWithNestedConnectOrCreate: string;
         let updateMutationWithNestedCreate: string;
         let updateMutationWithNestedConnect: string;
-        let updateMutationWithNestedConnectOrCreate: string;
         let updateMutationWithNestedDisconnect: string;
         let updateMutationWithNestedUpdate: string;
         let updateMutationWithNestedDelete: string;
@@ -60,25 +58,6 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             createMutationWithNestedConnect = `#graphql
                 mutation {
                     ${Movie.operations.create}(input: { id: "1", actors: { connect: { where: { node: { name_EQ: "someName" } } } } }) {
-                        info {
-                            nodesCreated
-                        }
-                    }
-                }
-        `;
-            createMutationWithNestedConnectOrCreate = `#graphql
-                mutation {
-                    ${Movie.operations.create}(
-                        input: {
-                            id: "1"
-                            actors: {
-                                connectOrCreate: {
-                                    where: { node: { id_EQ: "1" } }
-                                    onCreate: { node: { name: "someName" } }
-                                }
-                            }
-                        }
-                    ) {
                         info {
                             nodesCreated
                         }
@@ -108,25 +87,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                     }
                 }
         `;
-            updateMutationWithNestedConnectOrCreate = `#graphql
-                mutation {
-                    ${Movie.operations.update}(
-                        update: {
-                        actors: {
-                            connectOrCreate: {
-                            where: { node: { id_EQ: "1" } }
-                            onCreate: { node: { name: "someName" } }
-                            }
-                        }
-                        }
-                    ) {
-                        info {
-                            nodesCreated
-                            nodesDeleted
-                        }
-                    }
-                }
-        `;
+
             updateMutationWithNestedDisconnect = `#graphql
                 mutation {
                     ${Movie.operations.update}(
@@ -185,14 +146,10 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
 
             const createWithNestedCreateResult = await testHelper.executeGraphQL(createMutationWithNestedCreate);
             const createWithNestedConnectResult = await testHelper.executeGraphQL(createMutationWithNestedConnect);
-            const createWithNestedConnectOrCreateResult = await testHelper.executeGraphQL(
-                createMutationWithNestedConnectOrCreate
-            );
+
             const updateWithNestedCreateResult = await testHelper.executeGraphQL(updateMutationWithNestedCreate);
             const updateWithNestedConnectResult = await testHelper.executeGraphQL(updateMutationWithNestedConnect);
-            const updateWithNestedConnectOrCreateResult = await testHelper.executeGraphQL(
-                updateMutationWithNestedConnectOrCreate
-            );
+
             const updateWithNestedUpdateResult = await testHelper.executeGraphQL(updateMutationWithNestedUpdate);
             const updateWithNestedDisconnectResult = await testHelper.executeGraphQL(
                 updateMutationWithNestedDisconnect
@@ -208,10 +165,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             expect((createWithNestedConnectResult.errors as any)[0].message).toInclude(
                 'Field "actors" is not defined by type'
             );
-            expect(createWithNestedConnectOrCreateResult.errors).toBeDefined();
-            expect((createWithNestedConnectOrCreateResult.errors as any)[0].message).toInclude(
-                'Field "actors" is not defined by type'
-            );
+
             expect(updateWithNestedCreateResult.errors).toBeDefined();
             expect((updateWithNestedCreateResult.errors as any)[0].message).toInclude(
                 'Field "create" is not defined by type'
@@ -220,10 +174,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             expect((updateWithNestedConnectResult.errors as any)[0].message).toInclude(
                 'Field "connect" is not defined by type'
             );
-            expect(updateWithNestedConnectOrCreateResult.errors).toBeDefined();
-            expect((updateWithNestedConnectOrCreateResult.errors as any)[0].message).toInclude(
-                'Field "connectOrCreate" is not defined by type'
-            );
+
             expect(updateWithNestedUpdateResult.errors).toBeDefined();
             expect((updateWithNestedUpdateResult.errors as any)[0].message).toInclude(
                 'Field "update" is not defined by type'
@@ -246,10 +197,8 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
 
         let createMutationWithNestedCreate: string;
         let createMutationWithNestedConnect: string;
-        let createMutationWithNestedConnectOrCreate: string;
         let updateMutationWithNestedCreate: string;
         let updateMutationWithNestedConnect: string;
-        let updateMutationWithNestedConnectOrCreate: string;
         let updateMutationWithNestedDisconnect: string;
         let updateMutationWithNestedUpdate: string;
         let updateMutationWithNestedDelete: string;
@@ -277,27 +226,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                     }
                 }
             `;
-            createMutationWithNestedConnectOrCreate = `#graphql
-                mutation {
-                    ${Movie.operations.create}(
-                        input: {
-                            id: "1"
-                            actors: {
-                                ${PersonOne}: {
-                                    connectOrCreate: {
-                                        where: { node: { name_EQ: "someName" } }
-                                        onCreate: { node: { name: "someName" } }
-                                    }
-                                }
-                            }
-                        }
-                    ) {
-                        info {
-                            nodesCreated
-                        }
-                    }
-                }
-            `;
+
             updateMutationWithNestedCreate = `#graphql
                 mutation {
                     ${Movie.operations.update}(update: { actors: { create: { node: { name: "someName" } } } }) {
@@ -320,27 +249,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
                     }
                 }
             `;
-            updateMutationWithNestedConnectOrCreate = `#graphql
-                mutation {
-                    ${Movie.operations.update}(
-                        update: {
-                            actors: {
-                                ${PersonOne}: {
-                                    connectOrCreate: {
-                                        where: { node: { name_EQ: "someName" } }
-                                        onCreate: { node: { name: "someName" } }
-                                    }
-                                }
-                            }
-                        }
-                    ) {
-                        info {
-                            nodesCreated
-                            nodesDeleted
-                        }
-                    }
-                }
-            `;
+
             updateMutationWithNestedDisconnect = `#graphql
                 mutation {
                     ${Movie.operations.update}(
@@ -405,14 +314,10 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
 
             const createWithNestedCreateResult = await testHelper.executeGraphQL(createMutationWithNestedCreate);
             const createWithNestedConnectResult = await testHelper.executeGraphQL(createMutationWithNestedConnect);
-            const createWithNestedConnectOrCreateResult = await testHelper.executeGraphQL(
-                createMutationWithNestedConnectOrCreate
-            );
+
             const updateWithNestedCreateResult = await testHelper.executeGraphQL(updateMutationWithNestedCreate);
             const updateWithNestedConnectResult = await testHelper.executeGraphQL(updateMutationWithNestedConnect);
-            const updateWithNestedConnectOrCreateResult = await testHelper.executeGraphQL(
-                updateMutationWithNestedConnectOrCreate
-            );
+
             const updateWithNestedUpdateResult = await testHelper.executeGraphQL(updateMutationWithNestedUpdate);
             const updateWithNestedDisconnectResult = await testHelper.executeGraphQL(
                 updateMutationWithNestedDisconnect
@@ -428,10 +333,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             expect((createWithNestedConnectResult.errors as any)[0].message).toInclude(
                 'Field "actors" is not defined by type'
             );
-            expect(createWithNestedConnectOrCreateResult.errors).toBeDefined();
-            expect((createWithNestedConnectOrCreateResult.errors as any)[0].message).toInclude(
-                'Field "actors" is not defined by type'
-            );
+
             expect(updateWithNestedCreateResult.errors).toBeDefined();
             expect((updateWithNestedCreateResult.errors as any)[0].message).toInclude(
                 'Field "create" is not defined by type'
@@ -440,10 +342,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             expect((updateWithNestedConnectResult.errors as any)[0].message).toInclude(
                 'Field "connect" is not defined by type'
             );
-            expect(updateWithNestedConnectOrCreateResult.errors).toBeDefined();
-            expect((updateWithNestedConnectOrCreateResult.errors as any)[0].message).toInclude(
-                'Field "connectOrCreate" is not defined by type'
-            );
+
             expect(updateWithNestedUpdateResult.errors).toBeDefined();
             expect((updateWithNestedUpdateResult.errors as any)[0].message).toInclude(
                 'Field "update" is not defined by type'

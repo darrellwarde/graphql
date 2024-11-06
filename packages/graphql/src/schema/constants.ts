@@ -39,10 +39,3 @@ export const DEPRECATE_DIRECTED_ARGUMENT = {
         reason: "The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server",
     },
 };
-
-export const DEPRECATE_CONNECT_OR_CREATE = {
-    name: DEPRECATED,
-    args: {
-        reason: "The connectOrCreate operation is deprecated and will be removed",
-    },
-};
