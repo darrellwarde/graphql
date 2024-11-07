@@ -26,7 +26,6 @@ import type { GraphQLWhereArg, RelationField } from "../types";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import { compileCypher } from "../utils/compile-cypher";
 import createConnectAndParams from "./create-connect-and-params";
-import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
 import createCreateAndParams from "./create-create-and-params";
 import createDeleteAndParams from "./create-delete-and-params";
 import createDisconnectAndParams from "./create-disconnect-and-params";
@@ -53,7 +52,6 @@ export default async function translateUpdate({
     const disconnectInput = resolveTree.args.disconnect;
     const createInput = resolveTree.args.create;
     const deleteInput = resolveTree.args.delete;
-    const connectOrCreateInput = resolveTree.args.connectOrCreate;
     const varName = "this";
     const callbackBucket: CallbackBucket = new CallbackBucket(context);
     const withVars = [varName];
@@ -263,42 +261,6 @@ export default async function translateUpdate({
                     cypherParams = { ...cypherParams, ...connectAndParams[1] };
                 });
             }
-        });
-    }
-
-    if (connectOrCreateInput) {
-        Object.entries(connectOrCreateInput).forEach(([key, input]) => {
-            const relationField = node.relationFields.find((x) => key === x.fieldName) as RelationField;
-
-            const refNodes: Node[] = [];
-
-            if (relationField.union) {
-                Object.keys(input).forEach((unionTypeName) => {
-                    refNodes.push(context.nodes.find((x) => x.name === unionTypeName) as Node);
-                });
-            } else if (relationField.interface) {
-                relationField.interface?.implementations?.forEach((implementationName) => {
-                    refNodes.push(context.nodes.find((x) => x.name === implementationName) as Node);
-                });
-            } else {
-                refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
-            }
-
-            refNodes.forEach((refNode) => {
-                const { cypher, params } = createConnectOrCreateAndParams({
-                    input: input[refNode.name] || input, // Deals with different input from update -> connectOrCreate
-                    varName: `${varName}_connectOrCreate_${key}${relationField.union ? `_${refNode.name}` : ""}`,
-                    parentVar: varName,
-                    relationField,
-                    refNode,
-                    node,
-                    context,
-                    withVars,
-                    callbackBucket,
-                });
-                connectStrs.push(cypher);
-                cypherParams = { ...cypherParams, ...params };
-            });
         });
     }
 

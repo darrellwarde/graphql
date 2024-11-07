@@ -36,7 +36,7 @@ describe("https://github.com/neo4j/graphql/issues/2871", () => {
                     { where: { jwt: { roles_INCLUDES: "overlord" } } }
                 ]
             ) {
-            userId: String! @unique
+            userId: String!
             adminAccess: [Tenant!]! @relationship(type: "ADMIN_IN", direction: OUT)
         }
 

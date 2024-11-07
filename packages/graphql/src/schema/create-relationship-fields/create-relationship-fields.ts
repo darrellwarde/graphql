@@ -35,7 +35,6 @@ import {
     augmentObjectOrInterfaceTypeWithRelationshipField,
 } from "../generation/augment-object-or-interface";
 import { augmentConnectInputTypeWithConnectFieldInput } from "../generation/connect-input";
-import { withConnectOrCreateInputType } from "../generation/connect-or-create-input";
 import {
     augmentCreateInputTypeWithRelationshipsInput,
     withCreateInputType,
@@ -314,16 +313,8 @@ function createRelationshipFieldsForTarget({
     });
 
     if (relationshipAdapter.target instanceof InterfaceEntityAdapter) {
-        withFieldInputType({ relationshipAdapter, composer, userDefinedFieldDirectives });
-    } else {
-        withConnectOrCreateInputType({
-            relationshipAdapter,
-            composer,
-            userDefinedFieldDirectives,
-            deprecatedDirectives,
-        });
+        withFieldInputType({ relationshipAdapter, composer, userDefinedFieldDirectives, features });
     }
-
     composeNode.addFields(
         augmentObjectOrInterfaceTypeWithRelationshipField({
             relationshipAdapter,
@@ -355,6 +346,7 @@ function createRelationshipFieldsForTarget({
         composer,
         deprecatedDirectives,
         userDefinedFieldDirectives,
+        features,
     });
 
     augmentConnectInputTypeWithConnectFieldInput({

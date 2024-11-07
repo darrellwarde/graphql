@@ -185,6 +185,7 @@ describe("https://github.com/neo4j/graphql/issues/5631", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
+              custom_actor_with_zero_param: ActorWhere
             }
 
             type MoviesConnection {

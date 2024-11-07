@@ -44,8 +44,8 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
             }
 
             type ${User.name} @node {
-                id: ID! @unique
-                email: String! @unique
+                id: ID!
+                email: String!
                 name: String
                 creator: [${Group.name}!]! @relationship(type: "CREATOR_OF", direction: OUT)
                 admin: [${Admin.name}!]! @relationship(type: "IS_USER", direction: IN)
@@ -55,7 +55,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
             }
 
             type ${Group.name} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String
                 members: [${Person.name}!]! @relationship(type: "MEMBER_OF", direction: IN)
                 creator: ${User.name}!
@@ -95,7 +95,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                         }
                     ]
                 ) {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String!
                 creator: ${User.name}!
                     @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
@@ -132,7 +132,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
             }
 
             type ${Admin.name} implements Invitee @node {
-                id: ID! @unique @id
+                id: ID! @id
                 group: ${Group.name}! @relationship(type: "ADMIN_OF", direction: OUT)
                 creator: ${User.name}! @relationship(type: "CREATOR_OF", direction: IN)
                 email: String!
@@ -143,7 +143,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
             }
 
             type ${Contributor.name} implements Invitee @node {
-                id: ID! @unique @id
+                id: ID! @id
                 group: ${Group.name}! @relationship(type: "CONTRIBUTOR_TO", direction: OUT)
                 creator: ${User.name}! @relationship(type: "CREATOR_OF", direction: IN)
                 email: String!

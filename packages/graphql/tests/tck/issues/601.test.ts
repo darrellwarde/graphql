@@ -37,7 +37,7 @@ describe("#601", () => {
             }
 
             type Document @mutation(operations: []) @node {
-                id: ID! @id @unique
+                id: ID! @id
                 stakeholder: Stakeholder! @relationship(type: "REQUIRES", direction: OUT)
 
                 customerContact: CustomerContact!

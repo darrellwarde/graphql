@@ -27,7 +27,7 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
         const typeDefs = gql`
             type Movie @node {
                 title: String!
-                id: ID! @id @unique
+                id: ID! @id
             }
 
             type Actor @node {
@@ -113,15 +113,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
               where: MovieConnectWhere
             }
 
-            input Actor2MoviesConnectOrCreateFieldInput {
-              onCreate: Actor2MoviesConnectOrCreateFieldInputOnCreate!
-              where: MovieConnectOrCreateWhere!
-            }
-
-            input Actor2MoviesConnectOrCreateFieldInputOnCreate {
-              node: MovieOnCreateInput!
-            }
-
             type Actor2MoviesConnection {
               edges: [Actor2MoviesRelationship!]!
               pageInfo: PageInfo!
@@ -153,7 +144,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
 
             input Actor2MoviesFieldInput {
               connect: [Actor2MoviesConnectFieldInput!]
-              connectOrCreate: [Actor2MoviesConnectOrCreateFieldInput!]
               create: [Actor2MoviesCreateFieldInput!]
             }
 
@@ -199,7 +189,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
 
             input Actor2MoviesUpdateFieldInput {
               connect: [Actor2MoviesConnectFieldInput!]
-              connectOrCreate: [Actor2MoviesConnectOrCreateFieldInput!]
               create: [Actor2MoviesCreateFieldInput!]
               delete: [Actor2MoviesDeleteFieldInput!]
               disconnect: [Actor2MoviesDisconnectFieldInput!]
@@ -321,15 +310,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
               where: MovieConnectWhere
             }
 
-            input ActorMoviesConnectOrCreateFieldInput {
-              onCreate: ActorMoviesConnectOrCreateFieldInputOnCreate!
-              where: MovieConnectOrCreateWhere!
-            }
-
-            input ActorMoviesConnectOrCreateFieldInputOnCreate {
-              node: MovieOnCreateInput!
-            }
-
             type ActorMoviesConnection {
               edges: [ActorMoviesRelationship!]!
               pageInfo: PageInfo!
@@ -361,7 +341,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
 
             input ActorMoviesFieldInput {
               connect: [ActorMoviesConnectFieldInput!]
-              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!]
               create: [ActorMoviesCreateFieldInput!]
             }
 
@@ -407,7 +386,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
 
             input ActorMoviesUpdateFieldInput {
               connect: [ActorMoviesConnectFieldInput!]
-              connectOrCreate: [ActorMoviesConnectOrCreateFieldInput!]
               create: [ActorMoviesCreateFieldInput!]
               delete: [ActorMoviesDeleteFieldInput!]
               disconnect: [ActorMoviesDisconnectFieldInput!]
@@ -526,10 +504,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
               title: StringAggregateSelection!
             }
 
-            input MovieConnectOrCreateWhere {
-              node: MovieUniqueWhere!
-            }
-
             input MovieConnectWhere {
               node: MovieWhere!
             }
@@ -541,10 +515,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
             type MovieEdge {
               cursor: String!
               node: Movie!
-            }
-
-            input MovieOnCreateInput {
-              title: String!
             }
 
             input MovieOptions {
@@ -562,11 +532,6 @@ describe("https://github.com/neo4j/graphql/issues/872", () => {
             input MovieSort {
               id: SortDirection
               title: SortDirection
-            }
-
-            input MovieUniqueWhere {
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_EQ: ID
             }
 
             input MovieUpdateInput {

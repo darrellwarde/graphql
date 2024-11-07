@@ -26,7 +26,7 @@ describe("Autogenerate", () => {
     test("Simple", async () => {
         const typeDefs = gql`
             type Movie @node {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String!
             }
         `;

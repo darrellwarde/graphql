@@ -38,8 +38,8 @@ describe("https://github.com/neo4j/graphql/issues/2249", () => {
             type Person implements Reviewer @node {
                 name: String!
                 reputation: Int!
-                id: Int @unique
-                reviewerId: Int @unique
+                id: Int
+                reviewerId: Int
             }
 
             type Influencer implements Reviewer @node {

@@ -28,13 +28,13 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
         const typeDefs = gql`
             type Movie implements Production @subscription(events: []) @node {
                 title: String!
-                id: ID @unique
+                id: ID
                 director: Creature! @relationship(type: "DIRECTED", direction: IN)
             }
             type Series implements Production @node {
                 title: String!
                 episode: Int!
-                id: ID @unique
+                id: ID
                 director: Creature! @relationship(type: "DIRECTED", direction: IN)
             }
             interface Production {

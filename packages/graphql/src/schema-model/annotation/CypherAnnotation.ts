@@ -17,12 +17,14 @@
  * limitations under the License.
  */
 
+import type { ConcreteEntity } from "../entity/ConcreteEntity";
 import type { Annotation } from "./Annotation";
 
 export class CypherAnnotation implements Annotation {
     readonly name = "cypher";
     public statement: string;
     public columnName: string;
+    public targetEntity?: ConcreteEntity;
 
     constructor({ statement, columnName }: { statement: string; columnName: string }) {
         this.statement = statement;

@@ -49,7 +49,6 @@ export class QueryASTContext<T extends Cypher.Node | undefined = Cypher.Node | u
     public readonly shouldCollect: boolean; // temporary hack to describe if we should collect the return variable (used for mutation response)
     public readonly shouldDistinct: boolean; // temporary hack to describe if we should distinct the return variable (used for mutation response)
 
-
     public env: QueryASTEnv;
     public neo4jGraphQLContext: Neo4jGraphQLTranslationContext;
 
@@ -141,6 +140,16 @@ export class QueryASTContext<T extends Cypher.Node | undefined = Cypher.Node | u
             env: this.env,
             neo4jGraphQLContext: this.neo4jGraphQLContext,
             returnVariable: variable,
+        });
+    }
+
+    public setTarget(target: Cypher.Node): QueryASTContext<Cypher.Node> {
+        return new QueryASTContext({
+            source: this.target,
+            target,
+            env: this.env,
+            neo4jGraphQLContext: this.neo4jGraphQLContext,
+            returnVariable: this.returnVariable,
         });
     }
 }

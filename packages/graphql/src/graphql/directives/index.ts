@@ -42,5 +42,4 @@ export { selectableDirective } from "./selectable";
 export { settableDirective } from "./settable";
 export { subscriptionDirective } from "./subscription";
 export { timestampDirective } from "./timestamp";
-export { uniqueDirective } from "./unique";
 export { vectorDirective } from "./vector";

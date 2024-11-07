@@ -89,7 +89,9 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authorization(filter: [{ where: { jwt: { thisClaimDoesNotExist: "something" } } }]) {
+                    type User
+                        @node
+                        @authorization(filter: [{ where: { jwt: { thisClaimDoesNotExist: "something" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -727,7 +729,9 @@ describe("schema validation", () => {
 
             test("should validate directive argument name", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User
+                        @node
+                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -1446,7 +1450,9 @@ describe("schema validation", () => {
                         name: String!
                     }
 
-                    type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { content: "$jwt.sub" } } }]) {
+                    type Post
+                        @node
+                        @subscriptionsAuthorization(filter: [{ where: { node: { content: "$jwt.sub" } } }]) {
                         content: String!
                         author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
@@ -2391,7 +2397,11 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @node @shareable @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User
+                        @node
+                        @shareable
+                        @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        @node {
                         id: ID!
                         name: String!
                     }
@@ -2631,7 +2641,10 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @plural(value: "Users") @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User
+                        @node
+                        @plural(value: "Users")
+                        @authentication(operations: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -2742,29 +2755,6 @@ describe("schema validation", () => {
                     'Invalid argument: operations, error: Value "NEVER" does not exist in enum.'
                 );
                 expect(errors[0]).toHaveProperty("path", ["User", "@authentication", "operations", 0]);
-            });
-
-            test("validation should works when used with other directives", () => {
-                const userDocument = gql`
-                    type User @node {
-                        id: ID! @authentication(operations: [CREATE]) @unique
-                        name: String!
-                        posts: [Post!]! @relationship(type: "HAS_POSTS", direction: IN)
-                    }
-
-                    type Post @node {
-                        id: ID!
-                    }
-                `;
-
-                const schemaModel = generateModel(userDocument);
-                const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                    document: userDocument,
-                    schemaModel,
-                });
-
-                const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
-                expect(executeValidate).not.toThrow();
             });
 
             test("should validate directive argument name, when used with other directives", () => {
@@ -3495,7 +3485,11 @@ describe("schema validation", () => {
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     ${jwtType}
-                    type User @node @plural(value: "Users") @shareable @authentication(ops: [CREATE], jwt: { sub: "test" }) {
+                    type User
+                        @node
+                        @plural(value: "Users")
+                        @shareable
+                        @authentication(ops: [CREATE], jwt: { sub: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -3867,7 +3861,8 @@ describe("schema validation", () => {
                             name: String!
                         }
 
-                        type Post @node
+                        type Post
+                            @node
                             @authorization(
                                 filter: [{ where: { node: { author_NOT_A_QUANTIFIER: { name: "Simone" } } } }]
                             ) {

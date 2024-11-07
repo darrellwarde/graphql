@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { GraphQLError, GraphQLSchema } from "graphql";
+import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("schema/rfc/003", () => {
@@ -34,15 +34,15 @@ describe("schema/rfc/003", () => {
                 }
 
                 type Target @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
 
                 type SecondTarget @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
 
                 type ThirdTarget @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
             `;
 
@@ -58,7 +58,7 @@ describe("schema/rfc/003", () => {
                 }
 
                 type Target @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
             `;
 
@@ -74,7 +74,7 @@ describe("schema/rfc/003", () => {
                 }
 
                 type Target @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
             `;
 
@@ -89,7 +89,7 @@ describe("schema/rfc/003", () => {
                 }
 
                 type Target @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
             `;
 
@@ -109,14 +109,14 @@ describe("schema/rfc/003", () => {
                 }
 
                 type Source implements SourceInterface @node {
-                    id: ID @id @unique
+                    id: ID @id
                     targets: [Target!]! @relationship(type: "HAS_TARGET", direction: OUT)
                     target1: Target! @relationship(type: "HAS_TARGET", direction: OUT)
                     target2: Target @relationship(type: "HAS_TARGET", direction: OUT)
                 }
 
                 type Target @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
             `;
 
@@ -132,12 +132,12 @@ describe("schema/rfc/003", () => {
                 }
 
                 type Source implements SourceInterface @node {
-                    id: ID @id @unique
+                    id: ID @id
                     targets: [Target!] @relationship(type: "HAS_TARGET", direction: OUT)
                 }
 
                 type Target @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
             `;
 
@@ -156,12 +156,12 @@ describe("schema/rfc/003", () => {
                 }
 
                 type Source implements SourceInterface @node {
-                    id: ID @id @unique
+                    id: ID @id
                     targets: [Target]! @relationship(type: "HAS_TARGET", direction: OUT)
                 }
 
                 type Target @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
             `;
 
@@ -180,12 +180,12 @@ describe("schema/rfc/003", () => {
                 }
 
                 type Source implements SourceInterface @node {
-                    id: ID @id @unique
+                    id: ID @id
                     targets: [Target] @relationship(type: "HAS_TARGET", direction: OUT)
                 }
 
                 type Target @node {
-                    id: ID @id @unique
+                    id: ID @id
                 }
             `;
 

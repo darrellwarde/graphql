@@ -35,7 +35,6 @@ import type { Neo4jFeaturesSettings } from "../../types";
 import { ensureNonEmptyInput } from "../ensure-non-empty-input";
 import { concreteEntityToUpdateInputFields, withArrayOperators, withMathOperators } from "../to-compose";
 import { withConnectFieldInputType } from "./connect-input";
-import { withConnectOrCreateFieldInputType } from "./connect-or-create-input";
 import { withConnectionWhereInputType } from "./connection-where-input";
 import { withDeleteFieldInputType } from "./delete-input";
 import { withDisconnectFieldInputType } from "./disconnect-input";
@@ -224,16 +223,11 @@ function makeUpdateFieldInputTypeFields({
     features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposerFieldConfigMapDefinition {
     const fields = {};
-    let connectOrCreateFieldInputType: InputTypeComposer | undefined;
+
     let connectionWhereInputType: InputTypeComposer | string | undefined;
     const relationshipTarget = relationshipAdapter.target;
     if (relationshipTarget instanceof ConcreteEntityAdapter) {
         connectionWhereInputType = relationshipAdapter.operations.getConnectionWhereTypename();
-        connectOrCreateFieldInputType = withConnectOrCreateFieldInputType({
-            relationshipAdapter,
-            composer,
-            userDefinedFieldDirectives,
-        });
     } else if (relationshipTarget instanceof InterfaceEntityAdapter) {
         connectionWhereInputType = relationshipAdapter.operations.getConnectionWhereTypename();
     } else {
@@ -246,12 +240,6 @@ function makeUpdateFieldInputTypeFields({
             composer,
             features,
         });
-        connectOrCreateFieldInputType = withConnectOrCreateFieldInputType({
-            relationshipAdapter,
-            composer,
-            userDefinedFieldDirectives,
-            ifUnionMemberEntity,
-        });
     }
     if (connectionWhereInputType) {
         fields["where"] = {
@@ -259,14 +247,7 @@ function makeUpdateFieldInputTypeFields({
             directives: [],
         };
     }
-    if (connectOrCreateFieldInputType) {
-        fields["connectOrCreate"] = {
-            type: relationshipAdapter.isList
-                ? connectOrCreateFieldInputType.NonNull.List
-                : connectOrCreateFieldInputType,
-            directives: [],
-        };
-    }
+
     const connectFieldInputType = withConnectFieldInputType({ relationshipAdapter, ifUnionMemberEntity, composer });
     if (connectFieldInputType) {
         fields["connect"] = {

@@ -25,7 +25,6 @@ import type {
     UnionTypeDefinitionNode,
 } from "graphql";
 import { Neo4jGraphQLSchemaValidationError } from "../classes";
-import { SCHEMA_CONFIGURATION_OBJECT_DIRECTIVES } from "./library-directives";
 import {
     declareRelationshipDirective,
     nodeDirective,
@@ -33,15 +32,20 @@ import {
     relationshipDirective,
 } from "../graphql/directives";
 import getFieldTypeMeta from "../schema/get-field-type-meta";
+import { getInnerTypeName } from "../schema/validation/custom-rules/utils/utils";
+import { isInArray } from "../utils/is-in-array";
 import { filterTruthy } from "../utils/utils";
 import type { Operations } from "./Neo4jGraphQLSchemaModel";
 import { Neo4jGraphQLSchemaModel } from "./Neo4jGraphQLSchemaModel";
 import { Operation } from "./Operation";
 import type { Attribute } from "./attribute/Attribute";
+import { ObjectType } from "./attribute/AttributeType";
 import type { CompositeEntity } from "./entity/CompositeEntity";
 import { ConcreteEntity } from "./entity/ConcreteEntity";
+import type { Entity } from "./entity/Entity";
 import { InterfaceEntity } from "./entity/InterfaceEntity";
 import { UnionEntity } from "./entity/UnionEntity";
+import { SCHEMA_CONFIGURATION_OBJECT_DIRECTIVES } from "./library-directives";
 import type { DefinitionCollection } from "./parser/definition-collection";
 import { getDefinitionCollection } from "./parser/definition-collection";
 import { parseAnnotations } from "./parser/parse-annotation";
@@ -50,10 +54,7 @@ import { parseAttribute, parseAttributeArguments } from "./parser/parse-attribut
 import { findDirective } from "./parser/utils";
 import type { NestedOperation, QueryDirection, RelationshipDirection } from "./relationship/Relationship";
 import { Relationship } from "./relationship/Relationship";
-import { isInArray } from "../utils/is-in-array";
 import { RelationshipDeclaration } from "./relationship/RelationshipDeclaration";
-import type { Entity } from "./entity/Entity";
-import { getInnerTypeName } from "../schema/validation/custom-rules/utils/utils";
 
 export function generateModel(document: DocumentNode): Neo4jGraphQLSchemaModel {
     const definitionCollection: DefinitionCollection = getDefinitionCollection(document);
@@ -111,6 +112,9 @@ export function generateModel(document: DocumentNode): Neo4jGraphQLSchemaModel {
         annotations,
     });
     definitionCollection.nodes.forEach((def) => hydrateRelationships(def, schema, definitionCollection));
+
+    hydrateCypherAnnotations(schema, concreteEntities);
+
     definitionCollection.interfaceTypes.forEach((def) =>
         hydrateRelationshipDeclarations(def, schema, definitionCollection)
     );
@@ -125,6 +129,25 @@ function addCompositeEntitiesToConcreteEntity(compositeEntities: CompositeEntity
             concreteEntity.addCompositeEntities(compositeEntity)
         );
     });
+}
+
+function hydrateCypherAnnotations(schema: Neo4jGraphQLSchemaModel, concreteEntities: ConcreteEntity[]) {
+    for (const concreteEntity of concreteEntities) {
+        for (const attributeField of concreteEntity.attributes.values()) {
+            if (attributeField.annotations.cypher) {
+                if (attributeField.type instanceof ObjectType) {
+                    const foundConcreteEntity = schema.getConcreteEntity(attributeField.type.name);
+                    if (!foundConcreteEntity) {
+                        throw new Neo4jGraphQLSchemaValidationError(
+                            `Could not find concrete entity with name ${attributeField.type.name}`
+                        );
+                    }
+
+                    attributeField.annotations.cypher.targetEntity = foundConcreteEntity;
+                }
+            }
+        }
+    }
 }
 
 function hydrateInterfacesToTypeNamesMap(definitionCollection: DefinitionCollection) {
@@ -261,6 +284,7 @@ function hydrateRelationships(
         }
     }
 }
+
 function hydrateRelationshipDeclarations(
     definition: InterfaceTypeDefinitionNode,
     schema: Neo4jGraphQLSchemaModel,

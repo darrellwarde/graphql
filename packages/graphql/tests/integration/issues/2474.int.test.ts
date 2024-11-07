@@ -40,7 +40,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
         const typeDefs = `
         type ${PostalCode.name} @node {
             archivedAt: DateTime
-            number: String! @unique
+            number: String!
             address: [${Address.name}!]! @relationship(type: "HAS_POSTAL_CODE", direction: IN)
           }
           
@@ -48,7 +48,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
           
           type ${Address.name} @node {
             archivedAt: DateTime
-            uuid: ID! @id @unique
+            uuid: ID! @id
             createdAt: DateTime! @timestamp(operations: [CREATE])
             updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
             postalCode: ${PostalCode.name} @relationship(type: "HAS_POSTAL_CODE", direction: OUT)
@@ -57,7 +57,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
           
           type ${Mandate.name} @mutation(operations: [CREATE, UPDATE]) @node {
             archivedAt: DateTime
-            number: ID! @id @unique # numéro
+            number: ID! @id # numéro
             createdAt: DateTime! @timestamp(operations: [CREATE])
             updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
             price: Float!
@@ -66,7 +66,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
           
           type ${Valuation.name} @mutation(operations: [CREATE, UPDATE]) @node {
             archivedAt: DateTime
-            uuid: ID! @id @unique
+            uuid: ID! @id
             createdAt: DateTime! @timestamp(operations: [CREATE])
             updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
             estate: ${Estate.name}  @relationship(type: "VALUATION_FOR", direction: OUT)
@@ -89,7 +89,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
           
           type ${Estate.name} @mutation(operations: [CREATE, UPDATE]) @node {
             archivedAt: DateTime
-            uuid: ID! @id @unique
+            uuid: ID! @id
             createdAt: DateTime! @timestamp(operations: [CREATE])
             updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
             estateType: EstateType!

@@ -44,7 +44,7 @@ describe("https://github.com/neo4j/graphql/issues/2388", () => {
                 { operations: [READ], where: { jwt: { roles_INCLUDES: "downstream" } } }
             ])
         {
-            id: ID! @id @unique
+            id: ID! @id
         }
 
         type ${PartUsage} @node

@@ -23,12 +23,13 @@ import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-a
 import type { InterfaceEntityAdapter } from "../../../schema-model/entity/model-adapters/InterfaceEntityAdapter";
 import type { UnionEntityAdapter } from "../../../schema-model/entity/model-adapters/UnionEntityAdapter";
 import { RelationshipAdapter } from "../../../schema-model/relationship/model-adapters/RelationshipAdapter";
+import { getEntityAdapter } from "../../../schema-model/utils/get-entity-adapter";
 import type { ConnectionWhereArg, GraphQLWhereArg } from "../../../types";
-import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
 import { fromGlobalId } from "../../../utils/global-ids";
 import { asArray, filterTruthy } from "../../../utils/utils";
 import { isLogicalOperator } from "../../utils/logical-operators";
 import { ConnectionFilter } from "../ast/filters/ConnectionFilter";
+import { CypherOneToOneRelationshipFilter } from "../ast/filters/CypherOneToOneRelationshipFilter";
 import type { Filter, FilterOperator, RelationshipWhereOperator } from "../ast/filters/Filter";
 import { isRelationshipOperator } from "../ast/filters/Filter";
 import { LogicalFilter } from "../ast/filters/LogicalFilter";
@@ -119,13 +120,11 @@ export class FilterFactory {
         entity,
         where,
         partialOf,
-        context,
     }: {
         rel?: RelationshipAdapter;
         entity: EntityAdapter;
         where: GraphQLWhereArg | GraphQLWhereArg[];
         partialOf?: InterfaceEntityAdapter | UnionEntityAdapter;
-        context?: Neo4jGraphQLTranslationContext;
     }): Filter[] {
         let entityWhere = where;
         if (rel && isUnionEntity(rel.target) && where[entity.name]) {
@@ -161,11 +160,59 @@ export class FilterFactory {
                             relationship: rel,
                         });
                     }
-                    return this.createNodeFilters(entity, value, context);
+                    return this.createNodeFilters(entity, value);
                 }
             });
         });
         return filterTruthy(filters);
+    }
+
+    private createCypherFilter({
+        attribute,
+        comparisonValue,
+        operator,
+        isNot,
+    }: {
+        attribute: AttributeAdapter;
+        comparisonValue: GraphQLWhereArg;
+        operator: FilterOperator | undefined;
+        isNot: boolean;
+    }): Filter | Filter[] {
+        const filterOperator = operator || "EQ";
+
+        const selection = new CustomCypherSelection({
+            operationField: attribute,
+            rawArguments: {},
+            isNested: true,
+        });
+
+        if (attribute.annotations.cypher?.targetEntity) {
+            const entityAdapter = getEntityAdapter(attribute.annotations.cypher.targetEntity);
+
+            if (operator && !isRelationshipOperator(operator)) {
+                throw new Error(`Invalid operator ${operator} for relationship`);
+            }
+
+            return this.createCypherRelationshipFilter({
+                where: comparisonValue,
+                selection,
+                target: entityAdapter,
+                filterOps: {
+                    isNot,
+                    operator,
+                },
+                attribute,
+            });
+        }
+
+        const comparisonValueParam = new Cypher.Param(comparisonValue);
+
+        return new CypherFilter({
+            selection,
+            attribute,
+            comparisonValue: comparisonValueParam,
+            operator: filterOperator,
+        });
     }
 
     protected createPropertyFilter({
@@ -178,26 +225,19 @@ export class FilterFactory {
     }: {
         attribute: AttributeAdapter;
         relationship?: RelationshipAdapter;
-        comparisonValue: unknown;
+        comparisonValue: GraphQLWhereArg;
         operator: FilterOperator | undefined;
         isNot: boolean;
         attachedTo?: "node" | "relationship";
-    }): PropertyFilter | CypherFilter {
-        const filterOperator = operator ?? "EQ";
+    }): Filter | Filter[] {
+        const filterOperator = operator || "EQ";
+
         if (attribute.annotations.cypher) {
-            const selection = new CustomCypherSelection({
-                operationField: attribute,
-                rawArguments: {},
-                isNested: true,
-            });
-
-            const comparisonValueParam = new Cypher.Param(comparisonValue);
-
-            return new CypherFilter({
-                selection,
+            return this.createCypherFilter({
                 attribute,
-                comparisonValue: comparisonValueParam,
-                operator: filterOperator,
+                comparisonValue,
+                operator,
+                isNot,
             });
         }
 
@@ -233,8 +273,7 @@ export class FilterFactory {
     private createRelationshipFilter(
         relationship: RelationshipAdapter,
         where: GraphQLWhereArg,
-        filterOps: { isNot: boolean; operator: RelationshipWhereOperator | undefined },
-        context?: Neo4jGraphQLTranslationContext
+        filterOps: { isNot: boolean; operator: RelationshipWhereOperator | undefined }
     ): Filter[] {
         /**
          * The logic below can be confusing, but it's to handle the following cases:
@@ -260,7 +299,7 @@ export class FilterFactory {
 
             if (!isNull) {
                 const entityWhere = where[concreteEntity.name] ?? where;
-                const targetNodeFilters = this.createNodeFilters(concreteEntity, entityWhere, context);
+                const targetNodeFilters = this.createNodeFilters(concreteEntity, entityWhere);
                 relationshipFilter.addTargetNodeFilter(...targetNodeFilters);
             }
 
@@ -270,7 +309,67 @@ export class FilterFactory {
         return this.wrapMultipleFiltersInLogical(relationshipFilters, logicalOp);
     }
 
-    // This allows to override this creation in AuthorizationFilterFactory
+    protected createCypherRelationshipFilter({
+        selection,
+        target,
+        where,
+        filterOps,
+        attribute,
+    }: {
+        selection: CustomCypherSelection;
+        target: EntityAdapter;
+        where: GraphQLWhereArg;
+        filterOps: { isNot: boolean; operator: RelationshipWhereOperator | undefined };
+        attribute: AttributeAdapter;
+    }): Filter[] {
+        /**
+         * The logic below can be confusing, but it's to handle the following cases:
+         * 1. where: { actors: null } -> in this case we want to return an Exists filter as showed by tests packages/graphql/tests/tck/null.test.ts
+         * 2. where: {} -> in this case we want to not apply any filter, as showed by tests packages/graphql/tests/tck/issues/402.test.ts
+         **/
+        const isNull = where === null;
+        if (!isNull && Object.keys(where).length === 0) {
+            return [];
+        }
+
+        const filteredEntities = getConcreteEntities(target, where);
+        const cypherOneToOneRelationshipFilters: CypherOneToOneRelationshipFilter[] = [];
+        for (const concreteEntity of filteredEntities) {
+            const returnVariable = new Cypher.Node();
+            const cypherOneToOneRelationshipFilter = this.createCypherOneToOneRelationshipFilterTreeNode({
+                selection,
+                isNot: filterOps.isNot,
+                isNull,
+                operator: filterOps.operator || "SOME",
+                attribute,
+                returnVariable,
+            });
+
+            if (!isNull) {
+                const entityWhere = where[concreteEntity.name] ?? where;
+                const targetNodeFilters = this.createNodeFilters(concreteEntity, entityWhere);
+                cypherOneToOneRelationshipFilter.addTargetNodeFilter(...targetNodeFilters);
+            }
+
+            cypherOneToOneRelationshipFilters.push(cypherOneToOneRelationshipFilter);
+        }
+        const logicalOp = this.getLogicalOperatorForRelatedNodeFilters(target, filterOps.operator);
+        return this.wrapMultipleFiltersInLogical(cypherOneToOneRelationshipFilters, logicalOp);
+    }
+
+    // This allows to override this creation in AuthFilterFactory
+    protected createCypherOneToOneRelationshipFilterTreeNode(options: {
+        selection: CustomCypherSelection;
+        attribute: AttributeAdapter;
+        isNot: boolean;
+        isNull: boolean;
+        operator: RelationshipWhereOperator;
+        returnVariable: Cypher.Node;
+    }): CypherOneToOneRelationshipFilter {
+        return new CypherOneToOneRelationshipFilter(options);
+    }
+
+    // This allows to override this creation in AuthFilterFactory
     protected createRelationshipFilterTreeNode(options: {
         relationship: RelationshipAdapter;
         target: ConcreteEntityAdapter | InterfaceEntityAdapter;
@@ -280,7 +379,7 @@ export class FilterFactory {
         return new RelationshipFilter(options);
     }
 
-    // This allows to override this creation in AuthorizationFilterFactory
+    // This allows to override this creation in AuthFilterFactory
     protected createConnectionFilterTreeNode(options: {
         relationship: RelationshipAdapter;
         target: ConcreteEntityAdapter | InterfaceEntityAdapter;
@@ -295,13 +394,11 @@ export class FilterFactory {
         targetEntity,
         whereFields,
         relationship,
-        context,
     }: {
         entity: InterfaceEntityAdapter;
         targetEntity?: ConcreteEntityAdapter;
         whereFields: Record<string, any>;
         relationship?: RelationshipAdapter;
-        context?: Neo4jGraphQLTranslationContext;
     }): Filter[] {
         const filters = filterTruthy(
             Object.entries(whereFields).flatMap(([key, value]): Filter | Filter[] | undefined => {
@@ -338,17 +435,17 @@ export class FilterFactory {
                         isNot,
                         isConnection,
                         isAggregate,
-                        context,
                     });
                 }
 
-                const attr = entity.findAttribute(fieldName);
+                const attribute = entity.findAttribute(fieldName);
 
-                if (!attr) {
+                if (!attribute) {
                     throw new Error(`Attribute ${fieldName} not found`);
                 }
+
                 return this.createPropertyFilter({
-                    attribute: attr,
+                    attribute,
                     relationship,
                     comparisonValue: value,
                     isNot,
@@ -362,18 +459,18 @@ export class FilterFactory {
 
     public createNodeFilters(
         entity: ConcreteEntityAdapter | UnionEntityAdapter,
-        whereFields: Record<string, any>,
-        context?: Neo4jGraphQLTranslationContext
+        whereFields: Record<string, any>
     ): Filter[] {
         if (isUnionEntity(entity)) {
             return [];
         }
+
         const filters = filterTruthy(
             Object.entries(whereFields).flatMap(([key, value]): Filter | Filter[] | undefined => {
                 const valueAsArray = asArray(value);
                 if (isLogicalOperator(key)) {
                     const nestedFilters = valueAsArray.flatMap((nestedWhere) => {
-                        return this.createNodeFilters(entity, nestedWhere, context);
+                        return this.createNodeFilters(entity, nestedWhere);
                     });
                     return new LogicalFilter({
                         operation: key,
@@ -396,9 +493,9 @@ export class FilterFactory {
                     });
                 }
 
-                const attr = entity.findAttribute(fieldName);
+                const attribute = entity.findAttribute(fieldName);
 
-                if (!attr) {
+                if (!attribute) {
                     if (fieldName === "id" && entity.globalIdField) {
                         return this.createRelayIdPropertyFilter(entity, isNot, operator, value);
                     }
@@ -407,7 +504,7 @@ export class FilterFactory {
                 }
 
                 return this.createPropertyFilter({
-                    attribute: attr,
+                    attribute,
                     comparisonValue: value,
                     isNot,
                     operator,
@@ -425,7 +522,6 @@ export class FilterFactory {
         isNot,
         isConnection,
         isAggregate,
-        context,
     }: {
         relationship: RelationshipAdapter;
         value: any;
@@ -433,7 +529,6 @@ export class FilterFactory {
         isNot: boolean;
         isConnection: boolean;
         isAggregate: boolean;
-        context?: Neo4jGraphQLTranslationContext;
     }): Filter | Filter[] {
         if (isAggregate) {
             return this.createAggregationFilter(relationship, value as AggregateWhereInput);
@@ -447,15 +542,10 @@ export class FilterFactory {
                 operator,
             });
         }
-        return this.createRelationshipFilter(
-            relationship,
-            value as GraphQLWhereArg,
-            {
-                isNot,
-                operator,
-            },
-            context
-        );
+        return this.createRelationshipFilter(relationship, value as GraphQLWhereArg, {
+            isNot,
+            operator,
+        });
     }
 
     private getLogicalOperatorForRelatedNodeFilters(
@@ -478,7 +568,7 @@ export class FilterFactory {
         isNot: boolean,
         operator: FilterOperator | undefined,
         value: string
-    ): Filter {
+    ): Filter | Filter[] {
         const relayIdData = fromGlobalId(value);
         const { typeName, field } = relayIdData;
         let id = relayIdData.id;
@@ -497,9 +587,10 @@ export class FilterFactory {
                 throw new Error("Can't parse non-numeric relay id");
             }
         }
+
         return this.createPropertyFilter({
             attribute: idAttribute,
-            comparisonValue: id,
+            comparisonValue: id as unknown as GraphQLWhereArg,
             isNot,
             operator,
         });

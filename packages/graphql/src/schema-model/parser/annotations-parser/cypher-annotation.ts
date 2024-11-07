@@ -18,9 +18,9 @@
  */
 import type { DirectiveNode } from "graphql";
 import { Neo4jGraphQLSchemaValidationError } from "../../../classes";
+import { cypherDirective } from "../../../graphql/directives";
 import { CypherAnnotation } from "../../annotation/CypherAnnotation";
 import { parseArguments } from "../parse-arguments";
-import { cypherDirective } from "../../../graphql/directives";
 
 export function parseCypherAnnotation(directive: DirectiveNode): CypherAnnotation {
     const { statement, columnName } = parseArguments(cypherDirective, directive);

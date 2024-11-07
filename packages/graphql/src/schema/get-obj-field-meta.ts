@@ -62,7 +62,6 @@ import { getCypherMeta } from "./get-cypher-meta";
 import getFieldTypeMeta from "./get-field-type-meta";
 import { getPopulatedByMeta } from "./get-populated-by-meta";
 import getRelationshipMeta from "./get-relationship-meta";
-import getUniqueMeta from "./parse/get-unique-meta";
 
 export interface ObjectFields {
     relationFields: RelationField[];
@@ -141,7 +140,6 @@ function getObjFieldMeta({
             const selectableDirective = directives.find((x) => x.name.value === "selectable");
             const settableDirective = directives.find((x) => x.name.value === "settable");
             const filterableDirective = directives.find((x) => x.name.value === "filterable");
-            const unique = getUniqueMeta(directives, obj, field.name.value);
 
             const fieldInterface = interfaces.find((x) => x.name.value === typeMeta.name);
             const fieldUnion = unions.find((x) => x.name.value === typeMeta.name);
@@ -175,7 +173,6 @@ function getObjFieldMeta({
                             "coalesce",
                             "timestamp",
                             "alias",
-                            "unique",
                             "callback",
                             "populatedBy",
                             "jwtClaim",
@@ -188,7 +185,6 @@ function getObjFieldMeta({
                 ),
                 arguments: [...(field.arguments || [])],
                 description: field.description?.value,
-                ...(unique ? { unique } : {}),
             };
 
             if (aliasDirective) {

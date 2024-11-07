@@ -44,21 +44,21 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
             }
 
             type ${User.name} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 email: String!
                 roles: [String!]!
                 store: ${Store.name} @relationship(type: "WORKS_AT", direction: OUT)
             }
 
             type ${Store.name} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String!
                 employees: [${User.name}!]! @relationship(type: "WORKS_AT", direction: IN)
                 transactions: [${Transaction.name}!]! @relationship(type: "TRANSACTION", direction: IN)
             }
 
             type ${Transaction.name} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 store: ${Store.name}! @relationship(type: "TRANSACTION", direction: OUT)
                 type: String!
                 items: [${TransactionItem.name}!]! @relationship(type: "ITEM_TRANSACTED", direction: IN)
@@ -243,21 +243,21 @@ describe("replicates the test for relationship to interface so that multiple ref
             }
 
             type ${User.name} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 email: String!
                 roles: [String!]!
                 store: ${Store.name} @relationship(type: "WORKS_AT", direction: OUT)
             }
 
             type ${Store.name} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String!
                 employees: [${User.name}!]! @relationship(type: "WORKS_AT", direction: IN)
                 transactions: [${Transaction.name}!]! @relationship(type: "TRANSACTION", direction: IN)
             }
 
             type ${Transaction.name} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 store: ${Store.name}! @relationship(type: "TRANSACTION", direction: OUT)
                 type: String!
                 items: [TransactionItemI!]! @relationship(type: "ITEM_TRANSACTED", direction: IN)

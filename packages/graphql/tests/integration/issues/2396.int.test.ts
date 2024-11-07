@@ -40,7 +40,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
         const typeDefs = `
             type ${PostalCode} @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                number: String! @unique
+                number: String!
 
                 address: [${Address}!]! @relationship(type: "HAS_POSTAL_CODE", direction: IN)
             }
@@ -49,7 +49,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
             type ${Address} @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
@@ -60,7 +60,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
             type ${Mandate} @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                number: ID! @id @unique # numéro
+                number: ID! @id # numéro
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
@@ -73,7 +73,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
             type ${Valuation} @mutation(operations: [CREATE, UPDATE]) @node {
                 archivedAt: DateTime
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
@@ -99,7 +99,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
             type ${Estate} @node @mutation(operations: [CREATE, UPDATE]) {
                 archivedAt: DateTime
-                uuid: ID! @id @unique
+                uuid: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 

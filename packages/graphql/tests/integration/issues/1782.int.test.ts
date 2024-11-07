@@ -36,7 +36,7 @@ describe("https://github.com/neo4j/graphql/issues/1782", () => {
 
         const typeDefs = `
             type ${testSeries} @node {
-                id: ID! @unique
+                id: ID!
                 current: Boolean!
                 architecture: [${testMasterData}!]!
                     @relationship(type: "ARCHITECTURE", properties: "RelationProps", direction: OUT)
@@ -51,7 +51,7 @@ describe("https://github.com/neo4j/graphql/issues/1782", () => {
             }
     
             type ${testMasterData} @node {
-                id: ID! @unique
+                id: ID!
                 current: Boolean!
                 nameDetails: ${testNameDetails} @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
             }
@@ -59,7 +59,7 @@ describe("https://github.com/neo4j/graphql/issues/1782", () => {
 
         const extendedTypeDefs = `
             type ${testMain} @node {
-                id: ID! @unique
+                id: ID!
                 current: Boolean!
                 main: [${testSeries}!]! @relationship(type: "MAIN", properties: "RelationProps", direction: OUT)
             }

@@ -21,7 +21,7 @@ import type { Directive, InputTypeComposerFieldConfigMapDefinition } from "graph
 import type { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 
-function augmentWhereInputType({
+function augmentRelationshipWhereInputType({
     whereType,
     fieldName,
     filters,
@@ -69,7 +69,7 @@ export function augmentWhereInputTypeWithRelationshipFields(
     deprecatedDirectives: Directive[]
 ): InputTypeComposerFieldConfigMapDefinition {
     const filters = relationshipAdapter.listFiltersModel?.filters;
-    return augmentWhereInputType({
+    return augmentRelationshipWhereInputType({
         whereType: relationshipAdapter.target.operations.whereInputTypeName,
         fieldName: relationshipAdapter.name,
         filters,
@@ -83,7 +83,7 @@ export function augmentWhereInputTypeWithConnectionFields(
     deprecatedDirectives: Directive[]
 ): InputTypeComposerFieldConfigMapDefinition {
     const filters = relationshipAdapter.listFiltersModel?.connectionFilters;
-    return augmentWhereInputType({
+    return augmentRelationshipWhereInputType({
         whereType: relationshipAdapter.operations.getConnectionWhereTypename(),
         fieldName: relationshipAdapter.operations.connectionFieldName,
         filters,

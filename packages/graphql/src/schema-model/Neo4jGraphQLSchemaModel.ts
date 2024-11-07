@@ -69,6 +69,11 @@ export class Neo4jGraphQLSchemaModel {
         return concreteEntity ? new ConcreteEntityAdapter(concreteEntity) : undefined;
     }
 
+    public getConcreteEntity(name: string): ConcreteEntity | undefined {
+        const concreteEntity = this.concreteEntities.find((entity) => entity.name === name);
+        return concreteEntity;
+    }
+
     public getEntitiesByLabels(labels: string[]): ConcreteEntity[] {
         return this.concreteEntities.filter((entity) => entity.matchLabels(labels));
     }

@@ -321,7 +321,7 @@ export class OperationsFactory {
             });
             operation.addFilters(...filters);
         } else {
-            const filters = this.filterFactory.createNodeFilters(entity, whereArgs, context);
+            const filters = this.filterFactory.createNodeFilters(entity, whereArgs);
             operation.addFilters(...filters);
         }
 

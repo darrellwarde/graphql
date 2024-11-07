@@ -31,7 +31,7 @@ describe("Cypher Fragment", () => {
             }
 
             type User implements Entity @node {
-                id: ID! @id @unique
+                id: ID! @id
                 username: String!
                 owns: [OwnableType!]! @relationship(type: "OWNS", direction: OUT)
             }
@@ -44,12 +44,12 @@ describe("Cypher Fragment", () => {
             }
 
             type Tile implements Ownable @node {
-                id: ID! @id @unique
+                id: ID! @id
                 owner: User! @relationship(type: "OWNS", direction: IN)
             }
 
             type Character implements Ownable @node {
-                id: ID! @id @unique
+                id: ID! @id
                 owner: User! @relationship(type: "OWNS", direction: IN)
             }
         `;

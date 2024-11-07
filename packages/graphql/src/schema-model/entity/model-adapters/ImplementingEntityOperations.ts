@@ -54,7 +54,6 @@ export type UpdateMutationArgumentNames = {
     create: string;
     update: string;
     delete: string;
-    connectOrCreate: string;
     where: string;
 };
 
@@ -80,10 +79,6 @@ export class ImplementingEntityOperations<T extends InterfaceEntityAdapter | Con
 
     public get uniqueWhereInputTypeName(): string {
         return `${this.entityAdapter.name}UniqueWhere`;
-    }
-
-    public get connectOrCreateWhereInputTypeName(): string {
-        return `${this.entityAdapter.name}ConnectOrCreateWhere`;
     }
 
     public get connectWhereInputTypeName(): string {
@@ -116,10 +111,6 @@ export class ImplementingEntityOperations<T extends InterfaceEntityAdapter | Con
 
     public get connectInputTypeName(): string {
         return `${this.entityAdapter.name}ConnectInput`;
-    }
-
-    public get connectOrCreateInputTypeName(): string {
-        return `${this.entityAdapter.name}ConnectOrCreateInput`;
     }
 
     public get disconnectInputTypeName(): string {
@@ -198,7 +189,6 @@ export class ImplementingEntityOperations<T extends InterfaceEntityAdapter | Con
             create: this.relationInputTypeName,
             update: this.updateInputTypeName,
             delete: this.deleteInputTypeName,
-            connectOrCreate: this.connectOrCreateInputTypeName,
             where: this.whereInputTypeName,
         };
     }
@@ -206,12 +196,6 @@ export class ImplementingEntityOperations<T extends InterfaceEntityAdapter | Con
     public get createMutationArgumentNames(): CreateMutationArgumentNames {
         return {
             input: `[${this.createInputTypeName}!]!`,
-        };
-    }
-
-    public get connectOrCreateWhereInputFieldNames() {
-        return {
-            node: `${this.uniqueWhereInputTypeName}!`,
         };
     }
 }

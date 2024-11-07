@@ -838,7 +838,7 @@ describe("cypher directive", () => {
                 }
 
                 type ${User} @node {
-                    id: ID @id @unique
+                    id: ID @id
                     updates: [PostMovieUser!]!
                         @cypher(
                             statement: """

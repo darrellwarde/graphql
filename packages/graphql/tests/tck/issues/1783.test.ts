@@ -27,7 +27,7 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
             type Series @node {
-                id: ID! @unique
+                id: ID!
                 current: Boolean!
                 architecture: [MasterData!]!
                     @relationship(type: "ARCHITECTURE", properties: "RelationProps", direction: OUT)
@@ -43,7 +43,7 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
             }
 
             type MasterData @node {
-                id: ID! @unique
+                id: ID!
                 current: Boolean!
                 nameDetails: NameDetails @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
             }

@@ -34,7 +34,7 @@ describe("https://github.com/neo4j/graphql/issues/3938", () => {
 
         const typeDefs = /* GraphQL */ `
             type ${Group} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 name: String!
                 invitees: [${Invitee}!]! @relationship(type: "INVITED_TO", direction: IN, aggregate: true)
             }
@@ -50,7 +50,7 @@ describe("https://github.com/neo4j/graphql/issues/3938", () => {
                         { operations: [CREATE], where: { node: { group: { inviteesAggregate: { count_LT: 5 } } } } }
                     ]
                 ) {
-                id: ID! @id @unique
+                id: ID! @id
                 group: ${Group}! @relationship(type: "INVITED_TO", direction: OUT)
                 email: String!
                 status: InviteeStatus! @default(value: PENDING)

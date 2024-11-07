@@ -56,7 +56,7 @@ describe("https://github.com/neo4j/graphql/issues/5378", () => {
             type ${Space}
                 @node
                 @fulltext(indexes: [{ indexName: "fulltext_index_space_name_number", queryName: "spacesByNameAndNumber", fields: ["Name", "Number"] }]) {
-                Id: ID! @id @unique
+                Id: ID! @id
                 Number: String
                 Name: String!
             }

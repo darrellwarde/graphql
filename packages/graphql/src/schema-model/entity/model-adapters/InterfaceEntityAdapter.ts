@@ -23,7 +23,6 @@ import type { Attribute } from "../../attribute/Attribute";
 import { AttributeAdapter } from "../../attribute/model-adapters/AttributeAdapter";
 import { RelationshipDeclarationAdapter } from "../../relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { RelationshipDeclaration } from "../../relationship/RelationshipDeclaration";
-import { getFromMap } from "../../utils/get-from-map";
 import { plural, singular } from "../../utils/string-manipulation";
 import type { ConcreteEntity } from "../ConcreteEntity";
 import type { InterfaceEntity } from "../InterfaceEntity";
@@ -36,7 +35,6 @@ export class InterfaceEntityAdapter {
     public readonly attributes: Map<string, AttributeAdapter> = new Map();
     public readonly relationshipDeclarations: Map<string, RelationshipDeclarationAdapter> = new Map();
     public readonly annotations: Partial<Annotations>;
-    private uniqueFieldsKeys: string[] = [];
 
     private _singular: string | undefined;
     private _plural: string | undefined;
@@ -112,10 +110,6 @@ export class InterfaceEntityAdapter {
      * used to generate different types for the Entity that contains these Attributes
      */
 
-    public get uniqueFields(): AttributeAdapter[] {
-        return this.uniqueFieldsKeys.map((key) => getFromMap(this.attributes, key));
-    }
-
     public get sortableFields(): AttributeAdapter[] {
         return Array.from(this.attributes.values()).filter((attribute) => attribute.isSortableField());
     }
@@ -167,9 +161,6 @@ export class InterfaceEntityAdapter {
         for (const [attributeName, attribute] of attributes.entries()) {
             const attributeAdapter = new AttributeAdapter(attribute);
             this.attributes.set(attributeName, attributeAdapter);
-            if (attributeAdapter.isConstrainable() && attributeAdapter.isUnique()) {
-                this.uniqueFieldsKeys.push(attribute.name);
-            }
         }
     }
 
