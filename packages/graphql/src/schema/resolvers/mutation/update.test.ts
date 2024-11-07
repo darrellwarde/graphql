@@ -46,7 +46,6 @@ describe("Update resolver", () => {
         composer.createInputTC("MovieDeleteInput");
         composer.createInputTC("MovieConnectInput");
         composer.createInputTC("MovieDisconnectInput");
-        composer.createInputTC("MovieConnectOrCreateInput");
 
         const result = updateResolver({ node, composer, concreteEntityAdapter });
         expect(result.type).toBe("UpdateMoviesMutationResponse!");
@@ -87,7 +86,6 @@ describe("Update resolver", () => {
 
             create: "MovieRelationInput",
             delete: "MovieDeleteInput",
-            connectOrCreate: "MovieConnectOrCreateInput",
         });
         expect(result.args).toMatchObject({
             where: "MovieWhere",

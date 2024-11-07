@@ -30,12 +30,9 @@ import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/Uni
 import { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { Neo4jFeaturesSettings } from "../../types";
-import { DEPRECATE_CONNECT_OR_CREATE } from "../constants";
 import { concreteEntityToCreateInputFields } from "../to-compose";
 import { withConnectFieldInputType } from "./connect-input";
-import { withConnectOrCreateFieldInputType } from "./connect-or-create-input";
 import { withCreateFieldInputType } from "./relation-input";
-import { shouldAddDeprecatedFields } from "./utils";
 
 export function withCreateInputType({
     entityAdapter,
@@ -281,35 +278,6 @@ function makeFieldInputTypeFields({
     features?: Neo4jFeaturesSettings;
 }): InputTypeComposerFieldConfigMapDefinition {
     const fields = {};
-
-    if (shouldAddDeprecatedFields(features, "connectOrCreate")) {
-        let connectOrCreateFieldInputType: InputTypeComposer | undefined;
-        if (relationshipAdapter.target instanceof ConcreteEntityAdapter) {
-            connectOrCreateFieldInputType = withConnectOrCreateFieldInputType({
-                relationshipAdapter,
-                composer,
-                userDefinedFieldDirectives,
-            });
-        } else if (relationshipAdapter.target instanceof UnionEntityAdapter) {
-            if (!ifUnionMemberEntity) {
-                throw new Error("Member Entity required.");
-            }
-            connectOrCreateFieldInputType = withConnectOrCreateFieldInputType({
-                relationshipAdapter,
-                composer,
-                userDefinedFieldDirectives,
-                ifUnionMemberEntity,
-            });
-        }
-        if (connectOrCreateFieldInputType) {
-            fields["connectOrCreate"] = {
-                type: relationshipAdapter.isList
-                    ? connectOrCreateFieldInputType.NonNull.List
-                    : connectOrCreateFieldInputType,
-                directives: [DEPRECATE_CONNECT_OR_CREATE],
-            };
-        }
-    }
 
     const connectFieldInputType = withConnectFieldInputType({ relationshipAdapter, ifUnionMemberEntity, composer });
     if (connectFieldInputType) {
