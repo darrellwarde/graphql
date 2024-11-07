@@ -118,7 +118,6 @@ class Node extends GraphElement {
     public interfaces: NamedTypeNode[];
     public objectFields: ObjectField[];
     public nodeDirective?: NodeDirective;
-    public fulltextDirective?: FullText;
     public description?: string;
     public limit?: LimitDirective;
     public singular: string;
@@ -139,7 +138,6 @@ class Node extends GraphElement {
         this.interfaces = input.interfaces;
         this.objectFields = input.objectFields;
         this.nodeDirective = input.nodeDirective;
-        this.fulltextDirective = input.fulltextDirective;
         this.limit = input.limitDirective;
         this.isGlobalNode = input.isGlobalNode;
         this._idField = input.globalIdField;

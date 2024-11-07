@@ -22,12 +22,11 @@ import type { NamedTypeNode } from "graphql";
 import { Node } from "../classes";
 import type { LimitDirective } from "../classes/LimitDirective";
 import type { NodeDirective } from "../classes/NodeDirective";
-import type { FullText, Neo4jGraphQLCallbacks } from "../types";
+import type { Neo4jGraphQLCallbacks } from "../types";
 import { asArray, haveSharedElement } from "../utils/utils";
 import type { DefinitionNodes } from "./get-definition-nodes";
 import getObjFieldMeta from "./get-obj-field-meta";
 import parseNodeDirective from "./parse-node-directive";
-import parseFulltextDirective from "./parse/parse-fulltext-directive";
 import { parseLimitDirective } from "./parse/parse-limit-directive";
 import parsePluralDirective from "./parse/parse-plural-directive";
 
@@ -49,7 +48,7 @@ function getNodes(
 ): Nodes {
     let pointInTypeDefs = false;
     let cartesianPointInTypeDefs = false;
-    let floatWhereInTypeDefs = false;
+    const floatWhereInTypeDefs = false;
 
     const relationshipPropertyInterfaceNames = new Set<string>();
     const interfaceRelationshipNames = new Set<string>();
@@ -86,7 +85,6 @@ function getNodes(
 
             const nodeDirectiveDefinition = (definition.directives || []).find((x) => x.name.value === "node");
             const pluralDirectiveDefinition = (definition.directives || []).find((x) => x.name.value === "plural");
-            const fulltextDirectiveDefinition = (definition.directives || []).find((x) => x.name.value === "fulltext");
             const limitDirectiveDefinition = (definition.directives || []).find((x) => x.name.value === "limit");
             const nodeInterfaces = [...(definition.interfaces || [])] as NamedTypeNode[];
 
@@ -110,16 +108,6 @@ function getNodes(
                 callbacks: options.callbacks,
                 customResolvers,
             });
-
-            let fulltextDirective: FullText;
-            if (fulltextDirectiveDefinition) {
-                fulltextDirective = parseFulltextDirective({
-                    directive: fulltextDirectiveDefinition,
-                    nodeFields,
-                    definition,
-                });
-                floatWhereInTypeDefs = true;
-            }
 
             let limitDirective: LimitDirective | undefined;
             if (limitDirectiveDefinition) {
@@ -159,8 +147,6 @@ function getNodes(
                 ...nodeFields,
                 // @ts-ignore we can be sure it's defined
                 nodeDirective,
-                // @ts-ignore we can be sure it's defined
-                fulltextDirective,
                 limitDirective,
                 description: definition.description?.value,
                 isGlobalNode: Boolean(globalIdField),

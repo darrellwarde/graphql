@@ -545,14 +545,16 @@ describe("validation 2.0", () => {
                         name: String
                     }
                 `;
-                // TODO: is "[FullTextInput]!" type exposed to the user?
+                // TODO: is "[FulltextInput]!" type exposed to the user?
                 expect(() => validateDocument({ document: doc, features: {}, additionalDefinitions })).toThrow(
-                    'Directive "@fulltext" argument "indexes" of type "[FullTextInput]!" is required, but it was not provided.'
+                    'Directive "@fulltext" argument "indexes" of type "[FulltextInput]!" is required, but it was not provided.'
                 );
             });
             test("@fulltext ok", () => {
                 const doc = gql`
-                    type User @fulltext(indexes: [{ fields: ["name"] }]) @node {
+                    type User
+                        @fulltext(indexes: [{ indexName: "UserIndex", queryName: "usersByName", fields: ["name"] }])
+                        @node {
                         name: String
                     }
                 `;
@@ -790,7 +792,7 @@ describe("validation 2.0", () => {
     describe("Directive Argument Type", () => {
         test("@fulltext.indexes property required", () => {
             const doc = gql`
-                type User @fulltext(indexes: [{ name: "something" }]) @node {
+                type User @fulltext(indexes: [{ indexName: "something", queryName: "something" }]) @node {
                     name: String
                 }
             `;
@@ -811,7 +813,7 @@ describe("validation 2.0", () => {
                 type User @node {
                     name: String
                 }
-                extend type User @fulltext(indexes: [{ name: "something" }])
+                extend type User @fulltext(indexes: [{ indexName: "something", queryName: "something" }])
             `;
 
             const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
@@ -2534,7 +2536,12 @@ describe("validation 2.0", () => {
             test("@fulltext duplicate index names", () => {
                 const doc = gql`
                     type User
-                        @fulltext(indexes: [{ indexName: "a", fields: ["name"] }, { indexName: "a", fields: ["id"] }]) {
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "a", queryName: "b", fields: ["id"] }
+                            ]
+                        ) {
                         name: String
                         id: ID
                     }
@@ -2545,7 +2552,10 @@ describe("validation 2.0", () => {
 
                 expect(errors).toHaveLength(1);
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@fulltext.indexes invalid value for: a. Duplicate name.");
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@fulltext.indexes invalid value for: a. Duplicate index name."
+                );
                 expect(errors[0]).toHaveProperty("path", ["User", "@fulltext", "indexes"]);
             });
 
@@ -2556,7 +2566,12 @@ describe("validation 2.0", () => {
                         id: ID
                     }
                     extend type User
-                        @fulltext(indexes: [{ indexName: "a", fields: ["name"] }, { indexName: "a", fields: ["id"] }])
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "a", queryName: "b", fields: ["id"] }
+                            ]
+                        )
                 `;
 
                 const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
@@ -2564,13 +2579,69 @@ describe("validation 2.0", () => {
 
                 expect(errors).toHaveLength(1);
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@fulltext.indexes invalid value for: a. Duplicate name.");
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@fulltext.indexes invalid value for: a. Duplicate index name."
+                );
+                expect(errors[0]).toHaveProperty("path", ["User", "@fulltext", "indexes"]);
+            });
+
+            test("@fulltext duplicate query names", () => {
+                const doc = gql`
+                    type User
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "b", queryName: "a", fields: ["id"] }
+                            ]
+                        ) {
+                        name: String
+                        id: ID
+                    }
+                `;
+
+                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+                const errors = getError(executeValidate);
+
+                expect(errors).toHaveLength(1);
+                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@fulltext.indexes invalid value for: a. Duplicate query name."
+                );
+                expect(errors[0]).toHaveProperty("path", ["User", "@fulltext", "indexes"]);
+            });
+
+            test("@fulltext duplicate query names extension", () => {
+                const doc = gql`
+                    type User @node {
+                        name: String
+                        id: ID
+                    }
+                    extend type User
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "b", queryName: "a", fields: ["id"] }
+                            ]
+                        )
+                `;
+
+                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+                const errors = getError(executeValidate);
+
+                expect(errors).toHaveLength(1);
+                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@fulltext.indexes invalid value for: a. Duplicate query name."
+                );
                 expect(errors[0]).toHaveProperty("path", ["User", "@fulltext", "indexes"]);
             });
 
             test("@fulltext index on type not String or ID", () => {
                 const doc = gql`
-                    type User @fulltext(indexes: [{ indexName: "a", fields: ["age"] }]) @node {
+                    type User @fulltext(indexes: [{ indexName: "a", queryName: "a", fields: ["age"] }]) @node {
                         age: Int
                     }
                 `;
@@ -2590,7 +2661,12 @@ describe("validation 2.0", () => {
             test("@fulltext correct usage", () => {
                 const doc = gql`
                     type User
-                        @fulltext(indexes: [{ indexName: "a", fields: ["name"] }, { indexName: "b", fields: ["id"] }]) {
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "b", queryName: "b", fields: ["id"] }
+                            ]
+                        ) {
                         id: ID
                         name: String
                     }
@@ -5956,7 +6032,7 @@ describe("validation 2.0", () => {
             `;
 
             expect(() => validateDocument({ document: doc, features: undefined, additionalDefinitions })).toThrow(
-                'Directive "@fulltext" argument "indexes" of type "[FullTextInput]!" is required, but it was not provided.'
+                'Directive "@fulltext" argument "indexes" of type "[FulltextInput]!" is required, but it was not provided.'
             );
         });
 

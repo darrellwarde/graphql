@@ -151,10 +151,7 @@ async function checkIndexesAndConstraints({
     for (const entity of schemaModel.concreteEntities) {
         if (entity.annotations.fulltext) {
             entity.annotations.fulltext.indexes.forEach((index) => {
-                const indexName = index.indexName || index.name; // TODO remove indexName assignment and undefined check once the name argument has been removed.
-                if (indexName === undefined) {
-                    throw new Error("The name of the fulltext index should be defined using the indexName argument.");
-                }
+                const indexName = index.indexName;
 
                 const existingIndex = existingIndexes[indexName];
                 if (!existingIndex) {

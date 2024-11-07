@@ -99,6 +99,24 @@ describe("@vector schema", () => {
               node: Movie!
             }
 
+            type MovieIndexEdge {
+              cursor: String!
+              node: Movie!
+              score: Float!
+            }
+
+            \\"\\"\\"The input for sorting a Vector query on an index of Movie\\"\\"\\"
+            input MovieIndexSort {
+              node: MovieSort
+              score: SortDirection
+            }
+
+            \\"\\"\\"The input for filtering a Vector query on an index of Movie\\"\\"\\"
+            input MovieIndexWhere {
+              node: MovieWhere
+              score: FloatWhere
+            }
+
             input MovieOptions {
               limit: Int
               offset: Int
@@ -119,24 +137,6 @@ describe("@vector schema", () => {
             input MovieUpdateInput {
               description: String
               title: String
-            }
-
-            type MovieVectorEdge {
-              cursor: String!
-              node: Movie!
-              score: Float!
-            }
-
-            \\"\\"\\"The input for sorting a Vector query on an index of Movie\\"\\"\\"
-            input MovieVectorSort {
-              node: MovieSort
-              score: SortDirection
-            }
-
-            \\"\\"\\"The input for filtering a Vector query on an index of Movie\\"\\"\\"
-            input MovieVectorWhere {
-              node: MovieWhere
-              score: FloatWhere
             }
 
             input MovieWhere {
@@ -163,8 +163,8 @@ describe("@vector schema", () => {
               totalCount: Int!
             }
 
-            type MoviesVectorConnection {
-              edges: [MovieVectorEdge!]!
+            type MoviesIndexConnection {
+              edges: [MovieIndexEdge!]!
               pageInfo: PageInfo!
               totalCount: Int!
             }
@@ -184,11 +184,11 @@ describe("@vector schema", () => {
             }
 
             type Query {
-              descriptionQuery(after: String, first: Int, sort: [MovieVectorSort!], vector: [Float!], where: MovieVectorWhere): MoviesVectorConnection!
+              descriptionQuery(after: String, first: Int, sort: [MovieIndexSort!], vector: [Float!], where: MovieIndexWhere): MoviesIndexConnection!
               movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-              titleQuery(after: String, first: Int, sort: [MovieVectorSort!], vector: [Float!], where: MovieVectorWhere): MoviesVectorConnection!
+              titleQuery(after: String, first: Int, sort: [MovieIndexSort!], vector: [Float!], where: MovieIndexWhere): MoviesIndexConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
