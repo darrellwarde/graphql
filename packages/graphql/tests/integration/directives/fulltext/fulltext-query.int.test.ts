@@ -1056,7 +1056,7 @@ describe("@fulltext directive", () => {
             const gqlResult = await testHelper.executeGraphQL(query);
 
             expect(gqlResult.errors).toBeFalsy();
-            expect(gqlResult.data?.[queryType]).toEqual([
+            expect((gqlResult.data?.[queryType] as any).edges).toEqual([
                 {
                     node: {
                         name: person3.name,

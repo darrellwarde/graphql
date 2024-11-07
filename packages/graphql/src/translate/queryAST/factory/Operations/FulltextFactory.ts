@@ -18,9 +18,7 @@
  */
 
 import type { ResolveTree } from "graphql-parse-resolve-info";
-import { SCORE_FIELD } from "../../../../constants";
 import type { ConcreteEntityAdapter } from "../../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
-import type { SortDirection } from "../../../../types";
 import type { Neo4jGraphQLTranslationContext } from "../../../../types/neo4j-graphql-translation-context";
 import { checkEntityAuthentication } from "../../../authorization/check-authentication";
 import { ScoreField } from "../../ast/fields/ScoreField";
@@ -28,7 +26,6 @@ import { ScoreFilter } from "../../ast/filters/property-filters/ScoreFilter";
 import type { FulltextOptions } from "../../ast/operations/FulltextOperation";
 import { FulltextOperation } from "../../ast/operations/FulltextOperation";
 import { FulltextSelection } from "../../ast/selection/FulltextSelection";
-import { ScoreSort } from "../../ast/sort/ScoreSort";
 import type { QueryASTFactory } from "../QueryASTFactory";
 import { findFieldsByNameInFieldsByTypeNameField } from "../parsers/find-fields-by-name-in-fields-by-type-name-field";
 import { getFieldsByTypeName } from "../parsers/get-fields-by-type-name";
@@ -90,8 +87,6 @@ export class FulltextFactory {
             whereArgs: resolveTreeWhere,
         });
 
-        this.addScoreSort(operation, resolveTree, context);
-
         this.queryASTFactory.operationsFactory.hydrateConnectionOperation({
             target: entity,
             resolveTree: resolveTree,
@@ -102,24 +97,6 @@ export class FulltextFactory {
         });
 
         return operation;
-    }
-
-    private addScoreSort(
-        operation: FulltextOperation,
-        resolveTree: ResolveTree,
-        context: Neo4jGraphQLTranslationContext
-    ) {
-        const sortArguments: Record<string, SortDirection>[] = (resolveTree.args.sort ?? []) as any;
-
-        for (const sortArgument of sortArguments) {
-            if (sortArgument[SCORE_FIELD] && context?.fulltext) {
-                const scoreSort = new ScoreSort({
-                    scoreVariable: context.fulltext.scoreVariable,
-                    direction: sortArgument[SCORE_FIELD],
-                });
-                operation.addSort({ node: [scoreSort], edge: [] });
-            }
-        }
     }
 
     private addFulltextScoreFilter({
