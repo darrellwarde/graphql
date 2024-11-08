@@ -68,15 +68,6 @@ export function findResolver({
     }
 
     const extraArgs = {};
-    if (isConcreteEntity(entityAdapter)) {
-        if (entityAdapter.annotations.fulltext) {
-            extraArgs["fulltext"] = {
-                type: `${entityAdapter.name}Fulltext`,
-                description:
-                    "Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.",
-            };
-        }
-    }
 
     const whereArgumentType = entityAdapter.operations.whereInputTypeName;
     const args = {

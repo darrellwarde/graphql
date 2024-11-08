@@ -19,18 +19,17 @@
 
 import type { Annotation } from "./Annotation";
 
-export type FullTextField = {
-    name?: string;
-    fields: string[];
-    queryName?: string;
+export type FulltextField = {
     indexName: string;
+    queryName: string;
+    fields: string[];
 };
 
-export class FullTextAnnotation implements Annotation {
+export class FulltextAnnotation implements Annotation {
     readonly name = "fulltext";
-    public readonly indexes: FullTextField[];
+    public readonly indexes: FulltextField[];
 
-    constructor({ indexes }: { indexes: FullTextField[] }) {
+    constructor({ indexes }: { indexes: FulltextField[] }) {
         this.indexes = indexes;
     }
 }

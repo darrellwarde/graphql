@@ -25,7 +25,7 @@ import { parseCustomResolverAnnotation } from "../parser/annotations-parser/cust
 import { parseCypherAnnotation } from "../parser/annotations-parser/cypher-annotation";
 import { parseDefaultAnnotation } from "../parser/annotations-parser/default-annotation";
 import { parseFilterableAnnotation } from "../parser/annotations-parser/filterable-annotation";
-import { parseFullTextAnnotation } from "../parser/annotations-parser/full-text-annotation";
+import { parseFulltextAnnotation } from "../parser/annotations-parser/full-text-annotation";
 import { parseJWTClaimAnnotation } from "../parser/annotations-parser/jwt-claim-annotation";
 import { parseKeyAnnotation } from "../parser/annotations-parser/key-annotation";
 import { parseLimitAnnotation } from "../parser/annotations-parser/limit-annotation";
@@ -46,7 +46,7 @@ import type { CustomResolverAnnotation } from "./CustomResolverAnnotation";
 import type { CypherAnnotation } from "./CypherAnnotation";
 import type { DefaultAnnotation } from "./DefaultAnnotation";
 import type { FilterableAnnotation } from "./FilterableAnnotation";
-import type { FullTextAnnotation } from "./FullTextAnnotation";
+import type { FulltextAnnotation } from "./FulltextAnnotation";
 import { IDAnnotation } from "./IDAnnotation";
 import type { JWTClaimAnnotation } from "./JWTClaimAnnotation";
 import { JWTPayloadAnnotation } from "./JWTPayloadAnnotation";
@@ -82,7 +82,7 @@ export type Annotations = CheckAnnotationName<{
     cypher: CypherAnnotation;
     default: DefaultAnnotation;
     filterable: FilterableAnnotation;
-    fulltext: FullTextAnnotation;
+    fulltext: FulltextAnnotation;
     vector: VectorAnnotation;
     id: IDAnnotation;
     jwt: JWTPayloadAnnotation;
@@ -115,7 +115,7 @@ export const annotationsParsers: { [key in keyof Annotations]: AnnotationParser<
     cypher: parseCypherAnnotation,
     default: parseDefaultAnnotation,
     filterable: parseFilterableAnnotation,
-    fulltext: parseFullTextAnnotation,
+    fulltext: parseFulltextAnnotation,
     id: () => new IDAnnotation(),
     jwtClaim: parseJWTClaimAnnotation,
     jwt: () => new JWTPayloadAnnotation(),

@@ -515,11 +515,7 @@ function generateObjectType({
         features,
         composer,
     });
-    /**
-     * TODO [translation-layer-compatibility]
-     * Need to migrate resolvers, which themselves rely on the translation layer being migrated to the new schema model
-     */
-    augmentFulltextSchema(node, composer, concreteEntityAdapter);
+    augmentFulltextSchema({ composer, concreteEntityAdapter });
     augmentVectorSchema({ composer, concreteEntityAdapter, features });
     withUniqueWhereInputType({ concreteEntityAdapter, composer });
     withCreateInputType({ entityAdapter: concreteEntityAdapter, userDefinedFieldDirectives, composer });

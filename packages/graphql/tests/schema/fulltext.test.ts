@@ -18,8 +18,8 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { lexicographicSortSchema } from "graphql/utilities";
 import { gql } from "graphql-tag";
+import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../src";
 
 describe("@fulltext schema", () => {
@@ -29,8 +29,8 @@ describe("@fulltext schema", () => {
                 @node
                 @fulltext(
                     indexes: [
-                        { name: "MovieTitle", fields: ["title"] }
-                        { name: "MovieDescription", fields: ["description"] }
+                        { indexName: "MovieTitle", queryName: "moviesByTitle", fields: ["title"] }
+                        { indexName: "MovieDescription", queryName: "moviesByDescription", fields: ["description"] }
                     ]
                 ) {
                 title: String
@@ -95,35 +95,22 @@ describe("@fulltext schema", () => {
               node: Movie!
             }
 
-            input MovieFulltext {
-              MovieDescription: MovieMovieDescriptionFulltext
-              MovieTitle: MovieMovieTitleFulltext
-            }
-
-            \\"\\"\\"The result of a fulltext search on an index of Movie\\"\\"\\"
-            type MovieFulltextResult {
-              movie: Movie!
+            type MovieIndexEdge {
+              cursor: String!
+              node: Movie!
               score: Float!
             }
 
-            \\"\\"\\"The input for sorting a fulltext query on an index of Movie\\"\\"\\"
-            input MovieFulltextSort {
-              movie: MovieSort
+            \\"\\"\\"The input for sorting a Fulltext query on an index of Movie\\"\\"\\"
+            input MovieIndexSort {
+              node: MovieSort
               score: SortDirection
             }
 
-            \\"\\"\\"The input for filtering a fulltext query on an index of Movie\\"\\"\\"
-            input MovieFulltextWhere {
-              movie: MovieWhere
+            \\"\\"\\"The input for filtering a full-text query on an index of Movie\\"\\"\\"
+            input MovieIndexWhere {
+              node: MovieWhere
               score: FloatWhere
-            }
-
-            input MovieMovieDescriptionFulltext {
-              phrase: String!
-            }
-
-            input MovieMovieTitleFulltext {
-              phrase: String!
             }
 
             input MovieOptions {
@@ -172,6 +159,12 @@ describe("@fulltext schema", () => {
               totalCount: Int!
             }
 
+            type MoviesIndexConnection {
+              edges: [MovieIndexEdge!]!
+              pageInfo: PageInfo!
+              totalCount: Int!
+            }
+
             type Mutation {
               createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
               deleteMovies(where: MovieWhere): DeleteInfo!
@@ -187,42 +180,11 @@ describe("@fulltext schema", () => {
             }
 
             type Query {
-              movies(
-                \\"\\"\\"
-                Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.
-                \\"\\"\\"
-                fulltext: MovieFulltext
-                limit: Int
-                offset: Int
-                options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\")
-                sort: [MovieSort!]
-                where: MovieWhere
-              ): [Movie!]!
-              moviesAggregate(
-                \\"\\"\\"
-                Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.
-                \\"\\"\\"
-                fulltext: MovieFulltext
-                where: MovieWhere
-              ): MovieAggregateSelection!
-              moviesConnection(
-                after: String
-                first: Int
-                \\"\\"\\"
-                Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.
-                \\"\\"\\"
-                fulltext: MovieFulltext
-                sort: [MovieSort!]
-                where: MovieWhere
-              ): MoviesConnection!
-              \\"\\"\\"
-              Query a full-text index. This query returns the query score, but does not allow for aggregations. Use the \`fulltext\` argument under other queries for this functionality.
-              \\"\\"\\"
-              moviesFulltextMovieDescription(limit: Int, offset: Int, phrase: String!, sort: [MovieFulltextSort!], where: MovieFulltextWhere): [MovieFulltextResult!]!
-              \\"\\"\\"
-              Query a full-text index. This query returns the query score, but does not allow for aggregations. Use the \`fulltext\` argument under other queries for this functionality.
-              \\"\\"\\"
-              moviesFulltextMovieTitle(limit: Int, offset: Int, phrase: String!, sort: [MovieFulltextSort!], where: MovieFulltextWhere): [MovieFulltextResult!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              moviesAggregate(where: MovieWhere): MovieAggregateSelection!
+              moviesByDescription(after: String, first: Int, phrase: String!, sort: [MovieIndexSort!], where: MovieIndexWhere): MoviesIndexConnection!
+              moviesByTitle(after: String, first: Int, phrase: String!, sort: [MovieIndexSort!], where: MovieIndexWhere): MoviesIndexConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"

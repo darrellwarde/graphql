@@ -18,8 +18,8 @@
  */
 import type { DirectiveNode, FieldDefinitionNode } from "graphql";
 import { Kind } from "graphql";
+import type { FulltextField } from "../../../../schema-model/annotation/FulltextAnnotation";
 import { parseValueNode } from "../../../../schema-model/parser/parse-value-node";
-import type { FulltextContext } from "../../../../types";
 import { DocumentValidationError } from "../utils/document-validation-error";
 import type { ObjectOrInterfaceWithExtensions } from "../utils/path-parser";
 
@@ -39,7 +39,7 @@ export function verifyFulltext({
         // delegate to DirectiveArgumentOfCorrectType rule
         return;
     }
-    const indexesValue = parseValueNode(indexesArg.value) as FulltextContext[];
+    const indexesValue = parseValueNode(indexesArg.value) as FulltextField[];
     const compatibleFields = traversedDef.fields?.filter((f) => {
         if (f.type.kind === Kind.NON_NULL_TYPE) {
             const innerType = f.type.type;
@@ -53,12 +53,22 @@ export function verifyFulltext({
         return false;
     });
     indexesValue.forEach((index) => {
-        const indexName = index.indexName || index.name;
-        const names = indexesValue.filter((i) => indexName === (i.indexName || i.name));
-        if (names.length > 1) {
-            throw new DocumentValidationError(`@fulltext.indexes invalid value for: ${indexName}. Duplicate name.`, [
-                "indexes",
-            ]);
+        const indexName = index.indexName;
+        const indexNames = indexesValue.filter((i) => indexName === i.indexName);
+        if (indexNames.length > 1) {
+            throw new DocumentValidationError(
+                `@fulltext.indexes invalid value for: ${indexName}. Duplicate index name.`,
+                ["indexes"]
+            );
+        }
+
+        const queryName = index.queryName;
+        const queryNames = indexesValue.filter((i) => queryName === i.queryName);
+        if (queryNames.length > 1) {
+            throw new DocumentValidationError(
+                `@fulltext.indexes invalid value for: ${queryName}. Duplicate query name.`,
+                ["indexes"]
+            );
         }
 
         (index.fields || []).forEach((field) => {

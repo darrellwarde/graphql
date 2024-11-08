@@ -109,30 +109,9 @@ export class OperationsFactory {
         reference?: any;
         resolveAsUnwind?: boolean;
     }): Operation {
-        if (
-            entity &&
-            isConcreteEntity(entity) &&
-            Boolean(entity.annotations.fulltext) &&
-            context.fulltext &&
-            context.resolveTree.args.phrase
-        ) {
-            // Handles the new FullText operation as moviesFullText(phrase: "The Matrix") {...}
-            const indexName = context.fulltext.indexName ?? context.fulltext.name;
-            if (indexName === undefined) {
-                throw new Error("The name of the fulltext index should be defined using the indexName argument.");
-            }
-            assertIsConcreteEntity(entity);
-            return this.fulltextFactory.createFulltextOperation(entity, resolveTree, context);
-        }
-
         const operationMatch = parseTopLevelOperationField(resolveTree.name, context, entity);
         switch (operationMatch) {
             case "READ": {
-                // handle the deprecated way to do FullText search
-                if (context.resolveTree.args.fulltext || context.resolveTree.args.phrase) {
-                    assertIsConcreteEntity(entity);
-                    return this.fulltextFactory.createDeprecatedFulltextOperation(entity, resolveTree, context);
-                }
                 if (!entity) {
                     throw new Error("Entity is required for top level read operations");
                 }
@@ -143,6 +122,16 @@ export class OperationsFactory {
                     varName,
                     reference,
                 });
+            }
+            case "FULLTEXT": {
+                if (!entity) {
+                    throw new Error("Entity is required for top level connection read operations");
+                }
+                if (!isConcreteEntity(entity)) {
+                    throw new Error("Fulltext operations are only supported on concrete entities");
+                }
+
+                return this.fulltextFactory.createFulltextOperation(entity, resolveTree, context);
             }
             case "VECTOR": {
                 if (!entity) {
