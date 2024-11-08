@@ -77,8 +77,8 @@ describe("@vector directive - Query", () => {
 
         Movie = testHelper.createUniqueType("Movie");
 
-        const typeDefs = `
-        type ${Movie.name}  @vector(indexes: [{ indexName: "${Movie}Index", embeddingProperty: "embedding", queryName: "${queryName}" }]) @node {
+        const typeDefs = /* GraphQL */ `
+        type ${Movie.name} @vector(indexes: [{ indexName: "${Movie}Index", embeddingProperty: "embedding", queryName: "${queryName}" }]) @node {
             title: String!
             released: Int!
         }`;
@@ -137,7 +137,7 @@ describe("@vector directive - Query", () => {
             return;
         }
 
-        const query = `
+        const query = /* GraphQL */ `
                 query($vector: [Float!]) {
                     ${queryName}(vector: $vector, sort: {score: DESC} ) {
                         edges {
@@ -185,7 +185,7 @@ describe("@vector directive - Query", () => {
             return;
         }
 
-        const query = `
+        const query = /* GraphQL */ `
                 query($vector: [Float!]) {
                     ${queryName}(vector: $vector, sort: {score: ASC} ) {
                         edges {
@@ -220,6 +220,51 @@ describe("@vector directive - Query", () => {
         });
     });
 
+    test("Retrieve nodes ordered by score DESC without score in selection set", async () => {
+        // Skip if vector not supported
+        if (!VECTOR_SUPPORT) {
+            console.log("VECTOR SUPPORT NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        // Skip if multi-db not supported
+        if (!MULTIDB_SUPPORT) {
+            console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        const query = /* GraphQL */ `
+                query($vector: [Float!]) {
+                    ${queryName}(vector: $vector, sort: {score: DESC} ) {
+                        edges {
+                            node {
+                                title
+                            }
+                        }
+                    }
+                }
+            `;
+        const gqlResult = await testHelper.executeGraphQL(query, { variableValues: { vector: testVectors[0] } });
+
+        expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.data).toEqual({
+            [queryName]: {
+                edges: [
+                    {
+                        node: {
+                            title: "Some Title",
+                        },
+                    },
+                    {
+                        node: {
+                            title: "Another Title",
+                        },
+                    },
+                ],
+            },
+        });
+    });
+
     test("Retrieve nodes ordered by node property", async () => {
         // Skip if vector not supported
         if (!VECTOR_SUPPORT) {
@@ -233,9 +278,105 @@ describe("@vector directive - Query", () => {
             return;
         }
 
-        const query = `
+        const query = /* GraphQL */ `
                 query($vector: [Float!]) {
                     ${queryName}(vector: $vector, sort: {node: {title: ASC}} ) {
+                        edges {
+                            score
+                            node {
+                                title
+                            }
+                        }
+                    }
+                }
+            `;
+        const gqlResult = await testHelper.executeGraphQL(query, { variableValues: { vector: testVectors[0] } });
+
+        expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.data).toEqual({
+            [queryName]: {
+                edges: [
+                    {
+                        node: {
+                            title: "Another Title",
+                        },
+                        score: expect.closeTo(0.56),
+                    },
+                    {
+                        node: {
+                            title: "Some Title",
+                        },
+                        score: expect.closeTo(1),
+                    },
+                ],
+            },
+        });
+    });
+
+    test("Retrieve nodes ordered by node property first and score second", async () => {
+        // Skip if vector not supported
+        if (!VECTOR_SUPPORT) {
+            console.log("VECTOR SUPPORT NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        // Skip if multi-db not supported
+        if (!MULTIDB_SUPPORT) {
+            console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        const query = /* GraphQL */ `
+                query($vector: [Float!]) {
+                    ${queryName}(vector: $vector, sort: [{node: {title: DESC}}, { score: ASC }] ) {
+                        edges {
+                            score
+                            node {
+                                title
+                            }
+                        }
+                    }
+                }
+            `;
+        const gqlResult = await testHelper.executeGraphQL(query, { variableValues: { vector: testVectors[0] } });
+
+        expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.data).toEqual({
+            [queryName]: {
+                edges: [
+                    {
+                        node: {
+                            title: "Some Title",
+                        },
+                        score: expect.closeTo(1),
+                    },
+                    {
+                        node: {
+                            title: "Another Title",
+                        },
+                        score: expect.closeTo(0.56),
+                    },
+                ],
+            },
+        });
+    });
+
+    test("Retrieve nodes ordered by score first and node property second", async () => {
+        // Skip if vector not supported
+        if (!VECTOR_SUPPORT) {
+            console.log("VECTOR SUPPORT NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        // Skip if multi-db not supported
+        if (!MULTIDB_SUPPORT) {
+            console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
+            return;
+        }
+
+        const query = /* GraphQL */ `
+                query($vector: [Float!]) {
+                    ${queryName}(vector: $vector, sort: [{ score: ASC }, {node: {title: DESC}}] ) {
                         edges {
                             score
                             node {

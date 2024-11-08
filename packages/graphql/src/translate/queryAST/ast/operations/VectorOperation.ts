@@ -26,6 +26,7 @@ import type { QueryASTContext } from "../QueryASTContext";
 import type { QueryASTNode } from "../QueryASTNode";
 import type { ScoreField } from "../fields/ScoreField";
 import type { EntitySelection } from "../selection/EntitySelection";
+import { ScoreSort } from "../sort/ScoreSort";
 import { ConnectionReadOperation } from "./ConnectionReadOperation";
 
 export type VectorOptions = {
@@ -77,7 +78,7 @@ export class VectorOperation extends ConnectionReadOperation {
         edgeVar: Cypher.Variable,
         edgesVar: Cypher.Variable
     ): Cypher.With {
-        if (this.scoreField && context.neo4jGraphQLContext.vector) {
+        if ((this.scoreField || this.hasScoreSort()) && context.neo4jGraphQLContext.vector) {
             // No relationship, so we directly unwind node and score
             return new Cypher.Unwind([edgesVar, edgeVar]).with(
                 [edgeVar.property("node"), context.target],
@@ -93,7 +94,7 @@ export class VectorOperation extends ConnectionReadOperation {
         edgesVar: Cypher.Variable,
         totalCount: Cypher.Variable
     ): Cypher.With {
-        if (this.scoreField && nestedContext.neo4jGraphQLContext.vector) {
+        if ((this.scoreField || this.hasScoreSort()) && nestedContext.neo4jGraphQLContext.vector) {
             const nodeAndRelationshipMap = new Cypher.Map({
                 node: nestedContext.target,
             });
@@ -102,10 +103,7 @@ export class VectorOperation extends ConnectionReadOperation {
                 nodeAndRelationshipMap.set("relationship", nestedContext.relationship);
             }
 
-            const scoreProjection = this.scoreField.getProjectionField();
-            for (const [key, value] of Object.entries(scoreProjection)) {
-                nodeAndRelationshipMap.set(key, value);
-            }
+            nodeAndRelationshipMap.set("score", nestedContext.neo4jGraphQLContext.vector.scoreVariable);
 
             return new Cypher.With([Cypher.collect(nodeAndRelationshipMap), edgesVar]).with(edgesVar, [
                 Cypher.size(edgesVar),
@@ -114,5 +112,9 @@ export class VectorOperation extends ConnectionReadOperation {
         } else {
             return super.getWithCollectEdgesAndTotalCount(nestedContext, edgesVar, totalCount);
         }
+    }
+
+    private hasScoreSort(): boolean {
+        return this.sortFields.some(({ node }) => node.some((sort) => sort instanceof ScoreSort));
     }
 }

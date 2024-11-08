@@ -80,6 +80,14 @@ export class SortAndPaginationFactory {
             context,
         });
 
+        if (options[SCORE_FIELD] && context?.vector) {
+            const scoreSort = new ScoreSort({
+                scoreVariable: context.vector.scoreVariable,
+                direction: options[SCORE_FIELD],
+            });
+            nodeSortFields.push(scoreSort);
+        }
+
         return {
             edge: [],
             node: nodeSortFields,
