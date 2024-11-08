@@ -1375,8 +1375,7 @@ describe("tck/rfs/003", () => {
                                                     \\"node\\": {
                                                         \\"id_EQ\\": \\"directorId2-6\\"
                                                     }
-                                                },
-                                                \\"overwrite\\": true
+                                                }
                                             },
                                             \\"disconnect\\": {
                                                 \\"where\\": {
@@ -1505,8 +1504,7 @@ describe("tck/rfs/003", () => {
                                                     \\"node\\": {
                                                         \\"id_EQ\\": \\"directorId2-6\\"
                                                     }
-                                                },
-                                                \\"overwrite\\": true
+                                                }
                                             },
                                             \\"disconnect\\": {
                                                 \\"where\\": {

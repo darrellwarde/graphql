@@ -123,8 +123,7 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
                                         \\"node\\": {
                                             \\"id_EQ\\": \\"test-id\\"
                                         }
-                                    },
-                                    \\"overwrite\\": true
+                                    }
                                 },
                                 \\"disconnect\\": {
                                     \\"where\\": {

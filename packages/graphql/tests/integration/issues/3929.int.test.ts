@@ -146,7 +146,6 @@ describe("https://github.com/neo4j/graphql/issues/3929", () => {
                                                         id_EQ: "user1_id",
                                                     },
                                                 },
-                                                overwrite: true,
                                             },
                                         },
                                     },

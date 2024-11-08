@@ -355,8 +355,7 @@ describe("Cypher Create Pringles", () => {
                                                         \\"node\\": {
                                                             \\"name_EQ\\": \\"Light Green\\"
                                                         }
-                                                    },
-                                                    \\"overwrite\\": true
+                                                    }
                                                 },
                                                 \\"disconnect\\": {
                                                     \\"where\\": {
