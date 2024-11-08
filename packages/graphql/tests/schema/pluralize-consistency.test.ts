@@ -234,10 +234,6 @@ describe("Pluralize consistency", () => {
             }
 
             input super_userMy_friendConnectFieldInput {
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: super_friendConnectWhere
             }
 

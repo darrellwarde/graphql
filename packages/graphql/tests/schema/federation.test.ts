@@ -139,10 +139,6 @@ describe("Apollo Federation", () => {
 
             input PostAuthorConnectFieldInput {
               connect: UserConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -412,10 +408,6 @@ describe("Apollo Federation", () => {
 
             input UserPostsConnectFieldInput {
               connect: [PostConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PostConnectWhere
             }
 
@@ -686,10 +678,6 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorConnectFieldInput {
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 

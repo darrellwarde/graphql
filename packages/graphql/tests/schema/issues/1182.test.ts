@@ -212,10 +212,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             }
 
             input MovieActorsConnectFieldInput {
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 

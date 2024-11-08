@@ -1059,10 +1059,6 @@ describe("Interface Relationships", () => {
 
             input EpisodeSeriesConnectFieldInput {
               connect: SeriesConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: SeriesConnectWhere
             }
 
@@ -1253,10 +1249,6 @@ describe("Interface Relationships", () => {
             input MovieActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -1447,10 +1439,6 @@ describe("Interface Relationships", () => {
             input ProductionActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ProductionActorsEdgeCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -1737,10 +1725,6 @@ describe("Interface Relationships", () => {
             input SeriesActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -1856,10 +1840,6 @@ describe("Interface Relationships", () => {
 
             input SeriesEpisodesConnectFieldInput {
               connect: [EpisodeConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: EpisodeConnectWhere
             }
 
@@ -2506,10 +2486,6 @@ describe("Interface Relationships", () => {
 
             input EpisodeSeriesConnectFieldInput {
               connect: SeriesConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: SeriesConnectWhere
             }
 
@@ -2700,10 +2676,6 @@ describe("Interface Relationships", () => {
             input MovieActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -2894,10 +2866,6 @@ describe("Interface Relationships", () => {
             input ProductionActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ProductionActorsEdgeCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -3204,10 +3172,6 @@ describe("Interface Relationships", () => {
             input SeriesActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: StarredInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -3323,10 +3287,6 @@ describe("Interface Relationships", () => {
 
             input SeriesEpisodesConnectFieldInput {
               connect: [EpisodeConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: EpisodeConnectWhere
             }
 
@@ -7406,10 +7366,6 @@ describe("Interface Relationships", () => {
 
             input CommentCreatorConnectFieldInput {
               connect: UserConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -7505,10 +7461,6 @@ describe("Interface Relationships", () => {
 
             input CommentPostConnectFieldInput {
               connect: PostConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PostConnectWhere
             }
 
@@ -7703,10 +7655,6 @@ describe("Interface Relationships", () => {
 
             input ContentCreatorConnectFieldInput {
               connect: UserConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -7957,10 +7905,6 @@ describe("Interface Relationships", () => {
 
             input PostCommentsConnectFieldInput {
               connect: [CommentConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: CommentConnectWhere
             }
 
@@ -8080,10 +8024,6 @@ describe("Interface Relationships", () => {
 
             input PostCreatorConnectFieldInput {
               connect: UserConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -8924,10 +8864,6 @@ describe("Interface Relationships", () => {
             input MovieActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -9204,10 +9140,6 @@ describe("Interface Relationships", () => {
             input SeriesActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: StarredInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -9375,10 +9307,6 @@ describe("Interface Relationships", () => {
             input ShowActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ShowActorsEdgeCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 

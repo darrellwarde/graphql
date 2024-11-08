@@ -124,10 +124,6 @@ describe("Authorization", () => {
 
             input PostAuthorConnectFieldInput {
               connect: UserConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -398,10 +394,6 @@ describe("Authorization", () => {
 
             input UserPostsConnectFieldInput {
               connect: [UserConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 

@@ -145,10 +145,6 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
 
             input GenreMoviesConnectFieldInput {
               connect: [MovieConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -406,10 +402,6 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
 
             input MovieGenresConnectFieldInput {
               connect: [GenreConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 

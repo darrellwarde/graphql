@@ -143,10 +143,6 @@ describe("Sort", () => {
 
             input Node1RelatedToConnectFieldInput {
               connect: [Node2ConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: Node2ConnectWhere
             }
 
@@ -319,10 +315,6 @@ describe("Sort", () => {
 
             input Node2RelatedToConnectFieldInput {
               connect: [Node1ConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: Node1ConnectWhere
             }
 

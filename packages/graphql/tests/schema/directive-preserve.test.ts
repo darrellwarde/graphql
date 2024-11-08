@@ -293,10 +293,6 @@ describe("Directive-preserve", () => {
 
             input GenreMoviesConnectFieldInput {
               connect: [MovieConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -554,10 +550,6 @@ describe("Directive-preserve", () => {
 
             input MovieGenresConnectFieldInput {
               connect: [GenreConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -1181,10 +1173,6 @@ describe("Directive-preserve", () => {
             input MovieActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -1372,10 +1360,6 @@ describe("Directive-preserve", () => {
             input ProductionActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ProductionActorsEdgeCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -1656,10 +1640,6 @@ describe("Directive-preserve", () => {
             input SeriesActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -2238,10 +2218,6 @@ describe("Directive-preserve", () => {
             input MovieActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -2563,10 +2539,6 @@ describe("Directive-preserve", () => {
             input SeriesActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -3168,10 +3140,6 @@ describe("Directive-preserve", () => {
             input MovieActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -3493,10 +3461,6 @@ describe("Directive-preserve", () => {
             input SeriesActorsConnectFieldInput {
               connect: [ActorConnectInput!]
               edge: ActedInCreateInput!
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -3816,10 +3780,6 @@ describe("Directive-preserve", () => {
             }
 
             input BlogPostsConnectFieldInput {
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PostConnectWhere
             }
 

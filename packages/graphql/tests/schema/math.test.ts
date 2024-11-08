@@ -611,10 +611,6 @@ describe("Algebraic", () => {
 
             input DirectorDirectsConnectFieldInput {
               connect: [MovieConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -850,10 +846,6 @@ describe("Algebraic", () => {
 
             input MovieDirectedByConnectFieldInput {
               connect: DirectorConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: DirectorConnectWhere
             }
 
@@ -1249,10 +1241,6 @@ describe("Algebraic", () => {
 
             input MovieWorkersConnectFieldInput {
               connect: [PersonConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PersonConnectWhere
             }
 
@@ -1831,10 +1819,6 @@ describe("Algebraic", () => {
             input MovieActorsConnectFieldInput {
               connect: [PersonConnectInput!]
               edge: ActedInCreateInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PersonConnectWhere
             }
 
@@ -2074,10 +2058,6 @@ describe("Algebraic", () => {
             input PersonActedInMoviesConnectFieldInput {
               connect: [MovieConnectInput!]
               edge: ActedInCreateInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
