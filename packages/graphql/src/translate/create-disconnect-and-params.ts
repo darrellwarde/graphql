@@ -142,7 +142,7 @@ function createDisconnectAndParams({
             if (aggregationWhere) {
                 const columns = [new Cypher.NamedVariable(relVarName), new Cypher.NamedVariable(variableName)];
                 const caseWhereClause = caseWhere(new Cypher.Raw(predicate), columns);
-                const { cypher } = caseWhereClause.build("aggregateWhereFilter");
+                const { cypher } = caseWhereClause.build({ prefix: "aggregateWhereFilter" });
                 subquery.push(cypher);
             } else {
                 subquery.push(`WHERE ${predicate}`);

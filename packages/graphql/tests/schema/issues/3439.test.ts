@@ -560,7 +560,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -831,7 +831,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -1517,7 +1517,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -1785,7 +1785,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -2399,7 +2399,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -2674,7 +2674,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 
@@ -2980,7 +2980,7 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: GenreConnectWhere
             }
 

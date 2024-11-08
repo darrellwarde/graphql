@@ -1062,7 +1062,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: SeriesConnectWhere
             }
 
@@ -1256,7 +1256,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -1450,7 +1450,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -1740,7 +1740,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -1859,7 +1859,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: EpisodeConnectWhere
             }
 
@@ -2509,7 +2509,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: SeriesConnectWhere
             }
 
@@ -2703,7 +2703,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -2897,7 +2897,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -3207,7 +3207,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -3326,7 +3326,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: EpisodeConnectWhere
             }
 
@@ -7409,7 +7409,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -7508,7 +7508,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PostConnectWhere
             }
 
@@ -7706,7 +7706,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -7960,7 +7960,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: CommentConnectWhere
             }
 
@@ -8083,7 +8083,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -8927,7 +8927,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -9207,7 +9207,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 
@@ -9378,7 +9378,7 @@ describe("Interface Relationships", () => {
               \\"\\"\\"
               Whether or not to overwrite any matching relationship with the new properties.
               \\"\\"\\"
-              overwrite: Boolean! = true
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: ActorConnectWhere
             }
 

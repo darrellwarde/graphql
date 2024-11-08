@@ -233,6 +233,6 @@ export class AggregationOperation extends Operation {
 
         const ret = this.getFieldProjectionClause(targetVar, returnVariable, field);
 
-        return Cypher.concat(matchClause, ...selectionClauses, ...nestedSubqueries, extraSelectionWith, ret);
+        return Cypher.utils.concat(matchClause, ...selectionClauses, ...nestedSubqueries, extraSelectionWith, ret);
     }
 }

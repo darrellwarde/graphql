@@ -23,7 +23,6 @@ import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-tran
 import { caseWhere } from "../utils/case-where";
 import { checkAuthentication } from "./authorization/check-authentication";
 import { createAuthorizationBeforeAndParams } from "./authorization/compatibility/create-authorization-before-and-params";
-import { filterMetaVariable } from "./subscriptions/filter-meta-variable";
 import createConnectionWhereAndParams from "./where/create-connection-where-and-params";
 
 interface Res {
@@ -100,7 +99,6 @@ function createDeleteAndParams({
                     const nodeToDelete = `${variableName}_to_delete`;
                     const labels = refNode.getLabelString(context);
 
-                    const varsWithoutMeta = filterMetaVariable(withVars).join(", ");
                     innerStrs.push("WITH *");
                     innerStrs.push("CALL {");
                     if (withVars) {
@@ -174,7 +172,7 @@ function createDeleteAndParams({
                                 new Cypher.NamedVariable(variableName),
                             ];
                             const caseWhereClause = caseWhere(new Cypher.Raw(predicate), columns);
-                            const { cypher } = caseWhereClause.build("aggregateWhereFilter");
+                            const { cypher } = caseWhereClause.build({ prefix: "aggregateWhereFilter" });
                             innerStrs.push(cypher);
                         } else {
                             innerStrs.push(`WHERE ${predicate}`);
