@@ -39,10 +39,3 @@ export const DEPRECATE_DIRECTED_ARGUMENT = {
         reason: "The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server",
     },
 };
-
-export const DEPRECATE_OVERWRITE = {
-    name: DEPRECATED,
-    args: {
-        reason: "The overwrite argument is deprecated and will be removed",
-    },
-};

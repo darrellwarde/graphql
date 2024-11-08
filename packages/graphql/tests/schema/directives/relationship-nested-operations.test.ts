@@ -751,10 +751,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieActorsConnectFieldInput {
-                  \\"\\"\\"
-                  Whether or not to overwrite any matching relationship with the new properties.
-                  \\"\\"\\"
-                  overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
                   where: PersonConnectWhere
                 }
 
@@ -2737,10 +2733,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieActorsConnectFieldInput {
-                  \\"\\"\\"
-                  Whether or not to overwrite any matching relationship with the new properties.
-                  \\"\\"\\"
-                  overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
                   where: PersonConnectWhere
                 }
 

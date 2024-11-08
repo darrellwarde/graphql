@@ -215,10 +215,6 @@ describe("162", () => {
 
             input TigerJawLevel2Part1ConnectFieldInput {
               connect: TigerJawLevel2Part1ConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: TigerJawLevel2Part1ConnectWhere
             }
 
@@ -335,10 +331,6 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1TigerConnectFieldInput {
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: TigerConnectWhere
             }
 

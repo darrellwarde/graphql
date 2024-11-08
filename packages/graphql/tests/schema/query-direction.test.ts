@@ -161,10 +161,6 @@ describe("Query Direction", () => {
 
             input UserFriendsConnectFieldInput {
               connect: [UserConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -456,10 +452,6 @@ describe("Query Direction", () => {
 
             input UserFriendsConnectFieldInput {
               connect: [UserConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 

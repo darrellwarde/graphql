@@ -176,8 +176,7 @@ describe("https://github.com/neo4j/graphql/issues/5497", () => {
                                         \\"node\\": {
                                             \\"id_EQ\\": \\"new-id\\"
                                         }
-                                    },
-                                    \\"overwrite\\": true
+                                    }
                                 },
                                 \\"disconnect\\": {
                                     \\"where\\": {
