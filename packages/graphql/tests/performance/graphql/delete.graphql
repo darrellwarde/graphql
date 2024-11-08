@@ -5,7 +5,7 @@ mutation SimpleDelete {
 }
 
 mutation NestedDeleteInUpdate {
-    updateMovies(delete: { actors: { where: { node: { name_CONTAINS: "Shark" } } } }) {
+    updateMovies(update: { actors: { delete: { where: { node: { name_CONTAINS: "Shark" } } } } }) {
         movies {
             title
         }
