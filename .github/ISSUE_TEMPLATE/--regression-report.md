@@ -2,7 +2,7 @@
 name: "⏰ Regression report"
 about: Report an issue with functionality that was working in a previous version
 title: ""
-labels: regression report
+labels: regression
 assignees: ""
 ---
 

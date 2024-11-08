@@ -347,7 +347,7 @@ describe("@relationship directive, aggregate argument", () => {
                   \\"\\"\\"
                   Whether or not to overwrite any matching relationship with the new properties.
                   \\"\\"\\"
-                  overwrite: Boolean! = true
+                  overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
                   where: ActorConnectWhere
                 }
 
@@ -736,7 +736,7 @@ describe("@relationship directive, aggregate argument", () => {
                   \\"\\"\\"
                   Whether or not to overwrite any matching relationship with the new properties.
                   \\"\\"\\"
-                  overwrite: Boolean! = true
+                  overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
                   where: ActorConnectWhere
                 }
 

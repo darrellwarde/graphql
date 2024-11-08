@@ -2,7 +2,7 @@
 name: "\U0001F41B  Bug report"
 about: Report a bug to help us improve. If you have a support agreement with Neo4j, please raise a bug report here, then link the GitHub issue to a new or existing Zendesk ticket.
 title: ""
-labels: bug report
+labels: bug
 assignees: ""
 ---
 
