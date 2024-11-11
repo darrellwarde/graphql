@@ -97,7 +97,7 @@ describe("Cypher sort deprecated", () => {
         test("with field in selection set", async () => {
             const query = /* GraphQL */ `
                 {
-                    movies(options: { sort: [{ id: DESC }] }) {
+                    movies(sort: [{ id: DESC }]) {
                         id
                         title
                     }
@@ -119,7 +119,7 @@ describe("Cypher sort deprecated", () => {
         test("with field aliased in selection set", async () => {
             const query = /* GraphQL */ `
                 {
-                    movies(options: { sort: [{ id: DESC }] }) {
+                    movies(sort: [{ id: DESC }]) {
                         aliased: id
                         title
                     }
@@ -141,7 +141,7 @@ describe("Cypher sort deprecated", () => {
         test("with field not in selection set", async () => {
             const query = /* GraphQL */ `
                 {
-                    movies(options: { sort: [{ id: DESC }] }) {
+                    movies(sort: [{ id: DESC }]) {
                         title
                     }
                 }
@@ -163,7 +163,7 @@ describe("Cypher sort deprecated", () => {
     test("Simple Sort On Cypher Field Without Projection", async () => {
         const query = /* GraphQL */ `
             {
-                movies(options: { sort: [{ totalGenres: DESC }] }) {
+                movies(sort: [{ totalGenres: DESC }]) {
                     title
                 }
             }
@@ -221,11 +221,11 @@ describe("Cypher sort deprecated", () => {
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`"{}"`);
     });
-    
+
     test("Simple Sort On Cypher Field", async () => {
         const query = /* GraphQL */ `
             {
-                movies(options: { sort: [{ totalGenres: DESC }] }) {
+                movies(sort: [{ totalGenres: DESC }]) {
                     totalGenres
                 }
             }
@@ -257,7 +257,7 @@ describe("Cypher sort deprecated", () => {
     test("Multi Sort", async () => {
         const query = /* GraphQL */ `
             {
-                movies(options: { sort: [{ id: DESC }, { title: ASC }] }) {
+                movies(sort: [{ id: DESC }, { title: ASC }]) {
                     id
                     title
                 }
@@ -280,7 +280,9 @@ describe("Cypher sort deprecated", () => {
         const query = /* GraphQL */ `
             query ($title: String, $offset: Int, $limit: Int) {
                 movies(
-                    options: { sort: [{ id: DESC }, { title: ASC }], offset: $offset, limit: $limit }
+                    sort: [{ id: DESC }, { title: ASC }]
+                    offset: $offset
+                    limit: $limit
                     where: { title_EQ: $title }
                 ) {
                     id
@@ -322,7 +324,7 @@ describe("Cypher sort deprecated", () => {
         const query = /* GraphQL */ `
             {
                 movies {
-                    genres(options: { sort: [{ name: DESC }] }) {
+                    genres(sort: [{ name: DESC }]) {
                         name
                     }
                 }
@@ -350,7 +352,7 @@ describe("Cypher sort deprecated", () => {
         const query = /* GraphQL */ `
             {
                 movies {
-                    genres(options: { sort: [{ name: ASC }] }) {
+                    genres(sort: [{ name: ASC }]) {
                         name
                     }
                 }
@@ -378,7 +380,7 @@ describe("Cypher sort deprecated", () => {
         const query = /* GraphQL */ `
             {
                 movies {
-                    genres(options: { sort: [{ totalMovies: ASC }] }) {
+                    genres(sort: [{ totalMovies: ASC }]) {
                         name
                         totalMovies
                     }

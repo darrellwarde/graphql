@@ -78,7 +78,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              techs(limit: Int, offset: Int, options: TechOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TechSort!], where: TechWhere): [Tech!]!
+              techs(limit: Int, offset: Int, sort: [TechSort!], where: TechWhere): [Tech!]!
               techsAggregate(where: TechWhere): TechAggregateSelection!
               techsConnection(after: String, first: Int, sort: [TechSort!], where: TechWhere): TechsConnection!
             }
@@ -115,15 +115,6 @@ describe("Plural option", () => {
             type TechEdge {
               cursor: String!
               node: Tech!
-            }
-
-            input TechOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TechSort objects to sort Techs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TechSort!]
             }
 
             \\"\\"\\"
@@ -235,7 +226,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              techs(limit: Int, offset: Int, options: TechOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TechSort!], where: TechWhere): [Tech!]!
+              techs(limit: Int, offset: Int, sort: [TechSort!], where: TechWhere): [Tech!]!
               techsAggregate(where: TechWhere): TechAggregateSelection!
               techsConnection(after: String, first: Int, sort: [TechSort!], where: TechWhere): TechsConnection!
             }
@@ -272,15 +263,6 @@ describe("Plural option", () => {
             type TechEdge {
               cursor: String!
               node: Tech!
-            }
-
-            input TechOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TechSort objects to sort Techs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TechSort!]
             }
 
             \\"\\"\\"
@@ -392,7 +374,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              technologies(limit: Int, offset: Int, options: TechOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TechSort!], where: TechWhere): [Tech!]!
+              technologies(limit: Int, offset: Int, sort: [TechSort!], where: TechWhere): [Tech!]!
               technologiesAggregate(where: TechWhere): TechAggregateSelection!
               technologiesConnection(after: String, first: Int, sort: [TechSort!], where: TechWhere): TechnologiesConnection!
             }
@@ -429,15 +411,6 @@ describe("Plural option", () => {
             type TechEdge {
               cursor: String!
               node: Tech!
-            }
-
-            input TechOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TechSort objects to sort Technologies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TechSort!]
             }
 
             \\"\\"\\"
@@ -549,7 +522,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              techs(limit: Int, offset: Int, options: TechsOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TechsSort!], where: TechsWhere): [Techs!]!
+              techs(limit: Int, offset: Int, sort: [TechsSort!], where: TechsWhere): [Techs!]!
               techsAggregate(where: TechsWhere): TechsAggregateSelection!
               techsConnection(after: String, first: Int, sort: [TechsSort!], where: TechsWhere): TechsConnection!
             }
@@ -589,15 +562,6 @@ describe("Plural option", () => {
             type TechsEdge {
               cursor: String!
               node: Techs!
-            }
-
-            input TechsOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TechsSort objects to sort Techs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TechsSort!]
             }
 
             \\"\\"\\"
@@ -695,7 +659,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              techs(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
+              techs(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               techsAggregate(where: UserWhere): UserAggregateSelection!
               techsConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): TechsConnection!
             }
@@ -750,15 +714,6 @@ describe("Plural option", () => {
             type UserEdge {
               cursor: String!
               node: User!
-            }
-
-            input UserOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UserSort objects to sort Techs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UserSort!]
             }
 
             \\"\\"\\"
@@ -841,7 +796,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              users(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
+              users(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               usersAggregate(where: UserWhere): UserAggregateSelection!
               usersConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): UsersConnection!
             }
@@ -890,15 +845,6 @@ describe("Plural option", () => {
             type UserEdge {
               cursor: String!
               node: User!
-            }
-
-            input UserOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UserSort objects to sort Users by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UserSort!]
             }
 
             \\"\\"\\"
@@ -987,7 +933,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              users(limit: Int, offset: Int, options: UsersOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UsersSort!], where: UsersWhere): [Users!]!
+              users(limit: Int, offset: Int, sort: [UsersSort!], where: UsersWhere): [Users!]!
               usersAggregate(where: UsersWhere): UsersAggregateSelection!
               usersConnection(after: String, first: Int, sort: [UsersSort!], where: UsersWhere): UsersConnection!
             }
@@ -1042,15 +988,6 @@ describe("Plural option", () => {
             type UsersEdge {
               cursor: String!
               node: Users!
-            }
-
-            input UsersOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UsersSort objects to sort Users by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UsersSort!]
             }
 
             \\"\\"\\"

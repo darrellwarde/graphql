@@ -26,13 +26,6 @@ export const DEPRECATE_IMPLICIT_EQUAL_FILTERS = {
     },
 };
 
-export const DEPRECATE_OPTIONS_ARGUMENT = {
-    name: DEPRECATED,
-    args: {
-        reason: "Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.",
-    },
-};
-
 export const DEPRECATE_DIRECTED_ARGUMENT = {
     name: DEPRECATED,
     args: {

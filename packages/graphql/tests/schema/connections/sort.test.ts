@@ -80,7 +80,7 @@ describe("Sort", () => {
 
             type Node1 {
               property: String!
-              relatedTo(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Node2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: Node2Where): [Node2!]!
+              relatedTo(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: Node2Where): [Node2!]!
               relatedToAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Node2Where): Node1Node2RelatedToAggregationSelection
               relatedToConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: Node1RelatedToConnectionWhere): Node1RelatedToConnection!
             }
@@ -118,15 +118,6 @@ describe("Sort", () => {
 
             type Node1Node2RelatedToAggregationSelection {
               count: Int!
-            }
-
-            input Node1Options {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more Node1Sort objects to sort Node1s by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [Node1Sort!]
             }
 
             input Node1RelatedToAggregateInput {
@@ -252,7 +243,7 @@ describe("Sort", () => {
             }
 
             type Node2 {
-              relatedTo(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Node1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Node1Sort!], where: Node1Where): [Node1!]!
+              relatedTo(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [Node1Sort!], where: Node1Where): [Node1!]!
               relatedToAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Node1Where): Node2Node1RelatedToAggregationSelection
               relatedToConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Node2RelatedToConnectionSort!], where: Node2RelatedToConnectionWhere): Node2RelatedToConnection!
             }
@@ -293,11 +284,6 @@ describe("Sort", () => {
 
             type Node2Node1RelatedToNodeAggregateSelection {
               property: StringAggregateSelection!
-            }
-
-            input Node2Options {
-              limit: Int
-              offset: Int
             }
 
             input Node2RelatedToAggregateInput {
@@ -443,10 +429,10 @@ describe("Sort", () => {
             }
 
             type Query {
-              node1s(limit: Int, offset: Int, options: Node1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Node1Sort!], where: Node1Where): [Node1!]!
+              node1s(limit: Int, offset: Int, sort: [Node1Sort!], where: Node1Where): [Node1!]!
               node1sAggregate(where: Node1Where): Node1AggregateSelection!
               node1sConnection(after: String, first: Int, sort: [Node1Sort!], where: Node1Where): Node1sConnection!
-              node2s(limit: Int, offset: Int, options: Node2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: Node2Where): [Node2!]!
+              node2s(limit: Int, offset: Int, where: Node2Where): [Node2!]!
               node2sAggregate(where: Node2Where): Node2AggregateSelection!
               node2sConnection(after: String, first: Int, where: Node2Where): Node2sConnection!
             }

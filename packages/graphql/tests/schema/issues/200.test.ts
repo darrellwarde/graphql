@@ -72,15 +72,6 @@ describe("200", () => {
               node: Category!
             }
 
-            input CategoryOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more CategorySort objects to sort Categories by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [CategorySort!]
-            }
-
             \\"\\"\\"
             Fields to sort Categories by. The order in which sorts are applied is not guaranteed when specifying many fields in one CategorySort object.
             \\"\\"\\"
@@ -166,7 +157,7 @@ describe("200", () => {
             }
 
             type Query {
-              categories(limit: Int, offset: Int, options: CategoryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [CategorySort!], where: CategoryWhere): [Category!]!
+              categories(limit: Int, offset: Int, sort: [CategorySort!], where: CategoryWhere): [Category!]!
               categoriesAggregate(where: CategoryWhere): CategoryAggregateSelection!
               categoriesConnection(after: String, first: Int, sort: [CategorySort!], where: CategoryWhere): CategoriesConnection!
             }

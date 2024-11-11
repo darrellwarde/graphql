@@ -139,10 +139,10 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
             }
 
             type Query {
-              resourceEntities(limit: Int, offset: Int, options: ResourceEntityOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ResourceEntitySort!], where: ResourceEntityWhere): [ResourceEntity!]!
+              resourceEntities(limit: Int, offset: Int, sort: [ResourceEntitySort!], where: ResourceEntityWhere): [ResourceEntity!]!
               resourceEntitiesAggregate(where: ResourceEntityWhere): ResourceEntityAggregateSelection!
               resourceEntitiesConnection(after: String, first: Int, sort: [ResourceEntitySort!], where: ResourceEntityWhere): ResourceEntitiesConnection!
-              resources(limit: Int, offset: Int, options: ResourceOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ResourceSort!], where: ResourceWhere): [Resource!]!
+              resources(limit: Int, offset: Int, sort: [ResourceSort!], where: ResourceWhere): [Resource!]!
               resourcesAggregate(where: ResourceWhere): ResourceAggregateSelection!
               resourcesConnection(after: String, first: Int, sort: [ResourceSort!], where: ResourceWhere): ResourcesConnection!
             }
@@ -151,7 +151,7 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               \\"\\"\\"
               Resources encapsulating the given resource (e.g., a github org contains a repo)
               \\"\\"\\"
-              containedBy(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ResourceOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ResourceSort!], where: ResourceWhere): [Resource!]!
+              containedBy(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ResourceSort!], where: ResourceWhere): [Resource!]!
               containedByAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ResourceWhere): ResourceResourceContainedByAggregationSelection
               containedByConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ResourceContainedByConnectionSort!], where: ResourceContainedByConnectionWhere): ResourceContainedByConnection!
               createdAt: DateTime!
@@ -359,15 +359,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               Resource
             }
 
-            input ResourceEntityOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ResourceEntitySort objects to sort ResourceEntities by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ResourceEntitySort!]
-            }
-
             \\"\\"\\"
             Fields to sort ResourceEntities by. The order in which sorts are applied is not guaranteed when specifying many fields in one ResourceEntitySort object.
             \\"\\"\\"
@@ -403,15 +394,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               type_EQ: ResourceType
               type_IN: [ResourceType!]
               typename_IN: [ResourceEntityImplementation!]
-            }
-
-            input ResourceOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ResourceSort objects to sort Resources by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ResourceSort!]
             }
 
             type ResourceResourceContainedByAggregationSelection {

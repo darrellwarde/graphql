@@ -19,29 +19,17 @@
 
 import type { GraphQLResolveInfo } from "graphql";
 import type { SchemaComposer } from "graphql-compose";
-import { QueryOptions } from "../../../graphql/input-objects/QueryOptions";
 import type { EntityAdapter } from "../../../schema-model/entity/EntityAdapter";
 import { UnionEntityAdapter } from "../../../schema-model/entity/model-adapters/UnionEntityAdapter";
 import { translateRead } from "../../../translate";
 import { isConcreteEntity } from "../../../translate/queryAST/utils/is-concrete-entity";
-import type { Neo4jFeaturesSettings } from "../../../types";
 import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
 import { execute } from "../../../utils";
 import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
-import { DEPRECATE_OPTIONS_ARGUMENT } from "../../constants";
 import { makeSortInput } from "../../generation/sort-and-options-input";
-import { shouldAddDeprecatedFields } from "../../generation/utils";
 import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
 
-export function findResolver({
-    entityAdapter,
-    features,
-    composer,
-}: {
-    entityAdapter: EntityAdapter;
-    features?: Neo4jFeaturesSettings;
-    composer: SchemaComposer;
-}) {
+export function findResolver({ entityAdapter, composer }: { entityAdapter: EntityAdapter; composer: SchemaComposer }) {
     async function resolve(_root: any, args: any, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) {
         const resolveTree = getNeo4jResolveTree(info, { args });
 
@@ -81,16 +69,6 @@ export function findResolver({
         if (sortConfig) {
             args["sort"] = sortConfig.NonNull.List;
         }
-    }
-    // SOFT_DEPRECATION: OPTIONS-ARGUMENT
-    if (shouldAddDeprecatedFields(features, "deprecatedOptionsArgument")) {
-        args["options"] = {
-            type:
-                entityAdapter instanceof UnionEntityAdapter
-                    ? QueryOptions
-                    : entityAdapter.operations.optionsInputTypeName,
-            directives: [DEPRECATE_OPTIONS_ARGUMENT],
-        };
     }
 
     return {

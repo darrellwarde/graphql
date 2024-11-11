@@ -82,11 +82,6 @@ describe("Cypher Sort tests", () => {
 
         neoSchema = new Neo4jGraphQL({
             typeDefs,
-            features: {
-                excludeDeprecatedFields: {
-                    deprecatedOptionsArgument: true,
-                },
-            },
         });
     });
 

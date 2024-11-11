@@ -162,7 +162,7 @@ describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
             }
 
             type Person {
-              friends(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+              friends(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
               friendsAggregate(where: PersonWhere): PersonPersonFriendsAggregationSelection
               friendsConnection(after: String, first: Int, sort: [PersonFriendsConnectionSort!], where: PersonFriendsConnectionWhere): PersonFriendsConnection!
               id: ID!
@@ -291,15 +291,6 @@ describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
               where: PersonFriendsConnectionWhere
             }
 
-            input PersonOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [PersonSort!]
-            }
-
             type PersonPersonFriendsAggregationSelection {
               count: Int!
               edge: PersonPersonFriendsEdgeAggregateSelection
@@ -363,7 +354,7 @@ describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
             }
 
             type Query {
-              people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+              people(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
               peopleAggregate(where: PersonWhere): PersonAggregateSelection!
               peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
             }

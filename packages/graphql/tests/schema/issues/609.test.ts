@@ -77,20 +77,11 @@ describe("609", () => {
               node: Deprecated!
             }
 
-            input DeprecatedOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more DeprecatedSort objects to sort Deprecateds by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [DeprecatedSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Deprecateds by. The order in which sorts are applied is not guaranteed when specifying many fields in one DeprecatedSort object.
             \\"\\"\\"
             input DeprecatedSort {
-              deprecatedField: SortDirection @deprecated
+              deprecatedField: SortDirection
             }
 
             input DeprecatedUpdateInput {
@@ -130,7 +121,7 @@ describe("609", () => {
             }
 
             type Query {
-              deprecateds(limit: Int, offset: Int, options: DeprecatedOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [DeprecatedSort!], where: DeprecatedWhere): [Deprecated!]!
+              deprecateds(limit: Int, offset: Int, sort: [DeprecatedSort!], where: DeprecatedWhere): [Deprecated!]!
               deprecatedsAggregate(where: DeprecatedWhere): DeprecatedAggregateSelection!
               deprecatedsConnection(after: String, first: Int, sort: [DeprecatedSort!], where: DeprecatedWhere): DeprecatedsConnection!
             }
