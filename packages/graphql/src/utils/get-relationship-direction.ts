@@ -45,11 +45,7 @@ function getRelationshipDirection(
     /**
      * Duplicate of the schema-model `getCypherDirection` method;
      **/
-    if (
-        fieldArgs.directed === false ||
-        relationField.queryDirection === RelationshipQueryDirectionOption.UNDIRECTED_ONLY ||
-        relationField.queryDirection === RelationshipQueryDirectionOption.UNDIRECTED
-    ) {
+    if (fieldArgs.directed === false || relationField.queryDirection === RelationshipQueryDirectionOption.UNDIRECTED) {
         return "undirected";
     }
     return relationField.direction;

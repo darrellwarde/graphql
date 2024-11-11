@@ -104,7 +104,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 partners: [${Person.name}!]!
                     @relationship(
                         type: "PARTNER_OF"
-                        queryDirection: UNDIRECTED_ONLY
+                        queryDirection: UNDIRECTED
                         direction: OUT
                         properties: "PartnerOf"
                     )
