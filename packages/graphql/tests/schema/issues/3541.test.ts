@@ -394,7 +394,8 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input ActorUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -560,8 +561,10 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              id: ID
-              title: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {

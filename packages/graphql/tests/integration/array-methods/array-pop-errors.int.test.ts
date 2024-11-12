@@ -234,9 +234,9 @@ describe("array-pop-errors", () => {
             charset: "alphabetic",
         });
 
-        const update = `
+        const update = /* GraphQL */ `
             mutation {
-                ${typeMovie.operations.update} (update: { tags_POP: 1, tags: [] }) {
+                ${typeMovie.operations.update} (update: { tags_POP: 1, tags_SET: [] }) {
                     ${typeMovie.plural} {
                         title
                         tags
@@ -254,8 +254,9 @@ describe("array-pop-errors", () => {
         const gqlResult = await testHelper.executeGraphQL(update);
 
         expect(gqlResult.errors).toEqual([
-            new GraphQLError(`Conflicting modification of [[tags]], [[tags_POP]] on type ${typeMovie}`),
+            new GraphQLError(`Conflicting modification of [[tags_SET]], [[tags_POP]] on type ${typeMovie}`),
         ]);
+
         expect(gqlResult.data).toBeNull();
     });
 
@@ -286,14 +287,14 @@ describe("array-pop-errors", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation Mutation($id: ID, $numberToPop: Int) {
                 ${actor.operations.update}(where: { id_EQ: $id }, update: {
                     actedIn: [
                         {
                             update: {
                                 edge: {
-                                    pay: [],
+                                    pay_SET: [],
                                     pay_POP: $numberToPop
                                 }
                             }
@@ -333,11 +334,11 @@ describe("array-pop-errors", () => {
         });
 
         expect(gqlResult.errors).toBeDefined();
-        expect(
-            (gqlResult.errors as GraphQLError[]).some((el) =>
-                el.message.includes("Cannot mutate the same field multiple times in one Mutation")
-            )
-        ).toBeTruthy();
+
+        const relationshipType = `${movie.name}ActorsRelationship`;
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[pay_SET]], [[pay_POP]] on type ${relationshipType}`),
+        ]);
         expect(gqlResult.data).toBeNull();
     });
 });

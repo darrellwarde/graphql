@@ -128,11 +128,14 @@ describe("Deprecated directed argument", () => {
             }
 
             input ActedInUpdateInput {
-              leadRole: Boolean
-              screenTime: Int
+              leadRole: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
+              leadRole_SET: Boolean
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
-              startDate: Date
+              screenTime_SET: Int
+              startDate: Date @deprecated(reason: \\"Please use the explicit _SET field\\")
+              startDate_SET: Date
             }
 
             input ActedInWhere {
@@ -327,7 +330,8 @@ describe("Deprecated directed argument", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -442,7 +446,8 @@ describe("Deprecated directed argument", () => {
             }
 
             input GenreUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input GenreWhere {
@@ -645,7 +650,8 @@ describe("Deprecated directed argument", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {

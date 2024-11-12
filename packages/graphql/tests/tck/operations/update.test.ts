@@ -50,7 +50,7 @@ describe("Cypher Update", () => {
     test("Simple Update", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(where: { id_EQ: "1" }, update: { id: "2" }) {
+                updateMovies(where: { id_EQ: "1" }, update: { id_SET: "2" }) {
                     movies {
                         id
                     }
@@ -63,14 +63,14 @@ describe("Cypher Update", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             RETURN collect(DISTINCT this { .id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_id\\": \\"2\\",
+                \\"this_update_id_SET\\": \\"2\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -82,7 +82,9 @@ describe("Cypher Update", () => {
                 updateMovies(
                     where: { id_EQ: "1" }
                     update: {
-                        actors: [{ where: { node: { name_EQ: "old name" } }, update: { node: { name: "new name" } } }]
+                        actors: [
+                            { where: { node: { name_EQ: "old name" } }, update: { node: { name_SET: "new name" } } }
+                        ]
                     }
                 ) {
                     movies {
@@ -102,7 +104,7 @@ describe("Cypher Update", () => {
             	WITH this
             	MATCH (this)<-[this_acted_in0_relationship:ACTED_IN]-(this_actors0:Actor)
             	WHERE this_actors0.name = $updateMovies_args_update_actors0_where_this_actors0param0
-            	SET this_actors0.name = $this_update_actors0_name
+            	SET this_actors0.name = $this_update_actors0_name_SET
             	RETURN count(*) AS update_this_actors0
             }
             RETURN collect(DISTINCT this { .id }) AS data"
@@ -112,7 +114,7 @@ describe("Cypher Update", () => {
             "{
                 \\"param0\\": \\"1\\",
                 \\"updateMovies_args_update_actors0_where_this_actors0param0\\": \\"old name\\",
-                \\"this_update_actors0_name\\": \\"new name\\",
+                \\"this_update_actors0_name_SET\\": \\"new name\\",
                 \\"updateMovies\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -125,7 +127,7 @@ describe("Cypher Update", () => {
                                     },
                                     \\"update\\": {
                                         \\"node\\": {
-                                            \\"name\\": \\"new name\\"
+                                            \\"name_SET\\": \\"new name\\"
                                         }
                                     }
                                 }
@@ -149,11 +151,11 @@ describe("Cypher Update", () => {
                                 where: { node: { name_EQ: "old actor name" } }
                                 update: {
                                     node: {
-                                        name: "new actor name"
+                                        name_SET: "new actor name"
                                         movies: [
                                             {
                                                 where: { node: { id_EQ: "old movie title" } }
-                                                update: { node: { title: "new movie title" } }
+                                                update: { node: { title_SET: "new movie title" } }
                                             }
                                         ]
                                     }
@@ -179,13 +181,13 @@ describe("Cypher Update", () => {
             	WITH this
             	MATCH (this)<-[this_acted_in0_relationship:ACTED_IN]-(this_actors0:Actor)
             	WHERE this_actors0.name = $updateMovies_args_update_actors0_where_this_actors0param0
-            	SET this_actors0.name = $this_update_actors0_name
+            	SET this_actors0.name = $this_update_actors0_name_SET
             	WITH this, this_actors0
             	CALL {
             		WITH this, this_actors0
             		MATCH (this_actors0)-[this_actors0_acted_in0_relationship:ACTED_IN]->(this_actors0_movies0:Movie)
             		WHERE this_actors0_movies0.id = $updateMovies_args_update_actors0_update_node_movies0_where_this_actors0_movies0param0
-            		SET this_actors0_movies0.title = $this_update_actors0_movies0_title
+            		SET this_actors0_movies0.title = $this_update_actors0_movies0_title_SET
             		RETURN count(*) AS update_this_actors0_movies0
             	}
             	RETURN count(*) AS update_this_actors0
@@ -197,9 +199,9 @@ describe("Cypher Update", () => {
             "{
                 \\"param0\\": \\"1\\",
                 \\"updateMovies_args_update_actors0_where_this_actors0param0\\": \\"old actor name\\",
-                \\"this_update_actors0_name\\": \\"new actor name\\",
+                \\"this_update_actors0_name_SET\\": \\"new actor name\\",
                 \\"updateMovies_args_update_actors0_update_node_movies0_where_this_actors0_movies0param0\\": \\"old movie title\\",
-                \\"this_update_actors0_movies0_title\\": \\"new movie title\\",
+                \\"this_update_actors0_movies0_title_SET\\": \\"new movie title\\",
                 \\"updateMovies\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -212,7 +214,7 @@ describe("Cypher Update", () => {
                                     },
                                     \\"update\\": {
                                         \\"node\\": {
-                                            \\"name\\": \\"new actor name\\",
+                                            \\"name_SET\\": \\"new actor name\\",
                                             \\"movies\\": [
                                                 {
                                                     \\"where\\": {
@@ -222,7 +224,7 @@ describe("Cypher Update", () => {
                                                     },
                                                     \\"update\\": {
                                                         \\"node\\": {
-                                                            \\"title\\": \\"new movie title\\"
+                                                            \\"title_SET\\": \\"new movie title\\"
                                                         }
                                                     }
                                                 }
@@ -758,7 +760,7 @@ describe("Cypher Update", () => {
                     update: {
                         actors: {
                             where: { node: { name_EQ: "Actor to update" } }
-                            update: { node: { name: "Updated name" } }
+                            update: { node: { name_SET: "Updated name" } }
                             delete: { where: { node: { name_EQ: "Actor to delete" } } }
                         }
                     }
@@ -792,7 +794,7 @@ describe("Cypher Update", () => {
             	WITH this
             	MATCH (this)<-[this_acted_in0_relationship:ACTED_IN]-(this_actors0:Actor)
             	WHERE this_actors0.name = $updateMovies_args_update_actors0_where_this_actors0param0
-            	SET this_actors0.name = $this_update_actors0_name
+            	SET this_actors0.name = $this_update_actors0_name_SET
             	RETURN count(*) AS update_this_actors0
             }
             RETURN collect(DISTINCT this { .id }) AS data"
@@ -803,7 +805,7 @@ describe("Cypher Update", () => {
                 \\"param0\\": \\"1\\",
                 \\"updateMovies_args_update_actors0_delete0_where_this_actors0_delete0param0\\": \\"Actor to delete\\",
                 \\"updateMovies_args_update_actors0_where_this_actors0param0\\": \\"Actor to update\\",
-                \\"this_update_actors0_name\\": \\"Updated name\\",
+                \\"this_update_actors0_name_SET\\": \\"Updated name\\",
                 \\"updateMovies\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -816,7 +818,7 @@ describe("Cypher Update", () => {
                                     },
                                     \\"update\\": {
                                         \\"node\\": {
-                                            \\"name\\": \\"Updated name\\"
+                                            \\"name_SET\\": \\"Updated name\\"
                                         }
                                     },
                                     \\"delete\\": [

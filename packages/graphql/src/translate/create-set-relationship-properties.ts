@@ -17,14 +17,14 @@
  * limitations under the License.
  */
 
-import type { Relationship } from "../classes";
+import { type Relationship } from "../classes";
 import type { CallbackBucket } from "../classes/CallbackBucket";
 import type { RelationshipAdapter } from "../schema-model/relationship/model-adapters/RelationshipAdapter";
-import mapToDbProperty from "../utils/map-to-db-property";
+import { assertNonAmbiguousUpdate } from "./utils/assert-non-ambiguous-update";
 import { addCallbackAndSetParam } from "./utils/callback-utils";
-import { buildMathStatements, matchMathField, mathDescriptorBuilder } from "./utils/math";
+import { getMutationFieldStatements } from "./utils/get-mutation-field-statements";
 
-function createSetRelationshipProperties({
+export function createSetRelationshipProperties({
     properties,
     varName,
     withVars,
@@ -33,6 +33,7 @@ function createSetRelationshipProperties({
     operation,
     callbackBucket,
     parameterPrefix,
+    parameterNotation,
 }: {
     properties: Record<string, Record<string, unknown>>;
     varName: string;
@@ -42,7 +43,8 @@ function createSetRelationshipProperties({
     operation: "CREATE" | "UPDATE";
     callbackBucket: CallbackBucket;
     parameterPrefix: string;
-}): string | undefined {
+    parameterNotation: "." | "_";
+}): [string, Record<string, any>] | undefined {
     // setting properties on the edge of an Interface relationship
     // the input can contain other properties than the one applicable for this concrete entity relationship field
     if (Object.keys(properties).find((k) => relationshipAdapter?.siblings?.includes(k))) {
@@ -55,7 +57,8 @@ function createSetRelationshipProperties({
                 relationship,
                 operation,
                 callbackBucket,
-                parameterPrefix: `${parameterPrefix}.${relationship.properties}`,
+                parameterPrefix: `${parameterPrefix}${parameterNotation}${relationship.properties}`,
+                parameterNotation,
             });
         }
         return;
@@ -68,14 +71,10 @@ function createSetRelationshipProperties({
         operation,
         callbackBucket,
         parameterPrefix,
+        parameterNotation,
     });
 }
 
-/*
-    TODO - lets reuse this function for setting either node or rel properties.
-           This was not reused due to the large differences between node fields
-           - and relationship fields.
-*/
 function createSetRelationshipPropertiesForProperties({
     properties,
     varName,
@@ -84,6 +83,7 @@ function createSetRelationshipPropertiesForProperties({
     operation,
     callbackBucket,
     parameterPrefix,
+    parameterNotation,
 }: {
     properties: Record<string, unknown>;
     varName: string;
@@ -92,9 +92,45 @@ function createSetRelationshipPropertiesForProperties({
     operation: "CREATE" | "UPDATE";
     callbackBucket: CallbackBucket;
     parameterPrefix: string;
-}): string {
+    parameterNotation: "." | "_";
+}): [string, Record<string, any>] {
+    assertNonAmbiguousUpdate(relationship, properties);
     const strs: string[] = [];
+    const params = {};
 
+    addAutogenerateProperties({ relationship, operation, varName, strs });
+    [...relationship.primitiveFields, ...relationship.temporalFields].forEach((field) =>
+        addCallbackAndSetParam(field, varName, properties, callbackBucket, strs, operation)
+    );
+
+    Object.entries(properties).forEach(([key, value], _idx) => {
+        const param = `${parameterPrefix}${parameterNotation}${key}`;
+        const mutationFieldStatements = getMutationFieldStatements({
+            nodeOrRel: relationship,
+            param,
+            key,
+            varName,
+            value,
+            withVars,
+        });
+        strs.push(mutationFieldStatements);
+        params[param] = value;
+    });
+
+    return [strs.join("\n"), params];
+}
+
+function addAutogenerateProperties({
+    relationship,
+    operation,
+    varName,
+    strs,
+}: {
+    relationship: Relationship;
+    operation: "CREATE" | "UPDATE";
+    varName: string;
+    strs: string[];
+}) {
     relationship.primitiveFields.forEach((primitiveField) => {
         if (primitiveField?.autogenerate) {
             if (operation === "CREATE") {
@@ -114,91 +150,4 @@ function createSetRelationshipPropertiesForProperties({
             );
         }
     });
-
-    [...relationship.primitiveFields, ...relationship.temporalFields].forEach((field) =>
-        addCallbackAndSetParam(field, varName, properties, callbackBucket, strs, operation)
-    );
-
-    Object.entries(properties).forEach(([key, value], _idx, propertiesEntries) => {
-        const paramName = `${parameterPrefix}.${key}`;
-
-        const pointField = relationship.pointFields.find((x) => x.fieldName === key);
-        if (pointField) {
-            if (pointField.typeMeta.array) {
-                strs.push(`SET ${varName}.${pointField.dbPropertyName} = [p in $${paramName} | point(p)]`);
-            } else {
-                strs.push(`SET ${varName}.${pointField.dbPropertyName} = point($${paramName})`);
-            }
-
-            return;
-        }
-
-        const arrayPushField = relationship.primitiveFields.find((x) => `${x.fieldName}_PUSH` === key);
-        if (arrayPushField && arrayPushField.dbPropertyName) {
-            assertNonAmbiguousUpdate(propertiesEntries, arrayPushField.dbPropertyName);
-
-            strs.push(
-                `SET ${varName}.${arrayPushField.dbPropertyName} = ${varName}.${arrayPushField.dbPropertyName} + $${paramName}`
-            );
-
-            return;
-        }
-
-        const pointArrayPushField = relationship.pointFields.find((x) => `${x.fieldName}_PUSH` === key);
-        if (pointArrayPushField && pointArrayPushField.dbPropertyName) {
-            assertNonAmbiguousUpdate(propertiesEntries, pointArrayPushField.dbPropertyName);
-
-            strs.push(
-                `SET ${varName}.${pointArrayPushField.dbPropertyName} = ${varName}.${pointArrayPushField.dbPropertyName} + [p in $${paramName} | point(p)]`
-            );
-
-            return;
-        }
-
-        const arrayPopField = relationship.primitiveFields.find((x) => `${x.fieldName}_POP` === key);
-        if (arrayPopField && arrayPopField.dbPropertyName) {
-            assertNonAmbiguousUpdate(propertiesEntries, arrayPopField.dbPropertyName);
-
-            strs.push(
-                `SET ${varName}.${arrayPopField.dbPropertyName} = ${varName}.${arrayPopField.dbPropertyName}[0..-$${paramName}]`
-            );
-
-            return;
-        }
-
-        const pointArrayPopField = relationship.pointFields.find((x) => `${x.fieldName}_POP` === key);
-        if (pointArrayPopField && pointArrayPopField.dbPropertyName) {
-            assertNonAmbiguousUpdate(propertiesEntries, pointArrayPopField.dbPropertyName);
-
-            strs.push(
-                `SET ${varName}.${pointArrayPopField.dbPropertyName} = ${varName}.${pointArrayPopField.dbPropertyName}[0..-$${paramName}]`
-            );
-
-            return;
-        }
-
-        const mathMatch = matchMathField(key);
-        const { hasMatched } = mathMatch;
-        if (hasMatched) {
-            const mathDescriptor = mathDescriptorBuilder(value as number, relationship, mathMatch);
-            assertNonAmbiguousUpdate(propertiesEntries, mathDescriptor.dbName);
-
-            const mathStatements = buildMathStatements(mathDescriptor, varName, withVars, paramName);
-            strs.push(...mathStatements);
-            return;
-        }
-
-        const dbFieldName = mapToDbProperty(relationship, key);
-        strs.push(`SET ${varName}.${dbFieldName} = $${paramName}`);
-    });
-
-    return strs.join("\n");
-
-    function assertNonAmbiguousUpdate(propertiesEntries: [string, unknown][], propertyName: string) {
-        if (propertiesEntries.find(([entryKey]) => entryKey === propertyName)) {
-            throw new Error(`Cannot mutate the same field multiple times in one Mutation: ${propertyName}`);
-        }
-    }
 }
-
-export default createSetRelationshipProperties;

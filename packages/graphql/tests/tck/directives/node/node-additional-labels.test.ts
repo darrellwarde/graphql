@@ -189,7 +189,7 @@ describe("Node directive with additionalLabels", () => {
     test("Update Movie with additional labels", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(where: { id_EQ: "1" }, update: { id: "2" }) {
+                updateMovies(where: { id_EQ: "1" }, update: { id_SET: "2" }) {
                     movies {
                         id
                     }
@@ -202,14 +202,14 @@ describe("Node directive with additionalLabels", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Film:Multimedia)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             RETURN collect(DISTINCT this { .id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_id\\": \\"2\\",
+                \\"this_update_id_SET\\": \\"2\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

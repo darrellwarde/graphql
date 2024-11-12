@@ -196,7 +196,6 @@ export function withDisconnectFieldInputType({
     relationshipAdapter,
     composer,
     ifUnionMemberEntity,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
@@ -212,20 +211,19 @@ export function withDisconnectFieldInputType({
     }
     const disconnectFieldInput = composer.createInputTC({
         name: typeName,
-        fields: makeDisconnectFieldInputTypeFields({ relationshipAdapter, composer, ifUnionMemberEntity, features }),
+        fields: makeDisconnectFieldInputTypeFields({ relationshipAdapter, composer, ifUnionMemberEntity }),
     });
     return disconnectFieldInput;
 }
+
 function makeDisconnectFieldInputTypeFields({
     relationshipAdapter,
     composer,
     ifUnionMemberEntity,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
     ifUnionMemberEntity?: ConcreteEntityAdapter;
-    features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposerFieldConfigMapDefinition {
     const fields = {};
     if (relationshipAdapter.target instanceof ConcreteEntityAdapter) {
@@ -260,7 +258,6 @@ function makeDisconnectFieldInputTypeFields({
             relationshipAdapter,
             memberEntity: ifUnionMemberEntity,
             composer,
-            features,
         });
 
         if (ifUnionMemberEntity.relationships.size) {

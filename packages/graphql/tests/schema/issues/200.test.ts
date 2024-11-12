@@ -91,11 +91,14 @@ describe("200", () => {
             }
 
             input CategoryUpdateInput {
-              description: String
-              exampleImageLocations: [String!]
+              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              description_SET: String
+              exampleImageLocations: [String!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               exampleImageLocations_POP: Int
               exampleImageLocations_PUSH: [String!]
-              name: String
+              exampleImageLocations_SET: [String!]
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input CategoryWhere {

@@ -20,13 +20,10 @@
 import Cypher from "@neo4j/cypher-builder";
 import pluralize from "pluralize";
 import type { Node, Relationship } from "../classes";
-import { Neo4jGraphQLError } from "../classes";
 import type { CallbackBucket } from "../classes/CallbackBucket";
 import type { BaseField } from "../types";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import { caseWhere } from "../utils/case-where";
-import { findConflictingProperties } from "../utils/find-conflicting-properties";
-import mapToDbProperty from "../utils/map-to-db-property";
 import { wrapStringInApostrophes } from "../utils/wrap-string-in-apostrophes";
 import { checkAuthentication } from "./authorization/check-authentication";
 import {
@@ -42,11 +39,13 @@ import createCreateAndParams from "./create-create-and-params";
 import createDeleteAndParams from "./create-delete-and-params";
 import createDisconnectAndParams from "./create-disconnect-and-params";
 import { createRelationshipValidationString } from "./create-relationship-validation-string";
-import createSetRelationshipProperties from "./create-set-relationship-properties";
+import { createSetRelationshipProperties } from "./create-set-relationship-properties";
+import { assertNonAmbiguousUpdate } from "./utils/assert-non-ambiguous-update";
 import { addCallbackAndSetParam } from "./utils/callback-utils";
 import { getAuthorizationStatements } from "./utils/get-authorization-statements";
+import { getMutationFieldStatements } from "./utils/get-mutation-field-statements";
 import { indentBlock } from "./utils/indent-block";
-import { buildMathStatements, matchMathField, mathDescriptorBuilder } from "./utils/math";
+import { parseMutableField } from "./utils/parse-mutable-field";
 import createConnectionWhereAndParams from "./where/create-connection-where-and-params";
 
 interface Res {
@@ -88,20 +87,12 @@ export default function createUpdateAndParams({
 }): [string, any] {
     let hasAppliedTimeStamps = false;
 
-    const conflictingProperties = findConflictingProperties({ node, input: updateInput });
-    if (conflictingProperties.length > 0) {
-        throw new Neo4jGraphQLError(
-            `Conflicting modification of ${conflictingProperties.map((n) => `[[${n}]]`).join(", ")} on type ${
-                node.name
-            }`
-        );
-    }
+    assertNonAmbiguousUpdate(node, updateInput);
 
     checkAuthentication({ context, node, targetOperations: ["UPDATE"] });
 
     function reducer(res: Res, [key, value]: [string, any]) {
         let param: string;
-
         if (chainStr) {
             param = `${chainStr}_${key}`;
         } else {
@@ -109,8 +100,6 @@ export default function createUpdateAndParams({
         }
 
         const relationField = node.relationFields.find((x) => key === x.fieldName);
-        const pointField = node.pointFields.find((x) => key === x.fieldName);
-        const dbFieldName = mapToDbProperty(node, key);
 
         if (relationField) {
             const refNodes: Node[] = [];
@@ -273,7 +262,7 @@ export default function createUpdateAndParams({
                             const relationshipAdapter = entity
                                 ? entity.findRelationship(relationField.fieldName)
                                 : undefined;
-                            const setProperties = createSetRelationshipProperties({
+                            const res = createSetRelationshipProperties({
                                 properties: update.update.edge,
                                 varName: relationshipVariable,
                                 withVars: withVars,
@@ -284,7 +273,12 @@ export default function createUpdateAndParams({
                                 parameterPrefix: `${parameterPrefix}.${key}${
                                     relationField.union ? `.${refNode.name}` : ""
                                 }${relationField.typeMeta.array ? `[${index}]` : ``}.update.edge`,
+                                parameterNotation: ".",
                             });
+                            let setProperties;
+                            if (res) {
+                                setProperties = res[0];
+                            }
                             if (setProperties) {
                                 innerUpdate.push(setProperties);
                             }
@@ -459,9 +453,10 @@ export default function createUpdateAndParams({
                                     parameterPrefix: `${parameterPrefix}.${key}${
                                         relationField.union ? `.${refNode.name}` : ""
                                     }[${index}].create[${i}].edge`,
+                                    parameterNotation: ".",
                                 });
                                 if (setA) {
-                                    subquery.push(setA);
+                                    subquery.push(setA[0]);
                                 }
                             }
 
@@ -524,45 +519,31 @@ export default function createUpdateAndParams({
             addCallbackAndSetParam(field, varName, updateInput, callbackBucket, res.strs, "UPDATE")
         );
 
-        const mathMatch = matchMathField(key);
-        const { hasMatched, propertyName } = mathMatch;
-        const settableFieldComparator = hasMatched ? propertyName : key;
-        const settableField = node.mutableFields.find((x) => x.fieldName === settableFieldComparator);
-        const authableField = node.authableFields.find(
-            (x) => x.fieldName === key || `${x.fieldName}_PUSH` === key || `${x.fieldName}_POP` === key
-        );
+        const { settableField, operator } = parseMutableField(node, key);
 
         if (settableField) {
             if (settableField.typeMeta.required && value === null) {
                 throw new Error(`Cannot set non-nullable field ${node.name}.${settableField.fieldName} to null`);
             }
-
-            if (pointField) {
-                if (pointField.typeMeta.array) {
-                    res.strs.push(`SET ${varName}.${dbFieldName} = [p in $${param} | point(p)]`);
-                } else {
-                    res.strs.push(`SET ${varName}.${dbFieldName} = point($${param})`);
-                }
-            } else if (hasMatched) {
-                const mathDescriptor = mathDescriptorBuilder(value as number, node, mathMatch);
-                if (updateInput[mathDescriptor.dbName]) {
-                    throw new Error(
-                        `Cannot mutate the same field multiple times in one Mutation: ${mathDescriptor.dbName}`
-                    );
-                }
-
-                const mathStatements = buildMathStatements(mathDescriptor, varName, withVars, param);
-                res.strs.push(...mathStatements);
-            } else {
-                res.strs.push(`SET ${varName}.${dbFieldName} = $${param}`);
+            checkAuthentication({ context, node, targetOperations: ["UPDATE"], field: settableField.fieldName });
+            if (operator === "PUSH" || operator === "POP") {
+                validateNonNullProperty(res, varName, settableField);
             }
-            res.params[param] = value;
-        }
+            const mutationFieldStatements = getMutationFieldStatements({
+                nodeOrRel: node,
+                param,
+                key,
+                varName,
+                value,
+                withVars,
+            });
+            res.strs.push(mutationFieldStatements);
 
-        if (authableField) {
+            res.params[param] = value;
+
             const authorizationBeforeAndParams = createAuthorizationBeforeAndParamsField({
                 context,
-                nodes: [{ node: node, variable: varName, fieldName: authableField.fieldName }],
+                nodes: [{ node: node, variable: varName, fieldName: settableField.fieldName }],
                 operations: ["UPDATE"],
             });
 
@@ -580,7 +561,7 @@ export default function createUpdateAndParams({
 
             const authorizationAfterAndParams = createAuthorizationAfterAndParamsField({
                 context,
-                nodes: [{ node: node, variable: varName, fieldName: authableField.fieldName }],
+                nodes: [{ node: node, variable: varName, fieldName: settableField.fieldName }],
                 operations: ["UPDATE"],
             });
 
@@ -595,55 +576,6 @@ export default function createUpdateAndParams({
 
                 res.params = { ...res.params, ...authWhereParams };
             }
-        }
-
-        const pushSuffix = "_PUSH";
-        const pushField = node.mutableFields.find((x) => `${x.fieldName}${pushSuffix}` === key);
-        if (pushField) {
-            if (pushField.dbPropertyName && updateInput[pushField.dbPropertyName]) {
-                throw new Error(
-                    `Cannot mutate the same field multiple times in one Mutation: ${pushField.dbPropertyName}`
-                );
-            }
-
-            validateNonNullProperty(res, varName, pushField);
-            checkAuthentication({ context, node, targetOperations: ["UPDATE"], field: pushField.fieldName });
-
-            const pointArrayField = node.pointFields.find((x) => `${x.fieldName}_PUSH` === key);
-            if (pointArrayField) {
-                res.strs.push(
-                    `SET ${varName}.${pushField.dbPropertyName} = ${varName}.${pushField.dbPropertyName} + [p in $${param} | point(p)]`
-                );
-            } else {
-                res.strs.push(
-                    `SET ${varName}.${pushField.dbPropertyName} = ${varName}.${pushField.dbPropertyName} + $${param}`
-                );
-            }
-
-            res.params[param] = value;
-        }
-
-        const popSuffix = `_POP`;
-        const popField = node.mutableFields.find((x) => `${x.fieldName}${popSuffix}` === key);
-        if (popField) {
-            if (popField.dbPropertyName && updateInput[popField.dbPropertyName]) {
-                throw new Error(
-                    `Cannot mutate the same field multiple times in one Mutation: ${popField.dbPropertyName}`
-                );
-            }
-
-            validateNonNullProperty(res, varName, popField);
-            checkAuthentication({ context, node, targetOperations: ["UPDATE"], field: popField.fieldName });
-
-            res.strs.push(
-                `SET ${varName}.${popField.dbPropertyName} = ${varName}.${popField.dbPropertyName}[0..-$${param}]`
-            );
-
-            res.params[param] = value;
-        }
-
-        if (!pushField && !popField) {
-            checkAuthentication({ context, node, targetOperations: ["UPDATE"], field: key });
         }
 
         return res;

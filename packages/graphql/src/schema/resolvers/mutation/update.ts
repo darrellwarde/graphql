@@ -21,12 +21,10 @@ import { Kind, type FieldNode, type GraphQLResolveInfo } from "graphql";
 import type {
     ObjectTypeComposerArgumentConfigAsObjectDefinition,
     ObjectTypeComposerFieldConfigAsObjectDefinition,
-    SchemaComposer,
 } from "graphql-compose";
 import type { Node } from "../../../classes";
 import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import { translateUpdate } from "../../../translate";
-import type { Neo4jFeaturesSettings } from "../../../types";
 import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
 import { execute } from "../../../utils";
 import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
@@ -34,14 +32,10 @@ import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-
 
 export function updateResolver({
     node,
-    composer,
     concreteEntityAdapter,
-    features,
 }: {
     node: Node;
-    composer: SchemaComposer;
     concreteEntityAdapter: ConcreteEntityAdapter;
-    features?: Neo4jFeaturesSettings;
 }): ObjectTypeComposerFieldConfigAsObjectDefinition<any, any> {
     async function resolve(_root: any, args: any, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) {
         const resolveTree = getNeo4jResolveTree(info, { args });

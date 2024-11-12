@@ -56,7 +56,7 @@ describe("https://github.com/neo4j/graphql/issues/288", () => {
         const companyid1 = generate({ charset: "alphabetic" });
         const companyid2 = generate({ charset: "alphabetic" });
 
-        const createMutation = `
+        const createMutation = /* GraphQL */ `
             mutation {
                 ${USER.operations.create}(input: { USERID: "${userid}", COMPANYID: "${companyid1}" }) {
                     ${USER.plural} {
@@ -67,9 +67,9 @@ describe("https://github.com/neo4j/graphql/issues/288", () => {
             }
         `;
 
-        const updateMutation = `
+        const updateMutation = /* GraphQL */ `
             mutation {
-                ${USER.operations.update}(where: { USERID_EQ: "${userid}" }, update: { COMPANYID: "${companyid2}" }) {
+                ${USER.operations.update}(where: { USERID_EQ: "${userid}" }, update: { COMPANYID_SET: "${companyid2}" }) {
                     ${USER.plural} {
                         USERID
                         COMPANYID

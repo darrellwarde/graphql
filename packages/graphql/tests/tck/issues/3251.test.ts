@@ -47,7 +47,10 @@ describe("https://github.com/neo4j/graphql/issues/3251", () => {
                 mutation UpdateMovieWithConnectAndUpdate {
                     updateMovies(
                         where: { name_EQ: "TestMovie1" }
-                        update: { name: "TestMovie1", genre: { connect: { where: { node: { name_EQ: "Thriller" } } } } }
+                        update: {
+                            name_SET: "TestMovie1"
+                            genre: { connect: { where: { node: { name_EQ: "Thriller" } } } }
+                        }
                     ) {
                         movies {
                             name
@@ -64,7 +67,7 @@ describe("https://github.com/neo4j/graphql/issues/3251", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:Movie)
                 WHERE this.name = $param0
-                SET this.name = $this_update_name
+                SET this.name = $this_update_name_SET
                 WITH *
                 CALL {
                 	WITH this
@@ -104,7 +107,7 @@ describe("https://github.com/neo4j/graphql/issues/3251", () => {
             expect(formatParams(result.params)).toMatchInlineSnapshot(`
                 "{
                     \\"param0\\": \\"TestMovie1\\",
-                    \\"this_update_name\\": \\"TestMovie1\\",
+                    \\"this_update_name_SET\\": \\"TestMovie1\\",
                     \\"this_genre0_connect0_node_param0\\": \\"Thriller\\",
                     \\"resolvedCallbacks\\": {}
                 }"

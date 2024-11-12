@@ -30,17 +30,14 @@ import { InterfaceEntityAdapter } from "../../schema-model/entity/model-adapters
 import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/UnionEntityAdapter";
 import { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
-import type { Neo4jFeaturesSettings } from "../../types";
 
 // tODO: refactor into smaller fns for unions, like disconnect-input
 export function makeConnectionWhereInputType({
     relationshipAdapter,
     composer,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
-    features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposer {
     const typeName = relationshipAdapter.operations.getConnectionWhereTypename();
     if (composer.has(typeName)) {
@@ -54,7 +51,6 @@ export function makeConnectionWhereInputType({
                 relationshipAdapter,
                 memberEntity: concreteEntity,
                 composer,
-                features,
             });
 
             connectionWhereITC.addFields({
@@ -66,7 +62,6 @@ export function makeConnectionWhereInputType({
     return withConnectionWhereInputType({
         relationshipAdapter,
         composer,
-        features,
     });
 }
 
@@ -74,12 +69,10 @@ export function withConnectionWhereInputType({
     relationshipAdapter,
     memberEntity,
     composer,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     memberEntity?: ConcreteEntityAdapter;
     composer: SchemaComposer;
-    features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposer {
     const typeName = relationshipAdapter.operations.getConnectionWhereTypename(memberEntity);
     if (composer.has(typeName)) {

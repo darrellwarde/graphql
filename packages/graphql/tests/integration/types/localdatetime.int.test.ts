@@ -168,7 +168,7 @@ describe("LocalDateTime", () => {
 
             const mutation = /* GraphQL */ `
                     mutation ($id: ID!, $localDT: LocalDateTime) {
-                        ${Movie.operations.update}(where: { id_EQ: $id }, update: { localDT: $localDT }) {
+                        ${Movie.operations.update}(where: { id_EQ: $id }, update: { localDT_SET: $localDT }) {
                             ${Movie.plural} {
                                 id
                                 localDT

@@ -134,7 +134,6 @@ export function augmentObjectOrInterfaceTypeWithConnectionField(
             where: makeConnectionWhereInputType({
                 relationshipAdapter,
                 composer: schemaComposer,
-                features,
             }),
             first: {
                 type: GraphQLInt,

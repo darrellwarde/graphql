@@ -281,7 +281,8 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
 
             input GenreUpdateInput {
               movies: [GenreMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input GenreWhere {
@@ -500,15 +501,18 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
 
             input MovieUpdateInput {
               genres: [MovieGenresUpdateFieldInput!] @deprecated(reason: \\"Do not use genre\\")
-              imdbRating: Float
+              imdbRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdbRating_ADD: Float
               imdbRating_DIVIDE: Float
               imdbRating_MULTIPLY: Float
+              imdbRating_SET: Float
               imdbRating_SUBTRACT: Float
               title: String @deprecated(reason: \\"Do not use title\\")
-              year: Int
+              title_SET: String @deprecated(reason: \\"Do not use title\\")
+              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
+              year_SET: Int
             }
 
             input MovieWhere {

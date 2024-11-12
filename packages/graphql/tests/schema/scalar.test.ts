@@ -113,10 +113,14 @@ describe("Scalar", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              myCustomArrayScalar: [CustomScalar!]
-              myCustomScalar: CustomScalar
-              myRequiredCustomArrayScalar: [CustomScalar!]
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              myCustomArrayScalar: [CustomScalar!] @deprecated(reason: \\"Please use the explicit _SET field\\")
+              myCustomArrayScalar_SET: [CustomScalar!]
+              myCustomScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _SET field\\")
+              myCustomScalar_SET: CustomScalar
+              myRequiredCustomArrayScalar: [CustomScalar!] @deprecated(reason: \\"Please use the explicit _SET field\\")
+              myRequiredCustomArrayScalar_SET: [CustomScalar!]
             }
 
             input MovieWhere {

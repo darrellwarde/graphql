@@ -34,7 +34,7 @@ describe("parseMutationField", () => {
         });
     });
 
-    test.each(["PUSH", "POP", "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "INCREMENT", "DECREMENT"])(
+    test.each(["SET", "PUSH", "POP", "ADD", "SUBTRACT", "MULTIPLY", "DIVIDE", "INCREMENT", "DECREMENT"])(
         "title_%s",
         (operator) => {
             expect(parseMutationField(`title_${operator}`)).toEqual({

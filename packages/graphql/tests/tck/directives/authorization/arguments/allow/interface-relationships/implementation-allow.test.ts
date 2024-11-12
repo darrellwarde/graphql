@@ -206,7 +206,10 @@ describe("@auth allow on specific interface implementation", () => {
     test("Nested Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { id_EQ: "user-id" }, update: { content: { update: { node: { id: "new-id" } } } }) {
+                updateUsers(
+                    where: { id_EQ: "user-id" }
+                    update: { content: { update: { node: { id_SET: "new-id" } } } }
+                ) {
                     users {
                         id
                         content {
@@ -232,7 +235,7 @@ describe("@auth allow on specific interface implementation", () => {
             CALL {
             	WITH this
             	MATCH (this)-[this_has_content0_relationship:HAS_CONTENT]->(this_content0:Comment)
-            	SET this_content0.id = $this_update_content0_id
+            	SET this_content0.id = $this_update_content0_id_SET
             	WITH this, this_content0
             	CALL {
             		WITH this_content0
@@ -261,7 +264,7 @@ describe("@auth allow on specific interface implementation", () => {
             	OPTIONAL MATCH (this_content0)<-[:HAS_CONTENT]-(authorization__before_this0:User)
             	WITH *, count(authorization__before_this0) AS creatorCount
             	WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            	SET this_content0.id = $this_update_content0_id
+            	SET this_content0.id = $this_update_content0_id_SET
             	WITH this, this_content0
             	CALL {
             		WITH this_content0
@@ -308,7 +311,7 @@ describe("@auth allow on specific interface implementation", () => {
                     \\"sub\\": \\"user-id\\"
                 },
                 \\"param0\\": \\"user-id\\",
-                \\"this_update_content0_id\\": \\"new-id\\",
+                \\"this_update_content0_id_SET\\": \\"new-id\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

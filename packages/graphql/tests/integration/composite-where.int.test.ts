@@ -70,7 +70,7 @@ describe("composite-where", () => {
                         where: {
                             id_EQ: $movieId
                         }
-                        update:{
+                        update: {
                             actors: {
                                 delete: {
                                     where: {

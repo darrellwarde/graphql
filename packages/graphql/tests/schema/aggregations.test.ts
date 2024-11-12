@@ -209,25 +209,36 @@ describe("Aggregations", () => {
             }
 
             input MovieUpdateInput {
-              createdAt: DateTime
-              id: ID
-              imdbRating: Float
+              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              createdAt_SET: DateTime
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              imdbRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdbRating_ADD: Float
               imdbRating_DIVIDE: Float
               imdbRating_MULTIPLY: Float
+              imdbRating_SET: Float
               imdbRating_SUBTRACT: Float
-              isbn: String
-              screenTime: Duration
-              someBigInt: BigInt
+              isbn: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isbn_SET: String
+              screenTime: Duration @deprecated(reason: \\"Please use the explicit _SET field\\")
+              screenTime_SET: Duration
+              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               someBigInt_DECREMENT: BigInt
               someBigInt_INCREMENT: BigInt
-              someInt: Int
+              someBigInt_SET: BigInt
+              someInt: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               someInt_DECREMENT: Int
               someInt_INCREMENT: Int
-              someLocalDateTime: LocalDateTime
-              someLocalTime: LocalTime
-              someTime: Time
-              title: String
+              someInt_SET: Int
+              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someLocalDateTime_SET: LocalDateTime
+              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someLocalTime_SET: LocalTime
+              someTime: Time @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someTime_SET: Time
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -679,24 +690,34 @@ describe("Aggregations", () => {
             }
 
             input LikesUpdateInput {
-              someBigInt: BigInt
+              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               someBigInt_DECREMENT: BigInt
               someBigInt_INCREMENT: BigInt
-              someDateTime: DateTime
-              someDuration: Duration
-              someFloat: Float
+              someBigInt_SET: BigInt
+              someDateTime: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someDateTime_SET: DateTime
+              someDuration: Duration @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someDuration_SET: Duration
+              someFloat: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               someFloat_ADD: Float
               someFloat_DIVIDE: Float
               someFloat_MULTIPLY: Float
+              someFloat_SET: Float
               someFloat_SUBTRACT: Float
-              someId: ID
-              someInt: Int
+              someId: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someId_SET: ID
+              someInt: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               someInt_DECREMENT: Int
               someInt_INCREMENT: Int
-              someLocalDateTime: LocalDateTime
-              someLocalTime: LocalTime
-              someString: String
-              someTime: Time
+              someInt_SET: Int
+              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someLocalDateTime_SET: LocalDateTime
+              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someLocalTime_SET: LocalTime
+              someString: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someString_SET: String
+              someTime: Time @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someTime_SET: Time
             }
 
             input LikesWhere {
@@ -1074,7 +1095,8 @@ describe("Aggregations", () => {
 
             input PostUpdateInput {
               likes: [PostLikesUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             type PostUserLikesAggregationSelection {
@@ -1277,24 +1299,34 @@ describe("Aggregations", () => {
             }
 
             input UserUpdateInput {
-              someBigInt: BigInt
+              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               someBigInt_DECREMENT: BigInt
               someBigInt_INCREMENT: BigInt
-              someDateTime: DateTime
-              someDuration: Duration
-              someFloat: Float
+              someBigInt_SET: BigInt
+              someDateTime: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someDateTime_SET: DateTime
+              someDuration: Duration @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someDuration_SET: Duration
+              someFloat: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               someFloat_ADD: Float
               someFloat_DIVIDE: Float
               someFloat_MULTIPLY: Float
+              someFloat_SET: Float
               someFloat_SUBTRACT: Float
-              someId: ID
-              someInt: Int
+              someId: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someId_SET: ID
+              someInt: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               someInt_DECREMENT: Int
               someInt_INCREMENT: Int
-              someLocalDateTime: LocalDateTime
-              someLocalTime: LocalTime
-              someString: String
-              someTime: Time
+              someInt_SET: Int
+              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someLocalDateTime_SET: LocalDateTime
+              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someLocalTime_SET: LocalTime
+              someString: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someString_SET: String
+              someTime: Time @deprecated(reason: \\"Please use the explicit _SET field\\")
+              someTime_SET: Time
             }
 
             input UserWhere {

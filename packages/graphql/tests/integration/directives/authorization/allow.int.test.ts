@@ -426,7 +426,7 @@ describe("auth/allow", () => {
 
     describe("update", () => {
         test("should throw Forbidden when editing a node with invalid allow", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${userType.name}  @node {
                     id: ID
                 }
@@ -439,9 +439,9 @@ describe("auth/allow", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${userType.operations.update}(where: {id_EQ: "${userId}"}, update: {id: "new-id"}) {
+                    ${userType.operations.update}(where: { id_EQ: "${userId}" }, update: { id_SET: "new-id" }) {
                         ${userType.plural} {
                             id
                         }
@@ -470,7 +470,7 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when editing a property with invalid allow", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${userType.name} {
                     id: ID
                 }
@@ -485,9 +485,9 @@ describe("auth/allow", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${userType.operations.update}(where: {id_EQ: "${userId}"}, update: {password: "new-password"}) {
+                    ${userType.operations.update}(where: { id_EQ: "${userId}"}, update: { password_SET: "new-password" }) {
                         ${userType.plural} {
                             id
                         }
@@ -516,7 +516,7 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when editing a nested node with invalid allow", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${postType.name} @node {
                     id: ID
                     content: String
@@ -538,11 +538,11 @@ describe("auth/allow", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${postType.operations.update}(
                         where: { id_EQ: "${postId}" }
-                        update: { creator: { update: { node: { id: "new-id" } } } }
+                        update: { creator: { update: { node: { id_SET: "new-id" } } } }
                     ) {
                         ${postType.plural} {
                             id
@@ -572,7 +572,7 @@ describe("auth/allow", () => {
         });
 
         test("should throw Forbidden when editing a nested node property with invalid allow", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${postType.name} @node {
                     id: ID
                     content: String
@@ -596,11 +596,11 @@ describe("auth/allow", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${postType.operations.update}(
                         where: { id_EQ: "${postId}" }
-                        update: { creator: { update: { node: { password: "new-password" } } } }
+                        update: { creator: { update: { node: { password_SET: "new-password" } } } }
                     ) {
                         ${postType.plural} {
                             id

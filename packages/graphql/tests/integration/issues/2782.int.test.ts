@@ -77,12 +77,12 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
     });
 
     test("should update with nested disconnections", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${Product.operations.update}(
                     update: {
-                        id: "123"
-                        name: "Nested Connect"
+                        id_SET: "123"
+                        name_SET: "Nested Connect"
                         colors: {
                             disconnect: [
                                 {

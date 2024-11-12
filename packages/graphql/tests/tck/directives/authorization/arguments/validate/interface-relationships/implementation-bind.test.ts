@@ -262,7 +262,7 @@ describe("Cypher Auth Allow", () => {
                     update: {
                         content: {
                             where: { node: { id_EQ: "post-id" } }
-                            update: { node: { creator: { update: { node: { id: "not bound" } } } } }
+                            update: { node: { creator: { update: { node: { id_SET: "not bound" } } } } }
                         }
                     }
                 ) {
@@ -293,7 +293,7 @@ describe("Cypher Auth Allow", () => {
             	CALL {
             		WITH this, this_content0
             		MATCH (this_content0)<-[this_content0_has_content0_relationship:HAS_CONTENT]-(this_content0_creator0:User)
-            		SET this_content0_creator0.id = $this_update_content0_creator0_id
+            		SET this_content0_creator0.id = $this_update_content0_creator0_id_SET
             		WITH this, this_content0, this_content0_creator0
             		WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this_content0_creator0.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             		RETURN count(*) AS update_this_content0_creator0
@@ -321,7 +321,7 @@ describe("Cypher Auth Allow", () => {
             	CALL {
             		WITH this, this_content0
             		MATCH (this_content0)<-[this_content0_has_content0_relationship:HAS_CONTENT]-(this_content0_creator0:User)
-            		SET this_content0_creator0.id = $this_update_content0_creator0_id
+            		SET this_content0_creator0.id = $this_update_content0_creator0_id_SET
             		WITH this, this_content0, this_content0_creator0
             		WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this_content0_creator0.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             		RETURN count(*) AS update_this_content0_creator0
@@ -352,7 +352,7 @@ describe("Cypher Auth Allow", () => {
             "{
                 \\"param0\\": \\"id-01\\",
                 \\"updateUsers_args_update_content0_where_this_content0param0\\": \\"post-id\\",
-                \\"this_update_content0_creator0_id\\": \\"not bound\\",
+                \\"this_update_content0_creator0_id_SET\\": \\"not bound\\",
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [
@@ -375,7 +375,7 @@ describe("Cypher Auth Allow", () => {
                                             \\"creator\\": {
                                                 \\"update\\": {
                                                     \\"node\\": {
-                                                        \\"id\\": \\"not bound\\"
+                                                        \\"id_SET\\": \\"not bound\\"
                                                     }
                                                 }
                                             }

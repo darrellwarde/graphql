@@ -30,7 +30,9 @@ import type { Argument } from "../schema-model/argument/Argument";
 import { ArgumentAdapter } from "../schema-model/argument/model-adapters/ArgumentAdapter";
 import type { AttributeAdapter } from "../schema-model/attribute/model-adapters/AttributeAdapter";
 import { parseValueNode } from "../schema-model/parser/parse-value-node";
-import type { InputField } from "../types";
+import type { InputField, Neo4jFeaturesSettings } from "../types";
+import { DEPRECATE_IMPLICIT_SET } from "./constants";
+import { shouldAddDeprecatedFields } from "./generation/utils";
 import { idResolver } from "./resolvers/field/id";
 import { numericalResolver } from "./resolvers/field/numerical";
 
@@ -125,11 +127,17 @@ export function concreteEntityToCreateInputFields(
     return createInputFields;
 }
 
-export function concreteEntityToUpdateInputFields(
-    objectFields: AttributeAdapter[],
-    userDefinedFieldDirectives: Map<string, DirectiveNode[]>,
-    additionalFieldsCallbacks: AdditionalFieldsCallback[] = []
-) {
+export function concreteEntityToUpdateInputFields({
+    objectFields,
+    userDefinedFieldDirectives,
+    additionalFieldsCallbacks = [],
+    features,
+}: {
+    objectFields: AttributeAdapter[];
+    userDefinedFieldDirectives: Map<string, DirectiveNode[]>;
+    additionalFieldsCallbacks: AdditionalFieldsCallback[];
+    features?: Neo4jFeaturesSettings;
+}) {
     let updateInputFields: InputTypeComposerFieldConfigMapDefinition = {};
     for (const field of objectFields) {
         const newInputField: InputField = {
@@ -143,8 +151,14 @@ export function concreteEntityToUpdateInputFields(
                 userDefinedDirectivesOnField.filter((directive) => directive.name.value === DEPRECATED)
             );
         }
+        if (shouldAddDeprecatedFields(features, "implicitSet")) {
+            updateInputFields[field.name] = {
+                type: newInputField.type,
+                directives: newInputField.directives?.length ? newInputField.directives : [DEPRECATE_IMPLICIT_SET],
+            };
+        }
 
-        updateInputFields[field.name] = newInputField;
+        updateInputFields[`${field.name}_SET`] = newInputField;
 
         for (const cb of additionalFieldsCallbacks) {
             const additionalFields = cb(field, newInputField);

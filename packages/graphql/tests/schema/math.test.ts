@@ -110,10 +110,12 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              viewers: Int
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
+              viewers_SET: Int
             }
 
             input MovieWhere {
@@ -278,10 +280,12 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              viewers: BigInt
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: BigInt
               viewers_INCREMENT: BigInt
+              viewers_SET: BigInt
             }
 
             input MovieWhere {
@@ -442,11 +446,13 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              viewers: Float
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_ADD: Float
               viewers_DIVIDE: Float
               viewers_MULTIPLY: Float
+              viewers_SET: Float
               viewers_SUBTRACT: Float
             }
 
@@ -741,7 +747,8 @@ describe("Algebraic", () => {
 
             input DirectorUpdateInput {
               directs: [DirectorDirectsUpdateFieldInput!]
-              lastName: String
+              lastName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              lastName_SET: String
             }
 
             input DirectorWhere {
@@ -961,10 +968,12 @@ describe("Algebraic", () => {
 
             input MovieUpdateInput {
               directedBy: MovieDirectedByUpdateFieldInput
-              id: ID
-              viewers: Int
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
+              viewers_SET: Int
             }
 
             input MovieWhere {
@@ -1175,10 +1184,12 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              viewers: Int
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
+              viewers_SET: Int
               workers: [MovieWorkersUpdateFieldInput!]
             }
 
@@ -1412,7 +1423,8 @@ describe("Algebraic", () => {
             }
 
             input PersonUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               worksInProduction: [PersonWorksInProductionUpdateFieldInput!]
             }
 
@@ -1591,9 +1603,10 @@ describe("Algebraic", () => {
             }
 
             input ProductionUpdateInput {
-              viewers: Int
+              viewers: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
+              viewers_SET: Int
             }
 
             input ProductionWhere {
@@ -1736,14 +1749,16 @@ describe("Algebraic", () => {
             }
 
             input ActedInUpdateInput {
-              pay: Float
+              pay: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               pay_ADD: Float
               pay_DIVIDE: Float
               pay_MULTIPLY: Float
+              pay_SET: Float
               pay_SUBTRACT: Float
-              roles: [String!]
+              roles: [String!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               roles_POP: Int
               roles_PUSH: [String!]
+              roles_SET: [String!]
             }
 
             input ActedInWhere {
@@ -1965,7 +1980,8 @@ describe("Algebraic", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -2204,7 +2220,8 @@ describe("Algebraic", () => {
 
             input PersonUpdateInput {
               actedInMovies: [PersonActedInMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input PersonWhere {

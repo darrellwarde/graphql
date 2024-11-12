@@ -108,7 +108,8 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             input FOLLOWSUpdateInput {
-              since: DateTime
+              since: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              since_SET: DateTime
             }
 
             input FOLLOWSWhere {
@@ -189,8 +190,10 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             input ProfileUpdateInput {
-              id: ID
-              userName: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              userName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              userName_SET: String
             }
 
             input ProfileWhere {
@@ -422,7 +425,8 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
 
             input UserUpdateInput {
               following: [UserFollowingUpdateFieldInput!]
-              userName: String
+              userName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              userName_SET: String
             }
 
             input UserWhere {

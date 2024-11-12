@@ -100,12 +100,12 @@ describe("interface relationships", () => {
         });
         const seriesScreenTime = 53301;
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation UpdateUpdate($name: String, $oldTitle: String, $newTitle: String) {
                 ${Actor.operations.update}(
                     where: { name_EQ: $name }
                     update: {
-                        actedIn: { where: { node: { title_EQ: $oldTitle } }, update: { node: { title: $newTitle } } }
+                        actedIn: { where: { node: { title_EQ: $oldTitle } }, update: { node: { title_SET: $newTitle } } }
                     }
                 ) {
                     ${Actor.plural} {
@@ -195,14 +195,14 @@ describe("interface relationships", () => {
         });
         const seriesScreenTime = 38286;
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation UpdateUpdate($name: String, $newName: String, $oldTitle: String, $newTitle: String) {
                 ${Actor.operations.update}(
                     where: { name_EQ: $name }
                     update: {
                         actedIn: {
                             where: { node: { title_EQ: $oldTitle } }
-                            update: { node: { title: $newTitle, actors: { update: { node: { name: $newName } } } } }
+                            update: { node: { title_SET: $newTitle, actors: { update: { node: { name_SET: $newName } } } } }
                         }
                     }
                 ) {

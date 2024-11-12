@@ -56,9 +56,9 @@ describe("https://github.com/neo4j/graphql/issues/567", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
-                ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: { title: "${newTitle}" }) {
+                ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: { title_SET: "${newTitle}" }) {
                     info {
                         nodesCreated
                         nodesDeleted

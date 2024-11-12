@@ -377,7 +377,7 @@ describe("auth/where", () => {
 
     describe("update", () => {
         test("should add $jwt.id to where", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                 }
@@ -392,9 +392,9 @@ describe("auth/where", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { id: "${newUserId}" }){
+                    ${User.operations.update}(update: { id_SET: "${newUserId}" }){
                         ${User.plural} {
                             id
                         }

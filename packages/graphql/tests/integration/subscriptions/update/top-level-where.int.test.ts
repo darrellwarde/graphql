@@ -100,7 +100,7 @@ describe("Delete using top level aggregate where - subscriptions enabled", () =>
                             }
                         }
                     }
-                    update: { content: "${updatedContent}" }
+                    update: { content_SET: "${updatedContent}" }
                 ) {
                     ${postType.plural} {
                         id

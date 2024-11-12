@@ -167,7 +167,8 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -344,7 +345,8 @@ describe("Cypher", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input MovieWhere {
@@ -923,7 +925,8 @@ describe("Cypher", () => {
             }
 
             input BlogUpdateInput {
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input BlogWhere {
@@ -1030,7 +1033,8 @@ describe("Cypher", () => {
             }
 
             input PostUpdateInput {
-              content: String
+              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              content_SET: String
             }
 
             input PostWhere {
@@ -1196,7 +1200,8 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -1479,7 +1484,8 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -1707,7 +1713,8 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -1802,7 +1809,8 @@ describe("Cypher", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input MovieWhere {
@@ -1996,7 +2004,8 @@ describe("Cypher", () => {
             }
 
             input MovieUpdateInput {
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             type MovieUpdatedEvent {

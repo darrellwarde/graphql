@@ -79,7 +79,7 @@ describe("Update using aggregate where", () => {
     });
 
     test("should update by using an aggregation count", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${userType.operations.update}(
                     where: { name_EQ: "${userName}" }
@@ -94,7 +94,7 @@ describe("Update using aggregate where", () => {
                             } 
                             update: {
                                 node: {
-                                    content: "${expectedContent}"
+                                    content_SET: "${expectedContent}"
                                 } 
                             } 
                         } 
@@ -150,7 +150,7 @@ describe("Update using aggregate where", () => {
     });
 
     test("should update by using a nested aggregation", async () => {
-        const query = `
+        const query = /* GraphQL */ `
              mutation {
                  ${userType.operations.update}(
                      where: { name_EQ: "${userName}" }
@@ -175,7 +175,7 @@ describe("Update using aggregate where", () => {
                             } 
                              update: {
                                 node: {
-                                    content: "${expectedContent}"
+                                    content_SET: "${expectedContent}"
                                 }
                              } 
                          } 

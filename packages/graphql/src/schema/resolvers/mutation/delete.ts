@@ -19,7 +19,6 @@
 
 import type { GraphQLResolveInfo } from "graphql";
 import type { SchemaComposer } from "graphql-compose";
-import type { Node } from "../../../classes";
 import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import { translateDelete } from "../../../translate";
 import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
@@ -28,11 +27,9 @@ import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
 import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
 
 export function deleteResolver({
-    node,
     composer,
     concreteEntityAdapter,
 }: {
-    node: Node;
     composer: SchemaComposer;
     concreteEntityAdapter: ConcreteEntityAdapter;
 }) {
@@ -43,7 +40,6 @@ export function deleteResolver({
 
         const { cypher, params } = translateDelete({
             context: context as Neo4jGraphQLTranslationContext,
-            node,
             entityAdapter: concreteEntityAdapter,
         });
         const executeResult = await execute({

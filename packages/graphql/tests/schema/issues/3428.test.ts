@@ -189,7 +189,8 @@ describe("Relationship nested operations", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input MovieWhere {
@@ -296,7 +297,8 @@ describe("Relationship nested operations", () => {
             }
 
             input PersonUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input PersonWhere {
@@ -490,7 +492,8 @@ describe("Relationship nested operations", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input MovieWhere {
@@ -592,7 +595,8 @@ describe("Relationship nested operations", () => {
             }
 
             input PersonOneUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input PersonOneWhere {
@@ -648,7 +652,8 @@ describe("Relationship nested operations", () => {
             }
 
             input PersonTwoUpdateInput {
-              nameTwo: String
+              nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              nameTwo_SET: String
             }
 
             input PersonTwoWhere {

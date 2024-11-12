@@ -112,8 +112,10 @@ describe("Localdatetime", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              localDT: LocalDateTime
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              localDT: LocalDateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              localDT_SET: LocalDateTime
             }
 
             input MovieWhere {

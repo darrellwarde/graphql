@@ -69,7 +69,7 @@ describe("https://github.com/neo4j/graphql/issues/1551", () => {
 
         const updateMutation = `
             mutation {
-                ${testType.operations.update}(where: { prodid_EQ: 1, attribid_EQ: 2 }, update: { level: null }) {
+                ${testType.operations.update}(where: { prodid_EQ: 1, attribid_EQ: 2 }, update: { level_SET: null }) {
                     ${testType.plural} {
                         prodid
                         attribid

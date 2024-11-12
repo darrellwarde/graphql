@@ -217,7 +217,9 @@ describe("DateTime", () => {
 
             const create = /* GraphQL */ `
                 mutation {
-                    ${Movie.operations.update}(where: {id_EQ: "${id}"}, update: {datetime: "${date.toISOString()}"}) {
+                    ${
+                        Movie.operations.update
+                    }(where: {id_EQ: "${id}"}, update: { datetime_SET: "${date.toISOString()}" }) {
                         ${Movie.plural} {
                             id
                             datetime

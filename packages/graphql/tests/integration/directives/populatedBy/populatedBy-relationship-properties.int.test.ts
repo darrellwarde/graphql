@@ -172,7 +172,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -180,7 +180,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -284,7 +284,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -323,7 +323,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -542,7 +542,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -550,7 +550,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -662,7 +662,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -701,7 +701,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -1040,7 +1040,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -1079,7 +1079,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -1286,7 +1286,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -1294,7 +1294,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -1394,7 +1394,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -1433,7 +1433,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -1640,7 +1640,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -1648,7 +1648,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -1748,7 +1748,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -1787,7 +1787,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -1891,7 +1891,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -1930,7 +1930,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -2105,7 +2105,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -2113,7 +2113,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -2213,7 +2213,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -2252,7 +2252,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -2356,7 +2356,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -2395,7 +2395,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -2598,7 +2598,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -2606,7 +2606,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -2697,7 +2697,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -2736,7 +2736,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -2925,7 +2925,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -2933,7 +2933,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -3024,7 +3024,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -3063,7 +3063,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -3205,7 +3205,7 @@ describe("@populatedBy directive - Relationship properties", () => {
         test("should have access to parent in callback function for UPDATE", async () => {
             const testMovie = testHelper.createUniqueType("Movie");
             const testGenre = testHelper.createUniqueType("Genre");
-            const callback = (parent) => `${parent.title}-slug`;
+            const callback = (parent) => `${parent.title_SET}-slug`;
 
             const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} @node {
@@ -3246,7 +3246,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             const genreId = "genre_id";
             const relId = "relationship_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                 mutation {
                     ${testMovie.operations.update}(
                         where: { id_EQ: "${movieId}" }, 
@@ -3254,8 +3254,8 @@ describe("@populatedBy directive - Relationship properties", () => {
                             genres: {
                                 update: {
                                     edge: {
-                                        id: "${relId}"
-                                        title: "${movieTitle}"
+                                        id_SET: "${relId}"
+                                        title_SET: "${movieTitle}"
                                     }
                                 }
                             }

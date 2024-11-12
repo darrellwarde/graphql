@@ -133,7 +133,6 @@ describe("Cypher Points", () => {
         `);
     });
 
-
     test("Simple Points create mutation", async () => {
         const query = /* GraphQL */ `
             mutation {
@@ -182,7 +181,10 @@ describe("Cypher Points", () => {
     test("Simple Points update mutation", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updatePointContainers(where: { id_EQ: "id" }, update: { points: [{ longitude: 1.0, latitude: 2.0 }] }) {
+                updatePointContainers(
+                    where: { id_EQ: "id" }
+                    update: { points_SET: [{ longitude: 1.0, latitude: 2.0 }] }
+                ) {
                     pointContainers {
                         points {
                             longitude
@@ -199,14 +201,14 @@ describe("Cypher Points", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:PointContainer)
             WHERE this.id = $param0
-            SET this.points = [p in $this_update_points | point(p)]
+            SET this.points = [p in $this_update_points_SET | point(p)]
             RETURN collect(DISTINCT this { .points }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"id\\",
-                \\"this_update_points\\": [
+                \\"this_update_points_SET\\": [
                     {
                         \\"longitude\\": 1,
                         \\"latitude\\": 2

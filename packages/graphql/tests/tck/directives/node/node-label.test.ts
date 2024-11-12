@@ -240,7 +240,7 @@ describe("Label in Node directive", () => {
     test("Update Movie with label film", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(where: { id_EQ: "1" }, update: { id: "2" }) {
+                updateMovies(where: { id_EQ: "1" }, update: { id_SET: "2" }) {
                     movies {
                         id
                     }
@@ -253,14 +253,14 @@ describe("Label in Node directive", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Film)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             RETURN collect(DISTINCT this { .id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_id\\": \\"2\\",
+                \\"this_update_id_SET\\": \\"2\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -272,7 +272,9 @@ describe("Label in Node directive", () => {
                 updateMovies(
                     where: { id_EQ: "1" }
                     update: {
-                        actors: [{ where: { node: { name_EQ: "old name" } }, update: { node: { name: "new name" } } }]
+                        actors: [
+                            { where: { node: { name_EQ: "old name" } }, update: { node: { name_SET: "new name" } } }
+                        ]
                     }
                 ) {
                     movies {
@@ -292,7 +294,7 @@ describe("Label in Node directive", () => {
             	WITH this
             	MATCH (this)<-[this_acted_in0_relationship:ACTED_IN]-(this_actors0:Person)
             	WHERE this_actors0.name = $updateMovies_args_update_actors0_where_this_actors0param0
-            	SET this_actors0.name = $this_update_actors0_name
+            	SET this_actors0.name = $this_update_actors0_name_SET
             	RETURN count(*) AS update_this_actors0
             }
             RETURN collect(DISTINCT this { .id }) AS data"
@@ -302,7 +304,7 @@ describe("Label in Node directive", () => {
             "{
                 \\"param0\\": \\"1\\",
                 \\"updateMovies_args_update_actors0_where_this_actors0param0\\": \\"old name\\",
-                \\"this_update_actors0_name\\": \\"new name\\",
+                \\"this_update_actors0_name_SET\\": \\"new name\\",
                 \\"updateMovies\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -315,7 +317,7 @@ describe("Label in Node directive", () => {
                                     },
                                     \\"update\\": {
                                         \\"node\\": {
-                                            \\"name\\": \\"new name\\"
+                                            \\"name_SET\\": \\"new name\\"
                                         }
                                     }
                                 }

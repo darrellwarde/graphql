@@ -51,7 +51,7 @@ describe("Cypher Auth Projection", () => {
     test("Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { id: "new-id" }) {
+                updateUsers(update: { id_SET: "new-id" }) {
                     users {
                         id
                     }
@@ -68,7 +68,7 @@ describe("Cypher Auth Projection", () => {
             "MATCH (this:User)
             WITH this
             WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             WITH *
             WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             RETURN collect(DISTINCT this { .id }) AS data"
@@ -83,7 +83,7 @@ describe("Cypher Auth Projection", () => {
                     ],
                     \\"sub\\": \\"super_admin\\"
                 },
-                \\"this_update_id\\": \\"new-id\\",
+                \\"this_update_id_SET\\": \\"new-id\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
