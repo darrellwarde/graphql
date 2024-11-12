@@ -156,8 +156,8 @@ export class RelationshipAdapter {
      * @param directed the direction asked during the query, for instance "friends(directed: true)"
      * @returns the direction to use in the CypherBuilder
      **/
-    public getCypherDirection(directed?: boolean): "left" | "right" | "undirected" {
-        if (directed === false || this.queryDirection === "UNDIRECTED") {
+    public getCypherDirection(): "left" | "right" | "undirected" {
+        if (this.queryDirection === "UNDIRECTED") {
             return "undirected";
         }
         return this.cypherDirectionFromRelDirection();

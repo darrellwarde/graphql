@@ -64,7 +64,7 @@ export class RelationshipSelection extends EntitySelection {
         const relationshipTarget = this.targetOverride ?? this.relationship.target;
         const targetNode = createNode(this.alias);
         const labels = getEntityLabels(relationshipTarget, context.neo4jGraphQLContext);
-        const relDirection = this.relationship.getCypherDirection(this.directed);
+        const relDirection = this.relationship.getCypherDirection();
 
         const pattern = new Cypher.Pattern(context.target)
             .related(relVar, { direction: relDirection, type: this.relationship.type })

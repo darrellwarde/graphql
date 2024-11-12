@@ -152,7 +152,7 @@ export class AggregationOperation extends Operation {
         if (this.entity instanceof RelationshipAdapter) {
             const relVar = new Cypher.Relationship();
             const targetNode = new Cypher.Node();
-            const relDirection = this.entity.getCypherDirection(this.directed);
+            const relDirection = this.entity.getCypherDirection();
             return parentContext.push({ relationship: relVar, target: targetNode, direction: relDirection });
         } else {
             const targetNode = new Cypher.Node();
