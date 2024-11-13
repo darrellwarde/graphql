@@ -87,9 +87,12 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             }
 
             input ActorUpdateInput {
-              dob: DateTime
-              homeAddress: PointInput
-              name: String
+              dob: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              dob_SET: DateTime
+              homeAddress: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
+              homeAddress_SET: PointInput
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -171,9 +174,9 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             }
 
             type Movie {
-              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+              actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+              actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
               id: ID!
               title: String!
             }
@@ -329,7 +332,8 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {

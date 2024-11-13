@@ -86,6 +86,7 @@ describe("609", () => {
 
             input DeprecatedUpdateInput {
               deprecatedField: String @deprecated
+              deprecatedField_SET: String @deprecated
             }
 
             input DeprecatedWhere {

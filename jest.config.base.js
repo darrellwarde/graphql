@@ -23,4 +23,6 @@ module.exports = {
         escapeString: true,
         printBasicPrototype: true,
     },
+
+    prettierPath: require.resolve("prettier-2"),
 };

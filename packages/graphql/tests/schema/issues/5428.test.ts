@@ -126,7 +126,8 @@ describe("https://github.com/neo4j/graphql/issues/5428", () => {
             }
 
             input TestUpdateInput {
-              Name: String
+              Name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              Name_SET: String
             }
 
             input TestWhere {

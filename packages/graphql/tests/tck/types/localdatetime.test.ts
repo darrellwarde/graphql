@@ -148,7 +148,7 @@ describe("Cypher LocalDateTime", () => {
     test("Simple Update", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(update: { localDT: "1881-07-13T09:24:40.845512" }) {
+                updateMovies(update: { localDT_SET: "1881-07-13T09:24:40.845512" }) {
                     movies {
                         id
                         localDT
@@ -161,13 +161,13 @@ describe("Cypher LocalDateTime", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
-            SET this.localDT = $this_update_localDT
+            SET this.localDT = $this_update_localDT_SET
             RETURN collect(DISTINCT this { .id, .localDT }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_update_localDT\\": {
+                \\"this_update_localDT_SET\\": {
                     \\"year\\": 1881,
                     \\"month\\": 7,
                     \\"day\\": 13,

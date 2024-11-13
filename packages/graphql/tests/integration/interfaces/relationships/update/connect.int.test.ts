@@ -95,7 +95,7 @@ describe("interface relationships", () => {
         });
         const seriesScreenTime = 69129;
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation ConnectMovie($name: String, $title: String, $screenTime: Int!) {
                 ${Actor.operations.update}(
                     where: { name_EQ: $name }

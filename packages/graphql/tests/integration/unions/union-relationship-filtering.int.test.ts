@@ -151,7 +151,7 @@ describe("Union filtering", () => {
             mutation updateName($name: String!) {
                 ${Actor.operations.update}(
                     where: { actedIn_SOME: { ${Movie}: { title_EQ: "The Office" } }},
-                    update: { name: $name }
+                    update: { name_SET: $name }
                 ) {
                     ${Actor.plural} {
                         name

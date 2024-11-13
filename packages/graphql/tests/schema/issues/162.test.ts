@@ -155,9 +155,9 @@ describe("162", () => {
 
             type TigerJawLevel2 {
               id: ID
-              part1(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [TigerJawLevel2Part1Sort!], where: TigerJawLevel2Part1Where): TigerJawLevel2Part1!
-              part1Aggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: TigerJawLevel2Part1Where): TigerJawLevel2TigerJawLevel2Part1Part1AggregationSelection
-              part1Connection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [TigerJawLevel2Part1ConnectionSort!], where: TigerJawLevel2Part1ConnectionWhere): TigerJawLevel2Part1Connection!
+              part1(limit: Int, offset: Int, sort: [TigerJawLevel2Part1Sort!], where: TigerJawLevel2Part1Where): TigerJawLevel2Part1!
+              part1Aggregate(where: TigerJawLevel2Part1Where): TigerJawLevel2TigerJawLevel2Part1Part1AggregationSelection
+              part1Connection(after: String, first: Int, sort: [TigerJawLevel2Part1ConnectionSort!], where: TigerJawLevel2Part1ConnectionWhere): TigerJawLevel2Part1Connection!
             }
 
             type TigerJawLevel2AggregateSelection {
@@ -181,9 +181,9 @@ describe("162", () => {
 
             type TigerJawLevel2Part1 {
               id: ID
-              tiger(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [TigerSort!], where: TigerWhere): Tiger!
-              tigerAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: TigerWhere): TigerJawLevel2Part1TigerTigerAggregationSelection
-              tigerConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [TigerJawLevel2Part1TigerConnectionSort!], where: TigerJawLevel2Part1TigerConnectionWhere): TigerJawLevel2Part1TigerConnection!
+              tiger(limit: Int, offset: Int, sort: [TigerSort!], where: TigerWhere): Tiger!
+              tigerAggregate(where: TigerWhere): TigerJawLevel2Part1TigerTigerAggregationSelection
+              tigerConnection(after: String, first: Int, sort: [TigerJawLevel2Part1TigerConnectionSort!], where: TigerJawLevel2Part1TigerConnectionWhere): TigerJawLevel2Part1TigerConnection!
             }
 
             input TigerJawLevel2Part1AggregateInput {
@@ -417,7 +417,8 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1UpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               tiger: TigerJawLevel2Part1TigerUpdateFieldInput
             }
 
@@ -459,7 +460,8 @@ describe("162", () => {
             }
 
             input TigerJawLevel2UpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               part1: TigerJawLevel2Part1UpdateFieldInput
             }
 
@@ -492,9 +494,10 @@ describe("162", () => {
             }
 
             input TigerUpdateInput {
-              x: Int
+              x: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               x_DECREMENT: Int
               x_INCREMENT: Int
+              x_SET: Int
             }
 
             input TigerWhere {

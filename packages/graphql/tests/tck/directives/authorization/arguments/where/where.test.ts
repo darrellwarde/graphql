@@ -530,7 +530,7 @@ describe("Cypher Auth Where", () => {
     test("Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { name: "Bob" }) {
+                updateUsers(update: { name_SET: "Bob" }) {
                     users {
                         id
                     }
@@ -547,7 +547,7 @@ describe("Cypher Auth Where", () => {
             "MATCH (this:User)
             WITH *
             WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
-            SET this.name = $this_update_name
+            SET this.name = $this_update_name_SET
             WITH *
             WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
             RETURN collect(DISTINCT this { .id }) AS data"
@@ -562,7 +562,7 @@ describe("Cypher Auth Where", () => {
                     ],
                     \\"sub\\": \\"id-01\\"
                 },
-                \\"this_update_name\\": \\"Bob\\",
+                \\"this_update_name_SET\\": \\"Bob\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -571,7 +571,7 @@ describe("Cypher Auth Where", () => {
     test("Update Node + User Defined Where", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { name_EQ: "bob" }, update: { name: "Bob" }) {
+                updateUsers(where: { name_EQ: "bob" }, update: { name_SET: "Bob" }) {
                     users {
                         id
                     }
@@ -588,7 +588,7 @@ describe("Cypher Auth Where", () => {
             "MATCH (this:User)
             WITH *
             WHERE (this.name = $param0 AND ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub)))
-            SET this.name = $this_update_name
+            SET this.name = $this_update_name_SET
             WITH *
             WHERE ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub))
             RETURN collect(DISTINCT this { .id }) AS data"
@@ -604,7 +604,7 @@ describe("Cypher Auth Where", () => {
                     \\"sub\\": \\"id-01\\"
                 },
                 \\"param0\\": \\"bob\\",
-                \\"this_update_name\\": \\"Bob\\",
+                \\"this_update_name_SET\\": \\"Bob\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -613,7 +613,7 @@ describe("Cypher Auth Where", () => {
     test("Update Nested Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { posts: { update: { node: { id: "new-id" } } } }) {
+                updateUsers(update: { posts: { update: { node: { id_SET: "new-id" } } } }) {
                     users {
                         id
                         posts {
@@ -640,7 +640,7 @@ describe("Cypher Auth Where", () => {
             	OPTIONAL MATCH (this_posts0)<-[:HAS_POST]-(authorization__before_this0:User)
             	WITH *, count(authorization__before_this0) AS creatorCount
             	WHERE ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub)))
-            	SET this_posts0.id = $this_update_posts0_id
+            	SET this_posts0.id = $this_update_posts0_id_SET
             	WITH this, this_posts0
             	CALL {
             		WITH this_posts0
@@ -675,7 +675,7 @@ describe("Cypher Auth Where", () => {
                     ],
                     \\"sub\\": \\"id-01\\"
                 },
-                \\"this_update_posts0_id\\": \\"new-id\\",
+                \\"this_update_posts0_id_SET\\": \\"new-id\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

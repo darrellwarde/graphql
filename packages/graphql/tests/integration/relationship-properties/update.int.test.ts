@@ -72,7 +72,7 @@ describe("Relationship properties - update", () => {
             mutation {
                 ${Movie.operations.update}(
                     where: { title_EQ: "${movieTitle}" }
-                    update: { actors: [{ where: { node: { name_EQ: "${actor1}" } }, update: { edge: { screenTime: 60 } } }] }
+                    update: { actors: [{ where: { node: { name_EQ: "${actor1}" } }, update: { edge: { screenTime_SET: 60 } } }] }
                 ) {
                     ${Movie.plural} {
                         title
@@ -127,8 +127,8 @@ describe("Relationship properties - update", () => {
                             {
                                 where: { node: { name_EQ: "${actor2}" } }
                                 update: {
-                                    edge: { screenTime: 60 }
-                                    node: { name: "${actor3}" }
+                                    edge: { screenTime_SET: 60 }
+                                    node: { name_SET: "${actor3}" }
                                 }
                             }
                         ]

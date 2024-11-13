@@ -57,8 +57,8 @@ describe("Unions", () => {
 
             type Author {
               name: String!
-              publications(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PublicationWhere): [Publication!]!
-              publicationsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [AuthorPublicationsConnectionSort!], where: AuthorPublicationsConnectionWhere): AuthorPublicationsConnection!
+              publications(limit: Int, offset: Int, where: PublicationWhere): [Publication!]!
+              publicationsConnection(after: String, first: Int, sort: [AuthorPublicationsConnectionSort!], where: AuthorPublicationsConnectionWhere): AuthorPublicationsConnection!
             }
 
             type AuthorAggregateSelection {
@@ -242,7 +242,8 @@ describe("Unions", () => {
             }
 
             input AuthorUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               publications: AuthorPublicationsUpdateInput
             }
 
@@ -293,9 +294,9 @@ describe("Unions", () => {
             }
 
             type Book {
-              author(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [AuthorSort!], where: AuthorWhere): [Author!]!
-              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: AuthorWhere): BookAuthorAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [BookAuthorConnectionSort!], where: BookAuthorConnectionWhere): BookAuthorConnection!
+              author(limit: Int, offset: Int, sort: [AuthorSort!], where: AuthorWhere): [Author!]!
+              authorAggregate(where: AuthorWhere): BookAuthorAuthorAggregationSelection
+              authorConnection(after: String, first: Int, sort: [BookAuthorConnectionSort!], where: BookAuthorConnectionWhere): BookAuthorConnection!
               title: String!
             }
 
@@ -453,7 +454,8 @@ describe("Unions", () => {
 
             input BookUpdateInput {
               author: [BookAuthorUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input BookWhere {
@@ -538,9 +540,9 @@ describe("Unions", () => {
             }
 
             type Journal {
-              author(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [AuthorSort!], where: AuthorWhere): [Author!]!
-              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: AuthorWhere): JournalAuthorAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [JournalAuthorConnectionSort!], where: JournalAuthorConnectionWhere): JournalAuthorConnection!
+              author(limit: Int, offset: Int, sort: [AuthorSort!], where: AuthorWhere): [Author!]!
+              authorAggregate(where: AuthorWhere): JournalAuthorAuthorAggregationSelection
+              authorConnection(after: String, first: Int, sort: [JournalAuthorConnectionSort!], where: JournalAuthorConnectionWhere): JournalAuthorConnection!
               subject: String!
             }
 
@@ -698,7 +700,8 @@ describe("Unions", () => {
 
             input JournalUpdateInput {
               author: [JournalAuthorUpdateFieldInput!]
-              subject: String
+              subject: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              subject_SET: String
             }
 
             input JournalWhere {
@@ -867,9 +870,10 @@ describe("Unions", () => {
             }
 
             input WroteUpdateInput {
-              words: Int
+              words: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               words_DECREMENT: Int
               words_INCREMENT: Int
+              words_SET: Int
             }
 
             input WroteWhere {

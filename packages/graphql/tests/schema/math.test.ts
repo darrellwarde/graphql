@@ -101,10 +101,12 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              viewers: Int
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
+              viewers_SET: Int
             }
 
             input MovieWhere {
@@ -260,10 +262,12 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              viewers: BigInt
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: BigInt
               viewers_INCREMENT: BigInt
+              viewers_SET: BigInt
             }
 
             input MovieWhere {
@@ -415,11 +419,13 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              viewers: Float
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_ADD: Float
               viewers_DIVIDE: Float
               viewers_MULTIPLY: Float
+              viewers_SET: Float
               viewers_SUBTRACT: Float
             }
 
@@ -541,9 +547,9 @@ describe("Algebraic", () => {
             }
 
             type Director {
-              directs(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-              directsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): DirectorMovieDirectsAggregationSelection
-              directsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [DirectorDirectsConnectionSort!], where: DirectorDirectsConnectionWhere): DirectorDirectsConnection!
+              directs(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              directsAggregate(where: MovieWhere): DirectorMovieDirectsAggregationSelection
+              directsConnection(after: String, first: Int, sort: [DirectorDirectsConnectionSort!], where: DirectorDirectsConnectionWhere): DirectorDirectsConnection!
               lastName: String!
             }
 
@@ -705,7 +711,8 @@ describe("Algebraic", () => {
 
             input DirectorUpdateInput {
               directs: [DirectorDirectsUpdateFieldInput!]
-              lastName: String
+              lastName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              lastName_SET: String
             }
 
             input DirectorWhere {
@@ -764,9 +771,9 @@ describe("Algebraic", () => {
             }
 
             type Movie {
-              directedBy(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [DirectorSort!], where: DirectorWhere): Director
-              directedByAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: DirectorWhere): MovieDirectorDirectedByAggregationSelection
-              directedByConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieDirectedByConnectionSort!], where: MovieDirectedByConnectionWhere): MovieDirectedByConnection!
+              directedBy(limit: Int, offset: Int, sort: [DirectorSort!], where: DirectorWhere): Director
+              directedByAggregate(where: DirectorWhere): MovieDirectorDirectedByAggregationSelection
+              directedByConnection(after: String, first: Int, sort: [MovieDirectedByConnectionSort!], where: MovieDirectedByConnectionWhere): MovieDirectedByConnection!
               id: ID
               viewers: Int!
             }
@@ -916,10 +923,12 @@ describe("Algebraic", () => {
 
             input MovieUpdateInput {
               directedBy: MovieDirectedByUpdateFieldInput
-              id: ID
-              viewers: Int
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
+              viewers_SET: Int
             }
 
             input MovieWhere {
@@ -1077,9 +1086,9 @@ describe("Algebraic", () => {
             type Movie implements Production {
               id: ID
               viewers: Int!
-              workers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-              workersAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonWorkersAggregationSelection
-              workersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieWorkersConnectionSort!], where: MovieWorkersConnectionWhere): MovieWorkersConnection!
+              workers(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+              workersAggregate(where: PersonWhere): MoviePersonWorkersAggregationSelection
+              workersConnection(after: String, first: Int, sort: [MovieWorkersConnectionSort!], where: MovieWorkersConnectionWhere): MovieWorkersConnection!
             }
 
             type MovieAggregateSelection {
@@ -1121,10 +1130,12 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
-              viewers: Int
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              viewers: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
+              viewers_SET: Int
               workers: [MovieWorkersUpdateFieldInput!]
             }
 
@@ -1296,9 +1307,9 @@ describe("Algebraic", () => {
 
             type Person {
               name: String!
-              worksInProduction(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
-              worksInProductionAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): PersonProductionWorksInProductionAggregationSelection
-              worksInProductionConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PersonWorksInProductionConnectionSort!], where: PersonWorksInProductionConnectionWhere): PersonWorksInProductionConnection!
+              worksInProduction(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+              worksInProductionAggregate(where: ProductionWhere): PersonProductionWorksInProductionAggregationSelection
+              worksInProductionConnection(after: String, first: Int, sort: [PersonWorksInProductionConnectionSort!], where: PersonWorksInProductionConnectionWhere): PersonWorksInProductionConnection!
             }
 
             type PersonAggregateSelection {
@@ -1349,7 +1360,8 @@ describe("Algebraic", () => {
             }
 
             input PersonUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               worksInProduction: [PersonWorksInProductionUpdateFieldInput!]
             }
 
@@ -1519,9 +1531,10 @@ describe("Algebraic", () => {
             }
 
             input ProductionUpdateInput {
-              viewers: Int
+              viewers: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
+              viewers_SET: Int
             }
 
             input ProductionWhere {
@@ -1664,14 +1677,16 @@ describe("Algebraic", () => {
             }
 
             input ActedInUpdateInput {
-              pay: Float
+              pay: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               pay_ADD: Float
               pay_DIVIDE: Float
               pay_MULTIPLY: Float
+              pay_SET: Float
               pay_SUBTRACT: Float
-              roles: [String!]
+              roles: [String!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               roles_POP: Int
               roles_PUSH: [String!]
+              roles_SET: [String!]
             }
 
             input ActedInWhere {
@@ -1724,9 +1739,9 @@ describe("Algebraic", () => {
             }
 
             type Movie {
-              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+              actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+              actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+              actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
               title: String!
             }
 
@@ -1884,7 +1899,8 @@ describe("Algebraic", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -1954,9 +1970,9 @@ describe("Algebraic", () => {
             }
 
             type Person {
-              actedInMovies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-              actedInMoviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): PersonMovieActedInMoviesAggregationSelection
-              actedInMoviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PersonActedInMoviesConnectionSort!], where: PersonActedInMoviesConnectionWhere): PersonActedInMoviesConnection!
+              actedInMovies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              actedInMoviesAggregate(where: MovieWhere): PersonMovieActedInMoviesAggregationSelection
+              actedInMoviesConnection(after: String, first: Int, sort: [PersonActedInMoviesConnectionSort!], where: PersonActedInMoviesConnectionWhere): PersonActedInMoviesConnection!
               name: String!
             }
 
@@ -2114,7 +2130,8 @@ describe("Algebraic", () => {
 
             input PersonUpdateInput {
               actedInMovies: [PersonActedInMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input PersonWhere {

@@ -34,7 +34,7 @@ import { checkAuthentication } from "./authorization/check-authentication";
 import { createAuthorizationAfterAndParams } from "./authorization/compatibility/create-authorization-after-and-params";
 import { createAuthorizationBeforeAndParams } from "./authorization/compatibility/create-authorization-before-and-params";
 import { createRelationshipValidationString } from "./create-relationship-validation-string";
-import createSetRelationshipPropertiesAndParams from "./create-set-relationship-properties-and-params";
+import { createSetRelationshipProperties } from "./create-set-relationship-properties";
 import { filterMetaVariable } from "./subscriptions/filter-meta-variable";
 import { createWhereNodePredicate } from "./where/create-where-predicate";
 
@@ -181,15 +181,32 @@ function createConnectAndParams({
             const relationship = context.relationships.find(
                 (x) => x.properties === relationField.properties
             ) as unknown as Relationship;
-            const setA = createSetRelationshipPropertiesAndParams({
+
+            const sourceAdapter = context.schemaModel.getConcreteEntityAdapter(relationship.source);
+            if (!sourceAdapter) {
+                throw new Error(`Transpile error: Entity with name ${relationship.source} not found`);
+            }
+            const relationshipAdapter = sourceAdapter.relationships.get(relationship.relationshipFieldName);
+            if (!relationshipAdapter) {
+                throw new Error(
+                    `Transpile error: Relationship with name ${relationship.relationshipFieldName} not found`
+                );
+            }
+            const setA = createSetRelationshipProperties({
                 properties: connect.edge ?? {},
                 varName: relationshipName,
                 relationship,
+                relationshipAdapter: relationshipAdapter,
                 operation: "CREATE",
                 callbackBucket,
+                withVars,
+                parameterPrefix: relationshipName,
+                parameterNotation: "_",
             });
-            subquery.push(`\t\t\t${setA[0]}`);
-            params = { ...params, ...setA[1] };
+            if (setA) {
+                subquery.push(`\t\t\t${setA[0]}`);
+                params = { ...params, ...setA[1] };
+            }
         }
 
         subquery.push("\t\t}");

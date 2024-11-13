@@ -189,7 +189,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                     charset: "alphabetic",
                 });
 
-                const mutation = `
+                const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -197,7 +197,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -348,7 +348,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -579,7 +579,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                     charset: "alphabetic",
                 });
 
-                const mutation = `
+                const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.update}(
                             where: { id_EQ: "${movieId}" }, 
@@ -587,7 +587,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -705,7 +705,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                     charset: "alphabetic",
                 });
 
-                const mutation = `
+                const mutation = /* GraphQL */ `
                     mutation {
                         ${testMovie.operations.create}(input: [
                             {
@@ -744,7 +744,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }
@@ -924,7 +924,7 @@ describe("@populatedBy directive - Relationship properties", () => {
             test("should have access to parent in callback function for UPDATE", async () => {
                 const testMovie = testHelper.createUniqueType("Movie");
                 const testGenre = testHelper.createUniqueType("Genre");
-                const callback = (parent) => `${parent.title}-slug`;
+                const callback = (parent) => `${parent.title_SET}-slug`;
 
                 const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} @node {
@@ -971,37 +971,37 @@ describe("@populatedBy directive - Relationship properties", () => {
                     charset: "alphabetic",
                 });
 
-                const mutation = `
-                mutation {
-                    ${testMovie.operations.update}(
-                        where: { id_EQ: "${movieId}" }, 
-                        update: { 
-                            genres: {
-                                update: {
-                                    edge: {
-                                        id: "${relId}"
-                                        title: "${movieTitle}"
+                const mutation = /* GraphQL */ `
+                    mutation {
+                        ${testMovie.operations.update}(
+                            where: { id_EQ: "${movieId}" }, 
+                            update: { 
+                                genres: {
+                                    update: {
+                                        edge: {
+                                            id_SET: "${relId}"
+                                            title_SET: "${movieTitle}"
+                                        }
                                     }
                                 }
                             }
-                        }
-                    ) {
-                        ${testMovie.plural} {
-                            id
-                            genresConnection {
-                                edges {
-                                  properties { 
-                                     title
-                                     slug
-                                  }
-                                    node {
-                                        id
+                        ) {
+                            ${testMovie.plural} {
+                                id
+                                genresConnection {
+                                    edges {
+                                      properties { 
+                                         title
+                                         slug
+                                      }
+                                        node {
+                                            id
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
             `;
 
                 await testHelper.executeCypher(`

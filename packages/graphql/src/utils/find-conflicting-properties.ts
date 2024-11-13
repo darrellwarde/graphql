@@ -17,16 +17,16 @@
  * limitations under the License.
  */
 
-import type { Node } from "../classes";
+import type { GraphElement } from "../classes";
 import { parseMutationField } from "../translate/queryAST/factory/parsers/parse-mutation-field";
 import mapToDbProperty from "./map-to-db-property";
 
 /* returns conflicting mutation input properties */
 export function findConflictingProperties({
-    node,
+    graphElement,
     input,
 }: {
-    node: Node;
+    graphElement: GraphElement;
     input: Record<string, any> | undefined;
 }): string[] {
     if (!input) {
@@ -35,7 +35,7 @@ export function findConflictingProperties({
     const dbPropertiesToInputFieldNames: Record<string, string[]> = Object.keys(input).reduce((acc, rawField) => {
         const { fieldName } = parseMutationField(rawField);
 
-        const dbName = mapToDbProperty(node, fieldName);
+        const dbName = mapToDbProperty(graphElement, fieldName);
         // some input fields (eg relation fields) have no corresponding db name in the map
         if (!dbName) {
             return acc;

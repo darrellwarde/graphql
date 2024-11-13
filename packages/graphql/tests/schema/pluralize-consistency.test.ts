@@ -170,7 +170,8 @@ describe("Pluralize consistency", () => {
             }
 
             input super_friendUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input super_friendWhere {
@@ -186,9 +187,9 @@ describe("Pluralize consistency", () => {
             }
 
             type super_user {
-              my_friend(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
-              my_friendAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: super_friendWhere): super_usersuper_friendMy_friendAggregationSelection
-              my_friendConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [super_userMy_friendConnectionSort!], where: super_userMy_friendConnectionWhere): super_userMy_friendConnection!
+              my_friend(limit: Int, offset: Int, sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
+              my_friendAggregate(where: super_friendWhere): super_usersuper_friendMy_friendAggregationSelection
+              my_friendConnection(after: String, first: Int, sort: [super_userMy_friendConnectionSort!], where: super_userMy_friendConnectionWhere): super_userMy_friendConnection!
               name: String!
             }
 
@@ -310,7 +311,8 @@ describe("Pluralize consistency", () => {
 
             input super_userUpdateInput {
               my_friend: [super_userMy_friendUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input super_userWhere {

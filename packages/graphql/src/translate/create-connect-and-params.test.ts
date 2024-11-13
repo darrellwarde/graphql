@@ -46,7 +46,7 @@ describe("createConnectAndParams", () => {
                     type: "`SIMILAR`",
                     typeUnescaped: "SIMILAR",
                     fieldName: "similarMovies",
-                    queryDirection: RelationshipQueryDirectionOption.DEFAULT_DIRECTED,
+                    queryDirection: RelationshipQueryDirectionOption.DIRECTED,
                     aggregate: true,
                     inherited: false,
                     typeMeta: {

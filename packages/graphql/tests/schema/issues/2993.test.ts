@@ -108,7 +108,8 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             input FOLLOWSUpdateInput {
-              since: DateTime
+              since: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              since_SET: DateTime
             }
 
             input FOLLOWSWhere {
@@ -180,8 +181,10 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             input ProfileUpdateInput {
-              id: ID
-              userName: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              userName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              userName_SET: String
             }
 
             input ProfileWhere {
@@ -247,9 +250,9 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             type User implements Profile {
-              following(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ProfileSort!], where: ProfileWhere): [Profile!]!
-              followingAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProfileWhere): UserProfileFollowingAggregationSelection
-              followingConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [UserFollowingConnectionSort!], where: UserFollowingConnectionWhere): UserFollowingConnection!
+              following(limit: Int, offset: Int, sort: [ProfileSort!], where: ProfileWhere): [Profile!]!
+              followingAggregate(where: ProfileWhere): UserProfileFollowingAggregationSelection
+              followingConnection(after: String, first: Int, sort: [UserFollowingConnectionSort!], where: UserFollowingConnectionWhere): UserFollowingConnection!
               id: ID!
               userName: String!
             }
@@ -404,7 +407,8 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
 
             input UserUpdateInput {
               following: [UserFollowingUpdateFieldInput!]
-              userName: String
+              userName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              userName_SET: String
             }
 
             input UserWhere {

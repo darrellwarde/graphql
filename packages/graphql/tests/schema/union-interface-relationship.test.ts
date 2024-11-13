@@ -124,9 +124,10 @@ describe("Union Interface Relationships", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
+              screenTime_SET: Int
             }
 
             input ActedInWhere {
@@ -144,9 +145,9 @@ describe("Union Interface Relationships", () => {
 
             type Actor {
               id: Int
-              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+              moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
               name: String!
             }
 
@@ -327,11 +328,13 @@ describe("Union Interface Relationships", () => {
             }
 
             input ActorUpdateInput {
-              id: Int
+              id: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_DECREMENT: Int
               id_INCREMENT: Int
+              id_SET: Int
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -437,9 +440,10 @@ describe("Union Interface Relationships", () => {
             }
 
             input DirectedUpdateInput {
-              year: Int
+              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
+              year_SET: Int
             }
 
             input DirectedWhere {
@@ -496,13 +500,16 @@ describe("Union Interface Relationships", () => {
             }
 
             input InfluencerUpdateInput {
-              reputation: Int
+              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
-              reviewerId: Int
+              reputation_SET: Int
+              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
-              url: String
+              reviewerId_SET: Int
+              url: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              url_SET: String
             }
 
             input InfluencerWhere {
@@ -545,15 +552,15 @@ describe("Union Interface Relationships", () => {
             }
 
             type Movie {
-              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
-              directors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: DirectorWhere): [Director!]!
-              directorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieDirectorsConnectionSort!], where: MovieDirectorsConnectionWhere): MovieDirectorsConnection!
+              actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+              actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+              directors(limit: Int, offset: Int, where: DirectorWhere): [Director!]!
+              directorsConnection(after: String, first: Int, sort: [MovieDirectorsConnectionSort!], where: MovieDirectorsConnectionWhere): MovieDirectorsConnection!
               imdbId: Int
-              reviewers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ReviewerSort!], where: ReviewerWhere): [Reviewer!]!
-              reviewersAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ReviewerWhere): MovieReviewerReviewersAggregationSelection
-              reviewersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieReviewersConnectionSort!], where: MovieReviewersConnectionWhere): MovieReviewersConnection!
+              reviewers(limit: Int, offset: Int, sort: [ReviewerSort!], where: ReviewerWhere): [Reviewer!]!
+              reviewersAggregate(where: ReviewerWhere): MovieReviewerReviewersAggregationSelection
+              reviewersConnection(after: String, first: Int, sort: [MovieReviewersConnectionSort!], where: MovieReviewersConnectionWhere): MovieReviewersConnection!
               title: String!
             }
 
@@ -1023,11 +1030,13 @@ describe("Union Interface Relationships", () => {
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
               directors: MovieDirectorsUpdateInput
-              imdbId: Int
+              imdbId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdbId_DECREMENT: Int
               imdbId_INCREMENT: Int
+              imdbId_SET: Int
               reviewers: [MovieReviewersUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -1160,9 +1169,9 @@ describe("Union Interface Relationships", () => {
 
             type Person implements Reviewer {
               id: Int
-              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): PersonMovieMoviesAggregationSelection
-              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PersonMoviesConnectionSort!], where: PersonMoviesConnectionWhere): PersonMoviesConnection!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              moviesAggregate(where: MovieWhere): PersonMovieMoviesAggregationSelection
+              moviesConnection(after: String, first: Int, sort: [PersonMoviesConnectionSort!], where: PersonMoviesConnectionWhere): PersonMoviesConnection!
               name: String!
               reputation: Int!
               reviewerId: Int
@@ -1351,17 +1360,21 @@ describe("Union Interface Relationships", () => {
             }
 
             input PersonUpdateInput {
-              id: Int
+              id: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_DECREMENT: Int
               id_INCREMENT: Int
+              id_SET: Int
               movies: [PersonMoviesUpdateFieldInput!]
-              name: String
-              reputation: Int
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
-              reviewerId: Int
+              reputation_SET: Int
+              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
+              reviewerId_SET: Int
             }
 
             input PersonWhere {
@@ -1485,9 +1498,10 @@ describe("Union Interface Relationships", () => {
             }
 
             input ReviewUpdateInput {
-              score: Int
+              score: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               score_DECREMENT: Int
               score_INCREMENT: Int
+              score_SET: Int
             }
 
             input ReviewWhere {
@@ -1542,12 +1556,14 @@ describe("Union Interface Relationships", () => {
             }
 
             input ReviewerUpdateInput {
-              reputation: Int
+              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
-              reviewerId: Int
+              reputation_SET: Int
+              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
+              reviewerId_SET: Int
             }
 
             input ReviewerWhere {

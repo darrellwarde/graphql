@@ -55,8 +55,8 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             type Book {
               isbn: String!
               originalTitle: String!
-              translatedTitle(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: BookTitleWhere): BookTitle
-              translatedTitleConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: BookTranslatedTitleConnectionWhere): BookTranslatedTitleConnection!
+              translatedTitle(limit: Int, offset: Int, where: BookTitleWhere): BookTitle
+              translatedTitleConnection(after: String, first: Int, where: BookTranslatedTitleConnectionWhere): BookTranslatedTitleConnection!
             }
 
             type BookAggregateSelection {
@@ -120,9 +120,9 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             }
 
             type BookTitle_EN {
-              book(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [BookSort!], where: BookWhere): Book!
-              bookAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: BookWhere): BookTitle_ENBookBookAggregationSelection
-              bookConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [BookTitle_ENBookConnectionSort!], where: BookTitle_ENBookConnectionWhere): BookTitle_ENBookConnection!
+              book(limit: Int, offset: Int, sort: [BookSort!], where: BookWhere): Book!
+              bookAggregate(where: BookWhere): BookTitle_ENBookBookAggregationSelection
+              bookConnection(after: String, first: Int, sort: [BookTitle_ENBookConnectionSort!], where: BookTitle_ENBookConnectionWhere): BookTitle_ENBookConnection!
               value: String!
             }
 
@@ -284,7 +284,8 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
 
             input BookTitle_ENUpdateInput {
               book: BookTitle_ENBookUpdateFieldInput
-              value: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input BookTitle_ENWhere {
@@ -303,9 +304,9 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             }
 
             type BookTitle_SV {
-              book(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [BookSort!], where: BookWhere): Book!
-              bookAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: BookWhere): BookTitle_SVBookBookAggregationSelection
-              bookConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [BookTitle_SVBookConnectionSort!], where: BookTitle_SVBookConnectionWhere): BookTitle_SVBookConnection!
+              book(limit: Int, offset: Int, sort: [BookSort!], where: BookWhere): Book!
+              bookAggregate(where: BookWhere): BookTitle_SVBookBookAggregationSelection
+              bookConnection(after: String, first: Int, sort: [BookTitle_SVBookConnectionSort!], where: BookTitle_SVBookConnectionWhere): BookTitle_SVBookConnection!
               value: String!
             }
 
@@ -467,7 +468,8 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
 
             input BookTitle_SVUpdateInput {
               book: BookTitle_SVBookUpdateFieldInput
-              value: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input BookTitle_SVWhere {
@@ -615,8 +617,10 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             }
 
             input BookUpdateInput {
-              isbn: String
-              originalTitle: String
+              isbn: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isbn_SET: String
+              originalTitle: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              originalTitle_SET: String
               translatedTitle: BookTranslatedTitleUpdateInput
             }
 

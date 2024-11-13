@@ -18,7 +18,6 @@
  */
 
 import { GraphQLError } from "graphql";
-import { gql } from "graphql-tag";
 import { IncomingMessage } from "http";
 import { Socket } from "net";
 import { generate } from "randomstring";
@@ -36,7 +35,7 @@ describe("array-push", () => {
     test("should throw an error when trying to push on to a non-existing array", async () => {
         const typeMovie = testHelper.createUniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} @node {
                 title: String
                 tags: [String]
@@ -49,7 +48,7 @@ describe("array-push", () => {
             charset: "alphabetic",
         });
 
-        const update = `
+        const update = /* GraphQL */ `
             mutation {
                 ${typeMovie.operations.update} (update: { tags_PUSH: "test" }) {
                     ${typeMovie.plural} {
@@ -91,7 +90,7 @@ describe("array-push", () => {
             features: { authorization: { key: "secret" } },
         });
 
-        const update = `
+        const update = /* GraphQL */ `
             mutation {
                 ${typeMovie.operations.update} (update: { tags_PUSH: "test" }) {
                     ${typeMovie.plural} {
@@ -130,7 +129,7 @@ describe("array-push", () => {
     test("should throw an error when input is invalid", async () => {
         const typeMovie = testHelper.createUniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} @node {
                 title: String
                 tags: [String]
@@ -143,7 +142,7 @@ describe("array-push", () => {
             charset: "alphabetic",
         });
 
-        const update = `
+        const update = /* GraphQL */ `
             mutation {
                 ${typeMovie.operations.update} (update: { tags_PUSH: 123 }) {
                     ${typeMovie.plural} {
@@ -174,7 +173,7 @@ describe("array-push", () => {
     test("should throw an error when performing an ambiguous property update", async () => {
         const typeMovie = testHelper.createUniqueType("Movie");
 
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${typeMovie} @node {
                 title: String
                 tags: [String]
@@ -187,9 +186,9 @@ describe("array-push", () => {
             charset: "alphabetic",
         });
 
-        const update = `
+        const update = /* GraphQL */ `
             mutation {
-                ${typeMovie.operations.update} (update: { tags_PUSH: "test", tags: [] }) {
+                ${typeMovie.operations.update} (update: { tags_PUSH: "test", tags_SET: [] }) {
                     ${typeMovie.plural} {
                         title
                         tags
@@ -207,7 +206,7 @@ describe("array-push", () => {
         const gqlResult = await testHelper.executeGraphQL(update);
 
         expect(gqlResult.errors).toEqual([
-            new GraphQLError(`Conflicting modification of [[tags]], [[tags_PUSH]] on type ${typeMovie}`),
+            new GraphQLError(`Conflicting modification of [[tags_SET]], [[tags_PUSH]] on type ${typeMovie}`),
         ]);
         expect(gqlResult.data).toBeNull();
     });
@@ -217,7 +216,7 @@ describe("array-push", () => {
         const payIncrement = 50;
         const movie = testHelper.createUniqueType("Movie");
         const actor = testHelper.createUniqueType("Actor");
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${movie.name} @node {
                 title: String
                 actors: [${actor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
@@ -240,14 +239,14 @@ describe("array-push", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation Mutation($id: ID, $payIncrement: [Float]) {
                 ${actor.operations.update}(where: { id_EQ: $id }, update: {
                     actedIn: [
                         {
                             update: {
                                 edge: {
-                                    pay: [],
+                                    pay_SET: [],
                                     pay_PUSH: $payIncrement
                                 }
                             }
@@ -287,11 +286,11 @@ describe("array-push", () => {
         });
 
         expect(gqlResult.errors).toBeDefined();
-        expect(
-            (gqlResult.errors as GraphQLError[]).some((el) =>
-                el.message.includes("Cannot mutate the same field multiple times in one Mutation")
-            )
-        ).toBeTruthy();
+        const relationshipType = `${movie.name}ActorsRelationship`;
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[pay_SET]], [[pay_PUSH]] on type ${relationshipType}`),
+        ]);
+
         expect(gqlResult.data).toBeNull();
     });
 });

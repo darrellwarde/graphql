@@ -481,7 +481,7 @@ describe("unions", () => {
     });
 
     test("should update a union", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             union Search = ${MovieType} | ${GenreType}
 
             type ${GenreType} @node {
@@ -511,7 +511,7 @@ describe("unions", () => {
             charset: "alphabetic",
         });
 
-        const mutation = `
+        const mutation = /* GraphQL */ `
             mutation {
                 ${MovieType.operations.update}(
                     where: { title_EQ: "${movieTitle}" },
@@ -520,7 +520,7 @@ describe("unions", () => {
                             ${GenreType}: {
                                 where: { node: { name_EQ: "${genreName}" } },
                                 update: {
-                                    node: { name: "${newGenreName}" }
+                                    node: { name_SET: "${newGenreName}" }
                                 }
                             }
                         }
@@ -600,13 +600,13 @@ describe("unions", () => {
                             ${GenreType}: {
                                 where: { node: { name_EQ: "${genreName}" } },
                                 update: {
-                                    node: { name: "${newGenreName}" }
+                                    node: { name_SET: "${newGenreName}" }
                                 }
                             }
                             ${MovieType}: {
                                 where: { node: { title_EQ: "${nestedMovieTitle}" } },
                                 update: {
-                                    node: { title: "${newNestedMovieTitle}" }
+                                    node: { title_SET: "${newNestedMovieTitle}" }
                                 }
                             }
                         }

@@ -89,8 +89,10 @@ describe("@settable", () => {
             }
 
             input MovieUpdateInput {
-              description: String
-              title: String
+              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              description_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -233,7 +235,8 @@ describe("@settable", () => {
             }
 
             input MovieUpdateInput {
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -419,7 +422,8 @@ describe("@settable", () => {
             }
 
             input MovieUpdateInput {
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             type MovieUpdatedEvent {
@@ -533,9 +537,9 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                  actedInAggregate(where: MovieWhere): ActorMovieActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -676,7 +680,8 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -782,8 +787,10 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -894,9 +901,9 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                  actedInAggregate(where: MovieWhere): ActorMovieActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -1025,7 +1032,8 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -1131,8 +1139,10 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -1242,9 +1252,9 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                  actedInAggregate(where: MovieWhere): ActorMovieActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -1392,7 +1402,8 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -1465,9 +1476,9 @@ describe("@settable", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   description: String
                   title: String!
                 }
@@ -1617,8 +1628,10 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -1753,9 +1766,9 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                  actedInAggregate(where: MovieWhere): ActorMovieActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -1911,7 +1924,8 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -1984,9 +1998,9 @@ describe("@settable", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   description: String
                   title: String!
                 }
@@ -2136,8 +2150,10 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -2281,8 +2297,8 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: ProductionWhere): [Production!]!
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, where: ProductionWhere): [Production!]!
+                  actedInConnection(after: String, first: Int, where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -2411,7 +2427,8 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: ActorActedInUpdateInput
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -2521,8 +2538,10 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -2629,8 +2648,10 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  name: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input SeriesWhere {
@@ -2721,8 +2742,8 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: ProductionWhere): [Production!]!
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, where: ProductionWhere): [Production!]!
+                  actedInConnection(after: String, first: Int, where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -2827,7 +2848,8 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -2937,8 +2959,10 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -3045,8 +3069,10 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  name: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input SeriesWhere {
@@ -3136,8 +3162,8 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: ProductionWhere): [Production!]!
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, where: ProductionWhere): [Production!]!
+                  actedInConnection(after: String, first: Int, where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -3275,7 +3301,8 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -3352,9 +3379,9 @@ describe("@settable", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   description: String
                   title: String!
                 }
@@ -3504,8 +3531,10 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -3637,8 +3666,10 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  name: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input SeriesWhere {
@@ -3728,8 +3759,8 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: ProductionWhere): [Production!]!
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, where: ProductionWhere): [Production!]!
+                  actedInConnection(after: String, first: Int, where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -3883,7 +3914,8 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: ActorActedInUpdateInput
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -3960,9 +3992,9 @@ describe("@settable", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   description: String
                   title: String!
                 }
@@ -4112,8 +4144,10 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -4245,8 +4279,10 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  name: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input SeriesWhere {
@@ -4342,9 +4378,9 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+                  actedInAggregate(where: ProductionWhere): ActorProductionActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -4485,7 +4521,8 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -4592,8 +4629,10 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -4679,8 +4718,10 @@ describe("@settable", () => {
                 }
 
                 input ProductionUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input ProductionWhere {
@@ -4759,8 +4800,10 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input SeriesWhere {
@@ -4854,9 +4897,9 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+                  actedInAggregate(where: ProductionWhere): ActorProductionActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -4985,7 +5028,8 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -5092,8 +5136,10 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -5254,8 +5300,10 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input SeriesWhere {
@@ -5350,9 +5398,9 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+                  actedInAggregate(where: ProductionWhere): ActorProductionActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -5500,7 +5548,8 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -5578,9 +5627,9 @@ describe("@settable", () => {
                 }
 
                 type Movie implements Production {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
                   description: String
                   title: String!
                 }
@@ -5686,8 +5735,10 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -5948,9 +5999,9 @@ describe("@settable", () => {
                 }
 
                 type Series implements Production {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): SeriesActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): SeriesActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
                   description: String
                   title: String!
                 }
@@ -6062,8 +6113,10 @@ describe("@settable", () => {
 
                 input SeriesUpdateInput {
                   actors: [SeriesActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input SeriesWhere {
@@ -6183,9 +6236,9 @@ describe("@settable", () => {
                 }
 
                 type Actor {
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+                  actedInAggregate(where: ProductionWhere): ActorProductionActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -6341,7 +6394,8 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -6419,9 +6473,9 @@ describe("@settable", () => {
                 }
 
                 type Movie implements Production {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
                   description: String
                   title: String!
                 }
@@ -6527,8 +6581,10 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -6742,8 +6798,10 @@ describe("@settable", () => {
 
                 input ProductionUpdateInput {
                   actors: [ProductionActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input ProductionWhere {
@@ -6812,9 +6870,9 @@ describe("@settable", () => {
                 }
 
                 type Series implements Production {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): SeriesActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): SeriesActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [ProductionActorsConnectionSort!], where: ProductionActorsConnectionWhere): ProductionActorsConnection!
                   description: String
                   title: String!
                 }
@@ -6926,8 +6984,10 @@ describe("@settable", () => {
 
                 input SeriesUpdateInput {
                   actors: [SeriesActorsUpdateFieldInput!]
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input SeriesWhere {

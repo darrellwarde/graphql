@@ -39,7 +39,7 @@ describe("https://github.com/neo4j/graphql/issues/2789", () => {
     test("has no conflicting parameters when combining node and field auth", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { password: "123" }) {
+                updateUsers(update: { password_SET: "123" }) {
                     users {
                         password
                     }
@@ -55,7 +55,7 @@ describe("https://github.com/neo4j/graphql/issues/2789", () => {
             WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($param1 IS NOT NULL AND this.id = $param1)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             WITH this
             WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($authorization__before_param1 IS NOT NULL AND this.id = $authorization__before_param1)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            SET this.password = $this_update_password
+            SET this.password = $this_update_password_SET
             WITH this
             WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($authorization__after_param1 IS NOT NULL AND this.id = $authorization__after_param1)), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($authorization__after_param1 IS NOT NULL AND this.id = $authorization__after_param1)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             WITH *
@@ -69,7 +69,7 @@ describe("https://github.com/neo4j/graphql/issues/2789", () => {
                 \\"update_param1\\": \\"Foo\\",
                 \\"update_param2\\": \\"Bar\\",
                 \\"param1\\": \\"Foo\\",
-                \\"this_update_password\\": \\"123\\",
+                \\"this_update_password_SET\\": \\"123\\",
                 \\"authorization__before_param1\\": \\"Bar\\",
                 \\"authorization__after_param1\\": \\"Foo\\",
                 \\"resolvedCallbacks\\": {}

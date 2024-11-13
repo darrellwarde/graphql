@@ -93,8 +93,10 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input ActorUpdateInput {
-              password: String
-              username: String
+              password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              password_SET: String
+              username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              username_SET: String
             }
 
             input ActorWhere {
@@ -168,7 +170,8 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input MovieUpdateInput {
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -549,8 +552,10 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input ActorUpdateInput {
-              password: String
-              username: String
+              password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              password_SET: String
+              username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              username_SET: String
             }
 
             type ActorUpdatedEvent {
@@ -660,7 +665,8 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input MovieUpdateInput {
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             type MovieUpdatedEvent {

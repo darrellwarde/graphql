@@ -75,9 +75,9 @@ describe("https://github.com/neo4j/graphql/issues/1414", () => {
             }
         `;
 
-        const updateProgrammeItems = `
+        const updateProgrammeItems = /* GraphQL */ `
             mutation {
-                ${testProgrammeItem.operations.update}(where: { id_EQ: "nanoid0" }, update: { productTitle: "TestPI2" }) {
+                ${testProgrammeItem.operations.update}(where: { id_EQ: "nanoid0" }, update: { productTitle_SET: "TestPI2" }) {
                     ${testProgrammeItem.plural} {
                         id
                         productTitle

@@ -63,7 +63,10 @@ describe("Interface Relationships - Update update", () => {
             mutation {
                 updateActors(
                     update: {
-                        actedIn: { where: { node: { title_EQ: "Old Title" } }, update: { node: { title: "New Title" } } }
+                        actedIn: {
+                            where: { node: { title_EQ: "Old Title" } }
+                            update: { node: { title_SET: "New Title" } }
+                        }
                     }
                 ) {
                     actors {
@@ -85,7 +88,7 @@ describe("Interface Relationships - Update update", () => {
             	WITH this
             	MATCH (this)-[this_acted_in0_relationship:ACTED_IN]->(this_actedIn0:Movie)
             	WHERE this_actedIn0.title = $updateActors_args_update_actedIn0_where_this_actedIn0param0
-            	SET this_actedIn0.title = $this_update_actedIn0_title
+            	SET this_actedIn0.title = $this_update_actedIn0_title_SET
             	RETURN count(*) AS update_this_actedIn0
             }
             RETURN count(*) AS update_this_Movie
@@ -97,7 +100,7 @@ describe("Interface Relationships - Update update", () => {
             	WITH this
             	MATCH (this)-[this_acted_in0_relationship:ACTED_IN]->(this_actedIn0:Series)
             	WHERE this_actedIn0.title = $updateActors_args_update_actedIn0_where_this_actedIn0param0
-            	SET this_actedIn0.title = $this_update_actedIn0_title
+            	SET this_actedIn0.title = $this_update_actedIn0_title_SET
             	RETURN count(*) AS update_this_actedIn0
             }
             RETURN count(*) AS update_this_Series
@@ -108,7 +111,7 @@ describe("Interface Relationships - Update update", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"updateActors_args_update_actedIn0_where_this_actedIn0param0\\": \\"Old Title\\",
-                \\"this_update_actedIn0_title\\": \\"New Title\\",
+                \\"this_update_actedIn0_title_SET\\": \\"New Title\\",
                 \\"updateActors\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -121,7 +124,7 @@ describe("Interface Relationships - Update update", () => {
                                     },
                                     \\"update\\": {
                                         \\"node\\": {
-                                            \\"title\\": \\"New Title\\"
+                                            \\"title_SET\\": \\"New Title\\"
                                         }
                                     }
                                 }
@@ -141,7 +144,7 @@ describe("Interface Relationships - Update update", () => {
                     update: {
                         actedIn: {
                             where: { node: { title_EQ: "Old Title" } }
-                            update: { node: { actors: { update: { node: { name: "New Actor Name" } } } } }
+                            update: { node: { actors: { update: { node: { name_SET: "New Actor Name" } } } } }
                         }
                     }
                 ) {
@@ -168,7 +171,7 @@ describe("Interface Relationships - Update update", () => {
             	CALL {
             		WITH this, this_actedIn0
             		MATCH (this_actedIn0)<-[this_actedIn0_acted_in0_relationship:ACTED_IN]-(this_actedIn0_actors0:Actor)
-            		SET this_actedIn0_actors0.name = $this_update_actedIn0_actors0_name
+            		SET this_actedIn0_actors0.name = $this_update_actedIn0_actors0_name_SET
             		RETURN count(*) AS update_this_actedIn0_actors0
             	}
             	RETURN count(*) AS update_this_actedIn0
@@ -186,7 +189,7 @@ describe("Interface Relationships - Update update", () => {
             	CALL {
             		WITH this, this_actedIn0
             		MATCH (this_actedIn0)<-[this_actedIn0_acted_in0_relationship:ACTED_IN]-(this_actedIn0_actors0:Actor)
-            		SET this_actedIn0_actors0.name = $this_update_actedIn0_actors0_name
+            		SET this_actedIn0_actors0.name = $this_update_actedIn0_actors0_name_SET
             		RETURN count(*) AS update_this_actedIn0_actors0
             	}
             	RETURN count(*) AS update_this_actedIn0
@@ -199,7 +202,7 @@ describe("Interface Relationships - Update update", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"updateActors_args_update_actedIn0_where_this_actedIn0param0\\": \\"Old Title\\",
-                \\"this_update_actedIn0_actors0_name\\": \\"New Actor Name\\",
+                \\"this_update_actedIn0_actors0_name_SET\\": \\"New Actor Name\\",
                 \\"updateActors\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -216,7 +219,7 @@ describe("Interface Relationships - Update update", () => {
                                                 {
                                                     \\"update\\": {
                                                         \\"node\\": {
-                                                            \\"name\\": \\"New Actor Name\\"
+                                                            \\"name_SET\\": \\"New Actor Name\\"
                                                         }
                                                     }
                                                 }

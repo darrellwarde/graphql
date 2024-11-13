@@ -114,8 +114,8 @@ describe("Apollo Federation", () => {
 
             type Post {
               author: User!
-              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): PostUserAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
+              authorAggregate(where: UserWhere): PostUserAuthorAggregationSelection
+              authorConnection(after: String, first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
               content: String!
             }
 
@@ -252,7 +252,8 @@ describe("Apollo Federation", () => {
 
             input PostUpdateInput {
               author: PostAuthorUpdateFieldInput
-              content: String
+              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              content_SET: String
             }
 
             type PostUserAuthorAggregationSelection {
@@ -330,9 +331,9 @@ describe("Apollo Federation", () => {
 
             type User @shareable {
               name: String!
-              posts(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PostSort!], where: PostWhere): [Post!]!
-              postsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PostWhere): UserPostPostsAggregationSelection
-              postsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [UserPostsConnectionSort!], where: UserPostsConnectionWhere): UserPostsConnection!
+              posts(limit: Int, offset: Int, sort: [PostSort!], where: PostWhere): [Post!]!
+              postsAggregate(where: PostWhere): UserPostPostsAggregationSelection
+              postsConnection(after: String, first: Int, sort: [UserPostsConnectionSort!], where: UserPostsConnectionWhere): UserPostsConnection!
             }
 
             type UserAggregateSelection @shareable {
@@ -476,7 +477,8 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               posts: [UserPostsUpdateFieldInput!]
             }
 
@@ -636,8 +638,8 @@ describe("Apollo Federation", () => {
 
             type Post {
               author: User!
-              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): PostUserAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
+              authorAggregate(where: UserWhere): PostUserAuthorAggregationSelection
+              authorConnection(after: String, first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
               content: String!
             }
 
@@ -759,7 +761,8 @@ describe("Apollo Federation", () => {
 
             input PostUpdateInput {
               author: PostAuthorUpdateFieldInput
-              content: String
+              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              content_SET: String
             }
 
             type PostUserAuthorAggregationSelection {
@@ -866,7 +869,8 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input UserWhere {

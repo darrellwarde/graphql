@@ -190,11 +190,11 @@ describe("Point", () => {
         expect((beforeResult.records[0] as any).toObject().p.location.x).toEqual(longitude);
         expect((beforeResult.records[0] as any).toObject().p.location.y).toEqual(latitude);
 
-        const update = `
+        const update = /* GraphQL */ `
             mutation UpdatePhotographs($id: String!, $longitude: Float!, $latitude: Float!) {
                 ${Photograph.operations.update}(
                     where: { id_EQ: $id }
-                    update: { location: { longitude: $longitude, latitude: $latitude } }
+                    update: { location_SET: { longitude: $longitude, latitude: $latitude } }
                 ) {
                     ${Photograph.plural} {
                         id
@@ -263,7 +263,7 @@ describe("Point", () => {
             mutation UpdatePhotographs($id: String!, $longitude: Float!, $latitude: Float!, $height: Float!) {
                 ${Photograph.operations.update}(
                     where: { id_EQ: $id }
-                    update: { location: { longitude: $longitude, latitude: $latitude, height: $height } }
+                    update: { location_SET: { longitude: $longitude, latitude: $latitude, height: $height } }
                 ) {
                     ${Photograph.plural} {
                         id

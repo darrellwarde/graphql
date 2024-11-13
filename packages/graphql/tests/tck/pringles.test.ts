@@ -256,7 +256,7 @@ describe("Cypher Create Pringles", () => {
                                 where: { node: { description_EQ: "Green Photo" } }
                                 update: {
                                     node: {
-                                        description: "Light Green Photo"
+                                        description_SET: "Light Green Photo"
                                         color: {
                                             connect: { where: { node: { name_EQ: "Light Green" } } }
                                             disconnect: { where: { node: { name_EQ: "Green" } } }
@@ -284,7 +284,7 @@ describe("Cypher Create Pringles", () => {
             	WITH this
             	MATCH (this)-[this_has_photo0_relationship:HAS_PHOTO]->(this_photos0:Photo)
             	WHERE this_photos0.description = $updateProducts_args_update_photos0_where_this_photos0param0
-            	SET this_photos0.description = $this_update_photos0_description
+            	SET this_photos0.description = $this_update_photos0_description_SET
             	WITH this, this_photos0
             	CALL {
             	WITH this, this_photos0
@@ -333,7 +333,7 @@ describe("Cypher Create Pringles", () => {
             "{
                 \\"param0\\": \\"Pringles\\",
                 \\"updateProducts_args_update_photos0_where_this_photos0param0\\": \\"Green Photo\\",
-                \\"this_update_photos0_description\\": \\"Light Green Photo\\",
+                \\"this_update_photos0_description_SET\\": \\"Light Green Photo\\",
                 \\"updateProducts_args_update_photos0_update_node_color_disconnect_where_Color_this_photos0_color0_disconnect0param0\\": \\"Green\\",
                 \\"this_photos0_color0_connect0_node_param0\\": \\"Light Green\\",
                 \\"updateProducts\\": {
@@ -348,7 +348,7 @@ describe("Cypher Create Pringles", () => {
                                     },
                                     \\"update\\": {
                                         \\"node\\": {
-                                            \\"description\\": \\"Light Green Photo\\",
+                                            \\"description_SET\\": \\"Light Green Photo\\",
                                             \\"color\\": {
                                                 \\"connect\\": {
                                                     \\"where\\": {

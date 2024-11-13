@@ -1303,7 +1303,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                             edge: { roles_INCLUDES: "another role" }
                         }
                     }
-                    update: { name: "Exciting new name!" }
+                    update: { name_SET: "Exciting new name!" }
                 ) {
                     actors {
                         name
@@ -1337,7 +1337,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
             }
             WITH *
             WHERE var8 = true
-            SET this.name = $this_update_name
+            SET this.name = $this_update_name_SET
             RETURN collect(DISTINCT this { .name }) AS data"
         `);
 
@@ -1349,7 +1349,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                 },
                 \\"param1\\": \\"some role\\",
                 \\"param2\\": \\"another role\\",
-                \\"this_update_name\\": \\"Exciting new name!\\",
+                \\"this_update_name_SET\\": \\"Exciting new name!\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

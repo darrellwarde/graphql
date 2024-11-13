@@ -72,9 +72,9 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             type CrewMember {
-              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): Movie!
-              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): CrewMemberMovieMoviesAggregationSelection
-              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [CrewMemberMoviesConnectionSort!], where: CrewMemberMoviesConnectionWhere): CrewMemberMoviesConnection!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): Movie!
+              moviesAggregate(where: MovieWhere): CrewMemberMovieMoviesAggregationSelection
+              moviesConnection(after: String, first: Int, sort: [CrewMemberMoviesConnectionSort!], where: CrewMemberMoviesConnectionWhere): CrewMemberMoviesConnection!
             }
 
             type CrewMemberAggregateSelection {
@@ -241,7 +241,8 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewPositionUpdateInput {
-              position: CrewPositionType
+              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _SET field\\")
+              position_SET: CrewPositionType
             }
 
             input CrewPositionWhere {
@@ -291,7 +292,8 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input MovieUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input MovieWhere {

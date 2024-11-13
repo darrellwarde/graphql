@@ -257,9 +257,9 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
             }
 
             type Movie implements Production {
-              director(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: CreatureWhere): Creature!
-              directorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: CreatureWhere): MovieCreatureDirectorAggregationSelection
-              directorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: ProductionDirectorConnectionWhere): ProductionDirectorConnection!
+              director(limit: Int, offset: Int, where: CreatureWhere): Creature!
+              directorAggregate(where: CreatureWhere): MovieCreatureDirectorAggregationSelection
+              directorConnection(after: String, first: Int, where: ProductionDirectorConnectionWhere): ProductionDirectorConnection!
               id: ID
               title: String!
             }
@@ -348,8 +348,10 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
 
             input MovieUpdateInput {
               director: MovieDirectorUpdateFieldInput
-              id: ID
-              title: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -406,9 +408,9 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
             }
 
             type Person implements Creature {
-              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): Production!
-              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): PersonProductionMoviesAggregationSelection
-              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [CreatureMoviesConnectionSort!], where: CreatureMoviesConnectionWhere): CreatureMoviesConnection!
+              movies(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): Production!
+              moviesAggregate(where: ProductionWhere): PersonProductionMoviesAggregationSelection
+              moviesConnection(after: String, first: Int, sort: [CreatureMoviesConnectionSort!], where: CreatureMoviesConnectionWhere): CreatureMoviesConnection!
             }
 
             type PersonAggregateSelection {
@@ -644,7 +646,8 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
 
             input ProductionUpdateInput {
               director: ProductionDirectorUpdateFieldInput
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input ProductionWhere {
@@ -688,9 +691,9 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
             }
 
             type Series implements Production {
-              director(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: CreatureWhere): Creature!
-              directorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: CreatureWhere): SeriesCreatureDirectorAggregationSelection
-              directorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: ProductionDirectorConnectionWhere): ProductionDirectorConnection!
+              director(limit: Int, offset: Int, where: CreatureWhere): Creature!
+              directorAggregate(where: CreatureWhere): SeriesCreatureDirectorAggregationSelection
+              directorConnection(after: String, first: Int, where: ProductionDirectorConnectionWhere): ProductionDirectorConnection!
               episode: Int!
               id: ID
               title: String!
@@ -832,11 +835,14 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
 
             input SeriesUpdateInput {
               director: SeriesDirectorUpdateFieldInput
-              episode: Int
+              episode: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episode_DECREMENT: Int
               episode_INCREMENT: Int
-              id: ID
-              title: String
+              episode_SET: Int
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             type SeriesUpdatedEvent {

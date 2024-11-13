@@ -140,9 +140,9 @@ describe("integration/rfc/003", () => {
                     charset: "alphabetic",
                 });
 
-                const mutation = `
+                const mutation = /* GraphQL */ `
                     mutation {
-                        ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
                             info {
                                 nodesCreated
                             }
@@ -188,11 +188,11 @@ describe("integration/rfc/003", () => {
                         charset: "alphabetic",
                     });
 
-                    const mutation = `
+                    const mutation = /* GraphQL */ `
                         mutation {
                             ${Movie.operations.update}(
                               where: { id_EQ: "${movieId}" }
-                              update: { director: { update: { node: { id: "${directorId}" } } } }
+                              update: { director: { update: { node: { id_SET: "${directorId}" } } } }
                             ) {
                               info {
                                 nodesCreated
@@ -238,7 +238,7 @@ describe("integration/rfc/003", () => {
                         charset: "alphabetic",
                     });
 
-                    const mutation = `
+                    const mutation = /* GraphQL */ `
                         mutation {
                             ${Movie.operations.update}(
                               where: { id_EQ: "${movieId}" }

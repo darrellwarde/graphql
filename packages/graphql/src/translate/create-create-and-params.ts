@@ -19,9 +19,7 @@
 
 import type { Node, Relationship } from "../classes";
 import type { CallbackBucket } from "../classes/CallbackBucket";
-import { Neo4jGraphQLError } from "../classes/Error";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
-import { findConflictingProperties } from "../utils/find-conflicting-properties";
 import mapToDbProperty from "../utils/map-to-db-property";
 import { checkAuthentication } from "./authorization/check-authentication";
 import {
@@ -30,7 +28,8 @@ import {
 } from "./authorization/compatibility/create-authorization-after-and-params";
 import createConnectAndParams from "./create-connect-and-params";
 import { createRelationshipValidationString } from "./create-relationship-validation-string";
-import createSetRelationshipPropertiesAndParams from "./create-set-relationship-properties-and-params";
+import { createSetRelationshipProperties } from "./create-set-relationship-properties";
+import { assertNonAmbiguousUpdate } from "./utils/assert-non-ambiguous-update";
 import { addCallbackAndSetParam } from "./utils/callback-utils";
 
 interface Res {
@@ -73,14 +72,7 @@ function createCreateAndParams({
     //used to build authorization variable in auth subqueries
     authorizationPrefix?: number[];
 }): CreateAndParams {
-    const conflictingProperties = findConflictingProperties({ node, input });
-    if (conflictingProperties.length > 0) {
-        throw new Neo4jGraphQLError(
-            `Conflicting modification of ${conflictingProperties.map((n) => `[[${n}]]`).join(", ")} on type ${
-                node.name
-            }`
-        );
-    }
+    assertNonAmbiguousUpdate(node, input);
     checkAuthentication({ context, node, targetOperations: ["CREATE"] });
 
     function reducer(res: Res, [key, value]: [string, any], reducerIndex): Res {
@@ -170,15 +162,20 @@ function createCreateAndParams({
                                 (x) => x.properties === relationField.properties
                             ) as unknown as Relationship;
 
-                            const setA = createSetRelationshipPropertiesAndParams({
+                            const setA = createSetRelationshipProperties({
                                 properties: create.edge ?? {},
                                 varName: propertiesName,
+                                withVars,
                                 relationship,
                                 operation: "CREATE",
                                 callbackBucket,
+                                parameterPrefix: propertiesName,
+                                parameterNotation: "_",
                             });
-                            res.creates.push(setA[0]);
-                            res.params = { ...res.params, ...setA[1] };
+                            if (setA) {
+                                res.creates.push(setA[0]);
+                                res.params = { ...res.params, ...setA[1] };
+                            }
                         }
 
                         if (authorizationPredicates.length) {

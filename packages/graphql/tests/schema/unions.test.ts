@@ -102,7 +102,8 @@ describe("Unions", () => {
             }
 
             input GenreUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input GenreWhere {
@@ -130,8 +131,8 @@ describe("Unions", () => {
 
             type Movie {
               id: ID
-              search(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: SearchWhere): [Search!]!
-              searchConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
+              search(limit: Int, offset: Int, where: SearchWhere): [Search!]!
+              searchConnection(after: String, first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
               searchNoDirective: Search
             }
 
@@ -300,7 +301,8 @@ describe("Unions", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               search: MovieSearchUpdateInput
             }
 

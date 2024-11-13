@@ -181,9 +181,9 @@ describe("[Point]", () => {
                 .sort()
         ).toEqual(waypoints.sort());
 
-        const update = `
+        const update = /* GraphQL */ `
             mutation UpdateRoutes($id: String!, $waypoints: [PointInput!]) {
-                ${Route.operations.update}(where: { id_EQ: $id }, update: { waypoints: $waypoints }) {
+                ${Route.operations.update}(where: { id_EQ: $id }, update: { waypoints_SET: $waypoints }) {
                     ${Route.plural} {
                         id
                         waypoints {
@@ -265,9 +265,9 @@ describe("[Point]", () => {
                 .sort()
         ).toEqual(waypoints.sort());
 
-        const update = `
+        const update = /* GraphQL */ `
             mutation UpdateRoutes($id: String!, $waypoints: [PointInput!]) {
-                ${Route.operations.update}(where: { id_EQ: $id }, update: { waypoints: $waypoints }) {
+                ${Route.operations.update}(where: { id_EQ: $id }, update: { waypoints_SET: $waypoints }) {
                     ${Route.plural} {
                         id
                         waypoints {

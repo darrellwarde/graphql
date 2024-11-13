@@ -224,8 +224,10 @@ describe("@populatedBy tests", () => {
                 }
 
                 input MovieUpdateInput {
-                  callback1: String
-                  id: ID
+                  callback1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  callback1_SET: String
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -418,10 +420,12 @@ describe("@populatedBy tests", () => {
                 }
 
                 input MovieUpdateInput {
-                  callback1: Int
+                  callback1: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   callback1_DECREMENT: Int
                   callback1_INCREMENT: Int
-                  id: ID
+                  callback1_SET: Int
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -743,7 +747,8 @@ describe("@populatedBy tests", () => {
                 }
 
                 input GenreUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input GenreWhere {
@@ -770,9 +775,9 @@ describe("@populatedBy tests", () => {
                 }
 
                 type Movie {
-                  genres(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): [Genre!]!
-                  genresAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenresAggregationSelection
-                  genresConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieGenresConnectionSort!], where: MovieGenresConnectionWhere): MovieGenresConnection!
+                  genres(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): [Genre!]!
+                  genresAggregate(where: GenreWhere): MovieGenreGenresAggregationSelection
+                  genresConnection(after: String, first: Int, sort: [MovieGenresConnectionSort!], where: MovieGenresConnectionWhere): MovieGenresConnection!
                   id: ID
                 }
 
@@ -913,7 +918,8 @@ describe("@populatedBy tests", () => {
 
                 input MovieUpdateInput {
                   genres: [MovieGenresUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -1070,8 +1076,10 @@ describe("@populatedBy tests", () => {
                 }
 
                 input RelPropertiesUpdateInput {
-                  callback1: String
-                  id: ID
+                  callback1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  callback1_SET: String
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input RelPropertiesWhere {
@@ -1239,7 +1247,8 @@ describe("@populatedBy tests", () => {
                 }
 
                 input GenreUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input GenreWhere {
@@ -1273,9 +1282,9 @@ describe("@populatedBy tests", () => {
                 }
 
                 type Movie {
-                  genres(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): [Genre!]!
-                  genresAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenresAggregationSelection
-                  genresConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieGenresConnectionSort!], where: MovieGenresConnectionWhere): MovieGenresConnection!
+                  genres(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): [Genre!]!
+                  genresAggregate(where: GenreWhere): MovieGenreGenresAggregationSelection
+                  genresConnection(after: String, first: Int, sort: [MovieGenresConnectionSort!], where: MovieGenresConnectionWhere): MovieGenresConnection!
                   id: ID
                 }
 
@@ -1416,7 +1425,8 @@ describe("@populatedBy tests", () => {
 
                 input MovieUpdateInput {
                   genres: [MovieGenresUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -1588,10 +1598,12 @@ describe("@populatedBy tests", () => {
                 }
 
                 input RelPropertiesUpdateInput {
-                  callback1: Int
+                  callback1: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   callback1_DECREMENT: Int
                   callback1_INCREMENT: Int
-                  id: ID
+                  callback1_SET: Int
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input RelPropertiesWhere {

@@ -164,9 +164,9 @@ describe("lower case type names", () => {
 
             type actor {
               createdAt: DateTime
-              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [movieSort!], where: movieWhere): [movie!]!
-              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: movieWhere): actormovieMoviesAggregationSelection
-              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [actorMoviesConnectionSort!], where: actorMoviesConnectionWhere): actorMoviesConnection!
+              movies(limit: Int, offset: Int, sort: [movieSort!], where: movieWhere): [movie!]!
+              moviesAggregate(where: movieWhere): actormovieMoviesAggregationSelection
+              moviesConnection(after: String, first: Int, sort: [actorMoviesConnectionSort!], where: actorMoviesConnectionWhere): actorMoviesConnection!
               name: String
               year: Int
             }
@@ -354,12 +354,15 @@ describe("lower case type names", () => {
             }
 
             input actorUpdateInput {
-              createdAt: DateTime
+              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              createdAt_SET: DateTime
               movies: [actorMoviesUpdateFieldInput!]
-              name: String
-              year: Int
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
+              year_SET: Int
             }
 
             input actorWhere {
@@ -426,9 +429,9 @@ describe("lower case type names", () => {
             }
 
             type movie {
-              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [actorSort!], where: actorWhere): [actor!]!
-              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: actorWhere): movieactorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [movieActorsConnectionSort!], where: movieActorsConnectionWhere): movieActorsConnection!
+              actors(limit: Int, offset: Int, sort: [actorSort!], where: actorWhere): [actor!]!
+              actorsAggregate(where: actorWhere): movieactorActorsAggregationSelection
+              actorsConnection(after: String, first: Int, sort: [movieActorsConnectionSort!], where: movieActorsConnectionWhere): movieActorsConnection!
               createdAt: DateTime
               name: String
               testId: String
@@ -607,12 +610,16 @@ describe("lower case type names", () => {
 
             input movieUpdateInput {
               actors: [movieActorsUpdateFieldInput!]
-              createdAt: DateTime
-              name: String
-              testId: String
-              year: Int
+              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              createdAt_SET: DateTime
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              testId: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              testId_SET: String
+              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
+              year_SET: Int
             }
 
             input movieWhere {

@@ -88,7 +88,7 @@ describe("RelationshipAdapter", () => {
             direction: "OUT",
             isList: Boolean(false),
             attributes: [accountAlias],
-            queryDirection: "DEFAULT_DIRECTED",
+            queryDirection: "DIRECTED",
             nestedOperations: ["CREATE", "UPDATE", "DELETE", "CONNECT", "DISCONNECT", "CONNECT_OR_CREATE"],
             aggregate: false,
             description: "",

@@ -894,9 +894,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -1059,8 +1059,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -1154,9 +1156,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -1346,7 +1348,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -1498,9 +1501,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -1685,8 +1688,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -1780,9 +1785,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -1972,7 +1977,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -2124,9 +2130,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -2311,8 +2317,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -2406,9 +2414,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -2586,7 +2594,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -2735,9 +2744,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -2922,8 +2931,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -3017,9 +3028,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -3160,7 +3171,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -3313,9 +3325,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -3500,8 +3512,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -3595,9 +3609,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -3787,7 +3801,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -3941,9 +3956,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -4128,8 +4143,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -4223,9 +4240,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -4415,7 +4432,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -4545,9 +4563,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -4732,8 +4750,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -4827,9 +4847,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -4970,7 +4990,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -5128,9 +5149,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -5303,8 +5324,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -5398,9 +5421,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -5537,7 +5560,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -5646,7 +5670,8 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input PersonWhere {
@@ -5754,9 +5779,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -5929,8 +5954,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -6024,9 +6051,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -6197,7 +6224,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -6307,7 +6335,8 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input PersonWhere {
@@ -6415,9 +6444,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -6590,8 +6619,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -6685,9 +6716,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                      actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                      actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -6824,7 +6855,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -6933,7 +6965,8 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     input PersonWhere {
@@ -7045,9 +7078,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -7232,8 +7265,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -7293,9 +7328,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): AppearanceMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): AppearanceMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -7480,8 +7515,10 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type AppearanceUpdatedEvent {
@@ -7580,8 +7617,8 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                      actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -7782,7 +7819,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -7966,9 +8004,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -8153,8 +8191,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -8214,9 +8254,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): AppearanceMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): AppearanceMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -8401,8 +8441,10 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type AppearanceUpdatedEvent {
@@ -8501,8 +8543,8 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                      actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -8703,7 +8745,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {
@@ -8887,9 +8930,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -9074,8 +9117,10 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type ActorUpdatedEvent {
@@ -9135,9 +9180,9 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
-                      moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): AppearanceMovieMoviesAggregationSelection
-                      moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      moviesAggregate(where: MovieWhere): AppearanceMovieMoviesAggregationSelection
+                      moviesConnection(after: String, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
                       username: String!
                     }
@@ -9322,8 +9367,10 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String
-                      username: String
+                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      password_SET: String
+                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      username_SET: String
                     }
 
                     type AppearanceUpdatedEvent {
@@ -9422,8 +9469,8 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                      actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                      actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                      actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
 
@@ -9624,7 +9671,8 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String
+                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                      title_SET: String
                     }
 
                     type MovieUpdatedEvent {

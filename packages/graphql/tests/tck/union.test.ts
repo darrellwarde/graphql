@@ -371,7 +371,7 @@ describe("Cypher Union", () => {
                         search: {
                             Genre: {
                                 where: { node: { name_EQ: "some genre" } }
-                                update: { node: { name: "some new genre" } }
+                                update: { node: { name_SET: "some new genre" } }
                             }
                         }
                     }
@@ -394,7 +394,7 @@ describe("Cypher Union", () => {
             	WITH this
             	MATCH (this)-[this_search0_relationship:SEARCH]->(this_search_Genre0:Genre)
             	WHERE this_search_Genre0.name = $updateMovies_args_update_search_Genre0_where_this_search_Genre0param0
-            	SET this_search_Genre0.name = $this_update_search_Genre0_name
+            	SET this_search_Genre0.name = $this_update_search_Genre0_name_SET
             	RETURN count(*) AS update_this_search_Genre0
             }
             RETURN collect(DISTINCT this { .title }) AS data"
@@ -404,7 +404,7 @@ describe("Cypher Union", () => {
             "{
                 \\"param0\\": \\"some movie\\",
                 \\"updateMovies_args_update_search_Genre0_where_this_search_Genre0param0\\": \\"some genre\\",
-                \\"this_update_search_Genre0_name\\": \\"some new genre\\",
+                \\"this_update_search_Genre0_name_SET\\": \\"some new genre\\",
                 \\"updateMovies\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -418,7 +418,7 @@ describe("Cypher Union", () => {
                                         },
                                         \\"update\\": {
                                             \\"node\\": {
-                                                \\"name\\": \\"some new genre\\"
+                                                \\"name_SET\\": \\"some new genre\\"
                                             }
                                         }
                                     }

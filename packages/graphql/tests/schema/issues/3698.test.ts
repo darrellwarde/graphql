@@ -107,9 +107,9 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             type Genre {
               name: String!
-              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [IProductSort!], where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
+              product(limit: Int, offset: Int, sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(where: IProductWhere): GenreIProductProductAggregationSelection
+              productConnection(after: String, first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
             }
 
             type GenreAggregateSelection {
@@ -310,7 +310,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input GenreUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               product: [GenreProductUpdateFieldInput!]
             }
 
@@ -405,9 +406,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input IProductUpdateInput {
-              id: String
-              info: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              info_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input IProductWhere {
@@ -442,9 +446,9 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             type Movie implements IProduct {
-              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieGenreConnectionSort!], where: MovieGenreConnectionWhere): MovieGenreConnection!
+              genre(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(where: GenreWhere): MovieGenreGenreAggregationSelection
+              genreConnection(after: String, first: Int, sort: [MovieGenreConnectionSort!], where: MovieGenreConnectionWhere): MovieGenreConnection!
               id: String!
               info: String!
               name: String!
@@ -618,8 +622,10 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieUpdateInput {
               genre: MovieGenreUpdateFieldInput
-              id: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type MovieUpdatedEvent {
@@ -811,9 +817,9 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             type Genre {
               name: String!
-              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [IProductSort!], where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
+              product(limit: Int, offset: Int, sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(where: IProductWhere): GenreIProductProductAggregationSelection
+              productConnection(after: String, first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
             }
 
             type GenreAggregateSelection {
@@ -1017,7 +1023,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input GenreUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               product: [GenreProductUpdateFieldInput!]
             }
 
@@ -1214,9 +1221,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input IProductUpdateInput {
               genre: IProductGenreUpdateFieldInput
-              id: String
-              info: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              info_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input IProductWhere {
@@ -1254,9 +1264,9 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             type Movie implements IProduct {
-              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
+              genre(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(where: GenreWhere): MovieGenreGenreAggregationSelection
+              genreConnection(after: String, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               info: String!
               name: String!
@@ -1398,8 +1408,10 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieUpdateInput {
               genre: MovieGenreUpdateFieldInput
-              id: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type MovieUpdatedEvent {
@@ -1604,9 +1616,9 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             type Genre {
               name: String!
-              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [IProductSort!], where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
+              product(limit: Int, offset: Int, sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(where: IProductWhere): GenreIProductProductAggregationSelection
+              productConnection(after: String, first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
             }
 
             type GenreAggregateSelection {
@@ -1810,7 +1822,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input GenreUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               product: [GenreProductUpdateFieldInput!]
             }
 
@@ -2009,9 +2022,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input IProductUpdateInput {
               genre: IProductGenreUpdateFieldInput
-              id: String
-              info: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              info_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input IProductWhere {
@@ -2049,9 +2065,9 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             type Movie implements IProduct {
-              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
+              genre(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(where: GenreWhere): MovieGenreGenreAggregationSelection
+              genreConnection(after: String, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               info: String!
               name: String!
@@ -2193,8 +2209,10 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieUpdateInput {
               genre: MovieGenreUpdateFieldInput
-              id: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type MovieUpdatedEvent {
@@ -2267,9 +2285,9 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             type Series implements IProduct {
-              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): SeriesGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
+              genre(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): Genre!
+              genreAggregate(where: GenreWhere): SeriesGenreGenreAggregationSelection
+              genreConnection(after: String, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
               id: String!
               info: String!
               name: String!
@@ -2427,9 +2445,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input SeriesUpdateInput {
               genre: SeriesGenreUpdateFieldInput
-              id: String
-              info: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              info_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type SeriesUpdatedEvent {

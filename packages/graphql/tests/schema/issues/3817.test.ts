@@ -28,12 +28,7 @@ describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
             type Person @node {
                 id: ID! @id
                 friends: [Person!]!
-                    @relationship(
-                        type: "FRIEND_OF"
-                        direction: OUT
-                        queryDirection: UNDIRECTED_ONLY
-                        properties: "FriendOf"
-                    )
+                    @relationship(type: "FRIEND_OF", direction: OUT, queryDirection: UNDIRECTED, properties: "FriendOf")
             }
 
             type FriendOf @relationshipProperties {
@@ -121,7 +116,8 @@ describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
             }
 
             input FriendOfUpdateInput {
-              id: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
             }
 
             input FriendOfWhere {

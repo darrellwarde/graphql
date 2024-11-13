@@ -146,7 +146,7 @@ describe("Cypher Auth isAuthenticated", () => {
     test("Update Node with bind", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updatePosts(where: { id_EQ: "1" }, update: { id: "id-1" }) {
+                updatePosts(where: { id_EQ: "1" }, update: { id_SET: "id-1" }) {
                     posts {
                         id
                     }
@@ -162,14 +162,14 @@ describe("Cypher Auth isAuthenticated", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Post)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             RETURN collect(DISTINCT this { .id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_id\\": \\"id-1\\",
+                \\"this_update_id_SET\\": \\"id-1\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -178,7 +178,7 @@ describe("Cypher Auth isAuthenticated", () => {
     test("Update Node without bind", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateComments(where: { id_EQ: "1" }, update: { id: "id-1" }) {
+                updateComments(where: { id_EQ: "1" }, update: { id_SET: "id-1" }) {
                     comments {
                         id
                     }
@@ -194,14 +194,14 @@ describe("Cypher Auth isAuthenticated", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Comment)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             RETURN collect(DISTINCT this { .id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_id\\": \\"id-1\\",
+                \\"this_update_id_SET\\": \\"id-1\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

@@ -80,24 +80,24 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
         const orgId = createOrgResult?.data[testOrganization.operations.create][testOrganization.plural][0]
             .id as string;
 
-        const swapSidesQuery = /* GraphQL*/ `
-                mutation {
-                    ${testUser.operations.update}(
-                        where: { name_EQ: "Luke Skywalker" }
-                        update: {
-                            activeOrganization: {
-                                connect: { where: { node: { id_EQ: "${orgId}" } } } 
-                                disconnect: { where: { node: { NOT: { id_EQ: "${orgId}" } } } } 
-                                
-                            }
-                        }
-                        ) {
-                        ${testUser.plural} {
-                            id
+        const swapSidesQuery = /* GraphQL */ `
+            mutation {
+                ${testUser.operations.update}(
+                    where: { name_EQ: "Luke Skywalker" }
+                    update: {
+                        activeOrganization: {
+                            connect: { where: { node: { id_EQ: "${orgId}" } } } 
+                            disconnect: { where: { node: { NOT: { id_EQ: "${orgId}" } } } } 
+                            
                         }
                     }
+                    ) {
+                    ${testUser.plural} {
+                        id
+                    }
                 }
-            `;
+            }
+        `;
 
         const swapSidesResult = await testHelper.executeGraphQL(swapSidesQuery);
         expect(swapSidesResult.errors).toBeUndefined();

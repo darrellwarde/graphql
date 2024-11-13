@@ -363,11 +363,11 @@ describe("@alias directive", () => {
 
         await testHelper.executeGraphQL(create);
 
-        const update = `
+        const update = /* GraphQL */ `
         mutation UpdateAll {
             ${AliasDirectiveTestUser.operations.update}(
-                where: {name_CONTAINS: "${name}"}
-                update: {name: "${newName}", likes: {update: {edge: {comment: "${newComment}"}, node: {title: "${newTitle}", year: ${newYear}}}}}
+                where: { name_CONTAINS: "${name}"}
+                update: { name_SET: "${newName}", likes: { update: { edge: { comment_SET: "${newComment}"}, node: { title_SET: "${newTitle}", year_SET: ${newYear}}}}}
             ) {
                 ${AliasDirectiveTestUser.plural} {
                     id

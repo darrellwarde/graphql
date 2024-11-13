@@ -84,7 +84,7 @@ describe("#288", () => {
     test("Can update a USER and COMPANYID is populated", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { USERID_EQ: "userid" }, update: { COMPANYID: "companyid2" }) {
+                updateUsers(where: { USERID_EQ: "userid" }, update: { COMPANYID_SET: "companyid2" }) {
                     users {
                         USERID
                         COMPANYID
@@ -98,14 +98,14 @@ describe("#288", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:USER)
             WHERE this.USERID = $param0
-            SET this.COMPANYID = $this_update_COMPANYID
+            SET this.COMPANYID = $this_update_COMPANYID_SET
             RETURN collect(DISTINCT this { .USERID, .COMPANYID }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"userid\\",
-                \\"this_update_COMPANYID\\": \\"companyid2\\",
+                \\"this_update_COMPANYID_SET\\": \\"companyid2\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

@@ -187,7 +187,8 @@ describe("@private directive", () => {
             }
 
             input UserUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input UserWhere {
@@ -383,8 +384,10 @@ describe("@private directive", () => {
             }
 
             input UserUpdateInput {
-              id: ID
-              private: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              private: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              private_SET: String
             }
 
             input UserWhere {

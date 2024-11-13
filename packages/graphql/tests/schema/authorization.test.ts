@@ -96,9 +96,9 @@ describe("Authorization", () => {
             }
 
             type Post {
-              author(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): User!
-              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): PostUserAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
+              author(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): User!
+              authorAggregate(where: UserWhere): PostUserAuthorAggregationSelection
+              authorConnection(after: String, first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
               id: ID!
               name: String!
             }
@@ -237,8 +237,10 @@ describe("Authorization", () => {
 
             input PostUpdateInput {
               author: PostAuthorUpdateFieldInput
-              id: ID
-              name: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type PostUserAuthorAggregationSelection {
@@ -323,9 +325,9 @@ describe("Authorization", () => {
             type User {
               id: ID!
               name: String!
-              posts(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
-              postsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): UserUserPostsAggregationSelection
-              postsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [UserPostsConnectionSort!], where: UserPostsConnectionWhere): UserPostsConnection!
+              posts(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
+              postsAggregate(where: UserWhere): UserUserPostsAggregationSelection
+              postsConnection(after: String, first: Int, sort: [UserPostsConnectionSort!], where: UserPostsConnectionWhere): UserPostsConnection!
             }
 
             type UserAggregateSelection {
@@ -473,8 +475,10 @@ describe("Authorization", () => {
             }
 
             input UserUpdateInput {
-              id: ID
-              name: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               posts: [UserPostsUpdateFieldInput!]
             }
 

@@ -29,7 +29,6 @@ import { RelationshipAdapter } from "../../schema-model/relationship/model-adapt
 import { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { Neo4jFeaturesSettings } from "../../types";
 import { FieldAggregationComposer } from "../aggregations/field-aggregation-composer";
-import { addDirectedArgument } from "../directed-argument";
 import {
     augmentObjectOrInterfaceTypeWithConnectionField,
     augmentObjectOrInterfaceTypeWithRelationshipField,
@@ -264,13 +263,11 @@ export function createRelationshipFields({
                 where: relationshipTarget.operations.whereInputTypeName,
             };
 
-            const aggregationFieldsArgs = addDirectedArgument(aggregationFieldsBaseArgs, relationshipAdapter, features);
-
             if (relationshipAdapter.aggregate) {
                 composeNode.addFields({
                     [relationshipAdapter.operations.aggregateTypeName]: {
                         type: aggregationTypeObject,
-                        args: aggregationFieldsArgs,
+                        args: aggregationFieldsBaseArgs,
                         directives: deprecatedDirectives,
                     },
                 });
@@ -320,18 +317,12 @@ function createRelationshipFieldsForTarget({
             relationshipAdapter,
             userDefinedFieldDirectives,
             subgraph,
-            features,
             composer,
         })
     );
 
     composeNode.addFields(
-        augmentObjectOrInterfaceTypeWithConnectionField(
-            relationshipAdapter,
-            userDefinedFieldDirectives,
-            composer,
-            features
-        )
+        augmentObjectOrInterfaceTypeWithConnectionField(relationshipAdapter, userDefinedFieldDirectives, composer)
     );
 
     withRelationInputType({

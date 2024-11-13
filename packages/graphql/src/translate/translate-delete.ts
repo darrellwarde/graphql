@@ -19,7 +19,6 @@
 
 import type Cypher from "@neo4j/cypher-builder";
 import Debug from "debug";
-import type { Node } from "../classes";
 import { DEBUG_TRANSLATE } from "../constants";
 import type { EntityAdapter } from "../schema-model/entity/EntityAdapter";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
@@ -57,11 +56,9 @@ function translateUsingQueryAST({
 }
 export function translateDelete({
     context,
-    node,
     entityAdapter,
 }: {
     context: Neo4jGraphQLTranslationContext;
-    node: Node;
     entityAdapter: EntityAdapter;
 }): Cypher.CypherResult {
     const varName = "this";

@@ -18,55 +18,30 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
-describe("Deprecated directed argument", () => {
-    test("should remove the directed argument", async () => {
-        const typeDefs = gql`
+describe("Implicit SET field", () => {
+    test("Should remove implicit _SET field if specified by the setting implicitSET", async () => {
+        const typeDefs = /* GraphQL */ `
             type Actor @node {
-                name: String!
-                movies: [Movie!]!
-                    @relationship(
-                        type: "ACTED_IN"
-                        direction: OUT
-                        properties: "ActedIn"
-                        queryDirection: DEFAULT_UNDIRECTED
-                    )
+                name: String
+                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
-
-            type Movie implements Production @node {
-                title: String!
-                actors: [Actor!]!
-                    @relationship(
-                        type: "ACTED_IN"
-                        direction: IN
-                        properties: "ActedIn"
-                        queryDirection: DEFAULT_DIRECTED
-                    )
+            type Movie @node {
+                id: ID
+                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
             type ActedIn @relationshipProperties {
-                screenTime: Int!
-                startDate: Date!
-                leadRole: Boolean!
-            }
-            union Search = Movie | Genre
-
-            type Genre @node {
-                id: ID
-            }
-
-            interface Production {
-                title: String!
+                role: String
             }
         `;
         const neoSchema = new Neo4jGraphQL({
             typeDefs,
             features: {
                 excludeDeprecatedFields: {
-                    directedArgument: true,
+                    implicitSet: true,
                 },
             },
         });
@@ -84,84 +59,60 @@ describe("Deprecated directed argument", () => {
             * Movie.actors
             \\"\\"\\"
             type ActedIn {
-              leadRole: Boolean!
-              screenTime: Int!
-              startDate: Date!
+              role: String
             }
 
             input ActedInAggregationWhereInput {
               AND: [ActedInAggregationWhereInput!]
               NOT: ActedInAggregationWhereInput
               OR: [ActedInAggregationWhereInput!]
-              screenTime_AVERAGE_EQUAL: Float
-              screenTime_AVERAGE_GT: Float
-              screenTime_AVERAGE_GTE: Float
-              screenTime_AVERAGE_LT: Float
-              screenTime_AVERAGE_LTE: Float
-              screenTime_MAX_EQUAL: Int
-              screenTime_MAX_GT: Int
-              screenTime_MAX_GTE: Int
-              screenTime_MAX_LT: Int
-              screenTime_MAX_LTE: Int
-              screenTime_MIN_EQUAL: Int
-              screenTime_MIN_GT: Int
-              screenTime_MIN_GTE: Int
-              screenTime_MIN_LT: Int
-              screenTime_MIN_LTE: Int
-              screenTime_SUM_EQUAL: Int
-              screenTime_SUM_GT: Int
-              screenTime_SUM_GTE: Int
-              screenTime_SUM_LT: Int
-              screenTime_SUM_LTE: Int
+              role_AVERAGE_LENGTH_EQUAL: Float
+              role_AVERAGE_LENGTH_GT: Float
+              role_AVERAGE_LENGTH_GTE: Float
+              role_AVERAGE_LENGTH_LT: Float
+              role_AVERAGE_LENGTH_LTE: Float
+              role_LONGEST_LENGTH_EQUAL: Int
+              role_LONGEST_LENGTH_GT: Int
+              role_LONGEST_LENGTH_GTE: Int
+              role_LONGEST_LENGTH_LT: Int
+              role_LONGEST_LENGTH_LTE: Int
+              role_SHORTEST_LENGTH_EQUAL: Int
+              role_SHORTEST_LENGTH_GT: Int
+              role_SHORTEST_LENGTH_GTE: Int
+              role_SHORTEST_LENGTH_LT: Int
+              role_SHORTEST_LENGTH_LTE: Int
             }
 
             input ActedInCreateInput {
-              leadRole: Boolean!
-              screenTime: Int!
-              startDate: Date!
+              role: String
             }
 
             input ActedInSort {
-              leadRole: SortDirection
-              screenTime: SortDirection
-              startDate: SortDirection
+              role: SortDirection
             }
 
             input ActedInUpdateInput {
-              leadRole: Boolean
-              screenTime: Int
-              screenTime_DECREMENT: Int
-              screenTime_INCREMENT: Int
-              startDate: Date
+              role: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              role_SET: String
             }
 
             input ActedInWhere {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              leadRole: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              leadRole_EQ: Boolean
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              screenTime_EQ: Int
-              screenTime_GT: Int
-              screenTime_GTE: Int
-              screenTime_IN: [Int!]
-              screenTime_LT: Int
-              screenTime_LTE: Int
-              startDate: Date @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              startDate_EQ: Date
-              startDate_GT: Date
-              startDate_GTE: Date
-              startDate_IN: [Date!]
-              startDate_LT: Date
-              startDate_LTE: Date
+              role: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              role_CONTAINS: String
+              role_ENDS_WITH: String
+              role_EQ: String
+              role_IN: [String]
+              role_STARTS_WITH: String
             }
 
             type Actor {
               movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
               moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
-              name: String!
+              name: String
             }
 
             type ActorAggregateSelection {
@@ -179,7 +130,7 @@ describe("Deprecated directed argument", () => {
 
             input ActorCreateInput {
               movies: ActorMoviesFieldInput
-              name: String!
+              name: String
             }
 
             input ActorDeleteInput {
@@ -202,11 +153,11 @@ describe("Deprecated directed argument", () => {
             }
 
             type ActorMovieMoviesEdgeAggregateSelection {
-              screenTime: IntAggregateSelection!
+              role: StringAggregateSelection!
             }
 
             type ActorMovieMoviesNodeAggregateSelection {
-              title: StringAggregateSelection!
+              id: IDAggregateSelection!
             }
 
             input ActorMoviesAggregateInput {
@@ -225,7 +176,7 @@ describe("Deprecated directed argument", () => {
 
             input ActorMoviesConnectFieldInput {
               connect: [MovieConnectInput!]
-              edge: ActedInCreateInput!
+              edge: ActedInCreateInput
               where: MovieConnectWhere
             }
 
@@ -249,7 +200,7 @@ describe("Deprecated directed argument", () => {
             }
 
             input ActorMoviesCreateFieldInput {
-              edge: ActedInCreateInput!
+              edge: ActedInCreateInput
               node: MovieCreateInput!
             }
 
@@ -272,21 +223,16 @@ describe("Deprecated directed argument", () => {
               AND: [ActorMoviesNodeAggregationWhereInput!]
               NOT: ActorMoviesNodeAggregationWhereInput
               OR: [ActorMoviesNodeAggregationWhereInput!]
-              title_AVERAGE_LENGTH_EQUAL: Float
-              title_AVERAGE_LENGTH_GT: Float
-              title_AVERAGE_LENGTH_GTE: Float
-              title_AVERAGE_LENGTH_LT: Float
-              title_AVERAGE_LENGTH_LTE: Float
-              title_LONGEST_LENGTH_EQUAL: Int
-              title_LONGEST_LENGTH_GT: Int
-              title_LONGEST_LENGTH_GTE: Int
-              title_LONGEST_LENGTH_LT: Int
-              title_LONGEST_LENGTH_LTE: Int
-              title_SHORTEST_LENGTH_EQUAL: Int
-              title_SHORTEST_LENGTH_GT: Int
-              title_SHORTEST_LENGTH_GTE: Int
-              title_SHORTEST_LENGTH_LT: Int
-              title_SHORTEST_LENGTH_LTE: Int
+              id_MAX_EQUAL: ID
+              id_MAX_GT: ID
+              id_MAX_GTE: ID
+              id_MAX_LT: ID
+              id_MAX_LTE: ID
+              id_MIN_EQUAL: ID
+              id_MIN_GT: ID
+              id_MIN_GTE: ID
+              id_MIN_LT: ID
+              id_MIN_LTE: ID
             }
 
             type ActorMoviesRelationship {
@@ -318,7 +264,7 @@ describe("Deprecated directed argument", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String
+              name_SET: String
             }
 
             input ActorWhere {
@@ -354,7 +300,7 @@ describe("Deprecated directed argument", () => {
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
-              name_IN: [String!]
+              name_IN: [String]
               name_STARTS_WITH: String
             }
 
@@ -366,11 +312,6 @@ describe("Deprecated directed argument", () => {
 
             type CreateActorsMutationResponse {
               actors: [Actor!]!
-              info: CreateInfo!
-            }
-
-            type CreateGenresMutationResponse {
-              genres: [Genre!]!
               info: CreateInfo!
             }
 
@@ -387,9 +328,6 @@ describe("Deprecated directed argument", () => {
               movies: [Movie!]!
             }
 
-            \\"\\"\\"A date, represented as a 'yyyy-mm-dd' string\\"\\"\\"
-            scalar Date
-
             \\"\\"\\"
             Information about the number of nodes and relationships deleted during a delete mutation
             \\"\\"\\"
@@ -398,70 +336,16 @@ describe("Deprecated directed argument", () => {
               relationshipsDeleted: Int!
             }
 
-            type Genre {
-              id: ID
-            }
-
-            type GenreAggregateSelection {
-              count: Int!
-              id: IDAggregateSelection!
-            }
-
-            input GenreCreateInput {
-              id: ID
-            }
-
-            type GenreEdge {
-              cursor: String!
-              node: Genre!
-            }
-
-            \\"\\"\\"
-            Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
-            \\"\\"\\"
-            input GenreSort {
-              id: SortDirection
-            }
-
-            input GenreUpdateInput {
-              id: ID
-            }
-
-            input GenreWhere {
-              AND: [GenreWhere!]
-              NOT: GenreWhere
-              OR: [GenreWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: ID
-              id_ENDS_WITH: ID
-              id_EQ: ID
-              id_IN: [ID]
-              id_STARTS_WITH: ID
-            }
-
-            type GenresConnection {
-              edges: [GenreEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
             type IDAggregateSelection {
               longest: ID
               shortest: ID
             }
 
-            type IntAggregateSelection {
-              average: Float
-              max: Int
-              min: Int
-              sum: Int
-            }
-
-            type Movie implements Production {
+            type Movie {
               actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
               actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
-              title: String!
+              id: ID
             }
 
             type MovieActorActorsAggregationSelection {
@@ -471,7 +355,7 @@ describe("Deprecated directed argument", () => {
             }
 
             type MovieActorActorsEdgeAggregateSelection {
-              screenTime: IntAggregateSelection!
+              role: StringAggregateSelection!
             }
 
             type MovieActorActorsNodeAggregateSelection {
@@ -494,7 +378,7 @@ describe("Deprecated directed argument", () => {
 
             input MovieActorsConnectFieldInput {
               connect: [ActorConnectInput!]
-              edge: ActedInCreateInput!
+              edge: ActedInCreateInput
               where: ActorConnectWhere
             }
 
@@ -518,7 +402,7 @@ describe("Deprecated directed argument", () => {
             }
 
             input MovieActorsCreateFieldInput {
-              edge: ActedInCreateInput!
+              edge: ActedInCreateInput
               node: ActorCreateInput!
             }
 
@@ -580,7 +464,7 @@ describe("Deprecated directed argument", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              title: StringAggregateSelection!
+              id: IDAggregateSelection!
             }
 
             input MovieConnectInput {
@@ -593,7 +477,7 @@ describe("Deprecated directed argument", () => {
 
             input MovieCreateInput {
               actors: MovieActorsFieldInput
-              title: String!
+              id: ID
             }
 
             input MovieDeleteInput {
@@ -613,12 +497,12 @@ describe("Deprecated directed argument", () => {
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
             input MovieSort {
-              title: SortDirection
+              id: SortDirection
             }
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String
+              id_SET: ID
             }
 
             input MovieWhere {
@@ -650,12 +534,12 @@ describe("Deprecated directed argument", () => {
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              title_CONTAINS: String
-              title_ENDS_WITH: String
-              title_EQ: String
-              title_IN: [String!]
-              title_STARTS_WITH: String
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              id_CONTAINS: ID
+              id_ENDS_WITH: ID
+              id_EQ: ID
+              id_IN: [ID]
+              id_STARTS_WITH: ID
             }
 
             type MoviesConnection {
@@ -666,13 +550,10 @@ describe("Deprecated directed argument", () => {
 
             type Mutation {
               createActors(input: [ActorCreateInput!]!): CreateActorsMutationResponse!
-              createGenres(input: [GenreCreateInput!]!): CreateGenresMutationResponse!
               createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
               deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
-              deleteGenres(where: GenreWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-              updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
               updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
             }
 
@@ -684,71 +565,13 @@ describe("Deprecated directed argument", () => {
               startCursor: String
             }
 
-            interface Production {
-              title: String!
-            }
-
-            type ProductionAggregateSelection {
-              count: Int!
-              title: StringAggregateSelection!
-            }
-
-            type ProductionEdge {
-              cursor: String!
-              node: Production!
-            }
-
-            enum ProductionImplementation {
-              Movie
-            }
-
-            \\"\\"\\"
-            Fields to sort Productions by. The order in which sorts are applied is not guaranteed when specifying many fields in one ProductionSort object.
-            \\"\\"\\"
-            input ProductionSort {
-              title: SortDirection
-            }
-
-            input ProductionWhere {
-              AND: [ProductionWhere!]
-              NOT: ProductionWhere
-              OR: [ProductionWhere!]
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              title_CONTAINS: String
-              title_ENDS_WITH: String
-              title_EQ: String
-              title_IN: [String!]
-              title_STARTS_WITH: String
-              typename_IN: [ProductionImplementation!]
-            }
-
-            type ProductionsConnection {
-              edges: [ProductionEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
             type Query {
               actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
               actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-              genres(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): [Genre!]!
-              genresAggregate(where: GenreWhere): GenreAggregateSelection!
-              genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
               movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-              productions(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
-              productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
-              productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
-              searches(limit: Int, offset: Int, where: SearchWhere): [Search!]!
-            }
-
-            union Search = Genre | Movie
-
-            input SearchWhere {
-              Genre: GenreWhere
-              Movie: MovieWhere
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -766,11 +589,6 @@ describe("Deprecated directed argument", () => {
 
             type UpdateActorsMutationResponse {
               actors: [Actor!]!
-              info: UpdateInfo!
-            }
-
-            type UpdateGenresMutationResponse {
-              genres: [Genre!]!
               info: UpdateInfo!
             }
 

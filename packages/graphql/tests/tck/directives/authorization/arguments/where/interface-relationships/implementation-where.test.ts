@@ -350,7 +350,7 @@ describe("Cypher Auth Where", () => {
     test("Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updatePosts(update: { content: "Bob" }) {
+                updatePosts(update: { content_SET: "Bob" }) {
                     posts {
                         id
                     }
@@ -367,7 +367,7 @@ describe("Cypher Auth Where", () => {
             WITH *, count(this0) AS creatorCount
             WITH *
             WHERE ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this0.id = $jwt.sub)))
-            SET this.content = $this_update_content
+            SET this.content = $this_update_content_SET
             WITH *
             CALL {
             	WITH this
@@ -392,7 +392,7 @@ describe("Cypher Auth Where", () => {
                     ],
                     \\"sub\\": \\"id-01\\"
                 },
-                \\"this_update_content\\": \\"Bob\\",
+                \\"this_update_content_SET\\": \\"Bob\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -401,7 +401,7 @@ describe("Cypher Auth Where", () => {
     test("Update Node + User Defined Where", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updatePosts(where: { content_EQ: "bob" }, update: { content: "Bob" }) {
+                updatePosts(where: { content_EQ: "bob" }, update: { content_SET: "Bob" }) {
                     posts {
                         id
                     }
@@ -418,7 +418,7 @@ describe("Cypher Auth Where", () => {
             WITH *, count(this0) AS creatorCount
             WITH *
             WHERE (this.content = $param0 AND ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this0.id = $jwt.sub))))
-            SET this.content = $this_update_content
+            SET this.content = $this_update_content_SET
             WITH *
             CALL {
             	WITH this
@@ -444,7 +444,7 @@ describe("Cypher Auth Where", () => {
                     \\"sub\\": \\"id-01\\"
                 },
                 \\"param0\\": \\"bob\\",
-                \\"this_update_content\\": \\"Bob\\",
+                \\"this_update_content_SET\\": \\"Bob\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -453,7 +453,7 @@ describe("Cypher Auth Where", () => {
     test("Update Nested Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { content: { update: { node: { id: "new-id" } } } }) {
+                updateUsers(update: { content: { update: { node: { id_SET: "new-id" } } } }) {
                     users {
                         id
                     }
@@ -475,7 +475,7 @@ describe("Cypher Auth Where", () => {
             CALL {
             	WITH this
             	MATCH (this)-[this_has_content0_relationship:HAS_CONTENT]->(this_content0:Comment)
-            	SET this_content0.id = $this_update_content0_id
+            	SET this_content0.id = $this_update_content0_id_SET
             	WITH this, this_content0
             	CALL {
             		WITH this_content0
@@ -497,7 +497,7 @@ describe("Cypher Auth Where", () => {
             	OPTIONAL MATCH (this_content0)<-[:HAS_CONTENT]-(authorization__before_this0:User)
             	WITH *, count(authorization__before_this0) AS creatorCount
             	WHERE ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub)))
-            	SET this_content0.id = $this_update_content0_id
+            	SET this_content0.id = $this_update_content0_id_SET
             	WITH this, this_content0
             	CALL {
             		WITH this_content0
@@ -524,7 +524,7 @@ describe("Cypher Auth Where", () => {
                     ],
                     \\"sub\\": \\"id-01\\"
                 },
-                \\"this_update_content0_id\\": \\"new-id\\",
+                \\"this_update_content0_id_SET\\": \\"new-id\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

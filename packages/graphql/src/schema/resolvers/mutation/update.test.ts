@@ -17,7 +17,6 @@
  * limitations under the License.
  */
 
-import { SchemaComposer } from "graphql-compose";
 import { NodeBuilder } from "../../../../tests/utils/builders/node-builder";
 import { ConcreteEntity } from "../../../schema-model/entity/ConcreteEntity";
 import { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
@@ -41,13 +40,7 @@ describe("Update resolver", () => {
         });
         const concreteEntityAdapter = new ConcreteEntityAdapter(concreteEntity);
 
-        const composer = new SchemaComposer();
-        composer.createInputTC("MovieRelationInput");
-        composer.createInputTC("MovieDeleteInput");
-        composer.createInputTC("MovieConnectInput");
-        composer.createInputTC("MovieDisconnectInput");
-
-        const result = updateResolver({ node, composer, concreteEntityAdapter });
+        const result = updateResolver({ node, concreteEntityAdapter });
         expect(result.type).toBe("UpdateMoviesMutationResponse!");
         expect(result.resolve).toBeInstanceOf(Function);
         expect(result.args).toMatchObject({
@@ -72,11 +65,7 @@ describe("Update resolver", () => {
         });
         const concreteEntityAdapter = new ConcreteEntityAdapter(concreteEntity);
 
-        const composer = new SchemaComposer();
-        composer.createInputTC("MovieConnectInput");
-        composer.createInputTC("MovieDisconnectInput");
-
-        const result = updateResolver({ node, composer, concreteEntityAdapter });
+        const result = updateResolver({ node, concreteEntityAdapter });
         expect(result.type).toBe("UpdateMoviesMutationResponse!");
         expect(result.resolve).toBeInstanceOf(Function);
 

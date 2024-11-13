@@ -136,7 +136,7 @@ describe("Cypher Date", () => {
     test("Simple Update", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(update: { date: "1970-01-01" }) {
+                updateMovies(update: { date_SET: "1970-01-01" }) {
                     movies {
                         id
                         date
@@ -149,13 +149,13 @@ describe("Cypher Date", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
-            SET this.date = $this_update_date
+            SET this.date = $this_update_date_SET
             RETURN collect(DISTINCT this { .id, .date }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_update_date\\": {
+                \\"this_update_date_SET\\": {
                     \\"year\\": 1970,
                     \\"month\\": 1,
                     \\"day\\": 1

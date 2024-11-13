@@ -312,7 +312,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			UNWIND parentNodes as this0_actedIn_connect0_node
             			UNWIND connectedNodes as this0_actedIn_connect0_node_actors0_node
             			MERGE (this0_actedIn_connect0_node)<-[this0_actedIn_connect0_node_actors0_relationship:ACTED_IN]-(this0_actedIn_connect0_node_actors0_node)
-            			SET this0_actedIn_connect0_node_actors0_relationship.screenTime = $this0_actedIn_connect0_node_actors0_relationship_screenTime
+            			SET this0_actedIn_connect0_node_actors0_relationship.screenTime = $this0_actedIn_connect0_node_actors0_relationship_ActedIn_screenTime
             		}
             	}
             WITH this0, this0_actedIn_connect0_node, this0_actedIn_connect0_node_actors0_node
@@ -348,7 +348,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			UNWIND parentNodes as this0_actedIn_connect1_node
             			UNWIND connectedNodes as this0_actedIn_connect1_node_actors0_node
             			MERGE (this0_actedIn_connect1_node)<-[this0_actedIn_connect1_node_actors0_relationship:ACTED_IN]-(this0_actedIn_connect1_node_actors0_node)
-            			SET this0_actedIn_connect1_node_actors0_relationship.episodeNr = $this0_actedIn_connect1_node_actors0_relationship_episodeNr
+            			SET this0_actedIn_connect1_node_actors0_relationship.episodeNr = $this0_actedIn_connect1_node_actors0_relationship_StarredIn_episodeNr
             		}
             	}
             WITH this0, this0_actedIn_connect1_node, this0_actedIn_connect1_node_actors0_node
@@ -374,7 +374,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
                     \\"high\\": 0
                 },
                 \\"this0_actedIn_connect0_node_actors0_node_param0\\": \\"Second Actor\\",
-                \\"this0_actedIn_connect0_node_actors0_relationship_screenTime\\": {
+                \\"this0_actedIn_connect0_node_actors0_relationship_ActedIn_screenTime\\": {
                     \\"low\\": 25,
                     \\"high\\": 0
                 },
@@ -384,7 +384,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
                     \\"high\\": 0
                 },
                 \\"this0_actedIn_connect1_node_actors0_node_param0\\": \\"Second Actor\\",
-                \\"this0_actedIn_connect1_node_actors0_relationship_episodeNr\\": {
+                \\"this0_actedIn_connect1_node_actors0_relationship_StarredIn_episodeNr\\": {
                     \\"low\\": 10,
                     \\"high\\": 0
                 },

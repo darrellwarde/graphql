@@ -427,7 +427,7 @@ describe("auth/bind", () => {
 
     describe("update", () => {
         test("should throw forbidden when updating a node with invalid bind", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                 }
@@ -439,9 +439,9 @@ describe("auth/bind", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { id: "not bound" }) {
+                    ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { id_SET: "not bound" }) {
                         ${User.plural} {
                             id
                         }
@@ -470,7 +470,7 @@ describe("auth/bind", () => {
         });
 
         test("should throw forbidden when updating a nested node with invalid bind", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${Post} @node {
                     id: ID
                     creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
@@ -492,7 +492,7 @@ describe("auth/bind", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(
                         where: { id_EQ: "${userId}" },
@@ -501,7 +501,7 @@ describe("auth/bind", () => {
                                 where: { node: { id_EQ: "${postId}" } },
                                 update: {
                                     node: {
-                                        creator: { update: { node: { id: "not bound" } } }
+                                        creator: { update: { node: { id_SET: "not bound" } } }
                                     }
                                 }
                             }
@@ -535,7 +535,7 @@ describe("auth/bind", () => {
         });
 
         test("should throw forbidden when updating a node property with invalid bind", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                 }
@@ -549,11 +549,11 @@ describe("auth/bind", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(
                         where: { id_EQ: "${userId}" },
-                        update: { id: "not bound" }
+                        update: { id_SET: "not bound" }
                     ) {
                         ${User.plural} {
                             id
@@ -584,7 +584,7 @@ describe("auth/bind", () => {
 
     describe("connect", () => {
         test("should throw forbidden when connecting a node property with invalid bind", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                 }
@@ -605,7 +605,7 @@ describe("auth/bind", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${Post.operations.update}(
                         where: { id_EQ: "${postId}" },
@@ -647,7 +647,7 @@ describe("auth/bind", () => {
 
     describe("disconnect", () => {
         test("should throw forbidden when disconnecting a node property with invalid bind", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                 }
@@ -668,7 +668,7 @@ describe("auth/bind", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${Post.operations.update}(
                         where: { id_EQ: "${postId}" },

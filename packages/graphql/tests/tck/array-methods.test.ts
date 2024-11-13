@@ -218,15 +218,15 @@ describe("Arrays Methods", () => {
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
+                \\"this_update_ratings_PUSH\\": [
+                    1
+                ],
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": []
                 },
                 \\"authorization__before_param2\\": \\"update\\",
                 \\"authorization__after_param2\\": \\"update\\",
-                \\"this_update_ratings_PUSH\\": [
-                    1
-                ],
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -372,16 +372,16 @@ describe("Arrays Methods", () => {
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
+                \\"this_update_ratings_POP\\": {
+                    \\"low\\": 1,
+                    \\"high\\": 0
+                },
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": []
                 },
                 \\"authorization__before_param2\\": \\"update\\",
                 \\"authorization__after_param2\\": \\"update\\",
-                \\"this_update_ratings_POP\\": {
-                    \\"low\\": 1,
-                    \\"high\\": 0
-                },
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -461,7 +461,7 @@ describe("Arrays Methods", () => {
 
         const query = /* GraphQL */ `
             mutation {
-            updateActors(where: { id_EQ: 1 }, update: { actedIn: [{ update: { edge: { pay_PUSH: 10 } } }] }) {
+                updateActors(where: { id_EQ: 1 }, update: { actedIn: [{ update: { edge: { pay_PUSH: 10 } } }] }) {
                     actors {
                         name
                         actedIn {

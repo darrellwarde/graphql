@@ -151,9 +151,9 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               \\"\\"\\"
               Resources encapsulating the given resource (e.g., a github org contains a repo)
               \\"\\"\\"
-              containedBy(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ResourceSort!], where: ResourceWhere): [Resource!]!
-              containedByAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ResourceWhere): ResourceResourceContainedByAggregationSelection
-              containedByConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ResourceContainedByConnectionSort!], where: ResourceContainedByConnectionWhere): ResourceContainedByConnection!
+              containedBy(limit: Int, offset: Int, sort: [ResourceSort!], where: ResourceWhere): [Resource!]!
+              containedByAggregate(where: ResourceWhere): ResourceResourceContainedByAggregationSelection
+              containedByConnection(after: String, first: Int, sort: [ResourceContainedByConnectionSort!], where: ResourceContainedByConnectionWhere): ResourceContainedByConnection!
               createdAt: DateTime!
               externalIds: [ID!]
               id: ID!
@@ -427,15 +427,22 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
 
             input ResourceUpdateInput {
               containedBy: [ResourceContainedByUpdateFieldInput!]
-              createdAt: DateTime
-              externalIds: [ID!]
+              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              createdAt_SET: DateTime
+              externalIds: [ID!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               externalIds_POP: Int
               externalIds_PUSH: [ID!]
-              id: ID
-              name: String
-              properties: [Property!]
-              tags: [Tag!]
-              type: ResourceType
+              externalIds_SET: [ID!]
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              properties: [Property!] @deprecated(reason: \\"Please use the explicit _SET field\\")
+              properties_SET: [Property!]
+              tags: [Tag!] @deprecated(reason: \\"Please use the explicit _SET field\\")
+              tags_SET: [Tag!]
+              type: ResourceType @deprecated(reason: \\"Please use the explicit _SET field\\")
+              type_SET: ResourceType
             }
 
             input ResourceWhere {

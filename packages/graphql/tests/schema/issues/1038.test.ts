@@ -74,8 +74,10 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             input AWSAccountUpdateInput {
-              accountName: String
-              code: String
+              accountName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              accountName_SET: String
+              code: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              code_SET: String
             }
 
             input AWSAccountWhere {
@@ -150,8 +152,10 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             input DNSZoneUpdateInput {
-              awsId: String
-              zoneType: String
+              awsId: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              awsId_SET: String
+              zoneType: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              zoneType_SET: String
             }
 
             input DNSZoneWhere {

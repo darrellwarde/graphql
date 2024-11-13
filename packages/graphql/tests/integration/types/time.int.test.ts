@@ -177,9 +177,9 @@ describe("Time", () => {
                 { movie: { id } }
             );
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation ($id: ID!, $time: Time) {
-                        ${Movie.operations.update}(where: { id_EQ: $id }, update: { time: $time }) {
+                        ${Movie.operations.update}(where: { id_EQ: $id }, update: { time_SET: $time }) {
                             ${Movie.plural} {
                                 id
                                 time

@@ -166,18 +166,24 @@ describe("Comments", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int
+              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
-              averageRating: Float
+              actorCount_SET: Int
+              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
+              averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              customScalar: CustomScalar
-              genre: Genre
-              id: ID
-              isActive: Boolean
+              customScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _SET field\\")
+              customScalar_SET: CustomScalar
+              genre: Genre @deprecated(reason: \\"Please use the explicit _SET field\\")
+              genre_SET: Genre
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isActive_SET: Boolean
             }
 
             input MovieWhere {
@@ -317,7 +323,8 @@ describe("Comments", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -371,9 +378,9 @@ describe("Comments", () => {
 
                 type Movie {
                   \\"\\"\\"Actors in Movie\\"\\"\\"
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -504,7 +511,8 @@ describe("Comments", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -689,9 +697,10 @@ describe("Comments", () => {
                 }
 
                 input ActedInUpdateInput {
-                  screenTime: Int
+                  screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   screenTime_DECREMENT: Int
                   screenTime_INCREMENT: Int
+                  screenTime_SET: Int
                 }
 
                 input ActedInWhere {
@@ -709,9 +718,9 @@ describe("Comments", () => {
 
                 type Actor {
                   \\"\\"\\"Acted in Production\\"\\"\\"
-                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
-                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
-                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+                  actedInAggregate(where: ProductionWhere): ActorProductionActedInAggregationSelection
+                  actedInConnection(after: String, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
                 }
 
@@ -854,7 +863,8 @@ describe("Comments", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -968,10 +978,12 @@ describe("Comments", () => {
                 }
 
                 input MovieUpdateInput {
-                  runtime: Int
+                  runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   runtime_DECREMENT: Int
                   runtime_INCREMENT: Int
-                  title: String
+                  runtime_SET: Int
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -1055,7 +1067,8 @@ describe("Comments", () => {
                 }
 
                 input ProductionUpdateInput {
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input ProductionWhere {
@@ -1128,10 +1141,12 @@ describe("Comments", () => {
                 }
 
                 input SeriesUpdateInput {
-                  episodes: Int
+                  episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   episodes_DECREMENT: Int
                   episodes_INCREMENT: Int
-                  title: String
+                  episodes_SET: Int
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input SeriesWhere {
@@ -1272,7 +1287,8 @@ describe("Comments", () => {
                 }
 
                 input GenreUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input GenreWhere {
@@ -1300,8 +1316,8 @@ describe("Comments", () => {
 
                 type Movie {
                   id: ID
-                  search(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: SearchWhere): [Search!]!
-                  searchConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
+                  search(limit: Int, offset: Int, where: SearchWhere): [Search!]!
+                  searchConnection(after: String, first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
                   searchNoDirective: Search
                 }
 
@@ -1470,7 +1486,8 @@ describe("Comments", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                   search: MovieSearchUpdateInput
                 }
 

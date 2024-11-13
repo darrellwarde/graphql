@@ -102,10 +102,12 @@ describe("Bigint", () => {
             }
 
             input FileUpdateInput {
-              name: String
-              size: BigInt
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              size: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               size_DECREMENT: BigInt
               size_INCREMENT: BigInt
+              size_SET: BigInt
             }
 
             input FileWhere {

@@ -90,7 +90,8 @@ describe("Enum", () => {
             }
 
             input MovieUpdateInput {
-              status: Status
+              status: Status @deprecated(reason: \\"Please use the explicit _SET field\\")
+              status_SET: Status
             }
 
             input MovieWhere {

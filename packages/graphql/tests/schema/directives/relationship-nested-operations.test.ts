@@ -82,9 +82,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -175,7 +175,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -270,7 +271,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -381,9 +383,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -489,7 +491,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -584,7 +587,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -695,9 +699,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -803,7 +807,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -902,7 +907,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -1013,9 +1019,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -1116,7 +1122,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -1211,7 +1218,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -1322,9 +1330,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -1429,7 +1437,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -1524,7 +1533,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -1635,9 +1645,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -1738,7 +1748,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -1833,7 +1844,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -1945,9 +1957,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -2038,7 +2050,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -2133,7 +2146,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -2246,9 +2260,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -2350,7 +2364,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -2448,7 +2463,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -2566,13 +2582,13 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
-                  producers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  producersAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonProducersAggregationSelection
-                  producersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieProducersConnectionSort!], where: MovieProducersConnectionWhere): MovieProducersConnection!
+                  producers(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  producersAggregate(where: PersonWhere): MoviePersonProducersAggregationSelection
+                  producersConnection(after: String, first: Int, sort: [MovieProducersConnectionSort!], where: MovieProducersConnectionWhere): MovieProducersConnection!
                 }
 
                 input MovieActorsAggregateInput {
@@ -2776,7 +2792,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                   producers: [MovieProducersUpdateFieldInput!]
                 }
 
@@ -2901,7 +2918,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -3013,13 +3031,13 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
-                  producers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  producersAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonProducersAggregationSelection
-                  producersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieProducersConnectionSort!], where: MovieProducersConnectionWhere): MovieProducersConnection!
+                  producers(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  producersAggregate(where: PersonWhere): MoviePersonProducersAggregationSelection
+                  producersConnection(after: String, first: Int, sort: [MovieProducersConnectionSort!], where: MovieProducersConnectionWhere): MovieProducersConnection!
                 }
 
                 input MovieActorsAggregateInput {
@@ -3198,7 +3216,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                   producers: [MovieProducersUpdateFieldInput!]
                 }
 
@@ -3319,7 +3338,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -3448,8 +3468,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -3505,7 +3525,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -3598,7 +3619,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -3645,7 +3667,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -3787,8 +3810,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -3882,7 +3905,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -3975,7 +3999,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -4022,7 +4047,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -4164,8 +4190,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -4259,7 +4285,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -4356,7 +4383,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -4407,7 +4435,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -4549,8 +4578,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -4630,7 +4659,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -4723,7 +4753,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -4770,7 +4801,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -4912,8 +4944,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -5002,7 +5034,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -5095,7 +5128,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -5142,7 +5176,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -5284,8 +5319,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -5365,7 +5400,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -5458,7 +5494,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -5505,7 +5542,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -5648,8 +5686,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -5705,7 +5743,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -5798,7 +5837,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -5845,7 +5885,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -5990,8 +6031,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -6047,7 +6088,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -6143,7 +6185,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -6199,7 +6242,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -6348,11 +6392,11 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
-                  producers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  producersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieProducersConnectionWhere): MovieProducersConnection!
+                  producers(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  producersConnection(after: String, first: Int, where: MovieProducersConnectionWhere): MovieProducersConnection!
                 }
 
                 type MovieActorsConnection {
@@ -6549,7 +6593,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                   producers: MovieProducersUpdateInput
                 }
 
@@ -6671,7 +6716,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -6722,7 +6768,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -6865,11 +6912,11 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
-                  producers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, where: PersonWhere): [Person!]!
-                  producersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieProducersConnectionWhere): MovieProducersConnection!
+                  producers(limit: Int, offset: Int, where: PersonWhere): [Person!]!
+                  producersConnection(after: String, first: Int, where: MovieProducersConnectionWhere): MovieProducersConnection!
                 }
 
                 type MovieActorsConnection {
@@ -7015,7 +7062,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                   producers: MovieProducersUpdateInput
                 }
 
@@ -7133,7 +7181,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonOneWhere {
@@ -7180,7 +7229,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String
+                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  nameTwo_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -7332,9 +7382,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -7425,7 +7475,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -7544,10 +7595,12 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
-                  someExtraProp: [Int!]
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
+                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
+                  someExtraProp_SET: [Int!]
                 }
 
                 input PersonOneWhere {
@@ -7604,7 +7657,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -7759,9 +7813,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -7867,7 +7921,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -7991,10 +8046,12 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
-                  someExtraProp: [Int!]
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
+                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
+                  someExtraProp_SET: [Int!]
                 }
 
                 input PersonOneWhere {
@@ -8051,7 +8108,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -8206,9 +8264,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -8314,7 +8372,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -8437,10 +8496,12 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
-                  someExtraProp: [Int!]
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
+                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
+                  someExtraProp_SET: [Int!]
                 }
 
                 input PersonOneWhere {
@@ -8497,7 +8558,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -8652,9 +8714,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -8755,7 +8817,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -8874,10 +8937,12 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
-                  someExtraProp: [Int!]
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
+                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
+                  someExtraProp_SET: [Int!]
                 }
 
                 input PersonOneWhere {
@@ -8934,7 +8999,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -8956,7 +9022,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -9093,9 +9160,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -9200,7 +9267,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -9319,10 +9387,12 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
-                  someExtraProp: [Int!]
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
+                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
+                  someExtraProp_SET: [Int!]
                 }
 
                 input PersonOneWhere {
@@ -9379,7 +9449,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -9534,9 +9605,9 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -9637,7 +9708,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
@@ -9756,10 +9828,12 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
-                  someExtraProp: [Int!]
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
+                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
+                  someExtraProp_SET: [Int!]
                 }
 
                 input PersonOneWhere {
@@ -9816,7 +9890,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -9972,13 +10047,13 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
-                  producers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  producersAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonProducersAggregationSelection
-                  producersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieProducersConnectionSort!], where: MovieProducersConnectionWhere): MovieProducersConnection!
+                  producers(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  producersAggregate(where: PersonWhere): MoviePersonProducersAggregationSelection
+                  producersConnection(after: String, first: Int, sort: [MovieProducersConnectionSort!], where: MovieProducersConnectionWhere): MovieProducersConnection!
                 }
 
                 input MovieActorsAggregateInput {
@@ -10182,7 +10257,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                   producers: [MovieProducersUpdateFieldInput!]
                 }
 
@@ -10336,10 +10412,12 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
-                  someExtraProp: [Int!]
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
+                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
+                  someExtraProp_SET: [Int!]
                 }
 
                 input PersonOneWhere {
@@ -10396,7 +10474,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonTwoWhere {
@@ -10418,7 +10497,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonWhere {
@@ -10557,13 +10637,13 @@ describe("Relationship nested operations", () => {
                 }
 
                 type Movie {
-                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
+                  actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
-                  producers(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
-                  producersAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PersonWhere): MoviePersonProducersAggregationSelection
-                  producersConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieProducersConnectionSort!], where: MovieProducersConnectionWhere): MovieProducersConnection!
+                  producers(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
+                  producersAggregate(where: PersonWhere): MoviePersonProducersAggregationSelection
+                  producersConnection(after: String, first: Int, sort: [MovieProducersConnectionSort!], where: MovieProducersConnectionWhere): MovieProducersConnection!
                 }
 
                 input MovieActorsAggregateInput {
@@ -10751,7 +10831,8 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                   producers: [MovieProducersUpdateFieldInput!]
                 }
 
@@ -10901,10 +10982,12 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String
-                  someExtraProp: [Int!]
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
+                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
+                  someExtraProp_SET: [Int!]
                 }
 
                 input PersonOneWhere {
@@ -10961,7 +11044,8 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input PersonTwoWhere {

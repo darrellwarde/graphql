@@ -651,7 +651,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
     });
 
     test("should be able to filter update mutations by node properties, edge properties and aggregations in nested connections", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${Actor.operations.update}(
                     where: {
@@ -669,7 +669,7 @@ describe("https://github.com/neo4j/graphql/issues/2803", () => {
                             }
                         }
                     }
-                    update: { name: "${updatedName}" }
+                    update: { name_SET: "${updatedName}" }
 
                 ) {
                     ${Actor.plural} {

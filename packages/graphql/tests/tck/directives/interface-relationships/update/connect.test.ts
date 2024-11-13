@@ -203,7 +203,7 @@ describe("Interface Relationships - Update connect", () => {
             			UNWIND parentNodes as this_actedIn0_connect0_node
             			UNWIND connectedNodes as this_actedIn0_connect0_node_actors0_node
             			MERGE (this_actedIn0_connect0_node)<-[this_actedIn0_connect0_node_actors0_relationship:ACTED_IN]-(this_actedIn0_connect0_node_actors0_node)
-            			SET this_actedIn0_connect0_node_actors0_relationship.screenTime = $this_actedIn0_connect0_node_actors0_relationship_screenTime
+            			SET this_actedIn0_connect0_node_actors0_relationship.screenTime = $this_actedIn0_connect0_node_actors0_relationship_ActedIn_screenTime
             		}
             	}
             WITH this, this_actedIn0_connect0_node, this_actedIn0_connect0_node_actors0_node
@@ -244,7 +244,7 @@ describe("Interface Relationships - Update connect", () => {
             			UNWIND parentNodes as this_actedIn0_connect0_node
             			UNWIND connectedNodes as this_actedIn0_connect0_node_actors0_node
             			MERGE (this_actedIn0_connect0_node)<-[this_actedIn0_connect0_node_actors0_relationship:ACTED_IN]-(this_actedIn0_connect0_node_actors0_node)
-            			SET this_actedIn0_connect0_node_actors0_relationship.screenTime = $this_actedIn0_connect0_node_actors0_relationship_screenTime
+            			SET this_actedIn0_connect0_node_actors0_relationship.screenTime = $this_actedIn0_connect0_node_actors0_relationship_ActedIn_screenTime
             		}
             	}
             WITH this, this_actedIn0_connect0_node, this_actedIn0_connect0_node_actors0_node
@@ -265,7 +265,7 @@ describe("Interface Relationships - Update connect", () => {
                     \\"high\\": 0
                 },
                 \\"this_actedIn0_connect0_node_actors0_node_param0\\": \\"Actor\\",
-                \\"this_actedIn0_connect0_node_actors0_relationship_screenTime\\": {
+                \\"this_actedIn0_connect0_node_actors0_relationship_ActedIn_screenTime\\": {
                     \\"low\\": 90,
                     \\"high\\": 0
                 },
