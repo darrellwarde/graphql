@@ -231,7 +231,7 @@ export interface ConnectionQueryArgs {
  * Representation of the options arg
  * passed to resolvers.
  */
-export interface GraphQLOptionsArg {
+export interface GraphQLSortingAndPaginationArgs {
     limit?: number | Integer;
     offset?: number | Integer;
     sort?: GraphQLSortArg[];
@@ -449,7 +449,6 @@ export type Neo4jFeaturesSettings = {
     excludeDeprecatedFields?: {
         implicitEqualFilters?: boolean;
         implicitSet?: boolean;
-        deprecatedOptionsArgument?: boolean;
     };
     vector?: Neo4jVectorSettings;
 };

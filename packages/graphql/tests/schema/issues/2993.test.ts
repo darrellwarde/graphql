@@ -172,15 +172,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               User
             }
 
-            input ProfileOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ProfileSort objects to sort Profiles by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ProfileSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Profiles by. The order in which sorts are applied is not guaranteed when specifying many fields in one ProfileSort object.
             \\"\\"\\"
@@ -222,10 +213,10 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             type Query {
-              profiles(limit: Int, offset: Int, options: ProfileOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProfileSort!], where: ProfileWhere): [Profile!]!
+              profiles(limit: Int, offset: Int, sort: [ProfileSort!], where: ProfileWhere): [Profile!]!
               profilesAggregate(where: ProfileWhere): ProfileAggregateSelection!
               profilesConnection(after: String, first: Int, sort: [ProfileSort!], where: ProfileWhere): ProfilesConnection!
-              users(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
+              users(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               usersAggregate(where: UserWhere): UserAggregateSelection!
               usersConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): UsersConnection!
             }
@@ -259,7 +250,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             type User implements Profile {
-              following(limit: Int, offset: Int, options: ProfileOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProfileSort!], where: ProfileWhere): [Profile!]!
+              following(limit: Int, offset: Int, sort: [ProfileSort!], where: ProfileWhere): [Profile!]!
               followingAggregate(where: ProfileWhere): UserProfileFollowingAggregationSelection
               followingConnection(after: String, first: Int, sort: [UserFollowingConnectionSort!], where: UserFollowingConnectionWhere): UserFollowingConnection!
               id: ID!
@@ -389,15 +380,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               disconnect: [UserFollowingDisconnectFieldInput!]
               update: UserFollowingUpdateConnectionInput
               where: UserFollowingConnectionWhere
-            }
-
-            input UserOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UserSort objects to sort Users by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UserSort!]
             }
 
             type UserProfileFollowingAggregationSelection {

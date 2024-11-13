@@ -87,7 +87,7 @@ describe("Connection with interfaces", () => {
 
             interface Creature {
               id: ID
-              movies(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): Production!
+              movies(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): Production!
               moviesConnection(after: String, first: Int, sort: [CreatureMoviesConnectionSort!], where: CreatureMoviesConnectionWhere): CreatureMoviesConnection!
             }
 
@@ -208,15 +208,6 @@ describe("Connection with interfaces", () => {
               where: CreatureMoviesConnectionWhere
             }
 
-            input CreatureOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more CreatureSort objects to sort Creatures by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [CreatureSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Creatures by. The order in which sorts are applied is not guaranteed when specifying many fields in one CreatureSort object.
             \\"\\"\\"
@@ -273,7 +264,7 @@ describe("Connection with interfaces", () => {
             }
 
             type Movie implements Production {
-              director(limit: Int, offset: Int, options: CreatureOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [CreatureSort!], where: CreatureWhere): [Creature!]!
+              director(limit: Int, offset: Int, sort: [CreatureSort!], where: CreatureWhere): [Creature!]!
               directorAggregate(where: CreatureWhere): MovieCreatureDirectorAggregationSelection
               directorConnection(after: String, first: Int, sort: [ProductionDirectorConnectionSort!], where: ProductionDirectorConnectionWhere): ProductionDirectorConnection!
               id: ID
@@ -376,15 +367,6 @@ describe("Connection with interfaces", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -478,7 +460,7 @@ describe("Connection with interfaces", () => {
 
             type Person implements Creature {
               id: ID
-              movies(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): Production!
+              movies(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): Production!
               moviesAggregate(where: ProductionWhere): PersonProductionMoviesAggregationSelection
               moviesConnection(after: String, first: Int, sort: [CreatureMoviesConnectionSort!], where: CreatureMoviesConnectionWhere): CreatureMoviesConnection!
             }
@@ -568,15 +550,6 @@ describe("Connection with interfaces", () => {
               where: CreatureMoviesConnectionWhere
             }
 
-            input PersonOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [PersonSort!]
-            }
-
             type PersonProductionMoviesAggregationSelection {
               count: Int!
               node: PersonProductionMoviesNodeAggregateSelection
@@ -615,7 +588,7 @@ describe("Connection with interfaces", () => {
             }
 
             interface Production {
-              director(limit: Int, offset: Int, options: CreatureOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [CreatureSort!], where: CreatureWhere): [Creature!]!
+              director(limit: Int, offset: Int, sort: [CreatureSort!], where: CreatureWhere): [Creature!]!
               directorConnection(after: String, first: Int, sort: [ProductionDirectorConnectionSort!], where: ProductionDirectorConnectionWhere): ProductionDirectorConnection!
               id: ID
             }
@@ -739,15 +712,6 @@ describe("Connection with interfaces", () => {
               Series
             }
 
-            input ProductionOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ProductionSort objects to sort Productions by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ProductionSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Productions by. The order in which sorts are applied is not guaranteed when specifying many fields in one ProductionSort object.
             \\"\\"\\"
@@ -814,25 +778,25 @@ describe("Connection with interfaces", () => {
             }
 
             type Query {
-              creatures(limit: Int, offset: Int, options: CreatureOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [CreatureSort!], where: CreatureWhere): [Creature!]!
+              creatures(limit: Int, offset: Int, sort: [CreatureSort!], where: CreatureWhere): [Creature!]!
               creaturesAggregate(where: CreatureWhere): CreatureAggregateSelection!
               creaturesConnection(after: String, first: Int, sort: [CreatureSort!], where: CreatureWhere): CreaturesConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-              people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+              people(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
               peopleAggregate(where: PersonWhere): PersonAggregateSelection!
               peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
-              productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+              productions(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
               productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
               productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
-              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
+              series(limit: Int, offset: Int, sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
               seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
             }
 
             type Series implements Production {
-              director(limit: Int, offset: Int, options: CreatureOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [CreatureSort!], where: CreatureWhere): [Creature!]!
+              director(limit: Int, offset: Int, sort: [CreatureSort!], where: CreatureWhere): [Creature!]!
               directorAggregate(where: CreatureWhere): SeriesCreatureDirectorAggregationSelection
               directorConnection(after: String, first: Int, sort: [ProductionDirectorConnectionSort!], where: ProductionDirectorConnectionWhere): ProductionDirectorConnection!
               episode: Int!
@@ -942,15 +906,6 @@ describe("Connection with interfaces", () => {
             type SeriesEdge {
               cursor: String!
               node: Series!
-            }
-
-            input SeriesOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more SeriesSort objects to sort Series by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [SeriesSort!]
             }
 
             \\"\\"\\"

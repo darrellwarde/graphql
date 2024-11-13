@@ -20,7 +20,12 @@
 import { SCORE_FIELD } from "../../../constants";
 import type { EntityAdapter } from "../../../schema-model/entity/EntityAdapter";
 import { RelationshipAdapter } from "../../../schema-model/relationship/model-adapters/RelationshipAdapter";
-import type { ConnectionSortArg, GraphQLOptionsArg, GraphQLSortArg, NestedGraphQLSortArg } from "../../../types";
+import type {
+    ConnectionSortArg,
+    GraphQLSortArg,
+    GraphQLSortingAndPaginationArgs,
+    NestedGraphQLSortArg,
+} from "../../../types";
 import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
 import { asArray } from "../../../utils/utils";
 import { CypherScalarOperation } from "../ast/operations/CypherScalarOperation";
@@ -40,7 +45,7 @@ export class SortAndPaginationFactory {
         this.queryASTFactory = queryASTFactory;
     }
     public createSortFields(
-        options: GraphQLOptionsArg,
+        options: GraphQLSortingAndPaginationArgs,
         entity: EntityAdapter | RelationshipAdapter,
         context: Neo4jGraphQLTranslationContext
     ): Sort[] {
@@ -102,11 +107,11 @@ export class SortAndPaginationFactory {
         };
     }
 
-    public createPagination(options: GraphQLOptionsArg): Pagination | undefined {
-        if (options.limit || options.offset) {
+    public createPagination(args: GraphQLSortingAndPaginationArgs): Pagination | undefined {
+        if (args.limit || args.offset) {
             return new Pagination({
-                skip: options.offset,
-                limit: options.limit,
+                skip: args.offset,
+                limit: args.limit,
             });
         }
     }

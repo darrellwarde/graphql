@@ -894,7 +894,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -1031,15 +1031,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -1165,7 +1156,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -1336,15 +1327,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -1438,10 +1420,10 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
@@ -1519,7 +1501,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -1678,15 +1660,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -1812,7 +1785,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -1981,15 +1954,6 @@ describe("@filterable directive", () => {
 
                     type MovieEventPayload {
                       title: String
-                    }
-
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
                     }
 
                     \\"\\"\\"
@@ -2085,10 +2049,10 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
@@ -2166,7 +2130,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -2325,15 +2289,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -2459,7 +2414,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -2630,15 +2585,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -2714,10 +2660,10 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
@@ -2798,7 +2744,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -2957,15 +2903,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -3091,7 +3028,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -3213,15 +3150,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -3314,10 +3242,10 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
@@ -3397,7 +3325,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -3556,15 +3484,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -3690,7 +3609,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -3861,15 +3780,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -3963,10 +3873,10 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
@@ -4046,7 +3956,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -4205,15 +4115,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -4339,7 +4240,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -4510,15 +4411,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -4588,10 +4480,10 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
@@ -4671,7 +4563,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -4830,15 +4722,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -4964,7 +4847,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -5086,15 +4969,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -5187,10 +5061,10 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                     }
@@ -5275,7 +5149,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -5422,15 +5296,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -5556,7 +5421,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
                       actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -5663,15 +5528,6 @@ describe("@filterable directive", () => {
 
                     type MovieEventPayload {
                       title: String
-                    }
-
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
                     }
 
                     type MoviePersonActorsAggregationSelection {
@@ -5806,15 +5662,6 @@ describe("@filterable directive", () => {
                       Actor
                     }
 
-                    input PersonOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [PersonSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort People by. The order in which sorts are applied is not guaranteed when specifying many fields in one PersonSort object.
                     \\"\\"\\"
@@ -5841,13 +5688,13 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-                      people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      people(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
                       peopleAggregate(where: PersonWhere): PersonAggregateSelection!
                       peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
                     }
@@ -5932,7 +5779,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -6079,15 +5926,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -6213,7 +6051,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
                       actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -6356,15 +6194,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     type MoviePersonActorsAggregationSelection {
                       count: Int!
                       node: MoviePersonActorsNodeAggregateSelection
@@ -6498,15 +6327,6 @@ describe("@filterable directive", () => {
                       Actor
                     }
 
-                    input PersonOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [PersonSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort People by. The order in which sorts are applied is not guaranteed when specifying many fields in one PersonSort object.
                     \\"\\"\\"
@@ -6533,13 +6353,13 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-                      people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      people(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
                       peopleAggregate(where: PersonWhere): PersonAggregateSelection!
                       peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
                     }
@@ -6624,7 +6444,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor implements Person {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -6771,15 +6591,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -6905,7 +6716,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      actors(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
                       actorsAggregate(where: PersonWhere): MoviePersonActorsAggregationSelection
                       actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
@@ -7012,15 +6823,6 @@ describe("@filterable directive", () => {
 
                     type MovieEventPayload {
                       title: String
-                    }
-
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
                     }
 
                     type MoviePersonActorsAggregationSelection {
@@ -7155,15 +6957,6 @@ describe("@filterable directive", () => {
                       Actor
                     }
 
-                    input PersonOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [PersonSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort People by. The order in which sorts are applied is not guaranteed when specifying many fields in one PersonSort object.
                     \\"\\"\\"
@@ -7190,13 +6983,13 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-                      people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+                      people(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
                       peopleAggregate(where: PersonWhere): PersonAggregateSelection!
                       peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
                     }
@@ -7285,7 +7078,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -7444,15 +7237,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -7544,7 +7328,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): AppearanceMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
@@ -7703,15 +7487,6 @@ describe("@filterable directive", () => {
                       where: AppearanceMoviesConnectionWhere
                     }
 
-                    input AppearanceOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more AppearanceSort objects to sort Appearances by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [AppearanceSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Appearances by. The order in which sorts are applied is not guaranteed when specifying many fields in one AppearanceSort object.
                     \\"\\"\\"
@@ -7842,7 +7617,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
+                      actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
                       actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
@@ -8023,15 +7798,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -8134,22 +7900,16 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      appearances(limit: Int, offset: Int, options: AppearanceOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
+                      appearances(limit: Int, offset: Int, sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
                       appearancesAggregate(where: AppearanceWhere): AppearanceAggregateSelection!
                       appearancesConnection(after: String, first: Int, sort: [AppearanceSort!], where: AppearanceWhere): AppearancesConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-                      people(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
-                    }
-
-                    \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
-                    input QueryOptions {
-                      limit: Int
-                      offset: Int
+                      people(limit: Int, offset: Int, where: PersonWhere): [Person!]!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -8244,7 +8004,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -8403,15 +8163,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -8503,7 +8254,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): AppearanceMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
@@ -8662,15 +8413,6 @@ describe("@filterable directive", () => {
                       where: AppearanceMoviesConnectionWhere
                     }
 
-                    input AppearanceOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more AppearanceSort objects to sort Appearances by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [AppearanceSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Appearances by. The order in which sorts are applied is not guaranteed when specifying many fields in one AppearanceSort object.
                     \\"\\"\\"
@@ -8801,7 +8543,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
+                      actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
                       actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
@@ -8982,15 +8724,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -9093,22 +8826,16 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      appearances(limit: Int, offset: Int, options: AppearanceOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
+                      appearances(limit: Int, offset: Int, sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
                       appearancesAggregate(where: AppearanceWhere): AppearanceAggregateSelection!
                       appearancesConnection(after: String, first: Int, sort: [AppearanceSort!], where: AppearanceWhere): AppearancesConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-                      people(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
-                    }
-
-                    \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
-                    input QueryOptions {
-                      limit: Int
-                      offset: Int
+                      people(limit: Int, offset: Int, where: PersonWhere): [Person!]!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -9203,7 +8930,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Actor {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
                       password: String!
@@ -9362,15 +9089,6 @@ describe("@filterable directive", () => {
                       where: ActorMoviesConnectionWhere
                     }
 
-                    input ActorOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [ActorSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
                     \\"\\"\\"
@@ -9462,7 +9180,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Appearance {
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): AppearanceMovieMoviesAggregationSelection
                       moviesConnection(after: String, first: Int, sort: [AppearanceMoviesConnectionSort!], where: AppearanceMoviesConnectionWhere): AppearanceMoviesConnection!
                       password: String!
@@ -9621,15 +9339,6 @@ describe("@filterable directive", () => {
                       where: AppearanceMoviesConnectionWhere
                     }
 
-                    input AppearanceOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more AppearanceSort objects to sort Appearances by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [AppearanceSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Appearances by. The order in which sorts are applied is not guaranteed when specifying many fields in one AppearanceSort object.
                     \\"\\"\\"
@@ -9760,7 +9469,7 @@ describe("@filterable directive", () => {
                     }
 
                     type Movie {
-                      actors(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
+                      actors(limit: Int, offset: Int, where: PersonWhere): [Person!]!
                       actorsConnection(after: String, first: Int, where: MovieActorsConnectionWhere): MovieActorsConnection!
                       title: String
                     }
@@ -9941,15 +9650,6 @@ describe("@filterable directive", () => {
                       title: String
                     }
 
-                    input MovieOptions {
-                      limit: Int
-                      offset: Int
-                      \\"\\"\\"
-                      Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-                      \\"\\"\\"
-                      sort: [MovieSort!]
-                    }
-
                     \\"\\"\\"
                     Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                     \\"\\"\\"
@@ -10052,22 +9752,16 @@ describe("@filterable directive", () => {
                     }
 
                     type Query {
-                      actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                      actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
                       actorsAggregate(where: ActorWhere): ActorAggregateSelection!
                       actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-                      appearances(limit: Int, offset: Int, options: AppearanceOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
+                      appearances(limit: Int, offset: Int, sort: [AppearanceSort!], where: AppearanceWhere): [Appearance!]!
                       appearancesAggregate(where: AppearanceWhere): AppearanceAggregateSelection!
                       appearancesConnection(after: String, first: Int, sort: [AppearanceSort!], where: AppearanceWhere): AppearancesConnection!
-                      movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+                      movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
                       moviesAggregate(where: MovieWhere): MovieAggregateSelection!
                       moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-                      people(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PersonWhere): [Person!]!
-                    }
-
-                    \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
-                    input QueryOptions {
-                      limit: Int
-                      offset: Int
+                      people(limit: Int, offset: Int, where: PersonWhere): [Person!]!
                     }
 
                     \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"

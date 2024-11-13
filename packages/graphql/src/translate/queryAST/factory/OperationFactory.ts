@@ -26,7 +26,7 @@ import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-a
 import type { InterfaceEntityAdapter } from "../../../schema-model/entity/model-adapters/InterfaceEntityAdapter";
 import type { UnionEntityAdapter } from "../../../schema-model/entity/model-adapters/UnionEntityAdapter";
 import type { RelationshipAdapter } from "../../../schema-model/relationship/model-adapters/RelationshipAdapter";
-import type { GraphQLOptionsArg } from "../../../types";
+import type { GraphQLSortingAndPaginationArgs } from "../../../types";
 import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
 import { filterTruthy, isRecord } from "../../../utils/utils";
 import type { Filter } from "../ast/filters/Filter";
@@ -367,7 +367,7 @@ export class OperationsFactory {
         limitArg: number | Integer;
         offsetArg: number;
         sortArg: Record<string, any>[];
-    }): GraphQLOptionsArg | undefined {
+    }): GraphQLSortingAndPaginationArgs | undefined {
         const limitDirective = isUnionEntity(entity) ? undefined : entity.annotations.limit;
 
         let limit: Integer | number | undefined = limitArg ?? limitDirective?.default ?? limitDirective?.max;

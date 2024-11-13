@@ -21,12 +21,10 @@ import type { Directive, ObjectTypeComposerArgumentConfigMapDefinition, SchemaCo
 
 import type { Subgraph } from "../../classes/Subgraph";
 import { DEPRECATED } from "../../constants";
-import { QueryOptions } from "../../graphql/input-objects/QueryOptions";
 import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/UnionEntityAdapter";
 import { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
-import type { ConnectionQueryArgs, Neo4jFeaturesSettings } from "../../types";
-import { DEPRECATE_OPTIONS_ARGUMENT } from "../constants";
+import type { ConnectionQueryArgs } from "../../types";
 import { connectionFieldResolver } from "../pagination";
 import { graphqlDirectivesToCompose } from "../to-compose";
 import {
@@ -35,19 +33,16 @@ import {
     withConnectionSortInputType,
 } from "./connection-where-input";
 import { makeSortInput } from "./sort-and-options-input";
-import { shouldAddDeprecatedFields } from "./utils";
 
 export function augmentObjectOrInterfaceTypeWithRelationshipField({
     relationshipAdapter,
     userDefinedFieldDirectives,
     subgraph,
-    features,
     composer,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     userDefinedFieldDirectives: Map<string, DirectiveNode[]>;
     subgraph?: Subgraph | undefined;
-    features?: Neo4jFeaturesSettings;
     composer: SchemaComposer;
 }): Record<string, { type: string; description?: string; directives: Directive[]; args?: any }> {
     const fields = {};
@@ -72,10 +67,6 @@ export function augmentObjectOrInterfaceTypeWithRelationshipField({
                 ? relationshipAdapter.originalTarget
                 : relationshipAdapter.target;
 
-        const optionsTypeName =
-            relationshipTarget instanceof UnionEntityAdapter
-                ? QueryOptions
-                : relationshipTarget.operations.optionsInputTypeName;
         const whereTypeName = relationshipTarget.operations.whereInputTypeName;
 
         const nodeFieldsArgs = {
@@ -92,13 +83,6 @@ export function augmentObjectOrInterfaceTypeWithRelationshipField({
             if (sortConfig) {
                 nodeFieldsArgs["sort"] = sortConfig.NonNull.List;
             }
-        }
-        // SOFT_DEPRECATION: OPTIONS-ARGUMENT
-        if (shouldAddDeprecatedFields(features, "deprecatedOptionsArgument")) {
-            nodeFieldsArgs["options"] = {
-                type: optionsTypeName,
-                directives: [DEPRECATE_OPTIONS_ARGUMENT],
-            };
         }
 
         relationshipField.args = nodeFieldsArgs;

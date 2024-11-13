@@ -87,10 +87,10 @@ describe("Pluralize consistency", () => {
             }
 
             type Query {
-              superFriends(limit: Int, offset: Int, options: super_friendOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
+              superFriends(limit: Int, offset: Int, sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
               superFriendsAggregate(where: super_friendWhere): super_friendAggregateSelection!
               superFriendsConnection(after: String, first: Int, sort: [super_friendSort!], where: super_friendWhere): SuperFriendsConnection!
-              superUsers(limit: Int, offset: Int, options: super_userOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_userSort!], where: super_userWhere): [super_user!]!
+              superUsers(limit: Int, offset: Int, sort: [super_userSort!], where: super_userWhere): [super_user!]!
               superUsersAggregate(where: super_userWhere): super_userAggregateSelection!
               superUsersConnection(after: String, first: Int, sort: [super_userSort!], where: super_userWhere): SuperUsersConnection!
             }
@@ -162,15 +162,6 @@ describe("Pluralize consistency", () => {
               node: super_friend!
             }
 
-            input super_friendOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more super_friendSort objects to sort SuperFriends by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [super_friendSort!]
-            }
-
             \\"\\"\\"
             Fields to sort SuperFriends by. The order in which sorts are applied is not guaranteed when specifying many fields in one super_friendSort object.
             \\"\\"\\"
@@ -196,7 +187,7 @@ describe("Pluralize consistency", () => {
             }
 
             type super_user {
-              my_friend(limit: Int, offset: Int, options: super_friendOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
+              my_friend(limit: Int, offset: Int, sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
               my_friendAggregate(where: super_friendWhere): super_usersuper_friendMy_friendAggregationSelection
               my_friendConnection(after: String, first: Int, sort: [super_userMy_friendConnectionSort!], where: super_userMy_friendConnectionWhere): super_userMy_friendConnection!
               name: String!
@@ -309,15 +300,6 @@ describe("Pluralize consistency", () => {
               disconnect: [super_userMy_friendDisconnectFieldInput!]
               update: super_userMy_friendUpdateConnectionInput
               where: super_userMy_friendConnectionWhere
-            }
-
-            input super_userOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more super_userSort objects to sort SuperUsers by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [super_userSort!]
             }
 
             \\"\\"\\"

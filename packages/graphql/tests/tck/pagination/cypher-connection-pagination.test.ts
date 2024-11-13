@@ -86,11 +86,6 @@ describe("Cypher Connection pagination", () => {
 
         neoSchema = new Neo4jGraphQL({
             typeDefs,
-            features: {
-                excludeDeprecatedFields: {
-                    deprecatedOptionsArgument: true,
-                },
-            },
         });
     });
 

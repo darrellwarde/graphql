@@ -55,7 +55,7 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             type Book {
               isbn: String!
               originalTitle: String!
-              translatedTitle(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: BookTitleWhere): BookTitle
+              translatedTitle(limit: Int, offset: Int, where: BookTitleWhere): BookTitle
               translatedTitleConnection(after: String, first: Int, where: BookTranslatedTitleConnectionWhere): BookTranslatedTitleConnection!
             }
 
@@ -92,15 +92,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
               node: Book!
             }
 
-            input BookOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more BookSort objects to sort Books by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [BookSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Books by. The order in which sorts are applied is not guaranteed when specifying many fields in one BookSort object.
             \\"\\"\\"
@@ -129,7 +120,7 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             }
 
             type BookTitle_EN {
-              book(limit: Int, offset: Int, options: BookOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [BookSort!], where: BookWhere): Book!
+              book(limit: Int, offset: Int, sort: [BookSort!], where: BookWhere): Book!
               bookAggregate(where: BookWhere): BookTitle_ENBookBookAggregationSelection
               bookConnection(after: String, first: Int, sort: [BookTitle_ENBookConnectionSort!], where: BookTitle_ENBookConnectionWhere): BookTitle_ENBookConnection!
               value: String!
@@ -284,15 +275,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
               node: BookTitle_EN!
             }
 
-            input BookTitle_ENOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more BookTitle_ENSort objects to sort BookTitleEns by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [BookTitle_ENSort!]
-            }
-
             \\"\\"\\"
             Fields to sort BookTitleEns by. The order in which sorts are applied is not guaranteed when specifying many fields in one BookTitle_ENSort object.
             \\"\\"\\"
@@ -322,7 +304,7 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             }
 
             type BookTitle_SV {
-              book(limit: Int, offset: Int, options: BookOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [BookSort!], where: BookWhere): Book!
+              book(limit: Int, offset: Int, sort: [BookSort!], where: BookWhere): Book!
               bookAggregate(where: BookWhere): BookTitle_SVBookBookAggregationSelection
               bookConnection(after: String, first: Int, sort: [BookTitle_SVBookConnectionSort!], where: BookTitle_SVBookConnectionWhere): BookTitle_SVBookConnection!
               value: String!
@@ -475,15 +457,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             type BookTitle_SVEdge {
               cursor: String!
               node: BookTitle_SV!
-            }
-
-            input BookTitle_SVOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more BookTitle_SVSort objects to sort BookTitleSvs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [BookTitle_SVSort!]
             }
 
             \\"\\"\\"
@@ -729,22 +702,16 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             }
 
             type Query {
-              bookTitleEns(limit: Int, offset: Int, options: BookTitle_ENOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [BookTitle_ENSort!], where: BookTitle_ENWhere): [BookTitle_EN!]!
+              bookTitleEns(limit: Int, offset: Int, sort: [BookTitle_ENSort!], where: BookTitle_ENWhere): [BookTitle_EN!]!
               bookTitleEnsAggregate(where: BookTitle_ENWhere): BookTitle_ENAggregateSelection!
               bookTitleEnsConnection(after: String, first: Int, sort: [BookTitle_ENSort!], where: BookTitle_ENWhere): BookTitleEnsConnection!
-              bookTitleSvs(limit: Int, offset: Int, options: BookTitle_SVOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [BookTitle_SVSort!], where: BookTitle_SVWhere): [BookTitle_SV!]!
+              bookTitleSvs(limit: Int, offset: Int, sort: [BookTitle_SVSort!], where: BookTitle_SVWhere): [BookTitle_SV!]!
               bookTitleSvsAggregate(where: BookTitle_SVWhere): BookTitle_SVAggregateSelection!
               bookTitleSvsConnection(after: String, first: Int, sort: [BookTitle_SVSort!], where: BookTitle_SVWhere): BookTitleSvsConnection!
-              bookTitles(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: BookTitleWhere): [BookTitle!]!
-              books(limit: Int, offset: Int, options: BookOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [BookSort!], where: BookWhere): [Book!]!
+              bookTitles(limit: Int, offset: Int, where: BookTitleWhere): [BookTitle!]!
+              books(limit: Int, offset: Int, sort: [BookSort!], where: BookWhere): [Book!]!
               booksAggregate(where: BookWhere): BookAggregateSelection!
               booksConnection(after: String, first: Int, sort: [BookSort!], where: BookWhere): BooksConnection!
-            }
-
-            \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
-            input QueryOptions {
-              limit: Int
-              offset: Int
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"

@@ -73,12 +73,6 @@ describe("makeAugmentedSchema", () => {
             ).type as NamedTypeNode;
             expect(nodeFindQueryType.name.value).toEqual(type);
 
-            // Options
-            const options = document.definitions.find(
-                (x) => x.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION && x.name.value === `${type}Options`
-            );
-            expect(options).toBeTruthy();
-
             // Where
             const where = document.definitions.find(
                 (x) => x.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION && x.name.value === `${type}Where`

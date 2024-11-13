@@ -57,7 +57,7 @@ describe("Unions", () => {
 
             type Author {
               name: String!
-              publications(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PublicationWhere): [Publication!]!
+              publications(limit: Int, offset: Int, where: PublicationWhere): [Publication!]!
               publicationsConnection(after: String, first: Int, sort: [AuthorPublicationsConnectionSort!], where: AuthorPublicationsConnectionWhere): AuthorPublicationsConnection!
             }
 
@@ -90,15 +90,6 @@ describe("Unions", () => {
             type AuthorEdge {
               cursor: String!
               node: Author!
-            }
-
-            input AuthorOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more AuthorSort objects to sort Authors by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [AuthorSort!]
             }
 
             input AuthorPublicationsBookConnectFieldInput {
@@ -303,7 +294,7 @@ describe("Unions", () => {
             }
 
             type Book {
-              author(limit: Int, offset: Int, options: AuthorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AuthorSort!], where: AuthorWhere): [Author!]!
+              author(limit: Int, offset: Int, sort: [AuthorSort!], where: AuthorWhere): [Author!]!
               authorAggregate(where: AuthorWhere): BookAuthorAuthorAggregationSelection
               authorConnection(after: String, first: Int, sort: [BookAuthorConnectionSort!], where: BookAuthorConnectionWhere): BookAuthorConnection!
               title: String!
@@ -454,15 +445,6 @@ describe("Unions", () => {
               node: Book!
             }
 
-            input BookOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more BookSort objects to sort Books by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [BookSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Books by. The order in which sorts are applied is not guaranteed when specifying many fields in one BookSort object.
             \\"\\"\\"
@@ -558,7 +540,7 @@ describe("Unions", () => {
             }
 
             type Journal {
-              author(limit: Int, offset: Int, options: AuthorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AuthorSort!], where: AuthorWhere): [Author!]!
+              author(limit: Int, offset: Int, sort: [AuthorSort!], where: AuthorWhere): [Author!]!
               authorAggregate(where: AuthorWhere): JournalAuthorAuthorAggregationSelection
               authorConnection(after: String, first: Int, sort: [JournalAuthorConnectionSort!], where: JournalAuthorConnectionWhere): JournalAuthorConnection!
               subject: String!
@@ -709,15 +691,6 @@ describe("Unions", () => {
               node: Journal!
             }
 
-            input JournalOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more JournalSort objects to sort Journals by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [JournalSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Journals by. The order in which sorts are applied is not guaranteed when specifying many fields in one JournalSort object.
             \\"\\"\\"
@@ -802,22 +775,16 @@ describe("Unions", () => {
             }
 
             type Query {
-              authors(limit: Int, offset: Int, options: AuthorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AuthorSort!], where: AuthorWhere): [Author!]!
+              authors(limit: Int, offset: Int, sort: [AuthorSort!], where: AuthorWhere): [Author!]!
               authorsAggregate(where: AuthorWhere): AuthorAggregateSelection!
               authorsConnection(after: String, first: Int, sort: [AuthorSort!], where: AuthorWhere): AuthorsConnection!
-              books(limit: Int, offset: Int, options: BookOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [BookSort!], where: BookWhere): [Book!]!
+              books(limit: Int, offset: Int, sort: [BookSort!], where: BookWhere): [Book!]!
               booksAggregate(where: BookWhere): BookAggregateSelection!
               booksConnection(after: String, first: Int, sort: [BookSort!], where: BookWhere): BooksConnection!
-              journals(limit: Int, offset: Int, options: JournalOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [JournalSort!], where: JournalWhere): [Journal!]!
+              journals(limit: Int, offset: Int, sort: [JournalSort!], where: JournalWhere): [Journal!]!
               journalsAggregate(where: JournalWhere): JournalAggregateSelection!
               journalsConnection(after: String, first: Int, sort: [JournalSort!], where: JournalWhere): JournalsConnection!
-              publications(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: PublicationWhere): [Publication!]!
-            }
-
-            \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
-            input QueryOptions {
-              limit: Int
-              offset: Int
+              publications(limit: Int, offset: Int, where: PublicationWhere): [Publication!]!
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"

@@ -65,15 +65,6 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               node: AWSAccount!
             }
 
-            input AWSAccountOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more AWSAccountSort objects to sort AwsAccounts by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [AWSAccountSort!]
-            }
-
             \\"\\"\\"
             Fields to sort AwsAccounts by. The order in which sorts are applied is not guaranteed when specifying many fields in one AWSAccountSort object.
             \\"\\"\\"
@@ -152,15 +143,6 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               node: DNSZone!
             }
 
-            input DNSZoneOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more DNSZoneSort objects to sort DnsZones by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [DNSZoneSort!]
-            }
-
             \\"\\"\\"
             Fields to sort DnsZones by. The order in which sorts are applied is not guaranteed when specifying many fields in one DNSZoneSort object.
             \\"\\"\\"
@@ -226,10 +208,10 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             type Query {
-              awsAccounts(limit: Int, offset: Int, options: AWSAccountOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AWSAccountSort!], where: AWSAccountWhere): [AWSAccount!]!
+              awsAccounts(limit: Int, offset: Int, sort: [AWSAccountSort!], where: AWSAccountWhere): [AWSAccount!]!
               awsAccountsAggregate(where: AWSAccountWhere): AWSAccountAggregateSelection!
               awsAccountsConnection(after: String, first: Int, sort: [AWSAccountSort!], where: AWSAccountWhere): AwsAccountsConnection!
-              dnsZones(limit: Int, offset: Int, options: DNSZoneOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [DNSZoneSort!], where: DNSZoneWhere): [DNSZone!]!
+              dnsZones(limit: Int, offset: Int, sort: [DNSZoneSort!], where: DNSZoneWhere): [DNSZone!]!
               dnsZonesAggregate(where: DNSZoneWhere): DNSZoneAggregateSelection!
               dnsZonesConnection(after: String, first: Int, sort: [DNSZoneSort!], where: DNSZoneWhere): DnsZonesConnection!
             }

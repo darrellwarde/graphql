@@ -97,10 +97,6 @@ export class ImplementingEntityOperations<T extends InterfaceEntityAdapter | Con
         return `${this.entityAdapter.name}DeleteInput`;
     }
 
-    public get optionsInputTypeName(): string {
-        return `${this.entityAdapter.name}Options`;
-    }
-
     public get sortInputTypeName(): string {
         return `${this.entityAdapter.name}Sort`;
     }

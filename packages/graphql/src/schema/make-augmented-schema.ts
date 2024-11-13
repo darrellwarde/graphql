@@ -81,7 +81,6 @@ import { withCreateInputType } from "./generation/create-input";
 import { withInterfaceType } from "./generation/interface-type";
 import { withObjectType } from "./generation/object-type";
 import { withMutationResponseTypes } from "./generation/response-types";
-import { withOptionsInputType } from "./generation/sort-and-options-input";
 import { withUpdateInputType } from "./generation/update-input";
 import { withUniqueWhereInputType, withWhereInputType } from "./generation/where-input";
 import getNodes from "./get-nodes";
@@ -221,7 +220,6 @@ function makeAugmentedSchema({
                 composer.Query.addFields({
                     [unionEntityAdapter.operations.rootTypeFieldNames.read]: findResolver({
                         entityAdapter: unionEntityAdapter,
-                        features,
                         composer,
                     }),
                 });
@@ -508,7 +506,6 @@ function generateObjectType({
     userDefinedDirectivesForNode: Map<string, DirectiveNode[]>;
     userDefinedFieldDirectivesForNode: Map<string, Map<string, DirectiveNode[]>>;
 }) {
-    withOptionsInputType({ entityAdapter: concreteEntityAdapter, userDefinedFieldDirectives, composer });
     withWhereInputType({
         entityAdapter: concreteEntityAdapter,
         userDefinedFieldDirectives,
@@ -546,7 +543,6 @@ function generateObjectType({
         composer.Query.addFields({
             [concreteEntityAdapter.operations.rootTypeFieldNames.read]: findResolver({
                 entityAdapter: concreteEntityAdapter,
-                features,
                 composer,
             }),
         });
@@ -651,7 +647,6 @@ function generateInterfaceObjectType({
         string,
         DirectiveNode[]
     >;
-    withOptionsInputType({ entityAdapter: interfaceEntityAdapter, userDefinedFieldDirectives, composer });
     withWhereInputType({
         entityAdapter: interfaceEntityAdapter,
         userDefinedFieldDirectives,
@@ -684,7 +679,6 @@ function generateInterfaceObjectType({
         composer.Query.addFields({
             [interfaceEntityAdapter.operations.rootTypeFieldNames.read]: findResolver({
                 entityAdapter: interfaceEntityAdapter,
-                features,
                 composer,
             }),
         });

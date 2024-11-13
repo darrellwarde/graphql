@@ -93,15 +93,6 @@ describe("Bigint", () => {
               node: File!
             }
 
-            input FileOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more FileSort objects to sort Files by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [FileSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Files by. The order in which sorts are applied is not guaranteed when specifying many fields in one FileSort object.
             \\"\\"\\"
@@ -159,7 +150,7 @@ describe("Bigint", () => {
             }
 
             type Query {
-              files(limit: Int, offset: Int, options: FileOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [FileSort!], where: FileWhere): [File!]!
+              files(limit: Int, offset: Int, sort: [FileSort!], where: FileWhere): [File!]!
               filesAggregate(where: FileWhere): FileAggregateSelection!
               filesConnection(after: String, first: Int, sort: [FileSort!], where: FileWhere): FilesConnection!
             }

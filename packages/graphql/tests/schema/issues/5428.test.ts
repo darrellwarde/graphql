@@ -76,7 +76,7 @@ describe("https://github.com/neo4j/graphql/issues/5428", () => {
             }
 
             type Query {
-              test(limit: Int, offset: Int, options: TestOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TestSort!], where: TestWhere): [Test!]!
+              test(limit: Int, offset: Int, sort: [TestSort!], where: TestWhere): [Test!]!
               testAggregate(where: TestWhere): TestAggregateSelection!
               testConnection(after: String, first: Int, sort: [TestSort!], where: TestWhere): TestConnection!
             }
@@ -116,15 +116,6 @@ describe("https://github.com/neo4j/graphql/issues/5428", () => {
             type TestEdge {
               cursor: String!
               node: Test!
-            }
-
-            input TestOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TestSort objects to sort Test by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TestSort!]
             }
 
             \\"\\"\\"

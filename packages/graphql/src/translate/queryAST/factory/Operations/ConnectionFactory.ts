@@ -297,11 +297,11 @@ export class ConnectionFactory {
 
     private getConnectionOptions(
         entity: ConcreteEntityAdapter | InterfaceEntityAdapter,
-        options: Record<string, any>
+        args: Record<string, any>
     ): Pick<ConnectionQueryArgs, "first" | "after" | "sort"> | undefined {
         const limitDirective = entity.annotations.limit;
 
-        let limit: Integer | number | undefined = options?.first ?? limitDirective?.default ?? limitDirective?.max;
+        let limit: Integer | number | undefined = args?.first ?? limitDirective?.default ?? limitDirective?.max;
         if (limit instanceof Integer) {
             limit = limit.toNumber();
         }
@@ -310,12 +310,12 @@ export class ConnectionFactory {
             limit = Math.min(limit, maxLimit);
         }
 
-        if (limit === undefined && options.after === undefined && options.sort === undefined) return undefined;
+        if (limit === undefined && args.after === undefined && args.sort === undefined) return undefined;
 
         return {
             first: limit,
-            after: options.after,
-            sort: options.sort,
+            after: args.after,
+            sort: args.sort,
         };
     }
 

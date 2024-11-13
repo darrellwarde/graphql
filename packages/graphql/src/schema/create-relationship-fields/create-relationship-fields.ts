@@ -317,7 +317,6 @@ function createRelationshipFieldsForTarget({
             relationshipAdapter,
             userDefinedFieldDirectives,
             subgraph,
-            features,
             composer,
         })
     );
