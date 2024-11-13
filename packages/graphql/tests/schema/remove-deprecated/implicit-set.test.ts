@@ -92,19 +92,8 @@ describe("Implicit SET field", () => {
             }
 
             input ActedInUpdateInput {
-<<<<<<<< HEAD:packages/graphql/tests/schema/remove-deprecated/implicit-set.test.ts
               role: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               role_SET: String
-========
-              leadRole: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
-              leadRole_SET: Boolean
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
-              screenTime_DECREMENT: Int
-              screenTime_INCREMENT: Int
-              screenTime_SET: Int
-              startDate: Date @deprecated(reason: \\"Please use the explicit _SET field\\")
-              startDate_SET: Date
->>>>>>>> upstream/7.x:packages/graphql/tests/schema/remove-deprecated/directed-argument.test.ts
             }
 
             input ActedInWhere {
@@ -120,9 +109,9 @@ describe("Implicit SET field", () => {
             }
 
             type Actor {
-              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
-              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): ActorMovieMoviesAggregationSelection
-              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              moviesAggregate(where: MovieWhere): ActorMovieMoviesAggregationSelection
+              moviesConnection(after: String, first: Int, sort: [ActorMoviesConnectionSort!], where: ActorMoviesConnectionWhere): ActorMoviesConnection!
               name: String
             }
 
@@ -284,10 +273,6 @@ describe("Implicit SET field", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-<<<<<<<< HEAD:packages/graphql/tests/schema/remove-deprecated/implicit-set.test.ts
-========
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
->>>>>>>> upstream/7.x:packages/graphql/tests/schema/remove-deprecated/directed-argument.test.ts
               name_SET: String
             }
 
@@ -360,75 +345,15 @@ describe("Implicit SET field", () => {
               relationshipsDeleted: Int!
             }
 
-<<<<<<<< HEAD:packages/graphql/tests/schema/remove-deprecated/implicit-set.test.ts
-========
-            type Genre {
-              id: ID
-            }
-
-            type GenreAggregateSelection {
-              count: Int!
-              id: IDAggregateSelection!
-            }
-
-            input GenreCreateInput {
-              id: ID
-            }
-
-            type GenreEdge {
-              cursor: String!
-              node: Genre!
-            }
-
-            input GenreOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more GenreSort objects to sort Genres by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [GenreSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
-            \\"\\"\\"
-            input GenreSort {
-              id: SortDirection
-            }
-
-            input GenreUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: ID
-            }
-
-            input GenreWhere {
-              AND: [GenreWhere!]
-              NOT: GenreWhere
-              OR: [GenreWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: ID
-              id_ENDS_WITH: ID
-              id_EQ: ID
-              id_IN: [ID]
-              id_STARTS_WITH: ID
-            }
-
-            type GenresConnection {
-              edges: [GenreEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
->>>>>>>> upstream/7.x:packages/graphql/tests/schema/remove-deprecated/directed-argument.test.ts
             type IDAggregateSelection {
               longest: ID
               shortest: ID
             }
 
             type Movie {
-              actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
-              actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
-              actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actorsAggregate(where: ActorWhere): MovieActorActorsAggregationSelection
+              actorsConnection(after: String, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
               id: ID
             }
 
@@ -595,12 +520,7 @@ describe("Implicit SET field", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-<<<<<<<< HEAD:packages/graphql/tests/schema/remove-deprecated/implicit-set.test.ts
               id_SET: ID
-========
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              title_SET: String
->>>>>>>> upstream/7.x:packages/graphql/tests/schema/remove-deprecated/directed-argument.test.ts
             }
 
             input MovieWhere {
