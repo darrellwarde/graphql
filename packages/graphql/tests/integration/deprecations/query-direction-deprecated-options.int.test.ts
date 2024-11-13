@@ -48,11 +48,11 @@ describe("query-direction deprecated options", () => {
         await testHelper.close();
     });
 
-    test("should return related node using the queryDirection DIRECTED_ONLY", async () => {
+    test("should return related node using the queryDirection DIRECTED", async () => {
         const typeDefs = /* GraphQL */ `
             type ${Person} @node {
                 name: String!
-                friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DIRECTED_ONLY)
+                friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DIRECTED)
             }
         `;
         await testHelper.initNeo4jGraphQL({ typeDefs });
@@ -101,11 +101,11 @@ describe("query-direction deprecated options", () => {
         });
     });
 
-    test("should return related node using the queryDirection UNDIRECTED_ONLY", async () => {
+    test("should return related node using the queryDirection UNDIRECTED", async () => {
         const typeDefs = /* GraphQL */ `
             type ${Person} @node {
                 name: String!
-                friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: UNDIRECTED_ONLY)
+                friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: UNDIRECTED)
             }
         `;
         await testHelper.initNeo4jGraphQL({ typeDefs });
@@ -156,232 +156,6 @@ describe("query-direction deprecated options", () => {
                             name: mike,
                         },
                     ]),
-                },
-            ]),
-        });
-    });
-
-    test("should return related node using the queryDirection DEFAULT_DIRECTED", async () => {
-        const typeDefs = /* GraphQL */ `
-            type ${Person} @node {
-                name: String!
-                friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DEFAULT_DIRECTED)
-            }
-        `;
-        await testHelper.initNeo4jGraphQL({ typeDefs });
-        const query = /* GraphQL */ `
-            {
-                ${Person.plural} {
-                    name
-                    friends {
-                        name
-                    }
-                }
-            }
-        `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        if (gqlResult.errors) {
-            console.log(JSON.stringify(gqlResult.errors, null, 2));
-        }
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect(gqlResult.data).toEqual({
-            [Person.plural]: expect.toIncludeSameMembers([
-                {
-                    name: stefan,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: mike,
-                        },
-                    ]),
-                },
-                {
-                    name: mike,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: charlie,
-                        },
-                    ]),
-                },
-                {
-                    name: charlie,
-                    friends: [],
-                },
-            ]),
-        });
-    });
-
-    test("should return related node using the queryDirection DEFAULT_UNDIRECTED", async () => {
-        const typeDefs = /* GraphQL */ `
-            type ${Person} @node {
-                name: String!
-                friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
-            }
-        `;
-        await testHelper.initNeo4jGraphQL({ typeDefs });
-        const query = /* GraphQL */ `
-            {
-                ${Person.plural} {
-                    name
-                    friends {
-                        name
-                    }
-                }
-            }
-        `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        if (gqlResult.errors) {
-            console.log(JSON.stringify(gqlResult.errors, null, 2));
-        }
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect(gqlResult.data).toEqual({
-            [Person.plural]: expect.toIncludeSameMembers([
-                {
-                    name: stefan,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: mike,
-                        },
-                    ]),
-                },
-                {
-                    name: mike,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: stefan,
-                        },
-                        {
-                            name: charlie,
-                        },
-                    ]),
-                },
-                {
-                    name: charlie,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: mike,
-                        },
-                    ]),
-                },
-            ]),
-        });
-    });
-
-    test("should return related node using the queryDirection DEFAULT_DIRECTED + directed arg", async () => {
-        const typeDefs = /* GraphQL */ `
-            type ${Person} @node {
-                name: String!
-                friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DEFAULT_DIRECTED)
-            }
-        `;
-        await testHelper.initNeo4jGraphQL({ typeDefs });
-        const query = /* GraphQL */ `
-            {
-                ${Person.plural} {
-                    name
-                    friends(directed: false) {
-                        name
-                    }
-                }
-            }
-        `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        if (gqlResult.errors) {
-            console.log(JSON.stringify(gqlResult.errors, null, 2));
-        }
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect(gqlResult.data).toEqual({
-            [Person.plural]: expect.toIncludeSameMembers([
-                {
-                    name: stefan,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: mike,
-                        },
-                    ]),
-                },
-                {
-                    name: mike,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: stefan,
-                        },
-                        {
-                            name: charlie,
-                        },
-                    ]),
-                },
-                {
-                    name: charlie,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: mike,
-                        },
-                    ]),
-                },
-            ]),
-        });
-    });
-
-    test("should return related node using the queryDirection DEFAULT_UNDIRECTED + directed arg", async () => {
-        const typeDefs = /* GraphQL */ `
-            type ${Person} @node {
-                name: String!
-                friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
-            }
-        `;
-        await testHelper.initNeo4jGraphQL({ typeDefs });
-        const query = /* GraphQL */ `
-            {
-                ${Person.plural} {
-                    name
-                    friends(directed: true) {
-                        name
-                    }
-                }
-            }
-        `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        if (gqlResult.errors) {
-            console.log(JSON.stringify(gqlResult.errors, null, 2));
-        }
-
-        expect(gqlResult.errors).toBeUndefined();
-
-        expect(gqlResult.data).toEqual({
-            [Person.plural]: expect.toIncludeSameMembers([
-                {
-                    name: stefan,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: mike,
-                        },
-                    ]),
-                },
-                {
-                    name: mike,
-                    friends: expect.toIncludeSameMembers([
-                        {
-                            name: charlie,
-                        },
-                    ]),
-                },
-                {
-                    name: charlie,
-                    friends: [],
                 },
             ]),
         });
