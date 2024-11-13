@@ -108,9 +108,10 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
+              screenTime_SET: Int
             }
 
             input ActedInWhere {
@@ -296,7 +297,8 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -519,11 +521,14 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              release: DateTime
-              runtime: Int
+              release: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              release_SET: DateTime
+              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
-              title: String
+              runtime_SET: Int
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -751,10 +756,12 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
 
             input SeriesUpdateInput {
               actors: [SeriesActorsUpdateFieldInput!]
-              episodes: Int
+              episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodes_DECREMENT: Int
               episodes_INCREMENT: Int
-              title: String
+              episodes_SET: Int
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input SeriesWhere {
@@ -1003,7 +1010,8 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
 
             input ShowUpdateInput {
               actors: [ShowActorsUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input ShowWhere {

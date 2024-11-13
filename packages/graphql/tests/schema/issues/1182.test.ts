@@ -96,9 +96,12 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             }
 
             input ActorUpdateInput {
-              dob: DateTime
-              homeAddress: PointInput
-              name: String
+              dob: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              dob_SET: DateTime
+              homeAddress: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
+              homeAddress_SET: PointInput
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -347,7 +350,8 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {

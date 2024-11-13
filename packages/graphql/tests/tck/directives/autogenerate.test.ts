@@ -78,7 +78,7 @@ describe("Cypher autogenerate directive", () => {
     test("Simple Update", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(update: { name: "dan" }) {
+                updateMovies(update: { name_SET: "dan" }) {
                     movies {
                         id
                         name
@@ -91,13 +91,13 @@ describe("Cypher autogenerate directive", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
-            SET this.name = $this_update_name
+            SET this.name = $this_update_name_SET
             RETURN collect(DISTINCT this { .id, .name }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_update_name\\": \\"dan\\",
+                \\"this_update_name_SET\\": \\"dan\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

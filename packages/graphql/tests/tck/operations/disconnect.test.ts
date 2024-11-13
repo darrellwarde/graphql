@@ -63,8 +63,8 @@ describe("Cypher Disconnect", () => {
             mutation {
                 updateProducts(
                     update: {
-                        id: "123"
-                        name: "Nested Connect"
+                        id_SET: "123"
+                        name_SET: "Nested Connect"
                         colors: {
                             disconnect: [
                                 {
@@ -105,8 +105,8 @@ describe("Cypher Disconnect", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Product)
-            SET this.id = $this_update_id
-            SET this.name = $this_update_name
+            SET this.id = $this_update_id_SET
+            SET this.name = $this_update_name_SET
             WITH this
             CALL {
             WITH this
@@ -199,8 +199,8 @@ describe("Cypher Disconnect", () => {
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_update_id\\": \\"123\\",
-                \\"this_update_name\\": \\"Nested Connect\\",
+                \\"this_update_id_SET\\": \\"123\\",
+                \\"this_update_name_SET\\": \\"Nested Connect\\",
                 \\"updateProducts_args_update_colors0_disconnect0_where_Color_this_colors0_disconnect0param0\\": \\"Red\\",
                 \\"updateProducts_args_update_colors0_disconnect0_disconnect_photos0_where_Photo_this_colors0_disconnect0_photos0param0\\": \\"123\\",
                 \\"updateProducts_args_update_colors0_disconnect0_disconnect_photos_disconnect_color_where_Color_this_colors0_disconnect0_photos0_color0param0\\": \\"134\\",
@@ -211,8 +211,8 @@ describe("Cypher Disconnect", () => {
                 \\"updateProducts\\": {
                     \\"args\\": {
                         \\"update\\": {
-                            \\"id\\": \\"123\\",
-                            \\"name\\": \\"Nested Connect\\",
+                            \\"id_SET\\": \\"123\\",
+                            \\"name_SET\\": \\"Nested Connect\\",
                             \\"colors\\": [
                                 {
                                     \\"disconnect\\": [

@@ -119,7 +119,7 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
                         actors: [
                             {
                                 where: { node: { name_EQ: "Tom Hanks" } }
-                                update: { edge: { screenTime: 60 }, node: { name: "Tom Hanks" } }
+                                update: { edge: { screenTime_SET: 60 }, node: { name_SET: "Tom Hanks" } }
                             }
                         ]
                     }
@@ -141,8 +141,8 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
             	WITH this
             	MATCH (this)<-[this_acted_in0_relationship:ACTED_IN]-(this_actors0:Actor)
             	WHERE this_actors0.name = $updateMovies_args_update_actors0_where_this_actors0param0
-            	SET this_acted_in0_relationship.screenTime = $updateMovies.args.update.actors[0].update.edge.screenTime
-            	SET this_actors0.name = $this_update_actors0_name
+            	SET this_acted_in0_relationship.screenTime = $updateMovies.args.update.actors[0].update.edge.screenTime_SET
+            	SET this_actors0.name = $this_update_actors0_name_SET
             	RETURN count(*) AS update_this_actors0
             }
             RETURN collect(DISTINCT this { .title }) AS data"
@@ -152,7 +152,7 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
             "{
                 \\"param0\\": \\"Forrest Gump\\",
                 \\"updateMovies_args_update_actors0_where_this_actors0param0\\": \\"Tom Hanks\\",
-                \\"this_update_actors0_name\\": \\"Tom Hanks\\",
+                \\"this_update_actors0_name_SET\\": \\"Tom Hanks\\",
                 \\"updateMovies\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -165,10 +165,10 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
                                     },
                                     \\"update\\": {
                                         \\"node\\": {
-                                            \\"name\\": \\"Tom Hanks\\"
+                                            \\"name_SET\\": \\"Tom Hanks\\"
                                         },
                                         \\"edge\\": {
-                                            \\"screenTime\\": {
+                                            \\"screenTime_SET\\": {
                                                 \\"low\\": 60,
                                                 \\"high\\": 0
                                             }

@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { GraphQLError } from "graphql";
 import type { UniqueType } from "../../../utils/graphql-types";
 import { TestHelper } from "../../../utils/tests-helper";
 
@@ -74,9 +75,10 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.create]?.[typeDirector.plural]).toBeUndefined();
     });
     test("Create mutation with alias referring to existing field, include only field as inputs", async () => {
@@ -139,9 +141,10 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.create]?.[typeDirector.plural]).toBeUndefined();
     });
     test("Create mutation with alias on connection referring to existing field, include only field as inputs", async () => {
@@ -215,9 +218,10 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.create]?.[typeDirector.plural]).toBeUndefined();
     });
     test("Create mutation with alias on nested connection referring to existing field, include only field as inputs", async () => {
@@ -307,16 +311,17 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.create]?.[typeDirector.plural]).toBeUndefined();
     });
 
     test("Update mutation with alias referring to existing field, include both fields as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
-                ${typeDirector.operations.update}(where: {name_CONTAINS: "Tim"}, update: { name: "Tim Burton", nameAgain: "Timmy Burton" }) {
+                ${typeDirector.operations.update}(where: { name_CONTAINS: "Tim" }, update: { name_SET: "Tim Burton", nameAgain_SET: "Timmy Burton" }) {
                     ${typeDirector.plural} {
                         name
                         nameAgain
@@ -329,15 +334,16 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[name_SET]], [[nameAgain_SET]] on type ${typeDirector.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.update]?.[typeDirector.plural]).toBeUndefined();
     });
     test("Update mutation with alias referring to existing field, include only alias field as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
-                ${typeDirector.operations.update}(where: {name_CONTAINS: "Timmy"}, update: { nameAgain: "El Timmy Burton" }) {
+                ${typeDirector.operations.update}(where: { name_CONTAINS: "Timmy" }, update: { nameAgain_SET: "El Timmy Burton" }) {
                     ${typeDirector.plural} {
                         name
                         nameAgain
@@ -351,20 +357,20 @@ describe("@alias directive", () => {
         expect(gqlResult.errors).toBeUndefined();
     });
     test("Update mutation with alias referring to existing field, include connection and both fields as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
                 ${typeDirector.operations.update}(
-                    where: {name_CONTAINS: "Tim"}, 
+                    where: { name_CONTAINS: "Tim"}, 
                     update: { 
-                        name: "Tim Burton", 
-                        nameAgain: "Timmy Burton", 
+                        name_SET: "Tim Burton", 
+                        nameAgain_SET: "Timmy Burton", 
                         movies: [{
                             update: {
                                 node: {
-                                    title: "Three",
+                                    title_SET: "Three",
                                 },
                                 edge: {
-                                    year: 2010
+                                    year_SET: 2010
                                 }
                             }
                         }] 
@@ -382,22 +388,23 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[name_SET]], [[nameAgain_SET]] on type ${typeDirector.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.update]?.[typeDirector.plural]).toBeUndefined();
     });
     test("Update mutation with alias on connection referring to existing field, include only field as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
                 ${typeDirector.operations.update}(
                     update: {
-                      name: "Tim",
+                      name_SET: "Tim",
                       movies: [
                         {
                           update: {
                             node: {
-                              title: "Mv",
+                              title_SET: "Mv",
                             }
                           }
                         }
@@ -416,18 +423,18 @@ describe("@alias directive", () => {
         expect(gqlResult.errors).toBeUndefined();
     });
     test("Update mutation with alias on connection referring to existing field, include both fields as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
-                ${typeDirector.operations.update}(where: {name_CONTAINS: "Tim Burton"}, update:{
-                    name: "Tim Burton",
+                ${typeDirector.operations.update}(where: { name_CONTAINS: "Tim Burton" }, update: {
+                    name_SET: "Tim Burton",
                     movies: [{
                         update: {
                             node: {
-                                title: "One",
-                                titleAgain: "Onee"
+                                title_SET: "One",
+                                titleAgain_SET: "Onee"
                             },
                             edge: {
-                                year: 2010
+                                year_SET: 2010
                             }
                         }
                     }]
@@ -446,34 +453,34 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title_SET]], [[titleAgain_SET]] on type ${typeMovie.name}`),
+        ]);
         expect(gqlResult?.data?.[typeDirector.operations.update]?.[typeDirector.plural]).toBeUndefined();
     });
     test("Update mutation with alias on connection referring to existing field, include both bad and good field as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
-                ${typeDirector.operations.update}(where: {name_CONTAINS: "Tim Burton"}, update:{
-                    name: "Tim Burton",
+                ${typeDirector.operations.update}(where: { name_CONTAINS: "Tim Burton" }, update: {
+                    name_SET: "Tim Burton",
                     movies: [{
                         update: {
                             node: {
-                                title: "Three",
+                                title_SET: "Three",
                             },
                             edge: {
-                                year: 2010
+                                year_SET: 2010
                             }
                         }
                     },
                     {
                         update: {
                             node: {
-                                title: "One",
-                                titleAgain: "Onee"
+                                title_SET: "One",
+                                titleAgain_SET: "Onee"
                             },
                             edge: {
-                                year: 2010
+                                year_SET: 2010
                             }
                         }
                     }]
@@ -492,33 +499,34 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title_SET]], [[titleAgain_SET]] on type ${typeMovie.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.update]?.[typeDirector.plural]).toBeUndefined();
     });
     test("Update mutation with alias on nested connection referring to existing field, include only field as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
-                ${typeDirector.operations.update}(where: {name_CONTAINS: "Tim Burton"}, update:{
-                    name: "Tim Burton",
+                ${typeDirector.operations.update}(where: { name_CONTAINS: "Tim Burton" }, update: {
+                    name_SET: "Tim Burton",
                     movies: [{
                         update: {
                             node: {
-                                title: "Two",
+                                title_SET: "Two",
                                 directors: [{
                                     update: {
                                         node: {
-                                            nameAgain: "Timmy"
+                                            nameAgain_SET: "Timmy"
                                         }, 
                                         edge: {
-                                            year: 2011
+                                            year_SET: 2011
                                         }
                                     }
                                 } ] 
                             },
                             edge: {
-                                year: 2010
+                                year_SET: 2010
                             }
                         }
                     }]
@@ -540,29 +548,30 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeUndefined();
     });
+
     test("Update mutation with alias on nested connection referring to existing field, include both field as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
-                ${typeDirector.operations.update}(where: {name_CONTAINS: "Tim Burton"}, update:{
-                    name: "Tim Burton",
+                ${typeDirector.operations.update}(where: { name_CONTAINS: "Tim Burton" }, update: {
+                    name_SET: "Tim Burton",
                     movies: [{
                         update: {
                             node: {
-                                title: "Two",
+                                title_SET: "Two",
                                 directors: [{
                                     update: {
                                         node: {
-                                            name: "Tim",
-                                            nameAgain: "Timmy"
+                                            name_SET: "Tim",
+                                            nameAgain_SET: "Timmy"
                                         }, 
                                         edge: {
-                                            year: 2011
+                                            year_SET: 2011
                                         }
                                     }
                                 } ] 
                             },
                             edge: {
-                                year: 2010
+                                year_SET: 2010
                             }
                         }
                     }]
@@ -584,19 +593,20 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[name]], [[nameAgain]] on type ${typeDirector.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[name_SET]], [[nameAgain_SET]] on type ${typeDirector.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.update]?.[typeDirector.plural]).toBeUndefined();
     });
 
     test("Update mutation nested with create with alias referring to existing field, include only alias field as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
                 ${typeDirector.operations.update}(
-                    where: {name_CONTAINS: "Timmy"}, 
+                    where: { name_CONTAINS: "Timmy" }, 
                     update: {
-                      name: "The Timmy",
+                      name_SET: "The Timmy",
                       movies: [
                         {
                           create: [
@@ -649,15 +659,16 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.update]?.[typeDirector.plural]).toBeUndefined();
     });
     test("Update mutation (with create) with alias referring to existing field, include both fields as inputs", async () => {
-        const userMutation = `
+        const userMutation = /* GraphQL */ `
             mutation {
-                ${typeDirector.operations.update}(where: {name_CONTAINS: "Timmy"}, update: { movies: { create: [{ node: { title: "Movie", titleAgain: "El Movie" }, edge: { year: 1989 } }] } }) {
+                ${typeDirector.operations.update}(where: { name_CONTAINS: "Timmy" }, update: { movies: { create: [{ node: { title: "Movie", titleAgain: "El Movie" }, edge: { year: 1989 } }] } }) {
                     ${typeDirector.plural} {
                         name
                         nameAgain
@@ -670,9 +681,10 @@ describe("@alias directive", () => {
 
         expect(gqlResult.errors).toBeDefined();
         expect(gqlResult.errors).toHaveLength(1);
-        expect(gqlResult.errors?.[0]?.message).toBe(
-            `Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`
-        );
+        expect(gqlResult.errors).toEqual([
+            new GraphQLError(`Conflicting modification of [[title]], [[titleAgain]] on type ${typeMovie.name}`),
+        ]);
+
         expect(gqlResult?.data?.[typeDirector.operations.update]?.[typeDirector.plural]).toBeUndefined();
     });
 });

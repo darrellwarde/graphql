@@ -98,8 +98,10 @@ describe("@selectable", () => {
             }
 
             input MovieUpdateInput {
-              description: String
-              title: String
+              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              description_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -250,8 +252,10 @@ describe("@selectable", () => {
             }
 
             input MovieUpdateInput {
-              description: String
-              title: String
+              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              description_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -401,8 +405,10 @@ describe("@selectable", () => {
             }
 
             input MovieUpdateInput {
-              description: String
-              title: String
+              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              description_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -596,8 +602,10 @@ describe("@selectable", () => {
             }
 
             input MovieUpdateInput {
-              description: String
-              title: String
+              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              description_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             type MovieUpdatedEvent {
@@ -852,7 +860,8 @@ describe("@selectable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -967,8 +976,10 @@ describe("@selectable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -1236,7 +1247,8 @@ describe("@selectable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -1351,8 +1363,10 @@ describe("@selectable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -1614,7 +1628,8 @@ describe("@selectable", () => {
 
                 input ActorUpdateInput {
                   actedIn: ActorActedInUpdateInput
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -1733,8 +1748,10 @@ describe("@selectable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -1856,8 +1873,10 @@ describe("@selectable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  name: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input SeriesWhere {
@@ -2102,7 +2121,8 @@ describe("@selectable", () => {
 
                 input ActorUpdateInput {
                   actedIn: ActorActedInUpdateInput
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -2221,8 +2241,10 @@ describe("@selectable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -2344,8 +2366,10 @@ describe("@selectable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  name: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input SeriesWhere {
@@ -2582,7 +2606,8 @@ describe("@selectable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -2698,8 +2723,10 @@ describe("@selectable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -2794,8 +2821,10 @@ describe("@selectable", () => {
                 }
 
                 input ProductionUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input ProductionWhere {
@@ -2883,8 +2912,10 @@ describe("@selectable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input SeriesWhere {
@@ -3135,7 +3166,8 @@ describe("@selectable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
@@ -3251,8 +3283,10 @@ describe("@selectable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
@@ -3347,8 +3381,10 @@ describe("@selectable", () => {
                 }
 
                 input ProductionUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input ProductionWhere {
@@ -3436,8 +3472,10 @@ describe("@selectable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String
-                  title: String
+                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  description_SET: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input SeriesWhere {

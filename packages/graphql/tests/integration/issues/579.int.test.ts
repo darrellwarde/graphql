@@ -69,7 +69,7 @@ describe("https://github.com/neo4j/graphql/pull/579", () => {
                       color: {
                           update: {
                               edge: {
-                                  test: true
+                                  test_SET: true
                               }
                           }
                       }

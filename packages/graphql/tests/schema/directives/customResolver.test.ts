@@ -229,9 +229,12 @@ describe("@customResolver directive", () => {
             }
 
             input UserUpdateInput {
-              id: ID
-              password: String
-              username: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              password_SET: String
+              username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              username_SET: String
             }
 
             input UserWhere {

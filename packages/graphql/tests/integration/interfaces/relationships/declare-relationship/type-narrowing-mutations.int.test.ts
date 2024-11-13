@@ -109,7 +109,7 @@ describe("type narrowing - mutations setup", () => {
 
         const query = /* GraphQL */ `
         mutation {
-            ${Actor.operations.update}(update: { actedIn: [{ update: { node: { actors: [{ update: { edge: { ActedIn: { screenTime: 0 } } } }] } } }] }) {
+            ${Actor.operations.update}(update: { actedIn: [{ update: { node: { actors: [{ update: { edge: { ActedIn: { screenTime_SET: 0 } } } }] } } }] }) {
                 ${Actor.plural} {
                     name
                     actedInConnection {

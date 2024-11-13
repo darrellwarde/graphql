@@ -246,7 +246,8 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewPositionUpdateInput {
-              position: CrewPositionType
+              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _SET field\\")
+              position_SET: CrewPositionType
             }
 
             input CrewPositionWhere {
@@ -305,7 +306,8 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input MovieUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input MovieWhere {

@@ -519,7 +519,7 @@ function generateObjectType({
     augmentVectorSchema({ composer, concreteEntityAdapter, features });
     withUniqueWhereInputType({ concreteEntityAdapter, composer });
     withCreateInputType({ entityAdapter: concreteEntityAdapter, userDefinedFieldDirectives, composer });
-    withUpdateInputType({ entityAdapter: concreteEntityAdapter, userDefinedFieldDirectives, composer });
+    withUpdateInputType({ entityAdapter: concreteEntityAdapter, userDefinedFieldDirectives, composer, features });
     withMutationResponseTypes({ concreteEntityAdapter, propagatedDirectives, composer });
     const composeNode = withObjectType({
         entityAdapter: concreteEntityAdapter,
@@ -602,7 +602,6 @@ function generateObjectType({
     if (concreteEntityAdapter.isDeletable) {
         composer.Mutation.addFields({
             [concreteEntityAdapter.operations.rootTypeFieldNames.delete]: deleteResolver({
-                node,
                 composer,
                 concreteEntityAdapter,
             }),
@@ -617,9 +616,7 @@ function generateObjectType({
         composer.Mutation.addFields({
             [concreteEntityAdapter.operations.rootTypeFieldNames.update]: updateResolver({
                 node,
-                composer,
                 concreteEntityAdapter,
-                features,
             }),
         });
         composer.Mutation.setFieldDirectives(
@@ -662,7 +659,7 @@ function generateInterfaceObjectType({
         composer,
     });
     withCreateInputType({ entityAdapter: interfaceEntityAdapter, userDefinedFieldDirectives, composer });
-    withUpdateInputType({ entityAdapter: interfaceEntityAdapter, userDefinedFieldDirectives, composer });
+    withUpdateInputType({ entityAdapter: interfaceEntityAdapter, userDefinedFieldDirectives, composer, features });
 
     const composeInterface = withInterfaceType({
         interfaceEntityAdapter,

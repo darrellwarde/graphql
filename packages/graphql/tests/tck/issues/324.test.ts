@@ -74,7 +74,7 @@ describe("#324", () => {
                                 manufacturer: {
                                     update: {
                                         node: {
-                                            name: "Manufacturer",
+                                            name_SET: "Manufacturer",
                                             logo: { connect: { where: { node: { identifier_EQ: "Opel Logo" } } } },
                                         },
                                     },
@@ -97,7 +97,7 @@ describe("#324", () => {
             	CALL {
             		WITH this, this_car0
             		MATCH (this_car0)-[this_car0_manufacturer0_relationship:MANUFACTURER]->(this_car0_manufacturer0:Manufacturer)
-            		SET this_car0_manufacturer0.name = $this_update_car0_manufacturer0_name
+            		SET this_car0_manufacturer0.name = $this_update_car0_manufacturer0_name_SET
             		WITH *
             		CALL {
             			WITH this, this_car0, this_car0_manufacturer0
@@ -150,7 +150,7 @@ describe("#324", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"Someone\\",
-                \\"this_update_car0_manufacturer0_name\\": \\"Manufacturer\\",
+                \\"this_update_car0_manufacturer0_name_SET\\": \\"Manufacturer\\",
                 \\"this_car0_manufacturer0_logo0_connect0_node_param0\\": \\"Opel Logo\\",
                 \\"resolvedCallbacks\\": {}
             }"

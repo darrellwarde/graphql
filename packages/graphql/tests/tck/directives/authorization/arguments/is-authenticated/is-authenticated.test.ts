@@ -230,7 +230,7 @@ describe("Cypher Auth isAuthenticated", () => {
     test("Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { id_EQ: "1" }, update: { id: "id-1" }) {
+                updateUsers(where: { id_EQ: "1" }, update: { id_SET: "id-1" }) {
                     users {
                         id
                     }
@@ -246,14 +246,14 @@ describe("Cypher Auth isAuthenticated", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:User)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             RETURN collect(DISTINCT this { .id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_id\\": \\"id-1\\",
+                \\"this_update_id_SET\\": \\"id-1\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -262,7 +262,7 @@ describe("Cypher Auth isAuthenticated", () => {
     test("Update Node & Field", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { id_EQ: "1" }, update: { password: "password" }) {
+                updateUsers(where: { id_EQ: "1" }, update: { password_SET: "password" }) {
                     users {
                         id
                     }
@@ -278,14 +278,14 @@ describe("Cypher Auth isAuthenticated", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:User)
             WHERE this.id = $param0
-            SET this.password = $this_update_password
+            SET this.password = $this_update_password_SET
             RETURN collect(DISTINCT this { .id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_password\\": \\"password\\",
+                \\"this_update_password_SET\\": \\"password\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

@@ -104,7 +104,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
         `;
             updateMutationWithNestedUpdate = `#graphql
                 mutation {
-                    ${Movie.operations.update}(update: { actors: { update: { node: { name: "someName" } } } }) {
+                    ${Movie.operations.update}(update: { actors: { update: { node: { name_SET: "someName" } } } }) {
                         info {
                             nodesCreated
                             nodesDeleted
@@ -266,7 +266,7 @@ describe("https://github.com/neo4j/graphql/issues/3428", () => {
             `;
             updateMutationWithNestedUpdate = `#graphql
                 mutation {
-                    ${Movie.operations.update}(update: { actors: { ${PersonOne}: { update: { node: { name: "someName" } } } } }) {
+                    ${Movie.operations.update}(update: { actors: { ${PersonOne}: { update: { node: { name_SET: "someName" } } } } }) {
                         info {
                             nodesCreated
                             nodesDeleted

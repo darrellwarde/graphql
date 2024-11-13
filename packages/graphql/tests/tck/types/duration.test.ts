@@ -157,7 +157,7 @@ describe("Cypher Duration", () => {
     test("Simple Update", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(update: { duration: "P4D" }) {
+                updateMovies(update: { duration_SET: "P4D" }) {
                     movies {
                         id
                         duration
@@ -170,13 +170,13 @@ describe("Cypher Duration", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
-            SET this.duration = $this_update_duration
+            SET this.duration = $this_update_duration_SET
             RETURN collect(DISTINCT this { .id, .duration }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_update_duration\\": {
+                \\"this_update_duration_SET\\": {
                     \\"months\\": 0,
                     \\"days\\": 4,
                     \\"seconds\\": {

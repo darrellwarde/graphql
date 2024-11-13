@@ -116,7 +116,7 @@ describe("Plural directive", () => {
     test("Update Tech with plural techs using aggregation", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateTechs(update: { name: "Matrix" }) {
+                updateTechs(update: { name_SET: "Matrix" }) {
                     techs {
                         name
                     }
@@ -128,13 +128,13 @@ describe("Plural directive", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Tech)
-            SET this.name = $this_update_name
+            SET this.name = $this_update_name_SET
             RETURN collect(DISTINCT this { .name }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_update_name\\": \\"Matrix\\",
+                \\"this_update_name_SET\\": \\"Matrix\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);

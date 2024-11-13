@@ -87,16 +87,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
                         CREATE (:${testMovie.name} { id: "${movieId}" })
@@ -153,22 +153,22 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
-                        }
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
+                        }
+                    }
+                }
+            `;
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -317,16 +317,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
                         CREATE (:${testMovie.name} { id: "${movieId}" })
@@ -381,22 +381,22 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
-                        }
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
+                        }
+                    }
+                }
+            `;
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -547,16 +547,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
                         CREATE (:${testMovie.name} { id: "${movieId}" })
@@ -613,22 +613,22 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
-                        }
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
+                        }
+                    }
+                }
+            `;
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -777,20 +777,20 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
-                        CREATE (:${testMovie.name} { id: "${movieId}" })
-                    `);
+                CREATE (:${testMovie.name} { id: "${movieId}" })
+            `);
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -841,22 +841,22 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
-                        }
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
+                        }
+                    }
+                }
+            `;
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -906,16 +906,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -1005,20 +1005,20 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
-                        CREATE (:${testMovie.name} { id: "${movieId}" })
-                    `);
+                CREATE (:${testMovie.name} { id: "${movieId}" })
+            `);
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -1069,22 +1069,22 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
-                        }
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
+                        }
+                    }
+                }
+            `;
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -1233,20 +1233,20 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
-                        CREATE (:${testMovie.name} { id: "${movieId}" })
-                    `);
+                CREATE (:${testMovie.name} { id: "${movieId}" })
+            `);
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -1297,22 +1297,22 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
-                        }
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
+                        }
+                    }
+                }
+            `;
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -1465,9 +1465,9 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1623,16 +1623,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
                         CREATE (:${testMovie.name} { id: "${movieId}" })
@@ -1781,20 +1781,20 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
-                        CREATE (:${testMovie.name} { id: "${movieId}" })
-                    `);
+                CREATE (:${testMovie.name} { id: "${movieId}" })
+            `);
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -1939,9 +1939,9 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
                             ${testMovie.plural} {
                                 id
                                 callback
@@ -1951,8 +1951,8 @@ describe("@populatedBy directive - Node properties", () => {
                 `;
 
             await testHelper.executeCypher(`
-                        CREATE (:${testMovie.name} { id: "${movieId}" })
-                    `);
+                CREATE (:${testMovie.name} { id: "${movieId}" })
+            `);
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -2097,20 +2097,20 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
-                        CREATE (:${testMovie.name} { id: "${movieId}" })
-                    `);
+                CREATE (:${testMovie.name} { id: "${movieId}" })
+            `);
 
             const result = await testHelper.executeGraphQL(mutation);
 
@@ -2255,16 +2255,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
                         CREATE (:${testMovie.name} { id: "${movieId}" })
@@ -2359,16 +2359,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
                         CREATE (:${testMovie.name} { id: "${movieId}", callback: "${string1}" })
@@ -2415,16 +2415,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             await testHelper.executeCypher(`
                         CREATE (:${testMovie.name} { id: "${movieId}", callback: "${string1}" })
@@ -2504,7 +2504,7 @@ describe("@populatedBy directive - Node properties", () => {
 
         test("should have access to parent in callback function for UPDATE", async () => {
             const testMovie = testHelper.createUniqueType("Movie");
-            const callback = (parent) => `${parent.title}-slug`;
+            const callback = (parent) => `${parent.title_SET}-slug`;
 
             const typeDefs = /* GraphQL */ `
                     type ${testMovie.name} @node {
@@ -2529,9 +2529,9 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
+            const mutation = /* GraphQL */ `
                     mutation {
-                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}", title: "${movieTitle}" }) {
+                        ${testMovie.operations.update}(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}", title_SET: "${movieTitle}" }) {
                             ${testMovie.plural} {
                                 id
                                 title
@@ -2694,16 +2694,16 @@ describe("@populatedBy directive - Node properties", () => {
 
             const movieId = "movie_id";
 
-            const mutation = `
-                    mutation {
-                        ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
-                            ${testMovie.plural} {
-                                id
-                                callback
-                            }
+            const mutation = /* GraphQL */ `
+                mutation {
+                    ${testMovie.operations.create}(input: [{ id: "${movieId}" }]) {
+                        ${testMovie.plural} {
+                            id
+                            callback
                         }
                     }
-                `;
+                }
+            `;
 
             const result = await testHelper.executeGraphQL(mutation);
 

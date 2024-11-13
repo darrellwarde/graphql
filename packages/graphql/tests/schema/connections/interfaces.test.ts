@@ -225,7 +225,8 @@ describe("Connection with interfaces", () => {
             }
 
             input CreatureUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               movies: CreatureMoviesUpdateFieldInput
             }
 
@@ -394,8 +395,10 @@ describe("Connection with interfaces", () => {
 
             input MovieUpdateInput {
               director: [MovieDirectorUpdateFieldInput!]
-              id: ID
-              title: String
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
@@ -591,7 +594,8 @@ describe("Connection with interfaces", () => {
             }
 
             input PersonUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               movies: PersonMoviesUpdateFieldInput
             }
 
@@ -753,7 +757,8 @@ describe("Connection with interfaces", () => {
 
             input ProductionUpdateInput {
               director: [ProductionDirectorUpdateFieldInput!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input ProductionWhere {
@@ -959,11 +964,14 @@ describe("Connection with interfaces", () => {
 
             input SeriesUpdateInput {
               director: [SeriesDirectorUpdateFieldInput!]
-              episode: Int
+              episode: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episode_DECREMENT: Int
               episode_INCREMENT: Int
-              id: ID
-              title: String
+              episode_SET: Int
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input SeriesWhere {

@@ -763,7 +763,7 @@ describe("interface with declared relationships", () => {
 
         const query = /* GraphQL */ `
             mutation {
-                ${Actor.operations.update}(update: { actedIn: [{ update: { node: { actors: [{ update: { edge: { ActedIn: { screenTime: 0 } } } }] } } }] }) {
+                ${Actor.operations.update}(update: { actedIn: [{ update: { node: { actors: [{ update: { edge: { ActedIn: { screenTime_SET: 0 } } } }] } } }] }) {
                     ${Actor.plural} {
                         name
                         actedInConnection {
@@ -1045,7 +1045,13 @@ describe("interface with declared relationships", () => {
                         update: { 
                             node: { 
                                 actors: [{ 
-                                    create: { node: { name: "custom actor" }, edge: { ActedIn: { screenTime: 101 }, StarredIn: { episodeNr: 101 } } } 
+                                    create: { 
+                                        node: { name: "custom actor" },
+                                        edge: { 
+                                            ActedIn: { screenTime: 101 }, 
+                                            StarredIn: { episodeNr: 101 } 
+                                        } 
+                                    } 
                                 }] 
                             } 
                         } 

@@ -235,7 +235,7 @@ describe("Cypher Auth Allow", () => {
     test("Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { id_EQ: "id-01" }, update: { id: "not bound" }) {
+                updateUsers(where: { id_EQ: "id-01" }, update: { id_SET: "not bound" }) {
                     users {
                         id
                     }
@@ -251,7 +251,7 @@ describe("Cypher Auth Allow", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:User)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             WITH this
             WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             RETURN collect(DISTINCT this { .id }) AS data"
@@ -260,7 +260,7 @@ describe("Cypher Auth Allow", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"id-01\\",
-                \\"this_update_id\\": \\"not bound\\",
+                \\"this_update_id_SET\\": \\"not bound\\",
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [
@@ -281,7 +281,7 @@ describe("Cypher Auth Allow", () => {
                     update: {
                         posts: {
                             where: { node: { id_EQ: "post-id" } }
-                            update: { node: { creator: { update: { node: { id: "not bound" } } } } }
+                            update: { node: { creator: { update: { node: { id_SET: "not bound" } } } } }
                         }
                     }
                 ) {
@@ -309,7 +309,7 @@ describe("Cypher Auth Allow", () => {
             	CALL {
             		WITH this, this_posts0
             		MATCH (this_posts0)<-[this_posts0_has_post0_relationship:HAS_POST]-(this_posts0_creator0:User)
-            		SET this_posts0_creator0.id = $this_update_posts0_creator0_id
+            		SET this_posts0_creator0.id = $this_update_posts0_creator0_id_SET
             		WITH this, this_posts0, this_posts0_creator0
             		WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this_posts0_creator0.id = $jwt.sub)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             		RETURN count(*) AS update_this_posts0_creator0
@@ -333,7 +333,7 @@ describe("Cypher Auth Allow", () => {
             "{
                 \\"param0\\": \\"id-01\\",
                 \\"updateUsers_args_update_posts0_where_this_posts0param0\\": \\"post-id\\",
-                \\"this_update_posts0_creator0_id\\": \\"not bound\\",
+                \\"this_update_posts0_creator0_id_SET\\": \\"not bound\\",
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [
@@ -356,7 +356,7 @@ describe("Cypher Auth Allow", () => {
                                             \\"creator\\": {
                                                 \\"update\\": {
                                                     \\"node\\": {
-                                                        \\"id\\": \\"not bound\\"
+                                                        \\"id_SET\\": \\"not bound\\"
                                                     }
                                                 }
                                             }

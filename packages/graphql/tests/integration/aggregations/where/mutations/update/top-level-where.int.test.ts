@@ -77,7 +77,7 @@ describe("Delete using top level aggregate where", () => {
     });
 
     test("Implicit AND", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${postType.operations.update}(
                     where: { 
@@ -88,7 +88,7 @@ describe("Delete using top level aggregate where", () => {
                             }
                         }
                     }
-                    update: { content: "${updatedContent}" }
+                    update: { content_SET: "${updatedContent}" }
                 ) {
                     ${postType.plural} {
                         id

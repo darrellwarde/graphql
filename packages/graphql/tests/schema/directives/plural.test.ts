@@ -135,8 +135,10 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String
-              value: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input TechWhere {
@@ -292,8 +294,10 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String
-              value: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input TechWhere {
@@ -449,8 +453,10 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String
-              value: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input TechWhere {
@@ -608,7 +614,8 @@ describe("Plural option", () => {
             }
 
             input TechsUpdateInput {
-              value: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input TechsWhere {
@@ -769,7 +776,8 @@ describe("Plural option", () => {
             }
 
             input UserUpdateInput {
-              value: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input UserWhere {
@@ -909,7 +917,8 @@ describe("Plural option", () => {
             }
 
             input UserUpdateInput {
-              value: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input UserWhere {
@@ -1061,7 +1070,8 @@ describe("Plural option", () => {
             }
 
             input UsersUpdateInput {
-              value: String
+              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              value_SET: String
             }
 
             input UsersWhere {

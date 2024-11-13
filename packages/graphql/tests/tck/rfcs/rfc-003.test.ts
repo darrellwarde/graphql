@@ -342,7 +342,7 @@ describe("tck/rfs/003", () => {
 
                     const mutation = /* GraphQL */ `
                         mutation {
-                            updateMovies(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
+                            updateMovies(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
                                 info {
                                     nodesCreated
                                 }
@@ -355,7 +355,7 @@ describe("tck/rfs/003", () => {
                     expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                         "MATCH (this:Movie)
                         WHERE this.id = $param0
-                        SET this.id = $this_update_id
+                        SET this.id = $this_update_id_SET
                         WITH *
                         CALL {
                         	WITH this
@@ -370,7 +370,7 @@ describe("tck/rfs/003", () => {
                     expect(formatParams(result.params)).toMatchInlineSnapshot(`
                         "{
                             \\"param0\\": \\"movieId-3\\",
-                            \\"this_update_id\\": \\"movieId-3\\",
+                            \\"this_update_id_SET\\": \\"movieId-3\\",
                             \\"resolvedCallbacks\\": {}
                         }"
                     `);
@@ -394,7 +394,7 @@ describe("tck/rfs/003", () => {
 
                     const mutation = /* GraphQL */ `
                         mutation {
-                            updateMovies(where: { id_EQ: "${movieId}" }, update: { id: "${movieId}" }) {
+                            updateMovies(where: { id_EQ: "${movieId}" }, update: { id_SET: "${movieId}" }) {
                                 info {
                                     nodesCreated
                                 }
@@ -407,7 +407,7 @@ describe("tck/rfs/003", () => {
                     expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                         "MATCH (this:Movie)
                         WHERE this.id = $param0
-                        SET this.id = $this_update_id
+                        SET this.id = $this_update_id_SET
                         WITH *
                         CALL {
                         	WITH this
@@ -422,7 +422,7 @@ describe("tck/rfs/003", () => {
                     expect(formatParams(result.params)).toMatchInlineSnapshot(`
                         "{
                             \\"param0\\": \\"movieId-3\\",
-                            \\"this_update_id\\": \\"movieId-3\\",
+                            \\"this_update_id_SET\\": \\"movieId-3\\",
                             \\"resolvedCallbacks\\": {}
                         }"
                     `);
@@ -455,7 +455,7 @@ describe("tck/rfs/003", () => {
                             mutation {
                                 updateMovies(
                                   where: { id_EQ: "${movieId}" }
-                                  update: { director: { update: { node: { id: "${directorId}" } } } }
+                                  update: { director: { update: { node: { id_SET: "${directorId}" } } } }
                                 ) {
                                   info {
                                     nodesCreated
@@ -473,7 +473,7 @@ describe("tck/rfs/003", () => {
                             CALL {
                             	WITH this
                             	MATCH (this)<-[this_directed0_relationship:DIRECTED]-(this_director0:Director)
-                            	SET this_director0.id = $this_update_director0_id
+                            	SET this_director0.id = $this_update_director0_id_SET
                             	WITH this, this_director0
                             	CALL {
                             		WITH this_director0
@@ -498,7 +498,7 @@ describe("tck/rfs/003", () => {
                         expect(formatParams(result.params)).toMatchInlineSnapshot(`
                             "{
                                 \\"param0\\": \\"movieId-4\\",
-                                \\"this_update_director0_id\\": \\"directorId-3\\",
+                                \\"this_update_director0_id_SET\\": \\"directorId-3\\",
                                 \\"resolvedCallbacks\\": {}
                             }"
                         `);
@@ -530,7 +530,7 @@ describe("tck/rfs/003", () => {
                             mutation {
                                 updateMovies(
                                   where: { id_EQ: "${movieId}" }
-                                  update: { director: { update: { node: { id: "${directorId}" } } } }
+                                  update: { director: { update: { node: { id_SET: "${directorId}" } } } }
                                 ) {
                                   info {
                                     nodesCreated
@@ -548,7 +548,7 @@ describe("tck/rfs/003", () => {
                             CALL {
                             	WITH this
                             	MATCH (this)<-[this_directed0_relationship:DIRECTED]-(this_director0:Director)
-                            	SET this_director0.id = $this_update_director0_id
+                            	SET this_director0.id = $this_update_director0_id_SET
                             	WITH this, this_director0
                             	CALL {
                             		WITH this_director0
@@ -573,7 +573,7 @@ describe("tck/rfs/003", () => {
                         expect(formatParams(result.params)).toMatchInlineSnapshot(`
                             "{
                                 \\"param0\\": \\"movieId-4\\",
-                                \\"this_update_director0_id\\": \\"directorId-3\\",
+                                \\"this_update_director0_id_SET\\": \\"directorId-3\\",
                                 \\"resolvedCallbacks\\": {}
                             }"
                         `);

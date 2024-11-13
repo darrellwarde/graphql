@@ -44,10 +44,12 @@ export function withUpdateInputType({
     entityAdapter,
     userDefinedFieldDirectives,
     composer,
+    features,
 }: {
     entityAdapter: ConcreteEntityAdapter | InterfaceEntityAdapter | RelationshipAdapter;
     userDefinedFieldDirectives: Map<string, DirectiveNode[]>;
     composer: SchemaComposer;
+    features?: Neo4jFeaturesSettings;
 }): InputTypeComposer {
     const inputTypeName =
         entityAdapter instanceof RelationshipAdapter
@@ -64,10 +66,12 @@ export function withUpdateInputType({
 
     if (entityAdapter instanceof ConcreteEntityAdapter || entityAdapter instanceof RelationshipAdapter) {
         updateInputType.addFields(
-            concreteEntityToUpdateInputFields(entityAdapter.updateInputFields, userDefinedFieldDirectives, [
-                withMathOperators(),
-                withArrayOperators(),
-            ])
+            concreteEntityToUpdateInputFields({
+                objectFields: entityAdapter.updateInputFields,
+                userDefinedFieldDirectives,
+                additionalFieldsCallbacks: [withMathOperators(), withArrayOperators()],
+                features,
+            })
         );
     } else {
         const hasNestedRelationships = entityAdapter.relationshipDeclarations.size > 0;
@@ -77,9 +81,12 @@ export function withUpdateInputType({
         }
 
         updateInputType.addFields(
-            concreteEntityToUpdateInputFields(entityAdapter.updateInputFields, userDefinedFieldDirectives, [
-                withMathOperators(),
-            ])
+            concreteEntityToUpdateInputFields({
+                objectFields: entityAdapter.updateInputFields,
+                userDefinedFieldDirectives,
+                additionalFieldsCallbacks: [withMathOperators()],
+                features,
+            })
         );
     }
     return updateInputType;
@@ -238,7 +245,6 @@ function makeUpdateFieldInputTypeFields({
             relationshipAdapter,
             memberEntity: ifUnionMemberEntity,
             composer,
-            features,
         });
     }
     if (connectionWhereInputType) {
@@ -295,7 +301,6 @@ function makeUpdateFieldInputTypeFields({
         relationshipAdapter,
         ifUnionMemberEntity,
         composer,
-        features,
     });
     if (deleteFieldInputType) {
         fields["delete"] = {

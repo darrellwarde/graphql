@@ -30,7 +30,7 @@ import createCreateAndParams from "./create-create-and-params";
 import createDeleteAndParams from "./create-delete-and-params";
 import createDisconnectAndParams from "./create-disconnect-and-params";
 import { createRelationshipValidationString } from "./create-relationship-validation-string";
-import createSetRelationshipPropertiesAndParams from "./create-set-relationship-properties-and-params";
+import { createSetRelationshipProperties } from "./create-set-relationship-properties";
 import createUpdateAndParams from "./create-update-and-params";
 import { QueryASTContext, QueryASTEnv } from "./queryAST/ast/QueryASTContext";
 import { QueryASTFactory } from "./queryAST/factory/QueryASTFactory";
@@ -363,15 +363,20 @@ export default async function translateUpdate({
                             (x) => x.properties === relationField.properties
                         ) as unknown as Relationship;
 
-                        const setA = createSetRelationshipPropertiesAndParams({
+                        const setA = createSetRelationshipProperties({
                             properties: create.edge ?? {},
                             varName: propertiesName,
+                            withVars,
                             relationship,
                             operation: "CREATE",
                             callbackBucket,
+                            parameterPrefix: "",
+                            parameterNotation: ".",
                         });
-                        createStrs.push(setA[0]);
-                        cypherParams = { ...cypherParams, ...setA[1] };
+                        if (setA) {
+                            createStrs.push(setA[0]);
+                            cypherParams = { ...cypherParams, ...setA[1] };
+                        }
                     }
 
                     creates.push(...getAuthorizationStatements(authorizationPredicates, authorizationSubqueries));

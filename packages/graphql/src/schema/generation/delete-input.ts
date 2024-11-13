@@ -89,7 +89,6 @@ function makeDeleteInputType({
     relationshipAdapter,
     composer,
     deprecatedDirectives,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
@@ -97,9 +96,9 @@ function makeDeleteInputType({
     features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposer | undefined {
     if (relationshipAdapter.target instanceof UnionEntityAdapter) {
-        return withUnionDeleteInputType({ relationshipAdapter, composer, deprecatedDirectives, features });
+        return withUnionDeleteInputType({ relationshipAdapter, composer, deprecatedDirectives });
     }
-    return withDeleteFieldInputType({ relationshipAdapter, composer, features });
+    return withDeleteFieldInputType({ relationshipAdapter, composer });
 }
 function makeDeleteInputTypeRelationshipField({
     relationshipAdapter,
@@ -130,12 +129,10 @@ export function withUnionDeleteInputType({
     relationshipAdapter,
     composer,
     deprecatedDirectives,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
     deprecatedDirectives: Directive[];
-    features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposer | undefined {
     const typeName = relationshipAdapter.operations.unionDeleteInputTypeName;
     if (!relationshipAdapter.nestedOperations.has(RelationshipNestedOperationsOption.DELETE)) {
@@ -144,7 +141,7 @@ export function withUnionDeleteInputType({
     if (composer.has(typeName)) {
         return composer.getITC(typeName);
     }
-    const fields = makeUnionDeleteInputTypeFields({ relationshipAdapter, composer, deprecatedDirectives, features });
+    const fields = makeUnionDeleteInputTypeFields({ relationshipAdapter, composer, deprecatedDirectives });
     if (!Object.keys(fields).length) {
         return;
     }
@@ -159,12 +156,10 @@ function makeUnionDeleteInputTypeFields({
     relationshipAdapter,
     composer,
     deprecatedDirectives,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
     deprecatedDirectives: Directive[];
-    features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposerFieldConfigMapDefinition {
     const fields: InputTypeComposerFieldConfigMapDefinition = {};
     if (!(relationshipAdapter.target instanceof UnionEntityAdapter)) {
@@ -175,7 +170,6 @@ function makeUnionDeleteInputTypeFields({
             relationshipAdapter,
             ifUnionMemberEntity: memberEntity,
             composer,
-            features,
         });
         if (fieldInput) {
             fields[memberEntity.name] = {
@@ -191,12 +185,10 @@ export function withDeleteFieldInputType({
     relationshipAdapter,
     composer,
     ifUnionMemberEntity,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
     ifUnionMemberEntity?: ConcreteEntityAdapter;
-    features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposer | undefined {
     const typeName = relationshipAdapter.operations.getDeleteFieldInputTypeName(ifUnionMemberEntity);
     if (!relationshipAdapter.nestedOperations.has(RelationshipNestedOperationsOption.DELETE)) {
@@ -207,7 +199,7 @@ export function withDeleteFieldInputType({
     }
     const disconnectFieldInput = composer.createInputTC({
         name: typeName,
-        fields: makeDeleteFieldInputTypeFields({ relationshipAdapter, composer, ifUnionMemberEntity, features }),
+        fields: makeDeleteFieldInputTypeFields({ relationshipAdapter, composer, ifUnionMemberEntity }),
     });
     return disconnectFieldInput;
 }
@@ -215,12 +207,10 @@ function makeDeleteFieldInputTypeFields({
     relationshipAdapter,
     composer,
     ifUnionMemberEntity,
-    features,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
     ifUnionMemberEntity?: ConcreteEntityAdapter;
-    features: Neo4jFeaturesSettings | undefined;
 }): InputTypeComposerFieldConfigMapDefinition {
     const fields = {};
     if (relationshipAdapter.target instanceof ConcreteEntityAdapter) {
@@ -254,7 +244,6 @@ function makeDeleteFieldInputTypeFields({
             relationshipAdapter,
             memberEntity: ifUnionMemberEntity,
             composer,
-            features,
         });
         if (ifUnionMemberEntity.relationships.size) {
             const deleteInput = withDeleteInputType({ entityAdapter: ifUnionMemberEntity, composer });

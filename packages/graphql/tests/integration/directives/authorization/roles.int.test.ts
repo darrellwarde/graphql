@@ -383,7 +383,7 @@ describe("auth/roles", () => {
 
     describe("update", () => {
         test("should throw if missing role on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -398,9 +398,9 @@ describe("auth/roles", () => {
                 }
             `;
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${typeUser.operations.update}(update: { id: "1" }) {
+                    ${typeUser.operations.update}(update: { id_SET: "1" }) {
                         ${typeUser.plural} {
                             id
                         }
@@ -425,7 +425,7 @@ describe("auth/roles", () => {
         });
 
         test("should throw if missing role on field definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -440,9 +440,9 @@ describe("auth/roles", () => {
                 }
             `;
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${typeUser.operations.update}(update: { password: "1" }) {
+                    ${typeUser.operations.update}(update: { password_SET: "1" }) {
                         ${typeUser.plural} {
                             password
                         }
@@ -469,7 +469,7 @@ describe("auth/roles", () => {
 
     describe("connect", () => {
         test("should throw if missing role", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -508,9 +508,9 @@ describe("auth/roles", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${typeUser.operations.update}(update: { id: "${userId}", posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
+                    ${typeUser.operations.update}(update: { id_SET: "${userId}", posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${typeUser.plural} {
                             id
                         }
@@ -629,7 +629,7 @@ describe("auth/roles", () => {
 
     describe("disconnect", () => {
         test("should throw if missing role", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -668,9 +668,9 @@ describe("auth/roles", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${typeUser.operations.update}(update: { id: "${userId}", posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
+                    ${typeUser.operations.update}(update: { id_SET: "${userId}", posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${typeUser.plural} {
                             id
                         }

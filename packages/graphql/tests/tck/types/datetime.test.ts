@@ -118,7 +118,7 @@ describe("Cypher DateTime", () => {
     test("Simple Update", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(update: { datetime: "1970-01-01T00:00:00.000Z" }) {
+                updateMovies(update: { datetime_SET: "1970-01-01T00:00:00.000Z" }) {
                     movies {
                         id
                         datetime
@@ -131,13 +131,13 @@ describe("Cypher DateTime", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
-            SET this.datetime = $this_update_datetime
+            SET this.datetime = $this_update_datetime_SET
             RETURN collect(DISTINCT this { .id, datetime: apoc.date.convertFormat(toString(this.datetime), \\"iso_zoned_date_time\\", \\"iso_offset_date_time\\") }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_update_datetime\\": {
+                \\"this_update_datetime_SET\\": {
                     \\"year\\": 1970,
                     \\"month\\": 1,
                     \\"day\\": 1,

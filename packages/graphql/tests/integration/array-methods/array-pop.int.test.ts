@@ -760,7 +760,7 @@ describe("array-pop", () => {
     test("should be possible to update Point relationship properties", async () => {
         const movie = testHelper.createUniqueType("Movie");
         const actor = testHelper.createUniqueType("Actor");
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${movie.name} @node {
                 title: String
                 actors: [${actor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)

@@ -319,7 +319,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input GenreUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               product: [GenreProductUpdateFieldInput!]
             }
 
@@ -423,9 +424,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input IProductUpdateInput {
-              id: String
-              info: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              info_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input IProductWhere {
@@ -645,8 +649,10 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieUpdateInput {
               genre: MovieGenreUpdateFieldInput
-              id: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type MovieUpdatedEvent {
@@ -1053,7 +1059,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input GenreUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               product: [GenreProductUpdateFieldInput!]
             }
 
@@ -1259,9 +1266,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input IProductUpdateInput {
               genre: IProductGenreUpdateFieldInput
-              id: String
-              info: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              info_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input IProductWhere {
@@ -1452,8 +1462,10 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieUpdateInput {
               genre: MovieGenreUpdateFieldInput
-              id: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type MovieUpdatedEvent {
@@ -1873,7 +1885,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input GenreUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               product: [GenreProductUpdateFieldInput!]
             }
 
@@ -2081,9 +2094,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input IProductUpdateInput {
               genre: IProductGenreUpdateFieldInput
-              id: String
-              info: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              info_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input IProductWhere {
@@ -2274,8 +2290,10 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input MovieUpdateInput {
               genre: MovieGenreUpdateFieldInput
-              id: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type MovieUpdatedEvent {
@@ -2517,9 +2535,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input SeriesUpdateInput {
               genre: SeriesGenreUpdateFieldInput
-              id: String
-              info: String
-              name: String
+              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: String
+              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              info_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             type SeriesUpdatedEvent {

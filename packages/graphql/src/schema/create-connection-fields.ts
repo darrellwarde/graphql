@@ -55,6 +55,7 @@ export function createConnectionFields({
             source: relationship.source.name,
             target: relationship.target.name,
             properties: relationship instanceof RelationshipAdapter ? relationship.propertiesTypeName : undefined,
+            relationshipFieldName: relationship.name,
             ...(relFields
                 ? {
                       temporalFields: relFields.temporalFields,

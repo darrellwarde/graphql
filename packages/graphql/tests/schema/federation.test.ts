@@ -261,7 +261,8 @@ describe("Apollo Federation", () => {
 
             input PostUpdateInput {
               author: PostAuthorUpdateFieldInput
-              content: String
+              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              content_SET: String
             }
 
             type PostUserAuthorAggregationSelection {
@@ -494,7 +495,8 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
               posts: [UserPostsUpdateFieldInput!]
             }
 
@@ -786,7 +788,8 @@ describe("Apollo Federation", () => {
 
             input PostUpdateInput {
               author: PostAuthorUpdateFieldInput
-              content: String
+              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              content_SET: String
             }
 
             type PostUserAuthorAggregationSelection {
@@ -902,7 +905,8 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input UserWhere {

@@ -798,7 +798,7 @@ describe("auth/is-authenticated", () => {
 
     describe("update", () => {
         test("should not throw if authenticated on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User}  @authentication(operations: [UPDATE])  @node {
                     id: ID
                     name: String
@@ -814,9 +814,9 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { id: "1" }) {
+                    ${User.operations.update}(update: { id_SET: "1" }) {
                         ${User.plural} {
                             id
                         }
@@ -832,7 +832,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if authenticated with correct role on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -852,9 +852,9 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { id: "1" }) {
+                    ${User.operations.update}(update: { id_SET: "1" }) {
                         ${User.plural} {
                             id
                         }
@@ -870,7 +870,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if not authenticated on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User}  @authentication(operations: [UPDATE])  @node {
                     id: ID
                     name: String
@@ -886,9 +886,9 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { id: "1" }) {
+                    ${User.operations.update}(update: { id_SET: "1" }) {
                         ${User.plural} {
                             id
                         }
@@ -908,7 +908,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if authenticated with incorrect role on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -927,9 +927,9 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { id: "1" }) {
+                    ${User.operations.update}(update: { id_SET: "1" }) {
                         ${User.plural} {
                             id
                         }
@@ -945,7 +945,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if authenticated on field definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [UPDATE]) 
@@ -961,9 +961,9 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { id: "1" }) {
+                    ${User.operations.update}(update: { id_SET: "1" }) {
                         ${User.plural} {
                             id
                         }
@@ -979,7 +979,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if authenticated with correct role on field definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -999,9 +999,9 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { id: "1" }) {
+                    ${User.operations.update}(update: { id_SET: "1" }) {
                         ${User.plural} {
                             id
                         }
@@ -1017,7 +1017,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if not authenticated on field definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                     password: String  @authentication(operations: [UPDATE]) 
@@ -1033,9 +1033,9 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { password: "1" }) {
+                    ${User.operations.update}(update: { password_SET: "1" }) {
                         ${User.plural} {
                             password
                         }
@@ -1055,7 +1055,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if authenticated with incorrect role on field definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1074,9 +1074,9 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { password: "1" }) {
+                    ${User.operations.update}(update: { password_SET: "1" }) {
                         ${User.plural} {
                             password
                         }
@@ -1096,7 +1096,7 @@ describe("auth/is-authenticated", () => {
         test("should not throw if authenticated", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${Post} @node {
                     id: String
                     content: String
@@ -1132,7 +1132,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1157,7 +1157,7 @@ describe("auth/is-authenticated", () => {
         test("should not throw if authenticated with correct role", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1197,7 +1197,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1222,7 +1222,7 @@ describe("auth/is-authenticated", () => {
         test("should not throw if authenticated with correct role at nested level", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1259,7 +1259,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1284,7 +1284,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if not authenticated", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${Post} @node {
                     id: String
                     content: String
@@ -1320,7 +1320,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1350,7 +1350,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if not authenticated at nested level", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${Post} @node {
                     id: String
                     content: String
@@ -1383,7 +1383,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1413,7 +1413,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if authenticated with incorrect roles", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1453,7 +1453,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1478,7 +1478,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if authenticated with incorrect roles at nested level", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1515,7 +1515,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { connect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1542,7 +1542,7 @@ describe("auth/is-authenticated", () => {
         test("should not throw if authenticated", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphLQ */ `
                 type ${Post} @node {
                     id: String
                     content: String
@@ -1578,7 +1578,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphLQ */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1603,7 +1603,7 @@ describe("auth/is-authenticated", () => {
         test("should not throw if authenticated with correct role", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1643,7 +1643,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1668,7 +1668,7 @@ describe("auth/is-authenticated", () => {
         test("should not throw if authenticated with correct role at nested level", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1705,7 +1705,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1730,7 +1730,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if not authenticated", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${Post} @node {
                     id: String
                     content: String
@@ -1766,7 +1766,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1796,7 +1796,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if not authenticated at nested level", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${Post} @node {
                     id: String
                     content: String
@@ -1829,7 +1829,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1859,7 +1859,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if authenticated with incorrect roles", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1899,7 +1899,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1924,7 +1924,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if authenticated with incorrect roles at nested level", async () => {
             const Post = testHelper.createUniqueType("Post");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -1961,7 +1961,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.update}(where: { id_EQ: "${userId}" }, update: { posts: { disconnect: { where: { node: { id_EQ: "${postId}" } } } } }) {
                         ${User.plural} {
@@ -1986,7 +1986,7 @@ describe("auth/is-authenticated", () => {
 
     describe("delete", () => {
         test("should not throw if authenticated on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @authentication(operations: [DELETE])  @node {
                     id: ID
                     name: String
@@ -2002,7 +2002,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.delete} {
                         nodesDeleted
@@ -2018,7 +2018,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if authenticated with correct role on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2038,7 +2038,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.delete} {
                         nodesDeleted
@@ -2054,7 +2054,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if not authenticated on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @authentication(operations: [DELETE])  @node {
                     id: ID
                     name: String
@@ -2070,7 +2070,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.delete} {
                         nodesDeleted
@@ -2090,7 +2090,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if not authenticated on type definition (with nested delete)", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                     name: String
@@ -2120,7 +2120,7 @@ describe("auth/is-authenticated", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.delete}(where: {id_EQ: "${userId}"}, delete:{ posts: {where:{node: { id_EQ: "${postId}"}}} }) {
                         nodesDeleted
@@ -2144,7 +2144,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if authenticated with incorrect roles on type definition", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2164,7 +2164,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.delete} {
                         nodesDeleted
@@ -2180,7 +2180,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if authenticated with incorrect roles on type definition (with nested delete)", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2214,7 +2214,7 @@ describe("auth/is-authenticated", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.delete}(where: {id_EQ: "${userId}"}, delete:{posts: {where:{node: { id_EQ: "${postId}"}}} }) {
                         nodesDeleted
@@ -2234,7 +2234,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if not authenticated on type definition (with nested delete) on field", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                     name: String
@@ -2264,7 +2264,7 @@ describe("auth/is-authenticated", () => {
                 charset: "alphabetic",
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.delete}(where: {id_EQ: "${userId}"}, delete:{ posts: {where:{node: { id_EQ: "${postId}"}}} }) {
                         nodesDeleted
@@ -2290,7 +2290,7 @@ describe("auth/is-authenticated", () => {
 
     describe("custom-resolvers", () => {
         test("should not throw if authenticated on custom Query with @cypher", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @mutation(operations: []) @query(read: false, aggregate: false) @node {
                     id: ID
                     name: String
@@ -2310,7 +2310,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 query {
                     users {
                         id
@@ -2326,7 +2326,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if authenticated with correct roles on custom Query with @cypher", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2350,7 +2350,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 query {
                     users {
                         id
@@ -2366,7 +2366,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if not authenticated on custom Query with @cypher", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @mutation(operations: []) @query(read: false, aggregate: false) @node {
                     id: ID
                     name: String
@@ -2386,7 +2386,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 query {
                     users {
                         id
@@ -2406,7 +2406,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if authenticated with incorrect role on custom Query with @cypher", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2430,7 +2430,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 query {
                     users {
                         id
@@ -2446,7 +2446,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if authenticated on custom Mutation with @cypher", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                     name: String
@@ -2466,7 +2466,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     createUser {
                         id
@@ -2482,7 +2482,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if authenticated with correct role on custom Mutation with @cypher", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2506,7 +2506,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     createUser {
                         id
@@ -2522,7 +2522,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if not authenticated on custom Mutation with @cypher", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                     name: String
@@ -2542,7 +2542,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     createUser {
                         id
@@ -2562,7 +2562,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if authenticated with incorrect role on custom Mutation with @cypher", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2586,7 +2586,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 mutation {
                     createUser {
                         id
@@ -2604,7 +2604,7 @@ describe("auth/is-authenticated", () => {
         test("should not throw if authenticated on Field definition @cypher", async () => {
             const History = testHelper.createUniqueType("History");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${History} @node {
                     url: String
                 }
@@ -2626,7 +2626,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 {
                     ${User.plural} {
                         history {
@@ -2646,7 +2646,7 @@ describe("auth/is-authenticated", () => {
         test("should not throw if authenticated with correct role on Field definition @cypher", async () => {
             const History = testHelper.createUniqueType("History");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2672,7 +2672,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 {
                     ${User.plural} {
                         history {
@@ -2692,7 +2692,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if not authenticated on Field definition @cypher", async () => {
             const History = testHelper.createUniqueType("History");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${History} @node {
                     url: String
                 }
@@ -2714,7 +2714,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 {
                     ${User.plural} {
                         history {
@@ -2738,7 +2738,7 @@ describe("auth/is-authenticated", () => {
         test("should throw if authenticated with incorrect role on Field definition @cypher", async () => {
             const History = testHelper.createUniqueType("History");
 
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     roles: [String!]!
                 }
@@ -2764,7 +2764,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 {
                     ${User.plural} {
                         history {
@@ -2782,7 +2782,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if decoded JWT passed in context", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type ${Product} @authentication(operations: [READ])  @node {
                     id: ID
                     name: String
@@ -2798,7 +2798,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 {
                     ${Product.plural} {
                         id
@@ -2820,7 +2820,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should not throw if decoded JWT passed in context matches claim", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     name: String!
                 }
@@ -2840,7 +2840,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 {
                     ${Product.plural} {
                         id
@@ -2862,7 +2862,7 @@ describe("auth/is-authenticated", () => {
         });
 
         test("should throw if decoded JWT passed in context does not matches claim", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                 type JWTPayload @jwt {
                     name: String!
                 }
@@ -2882,7 +2882,7 @@ describe("auth/is-authenticated", () => {
                 },
             });
 
-            const query = `
+            const query = /* GraphQL */ `
                 {
                     ${Product.plural} {
                         id
@@ -2907,7 +2907,7 @@ describe("auth/is-authenticated", () => {
     describe("schema", () => {
         describe("read", () => {
             beforeEach(async () => {
-                const typeDefs = `
+                const typeDefs = /* GraphQL */ `
                 type ${Product} @node {
                     id: ID
                     name: String
@@ -2926,7 +2926,7 @@ describe("auth/is-authenticated", () => {
             });
 
             test("should throw if not authenticated type definition", async () => {
-                const query = `
+                const query = /* GraphQL */ `
                     {
                         ${Product.plural} {
                             id
@@ -2946,7 +2946,7 @@ describe("auth/is-authenticated", () => {
             });
 
             test("should not throw if authenticated type definition", async () => {
-                const query = `
+                const query = /* GraphQL */ `
                     {
                         ${Product.plural} {
                             id
@@ -2963,7 +2963,7 @@ describe("auth/is-authenticated", () => {
         });
         describe("create", () => {
             beforeEach(async () => {
-                const typeDefs = `
+                const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                     name: String
@@ -2982,7 +2982,7 @@ describe("auth/is-authenticated", () => {
             });
 
             test("should throw if not authenticated type definition", async () => {
-                const query = `
+                const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.create}(input: [{ id: "1" }]) {
                         ${User.plural} {
@@ -3004,7 +3004,7 @@ describe("auth/is-authenticated", () => {
             });
 
             test("should not throw if authenticated type definition", async () => {
-                const query = `
+                const query = /* GraphQL */ `
                 mutation {
                     ${User.operations.create}(input: [{ id: "1" }]) {
                         ${User.plural} {
@@ -3023,7 +3023,7 @@ describe("auth/is-authenticated", () => {
         });
         describe("update", () => {
             beforeEach(async () => {
-                const typeDefs = `
+                const typeDefs = /* GraphQL */ `
                 type ${User} @node {
                     id: ID
                     name: String
@@ -3042,9 +3042,9 @@ describe("auth/is-authenticated", () => {
             });
 
             test("should throw if not authenticated type definition", async () => {
-                const query = `
+                const query = /* GraphQL */ `
                 mutation {
-                    ${User.operations.update}(update: { id: "1" }) {
+                    ${User.operations.update}(update: { id_SET: "1" }) {
                         ${User.plural} {
                             id
                         }
@@ -3066,7 +3066,7 @@ describe("auth/is-authenticated", () => {
             test("should not throw if authenticated type definition", async () => {
                 const query = `
                 mutation {
-                    ${User.operations.update}(update: { id: "1" }) {
+                    ${User.operations.update}(update: { id_SET: "1" }) {
                         ${User.plural} {
                             id
                         }

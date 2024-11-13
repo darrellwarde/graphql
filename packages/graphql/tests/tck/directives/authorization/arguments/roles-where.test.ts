@@ -552,7 +552,7 @@ describe("Cypher Auth Where with Roles", () => {
     test("Update Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { name: "Bob" }) {
+                updateUsers(update: { name_SET: "Bob" }) {
                     users {
                         id
                     }
@@ -569,7 +569,7 @@ describe("Cypher Auth Where with Roles", () => {
             "MATCH (this:User)
             WITH *
             WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            SET this.name = $this_update_name
+            SET this.name = $this_update_name_SET
             WITH this
             WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             WITH *
@@ -590,7 +590,7 @@ describe("Cypher Auth Where with Roles", () => {
                 \\"update_param3\\": \\"admin\\",
                 \\"param2\\": \\"user\\",
                 \\"param3\\": \\"admin\\",
-                \\"this_update_name\\": \\"Bob\\",
+                \\"this_update_name_SET\\": \\"Bob\\",
                 \\"authorization__after_param2\\": \\"user\\",
                 \\"authorization__after_param3\\": \\"admin\\",
                 \\"resolvedCallbacks\\": {}
@@ -601,7 +601,7 @@ describe("Cypher Auth Where with Roles", () => {
     test("Update Node + User Defined Where", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(where: { name_EQ: "bob" }, update: { name: "Bob" }) {
+                updateUsers(where: { name_EQ: "bob" }, update: { name_SET: "Bob" }) {
                     users {
                         id
                     }
@@ -618,7 +618,7 @@ describe("Cypher Auth Where with Roles", () => {
             "MATCH (this:User)
             WITH *
             WHERE (this.name = $param0 AND apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $param3 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $param4 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
-            SET this.name = $this_update_name
+            SET this.name = $this_update_name_SET
             WITH this
             WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND ($jwt.sub IS NOT NULL AND this.id = $jwt.sub) AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             WITH *
@@ -640,7 +640,7 @@ describe("Cypher Auth Where with Roles", () => {
                 \\"param0\\": \\"bob\\",
                 \\"param3\\": \\"user\\",
                 \\"param4\\": \\"admin\\",
-                \\"this_update_name\\": \\"Bob\\",
+                \\"this_update_name_SET\\": \\"Bob\\",
                 \\"authorization__after_param2\\": \\"user\\",
                 \\"authorization__after_param3\\": \\"admin\\",
                 \\"resolvedCallbacks\\": {}
@@ -651,7 +651,7 @@ describe("Cypher Auth Where with Roles", () => {
     test("Update Nested Node", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateUsers(update: { posts: { update: { node: { id: "new-id" } } } }) {
+                updateUsers(update: { posts: { update: { node: { id_SET: "new-id" } } } }) {
                     users {
                         id
                         posts {
@@ -676,7 +676,7 @@ describe("Cypher Auth Where with Roles", () => {
             	WITH this
             	MATCH (this)-[this_has_post0_relationship:HAS_POST]->(this_posts0:Post)
             	WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__before_this0 IN [(this_posts0)<-[:HAS_POST]-(authorization__before_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__before_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-            	SET this_posts0.id = $this_update_posts0_id
+            	SET this_posts0.id = $this_update_posts0_id_SET
             	WITH this, this_posts0
             	WHERE apoc.util.validatePredicate(NOT (($isAuthenticated = true AND single(authorization__after_this0 IN [(this_posts0)<-[:HAS_POST]-(authorization__after_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__after_this0.id = $jwt.sub) | 1] WHERE true) AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             	WITH this, this_posts0
@@ -721,7 +721,7 @@ describe("Cypher Auth Where with Roles", () => {
                 \\"param3\\": \\"admin\\",
                 \\"authorization__before_param2\\": \\"user\\",
                 \\"authorization__before_param3\\": \\"admin\\",
-                \\"this_update_posts0_id\\": \\"new-id\\",
+                \\"this_update_posts0_id_SET\\": \\"new-id\\",
                 \\"authorization__after_param2\\": \\"user\\",
                 \\"authorization__after_param3\\": \\"admin\\",
                 \\"resolvedCallbacks\\": {}

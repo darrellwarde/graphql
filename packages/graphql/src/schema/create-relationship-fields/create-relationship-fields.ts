@@ -323,12 +323,7 @@ function createRelationshipFieldsForTarget({
     );
 
     composeNode.addFields(
-        augmentObjectOrInterfaceTypeWithConnectionField(
-            relationshipAdapter,
-            userDefinedFieldDirectives,
-            composer,
-            features
-        )
+        augmentObjectOrInterfaceTypeWithConnectionField(relationshipAdapter, userDefinedFieldDirectives, composer)
     );
 
     withRelationInputType({

@@ -166,9 +166,9 @@ describe("timestamp/time", () => {
                 charset: "alphabetic",
             });
 
-            const create = `
+            const create = /* GraphQL */ `
                     mutation ($id: ID!) {
-                        ${Movie.operations.update}(where: {id_EQ: $id}, update: { id: $id }) {
+                        ${Movie.operations.update}(where: {id_EQ: $id}, update: { id_SET: $id }) {
                             ${Movie.plural} {
                                 id
                             }
@@ -224,11 +224,11 @@ describe("timestamp/time", () => {
             });
             const screenTime = 60;
 
-            const update = `
+            const update = /* GraphQL */ `
                     mutation($title: String!, $screenTime: Int!) {
                         ${Movie.operations.update}(
                             where: { title_EQ: $title }
-                            update: { actors: [{ update: { edge: { screenTime: $screenTime } } }] }
+                            update: { actors: [{ update: { edge: { screenTime_SET: $screenTime } } }] }
                         ) {
                             ${Movie.plural} {
                                 actorsConnection {
@@ -407,11 +407,11 @@ describe("timestamp/time", () => {
             });
             const screenTime = 60;
 
-            const update = `
+            const update = /* GraphQL */ `
                     mutation($title: String!, $screenTime: Int!) {
                         ${Movie.operations.update}(
                             where: { title_EQ: $title }
-                            update: { actors: [{ update: { edge: { screenTime: $screenTime } } }] }
+                            update: { actors: [{ update: { edge: { screenTime_SET: $screenTime } } }] }
                         ) {
                             ${Movie.plural} {
                                 actorsConnection {
@@ -468,9 +468,9 @@ describe("timestamp/time", () => {
                 charset: "alphabetic",
             });
 
-            const create = `
+            const create = /* GraphQL */ `
                     mutation ($id: ID!) {
-                        ${Movie.operations.update}(where: {id_EQ: $id}, update: { id: $id }) {
+                        ${Movie.operations.update}(where: {id_EQ: $id}, update: { id_SET: $id }) {
                             ${Movie.plural} {
                                 id
                             }
@@ -609,7 +609,7 @@ describe("timestamp/time", () => {
         });
 
         test("update timestamp on relationship property", async () => {
-            const typeDefs = `
+            const typeDefs = /* GraphQL */ `
                     type ${Actor} @node {
                         name: String!
                     }
@@ -635,11 +635,11 @@ describe("timestamp/time", () => {
             });
             const screenTime = 60;
 
-            const update = `
+            const update = /* GraphQL */ `
                     mutation($title: String!, $screenTime: Int!) {
                         ${Movie.operations.update}(
                             where: { title_EQ: $title }
-                            update: { actors: [{ update: { edge: { screenTime: $screenTime } } }] }
+                            update: { actors: [{ update: { edge: { screenTime_SET: $screenTime } } }] }
                         ) {
                             ${Movie.plural} {
                                 actorsConnection {
@@ -696,9 +696,9 @@ describe("timestamp/time", () => {
                 charset: "alphabetic",
             });
 
-            const create = `
+            const create = /* GraphQL */ `
                     mutation ($id: ID!) {
-                        ${Movie.operations.update}(where: {id_EQ: $id}, update: { id: $id }) {
+                        ${Movie.operations.update}(where: {id_EQ: $id}, update: { id_SET: $id }) {
                             ${Movie.plural} {
                                 id
                             }

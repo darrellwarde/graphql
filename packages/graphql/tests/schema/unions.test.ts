@@ -111,7 +111,8 @@ describe("Unions", () => {
             }
 
             input GenreUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input GenreWhere {
@@ -318,7 +319,8 @@ describe("Unions", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               search: MovieSearchUpdateInput
             }
 

@@ -216,10 +216,12 @@ describe("Alias", () => {
             }
 
             input ActorActedInPropsUpdateInput {
-              character: String
-              screenTime: Int
+              character: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              character_SET: String
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
+              screenTime_SET: Int
             }
 
             input ActorActedInPropsWhere {
@@ -317,8 +319,10 @@ describe("Alias", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              city: String
-              name: String
+              city: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              city_SET: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
@@ -453,12 +457,14 @@ describe("Alias", () => {
             }
 
             input MovieUpdateInput {
-              rating: Float
+              rating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               rating_ADD: Float
               rating_DIVIDE: Float
               rating_MULTIPLY: Float
+              rating_SET: Float
               rating_SUBTRACT: Float
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {

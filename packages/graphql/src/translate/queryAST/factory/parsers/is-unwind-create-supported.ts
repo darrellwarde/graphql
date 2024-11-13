@@ -44,10 +44,6 @@ export function isUnwindCreateSupported(
     createArgs: Record<string, any>[],
     context: Neo4jGraphQLTranslationContext
 ): UnwindCreateSupported {
-    const isSubscriptionEnabled = checkSubscriptionEnabled(context);
-    if (!isSubscriptionEnabled.isSupported) {
-        return isSubscriptionEnabled;
-    }
     const isConcreteEntity = checkIsConcreteEntity(entityAdapter);
     if (!isConcreteEntity.isSupported) {
         return isConcreteEntity;
@@ -87,10 +83,6 @@ export function isUnwindCreateSupported(
         isSupported: true,
         reason: "",
     };
-}
-
-function checkSubscriptionEnabled(context: Neo4jGraphQLTranslationContext): UnwindCreateSupported {
-    return SUPPORTED;
 }
 
 function checkIsConcreteEntity(entityAdapter: EntityAdapter): UnwindCreateSupported {

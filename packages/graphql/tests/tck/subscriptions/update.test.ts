@@ -49,7 +49,7 @@ describe("Subscriptions metadata on update", () => {
     test("Simple update with subscriptions", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(where: { id_EQ: "1" }, update: { id: "2" }) {
+                updateMovies(where: { id_EQ: "1" }, update: { id_SET: "2" }) {
                     movies {
                         id
                     }
@@ -62,14 +62,14 @@ describe("Subscriptions metadata on update", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             RETURN collect(DISTINCT this { .id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_id\\": \\"2\\",
+                \\"this_update_id_SET\\": \\"2\\",
                 \\"resolvedCallbacks\\": {}
             }"
         `);
@@ -81,8 +81,8 @@ describe("Subscriptions metadata on update", () => {
                 updateMovies(
                     where: { id_EQ: "1" }
                     update: {
-                        id: "2"
-                        actors: [{ where: { node: { name_EQ: "arthur" } }, update: { node: { name: "ford" } } }]
+                        id_SET: "2"
+                        actors: [{ where: { node: { name_EQ: "arthur" } }, update: { node: { name_SET: "ford" } } }]
                     }
                 ) {
                     movies {
@@ -97,13 +97,13 @@ describe("Subscriptions metadata on update", () => {
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
             WHERE this.id = $param0
-            SET this.id = $this_update_id
+            SET this.id = $this_update_id_SET
             WITH this
             CALL {
             	WITH this
             	MATCH (this)<-[this_acted_in0_relationship:ACTED_IN]-(this_actors0:Actor)
             	WHERE this_actors0.name = $updateMovies_args_update_actors0_where_this_actors0param0
-            	SET this_actors0.name = $this_update_actors0_name
+            	SET this_actors0.name = $this_update_actors0_name_SET
             	RETURN count(*) AS update_this_actors0
             }
             RETURN collect(DISTINCT this { .id }) AS data"
@@ -112,13 +112,13 @@ describe("Subscriptions metadata on update", () => {
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"1\\",
-                \\"this_update_id\\": \\"2\\",
+                \\"this_update_id_SET\\": \\"2\\",
                 \\"updateMovies_args_update_actors0_where_this_actors0param0\\": \\"arthur\\",
-                \\"this_update_actors0_name\\": \\"ford\\",
+                \\"this_update_actors0_name_SET\\": \\"ford\\",
                 \\"updateMovies\\": {
                     \\"args\\": {
                         \\"update\\": {
-                            \\"id\\": \\"2\\",
+                            \\"id_SET\\": \\"2\\",
                             \\"actors\\": [
                                 {
                                     \\"where\\": {
@@ -128,7 +128,7 @@ describe("Subscriptions metadata on update", () => {
                                     },
                                     \\"update\\": {
                                         \\"node\\": {
-                                            \\"name\\": \\"ford\\"
+                                            \\"name_SET\\": \\"ford\\"
                                         }
                                     }
                                 }

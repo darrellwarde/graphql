@@ -18,21 +18,23 @@
  */
 
 import type {
-    PrimitiveField,
-    PointField,
     CustomEnumField,
-    CypherField,
-    CustomScalarField,
-    TemporalField,
     CustomResolverField,
+    CustomScalarField,
+    CypherField,
+    PointField,
+    PrimitiveField,
+    TemporalField,
 } from "../types";
 import { GraphElement } from "./GraphElement";
+import type { MutableField } from "./Node";
 
 interface RelationshipConstructor {
     name: string;
     type?: string;
     source: string; // temporary addition to infer the source using the schema model
     target: string; // temporary addition to infer the target using the schema model
+    relationshipFieldName: string; // temporary addition to infer the fieldName using the schema model
     description?: string;
     properties?: string;
     cypherFields?: CypherField[];
@@ -48,6 +50,7 @@ class Relationship extends GraphElement {
     public properties?: string;
     public source: string;
     public target: string;
+    public relationshipFieldName: string;
 
     constructor(input: RelationshipConstructor) {
         super({
@@ -65,6 +68,17 @@ class Relationship extends GraphElement {
         this.properties = input.properties;
         this.source = input.source;
         this.target = input.target;
+        this.relationshipFieldName = input.relationshipFieldName;
+    }
+    // Fields you can set in a create or update mutation
+    public get mutableFields(): MutableField[] {
+        return [
+            ...this.temporalFields,
+            ...this.enumFields,
+            ...this.scalarFields, // these are just custom scalars
+            ...this.primitiveFields, // these are instead built-in scalars
+            ...this.pointFields,
+        ];
     }
 }
 

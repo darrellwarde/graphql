@@ -142,7 +142,7 @@ describe("Cypher Time", () => {
     test("Simple Update", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(update: { time: "09:24:40.845512+06:30" }) {
+                updateMovies(update: { time_SET: "09:24:40.845512+06:30" }) {
                     movies {
                         id
                         time
@@ -155,13 +155,13 @@ describe("Cypher Time", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Movie)
-            SET this.time = $this_update_time
+            SET this.time = $this_update_time_SET
             RETURN collect(DISTINCT this { .id, .time }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"this_update_time\\": {
+                \\"this_update_time_SET\\": {
                     \\"hour\\": 9,
                     \\"minute\\": 24,
                     \\"second\\": 40,

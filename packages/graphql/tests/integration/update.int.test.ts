@@ -17,12 +17,11 @@
  * limitations under the License.
  */
 
-import { gql } from "graphql-tag";
 import { generate } from "randomstring";
 import type { UniqueType } from "../utils/graphql-types";
 import { TestHelper } from "../utils/tests-helper";
 
-describe("update", () => {
+describe("update (deprecate implicit _SET)", () => {
     const testHelper = new TestHelper();
     let Movie: UniqueType;
     let Actor: UniqueType;
@@ -47,7 +46,7 @@ describe("update", () => {
     });
 
     test("should update no movies where predicate yields false", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Movie} @node {
                 id: ID!
                 name: String
@@ -64,9 +63,9 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name: $name}) {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: { name_SET: $name }) {
                 ${Movie.plural} {
                     id
                     name
@@ -85,7 +84,7 @@ describe("update", () => {
     });
 
     test("should update a single movie", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Movie} @node {
                 id: ID!
                 name: String
@@ -106,9 +105,9 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name: $name}) {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name_SET: $name}) {
                 ${Movie.plural} {
                     id
                     name
@@ -136,7 +135,7 @@ describe("update", () => {
         expect(gqlResult?.data?.[Movie.operations.update]).toEqual({ [Movie.plural]: [{ id, name: updatedName }] });
     });
     test("should connect through interface relationship", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Movie} implements Production @subscription(events: []) @node {
                 title: String!
                 id: ID
@@ -169,7 +168,7 @@ describe("update", () => {
         await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
             ${Movie.operations.update}(
                 where: { id_EQ: "1" }, 
@@ -226,7 +225,7 @@ describe("update", () => {
     });
 
     test("should update a movie when matching on relationship property", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -252,12 +251,12 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($updatedMovieId: ID, $actorName: String) {
             ${Movie.operations.update}(
               where: { actorsConnection_SOME: { node: { name_EQ: $actorName } } },
               update: {
-                id: $updatedMovieId
+                id_SET: $updatedMovieId
               }
           ) {
               ${Movie.plural} {
@@ -292,7 +291,7 @@ describe("update", () => {
     });
 
     test("should update 2 movies", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Movie} @node {
                 id: ID!
                 name: String
@@ -311,9 +310,9 @@ describe("update", () => {
 
         const updatedName = "Beer";
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($id1: ID, $id2: ID, $name: String) {
-            ${Movie.operations.update}(where: { OR: [{ id_EQ: $id1 }, { id_EQ: $id2 }] }, update: {name: $name}) {
+            ${Movie.operations.update}(where: { OR: [{ id_EQ: $id1 }, { id_EQ: $id2 }] }, update: {name_SET: $name}) {
                 ${Movie.plural} {
                     id
                     name
@@ -339,16 +338,16 @@ describe("update", () => {
 
         expect(gqlResult.errors).toBeFalsy();
 
-        expect((gqlResult?.data as any)?.[Movie.operations.update][Movie.plural] as any[]).toHaveLength(2);
+        expect(gqlResult?.data?.[Movie.operations.update]?.[Movie.plural] as any[]).toHaveLength(2);
 
-        ((gqlResult?.data as any)?.[Movie.operations.update][Movie.plural] as any[]).forEach((movie) => {
+        (gqlResult?.data?.[Movie.operations.update]?.[Movie.plural] as any[]).forEach((movie) => {
             expect([id1, id2]).toContain(movie.id);
             expect(movie.name).toEqual(updatedName);
         });
     });
 
     test("should update nested actors from a movie", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -374,14 +373,14 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($movieId: ID, $initialName: String, $updatedName: String) {
             ${Movie.operations.update}(
               where: { id_EQ: $movieId },
               update: {
                 actors: [{
                   where: { node: { name_EQ: $initialName } },
-                  update: { node: { name: $updatedName } }
+                  update: { node: { name_SET: $updatedName } }
                 }]
               }
           ) {
@@ -419,7 +418,7 @@ describe("update", () => {
     });
 
     test("should delete a nested actor from a movie abc", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -484,7 +483,7 @@ describe("update", () => {
     });
 
     test("should delete a nested actor from a movie within an update block", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -549,7 +548,7 @@ describe("update", () => {
     });
 
     test("should delete a nested actor and one of their nested movies, within an update block abc", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -641,7 +640,7 @@ describe("update", () => {
     });
 
     test("should delete multiple nested actors from a movie", async () => {
-        const typeDefs = gql`
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -717,7 +716,7 @@ describe("update", () => {
     });
 
     test("should update nested actors from a move then update the movie from the nested actors", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
               name: String
               movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -736,7 +735,7 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
             ${Movie.operations.update}(
               where: { id_EQ: "${movieId}" }
@@ -745,10 +744,10 @@ describe("update", () => {
                   where: { node: { name_EQ: "old actor name" } }
                   update: {
                     node: {
-                        name: "new actor name"
+                        name_SET: "new actor name"
                         movies: [{
                             where: { node: { title_EQ: "old movie title" } }
-                            update: { node: { title: "new movie title" } }
+                            update: { node: { title_SET: "new movie title" } }
                         }]
                     }
                   }
@@ -785,7 +784,7 @@ describe("update", () => {
     });
 
     test("should connect a single movie to a actor", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 id: ID
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -807,7 +806,7 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
             ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: {actors: { connect: [{ where: { node:{ id_EQ: "${actorId}"}}}]}}) {
                 ${Movie.plural} {
@@ -841,7 +840,7 @@ describe("update", () => {
     });
 
     test("should connect a single movie to a actor based on a connection predicate", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 id: ID
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -873,7 +872,7 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation($movieId: ID, $seriesId: ID) {
                 ${Movie.operations.update}(
                     where: { id_EQ: $movieId }
@@ -913,7 +912,7 @@ describe("update", () => {
     });
 
     test("should disconnect an actor from a movie", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Actor} @node {
                 id: ID
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
@@ -938,7 +937,7 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
             ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: {actors: { disconnect: [{where: { node: { id_EQ: "${actorId1}"}}}]}}) {
                 ${Movie.plural} {
@@ -976,7 +975,7 @@ describe("update", () => {
     });
 
     test("should disconnect a color from a photo through a product", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type ${Product} @node {
                 id: ID
                 photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
@@ -1006,7 +1005,7 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
             ${Product.operations.update}(
               where: { id_EQ: "${productId}" }
@@ -1059,7 +1058,7 @@ describe("update", () => {
     });
 
     test("should update the colors of a product to light versions", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
           type ${Product} @node {
              id: ID
              name: String
@@ -1109,7 +1108,7 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${Product.operations.update}(
                   where: { id_EQ: "${productId}" }
@@ -1119,7 +1118,7 @@ describe("update", () => {
                         where: { node: { name_EQ: "Green Photo", id_EQ: "${photo0Id}" } }
                         update: {
                             node: {
-                                name: "Light Green Photo"
+                                name_SET: "Light Green Photo"
                                 color: {
                                     connect: { where: { node: { name_EQ: "Light Green", id_EQ: "${photo0Color1Id}" } } }
                                     disconnect: { where: { node: { name_EQ: "Green", id_EQ: "${photo0Color0Id}" } } }
@@ -1131,7 +1130,7 @@ describe("update", () => {
                         where: { node: { name_EQ: "Yellow Photo", id_EQ: "${photo1Id}" } }
                         update: {
                             node: {
-                                name: "Light Yellow Photo"
+                                name_SET: "Light Yellow Photo"
                                 color: {
                                     connect: { where: { node: { name_EQ: "Light Yellow", id_EQ: "${photo1Color1Id}" } } }
                                     disconnect: { where: { node: { name_EQ: "Yellow", id_EQ: "${photo1Color0Id}" } } }
@@ -1188,9 +1187,9 @@ describe("update", () => {
 
         expect(gqlResult.errors).toBeFalsy();
 
-        expect((gqlResult?.data as any)?.[Product.operations.update][Product.plural] as any[]).toHaveLength(1);
+        expect(gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[]).toHaveLength(1);
 
-        const { photos } = ((gqlResult?.data as any)?.[Product.operations.update][Product.plural] as any[])[0];
+        const { photos } = (gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0];
 
         const greenPhoto = photos.find((x) => x.id === photo0Id);
 
@@ -1210,7 +1209,7 @@ describe("update", () => {
     });
 
     test("should update a Product via creating a new Photo and creating a new Color (via field level update)", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
           type ${Product} @node {
              id: ID
              name: String
@@ -1244,7 +1243,7 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${Product.operations.update}(
                   where: { id_EQ: "${productId}" }
@@ -1295,14 +1294,14 @@ describe("update", () => {
 
         expect(gqlResult.errors).toBeFalsy();
 
-        expect(((gqlResult?.data as any)?.[Product.operations.update][Product.plural] as any[])[0]).toMatchObject({
+        expect((gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0]).toMatchObject({
             id: productId,
             photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
         });
     });
 
     test("should update a Product via creating a new Photo and creating a new Color (via top level create)", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
           type ${Product} @node {
              id: ID
              name: String
@@ -1336,7 +1335,7 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
                 ${Product.operations.update}(
                   where: { id_EQ: "${productId}" }
@@ -1385,7 +1384,7 @@ describe("update", () => {
 
         expect(gqlResult.errors).toBeFalsy();
 
-        expect(((gqlResult?.data as any)?.[Product.operations.update][Product.plural] as any[])[0]).toMatchObject({
+        expect((gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0]).toMatchObject({
             id: productId,
             photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
         });

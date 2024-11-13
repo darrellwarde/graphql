@@ -17,15 +17,24 @@
  * limitations under the License.
  */
 
-type MutationOperation = "PUSH" | "POP" | "ADD" | "SUBTRACT" | "MULTIPLY" | "DIVIDE" | "INCREMENT" | "DECREMENT";
+export type MutationOperator =
+    | "SET"
+    | "PUSH"
+    | "POP"
+    | "ADD"
+    | "SUBTRACT"
+    | "MULTIPLY"
+    | "DIVIDE"
+    | "INCREMENT"
+    | "DECREMENT";
 
 export type MutationRegexGroups = {
     fieldName: string;
-    operator: MutationOperation | undefined;
+    operator: MutationOperator | undefined;
 };
 
 const mutationRegEx =
-    /(?<fieldName>[_A-Za-z]\w*?)(?:_(?<operator>PUSH|POP|ADD|SUBTRACT|MULTIPLY|DIVIDE|INCREMENT|DECREMENT))?$/;
+    /(?<fieldName>[_A-Za-z]\w*?)(?:_(?<operator>SET|PUSH|POP|ADD|SUBTRACT|MULTIPLY|DIVIDE|INCREMENT|DECREMENT))?$/;
 
 export function parseMutationField(field: string): MutationRegexGroups {
     const match = mutationRegEx.exec(field);
