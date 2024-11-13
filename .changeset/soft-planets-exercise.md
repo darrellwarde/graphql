@@ -29,3 +29,5 @@ The migration is as below:
   }
 }
 ```
+
+The `deprecatedOptionsArgument` of `excludeDeprecatedFields` has been removed as it is now a no-op.
