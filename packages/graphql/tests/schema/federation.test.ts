@@ -34,7 +34,7 @@ describe("Apollo Federation", () => {
 
             type Post @node {
                 content: String!
-                author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
             }
         `;
 
@@ -113,7 +113,7 @@ describe("Apollo Federation", () => {
             }
 
             type Post {
-              author: User!
+              author(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               authorAggregate(where: UserWhere): PostUserAuthorAggregationSelection
               authorConnection(after: String, first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
               content: String!
@@ -138,7 +138,7 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorConnectFieldInput {
-              connect: UserConnectInput
+              connect: [UserConnectInput!]
               where: UserConnectWhere
             }
 
@@ -174,8 +174,8 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
             }
 
             input PostAuthorNodeAggregationWhereInput {
@@ -209,16 +209,16 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorUpdateFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
-              delete: PostAuthorDeleteFieldInput
-              disconnect: PostAuthorDisconnectFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
+              delete: [PostAuthorDeleteFieldInput!]
+              disconnect: [PostAuthorDisconnectFieldInput!]
               update: PostAuthorUpdateConnectionInput
               where: PostAuthorConnectionWhere
             }
 
             input PostConnectInput {
-              author: PostAuthorConnectFieldInput
+              author: [PostAuthorConnectFieldInput!]
             }
 
             input PostConnectWhere {
@@ -231,11 +231,11 @@ describe("Apollo Federation", () => {
             }
 
             input PostDeleteInput {
-              author: PostAuthorDeleteFieldInput
+              author: [PostAuthorDeleteFieldInput!]
             }
 
             input PostDisconnectInput {
-              author: PostAuthorDisconnectFieldInput
+              author: [PostAuthorDisconnectFieldInput!]
             }
 
             type PostEdge {
@@ -251,7 +251,7 @@ describe("Apollo Federation", () => {
             }
 
             input PostUpdateInput {
-              author: PostAuthorUpdateFieldInput
+              author: [PostAuthorUpdateFieldInput!]
               content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
             }
@@ -269,9 +269,31 @@ describe("Apollo Federation", () => {
               AND: [PostWhere!]
               NOT: PostWhere
               OR: [PostWhere!]
-              author: UserWhere
               authorAggregate: PostAuthorAggregateInput
-              authorConnection: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where all of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_ALL: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where none of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_NONE: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where one of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SINGLE: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where some of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SOME: PostAuthorConnectionWhere
+              \\"\\"\\"Return Posts where all of the related Users match this filter\\"\\"\\"
+              author_ALL: UserWhere
+              \\"\\"\\"Return Posts where none of the related Users match this filter\\"\\"\\"
+              author_NONE: UserWhere
+              \\"\\"\\"Return Posts where one of the related Users match this filter\\"\\"\\"
+              author_SINGLE: UserWhere
+              \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
+              author_SOME: UserWhere
               content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               content_CONTAINS: String
               content_ENDS_WITH: String
@@ -558,7 +580,7 @@ describe("Apollo Federation", () => {
 
             type Post @node {
                 content: String!
-                author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
             }
         `;
 
@@ -637,7 +659,7 @@ describe("Apollo Federation", () => {
             }
 
             type Post {
-              author: User!
+              author(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               authorAggregate(where: UserWhere): PostUserAuthorAggregationSelection
               authorConnection(after: String, first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
               content: String!
@@ -695,8 +717,8 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
             }
 
             input PostAuthorNodeAggregationWhereInput {
@@ -730,10 +752,10 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorUpdateFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
-              delete: PostAuthorDeleteFieldInput
-              disconnect: PostAuthorDisconnectFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
+              delete: [PostAuthorDeleteFieldInput!]
+              disconnect: [PostAuthorDisconnectFieldInput!]
               update: PostAuthorUpdateConnectionInput
               where: PostAuthorConnectionWhere
             }
@@ -744,7 +766,7 @@ describe("Apollo Federation", () => {
             }
 
             input PostDeleteInput {
-              author: PostAuthorDeleteFieldInput
+              author: [PostAuthorDeleteFieldInput!]
             }
 
             type PostEdge {
@@ -760,7 +782,7 @@ describe("Apollo Federation", () => {
             }
 
             input PostUpdateInput {
-              author: PostAuthorUpdateFieldInput
+              author: [PostAuthorUpdateFieldInput!]
               content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
             }
@@ -778,9 +800,31 @@ describe("Apollo Federation", () => {
               AND: [PostWhere!]
               NOT: PostWhere
               OR: [PostWhere!]
-              author: UserWhere
               authorAggregate: PostAuthorAggregateInput
-              authorConnection: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where all of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_ALL: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where none of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_NONE: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where one of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SINGLE: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where some of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SOME: PostAuthorConnectionWhere
+              \\"\\"\\"Return Posts where all of the related Users match this filter\\"\\"\\"
+              author_ALL: UserWhere
+              \\"\\"\\"Return Posts where none of the related Users match this filter\\"\\"\\"
+              author_NONE: UserWhere
+              \\"\\"\\"Return Posts where one of the related Users match this filter\\"\\"\\"
+              author_SINGLE: UserWhere
+              \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
+              author_SOME: UserWhere
               content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               content_CONTAINS: String
               content_ENDS_WITH: String

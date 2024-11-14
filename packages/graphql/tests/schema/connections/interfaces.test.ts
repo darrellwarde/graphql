@@ -45,12 +45,12 @@ describe("Connection with interfaces", () => {
 
             type Person implements Creature @node {
                 id: ID
-                movies: Production! @relationship(type: "DIRECTED", direction: OUT)
+                movies: [Production!]! @relationship(type: "DIRECTED", direction: OUT)
             }
 
             interface Creature {
                 id: ID
-                movies: Production! @declareRelationship
+                movies: [Production!]! @declareRelationship
             }
         `;
         const neoSchema = new Neo4jGraphQL({ typeDefs });
@@ -87,7 +87,7 @@ describe("Connection with interfaces", () => {
 
             interface Creature {
               id: ID
-              movies(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): Production!
+              movies(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
               moviesConnection(after: String, first: Int, sort: [CreatureMoviesConnectionSort!], where: CreatureMoviesConnectionWhere): CreatureMoviesConnection!
             }
 
@@ -97,7 +97,7 @@ describe("Connection with interfaces", () => {
             }
 
             input CreatureConnectInput {
-              movies: CreatureMoviesConnectFieldInput
+              movies: [CreatureMoviesConnectFieldInput!]
             }
 
             input CreatureConnectWhere {
@@ -109,11 +109,11 @@ describe("Connection with interfaces", () => {
             }
 
             input CreatureDeleteInput {
-              movies: CreatureMoviesDeleteFieldInput
+              movies: [CreatureMoviesDeleteFieldInput!]
             }
 
             input CreatureDisconnectInput {
-              movies: CreatureMoviesDisconnectFieldInput
+              movies: [CreatureMoviesDisconnectFieldInput!]
             }
 
             type CreatureEdge {
@@ -200,10 +200,10 @@ describe("Connection with interfaces", () => {
             }
 
             input CreatureMoviesUpdateFieldInput {
-              connect: CreatureMoviesConnectFieldInput
-              create: CreatureMoviesCreateFieldInput
-              delete: CreatureMoviesDeleteFieldInput
-              disconnect: CreatureMoviesDisconnectFieldInput
+              connect: [CreatureMoviesConnectFieldInput!]
+              create: [CreatureMoviesCreateFieldInput!]
+              delete: [CreatureMoviesDeleteFieldInput!]
+              disconnect: [CreatureMoviesDisconnectFieldInput!]
               update: CreatureMoviesUpdateConnectionInput
               where: CreatureMoviesConnectionWhere
             }
@@ -218,7 +218,7 @@ describe("Connection with interfaces", () => {
             input CreatureUpdateInput {
               id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              movies: CreatureMoviesUpdateFieldInput
+              movies: [CreatureMoviesUpdateFieldInput!]
             }
 
             input CreatureWhere {
@@ -231,9 +231,39 @@ describe("Connection with interfaces", () => {
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              movies: ProductionWhere
               moviesAggregate: CreatureMoviesAggregateInput
-              moviesConnection: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return Creatures where all of the related CreatureMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_ALL: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return Creatures where none of the related CreatureMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_NONE: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return Creatures where one of the related CreatureMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SINGLE: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return Creatures where some of the related CreatureMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SOME: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return Creatures where all of the related Productions match this filter
+              \\"\\"\\"
+              movies_ALL: ProductionWhere
+              \\"\\"\\"
+              Return Creatures where none of the related Productions match this filter
+              \\"\\"\\"
+              movies_NONE: ProductionWhere
+              \\"\\"\\"
+              Return Creatures where one of the related Productions match this filter
+              \\"\\"\\"
+              movies_SINGLE: ProductionWhere
+              \\"\\"\\"
+              Return Creatures where some of the related Productions match this filter
+              \\"\\"\\"
+              movies_SOME: ProductionWhere
               typename_IN: [CreatureImplementation!]
             }
 
@@ -460,7 +490,7 @@ describe("Connection with interfaces", () => {
 
             type Person implements Creature {
               id: ID
-              movies(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): Production!
+              movies(limit: Int, offset: Int, sort: [ProductionSort!], where: ProductionWhere): [Production!]!
               moviesAggregate(where: ProductionWhere): PersonProductionMoviesAggregationSelection
               moviesConnection(after: String, first: Int, sort: [CreatureMoviesConnectionSort!], where: CreatureMoviesConnectionWhere): CreatureMoviesConnection!
             }
@@ -476,7 +506,7 @@ describe("Connection with interfaces", () => {
             }
 
             input PersonDeleteInput {
-              movies: PersonMoviesDeleteFieldInput
+              movies: [PersonMoviesDeleteFieldInput!]
             }
 
             type PersonEdge {
@@ -517,8 +547,8 @@ describe("Connection with interfaces", () => {
             }
 
             input PersonMoviesFieldInput {
-              connect: PersonMoviesConnectFieldInput
-              create: PersonMoviesCreateFieldInput
+              connect: [PersonMoviesConnectFieldInput!]
+              create: [PersonMoviesCreateFieldInput!]
             }
 
             input PersonMoviesNodeAggregationWhereInput {
@@ -542,10 +572,10 @@ describe("Connection with interfaces", () => {
             }
 
             input PersonMoviesUpdateFieldInput {
-              connect: PersonMoviesConnectFieldInput
-              create: PersonMoviesCreateFieldInput
-              delete: PersonMoviesDeleteFieldInput
-              disconnect: PersonMoviesDisconnectFieldInput
+              connect: [PersonMoviesConnectFieldInput!]
+              create: [PersonMoviesCreateFieldInput!]
+              delete: [PersonMoviesDeleteFieldInput!]
+              disconnect: [PersonMoviesDisconnectFieldInput!]
               update: PersonMoviesUpdateConnectionInput
               where: CreatureMoviesConnectionWhere
             }
@@ -569,7 +599,7 @@ describe("Connection with interfaces", () => {
             input PersonUpdateInput {
               id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              movies: PersonMoviesUpdateFieldInput
+              movies: [PersonMoviesUpdateFieldInput!]
             }
 
             input PersonWhere {
@@ -582,9 +612,31 @@ describe("Connection with interfaces", () => {
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              movies: ProductionWhere
               moviesAggregate: PersonMoviesAggregateInput
-              moviesConnection: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return People where all of the related CreatureMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_ALL: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return People where none of the related CreatureMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_NONE: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return People where one of the related CreatureMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SINGLE: CreatureMoviesConnectionWhere
+              \\"\\"\\"
+              Return People where some of the related CreatureMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SOME: CreatureMoviesConnectionWhere
+              \\"\\"\\"Return People where all of the related Productions match this filter\\"\\"\\"
+              movies_ALL: ProductionWhere
+              \\"\\"\\"Return People where none of the related Productions match this filter\\"\\"\\"
+              movies_NONE: ProductionWhere
+              \\"\\"\\"Return People where one of the related Productions match this filter\\"\\"\\"
+              movies_SINGLE: ProductionWhere
+              \\"\\"\\"Return People where some of the related Productions match this filter\\"\\"\\"
+              movies_SOME: ProductionWhere
             }
 
             interface Production {

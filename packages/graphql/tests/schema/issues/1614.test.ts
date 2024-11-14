@@ -40,7 +40,7 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             type CrewMember @node {
-                movies: Movie! @relationship(type: "WORKED_ON", direction: OUT, properties: "CrewPosition")
+                movies: [Movie!]! @relationship(type: "WORKED_ON", direction: OUT, properties: "CrewPosition")
             }
         `;
 
@@ -72,7 +72,7 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             type CrewMember {
-              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): Movie!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): CrewMemberMovieMoviesAggregationSelection
               moviesConnection(after: String, first: Int, sort: [CrewMemberMoviesConnectionSort!], where: CrewMemberMoviesConnectionWhere): CrewMemberMoviesConnection!
             }
@@ -86,7 +86,7 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewMemberDeleteInput {
-              movies: CrewMemberMoviesDeleteFieldInput
+              movies: [CrewMemberMoviesDeleteFieldInput!]
             }
 
             type CrewMemberEdge {
@@ -154,8 +154,8 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewMemberMoviesFieldInput {
-              connect: CrewMemberMoviesConnectFieldInput
-              create: CrewMemberMoviesCreateFieldInput
+              connect: [CrewMemberMoviesConnectFieldInput!]
+              create: [CrewMemberMoviesCreateFieldInput!]
             }
 
             input CrewMemberMoviesNodeAggregationWhereInput {
@@ -191,25 +191,47 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewMemberMoviesUpdateFieldInput {
-              connect: CrewMemberMoviesConnectFieldInput
-              create: CrewMemberMoviesCreateFieldInput
-              delete: CrewMemberMoviesDeleteFieldInput
-              disconnect: CrewMemberMoviesDisconnectFieldInput
+              connect: [CrewMemberMoviesConnectFieldInput!]
+              create: [CrewMemberMoviesCreateFieldInput!]
+              delete: [CrewMemberMoviesDeleteFieldInput!]
+              disconnect: [CrewMemberMoviesDisconnectFieldInput!]
               update: CrewMemberMoviesUpdateConnectionInput
               where: CrewMemberMoviesConnectionWhere
             }
 
             input CrewMemberUpdateInput {
-              movies: CrewMemberMoviesUpdateFieldInput
+              movies: [CrewMemberMoviesUpdateFieldInput!]
             }
 
             input CrewMemberWhere {
               AND: [CrewMemberWhere!]
               NOT: CrewMemberWhere
               OR: [CrewMemberWhere!]
-              movies: MovieWhere
               moviesAggregate: CrewMemberMoviesAggregateInput
-              moviesConnection: CrewMemberMoviesConnectionWhere
+              \\"\\"\\"
+              Return CrewMembers where all of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_ALL: CrewMemberMoviesConnectionWhere
+              \\"\\"\\"
+              Return CrewMembers where none of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_NONE: CrewMemberMoviesConnectionWhere
+              \\"\\"\\"
+              Return CrewMembers where one of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SINGLE: CrewMemberMoviesConnectionWhere
+              \\"\\"\\"
+              Return CrewMembers where some of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SOME: CrewMemberMoviesConnectionWhere
+              \\"\\"\\"Return CrewMembers where all of the related Movies match this filter\\"\\"\\"
+              movies_ALL: MovieWhere
+              \\"\\"\\"Return CrewMembers where none of the related Movies match this filter\\"\\"\\"
+              movies_NONE: MovieWhere
+              \\"\\"\\"Return CrewMembers where one of the related Movies match this filter\\"\\"\\"
+              movies_SINGLE: MovieWhere
+              \\"\\"\\"Return CrewMembers where some of the related Movies match this filter\\"\\"\\"
+              movies_SOME: MovieWhere
             }
 
             type CrewMembersConnection {

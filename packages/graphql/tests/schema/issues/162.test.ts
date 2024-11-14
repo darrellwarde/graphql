@@ -31,12 +31,12 @@ describe("162", () => {
 
             type TigerJawLevel2 @node {
                 id: ID
-                part1: TigerJawLevel2Part1! @relationship(type: "REL1", direction: OUT)
+                part1: [TigerJawLevel2Part1!]! @relationship(type: "REL1", direction: OUT)
             }
 
             type TigerJawLevel2Part1 @node {
                 id: ID
-                tiger: Tiger! @relationship(type: "REL2", direction: OUT)
+                tiger: [Tiger!]! @relationship(type: "REL2", direction: OUT)
             }
         `;
         const neoSchema = new Neo4jGraphQL({ typeDefs });
@@ -155,7 +155,7 @@ describe("162", () => {
 
             type TigerJawLevel2 {
               id: ID
-              part1(limit: Int, offset: Int, sort: [TigerJawLevel2Part1Sort!], where: TigerJawLevel2Part1Where): TigerJawLevel2Part1!
+              part1(limit: Int, offset: Int, sort: [TigerJawLevel2Part1Sort!], where: TigerJawLevel2Part1Where): [TigerJawLevel2Part1!]!
               part1Aggregate(where: TigerJawLevel2Part1Where): TigerJawLevel2TigerJawLevel2Part1Part1AggregationSelection
               part1Connection(after: String, first: Int, sort: [TigerJawLevel2Part1ConnectionSort!], where: TigerJawLevel2Part1ConnectionWhere): TigerJawLevel2Part1Connection!
             }
@@ -171,7 +171,7 @@ describe("162", () => {
             }
 
             input TigerJawLevel2DeleteInput {
-              part1: TigerJawLevel2Part1DeleteFieldInput
+              part1: [TigerJawLevel2Part1DeleteFieldInput!]
             }
 
             type TigerJawLevel2Edge {
@@ -181,7 +181,7 @@ describe("162", () => {
 
             type TigerJawLevel2Part1 {
               id: ID
-              tiger(limit: Int, offset: Int, sort: [TigerSort!], where: TigerWhere): Tiger!
+              tiger(limit: Int, offset: Int, sort: [TigerSort!], where: TigerWhere): [Tiger!]!
               tigerAggregate(where: TigerWhere): TigerJawLevel2Part1TigerTigerAggregationSelection
               tigerConnection(after: String, first: Int, sort: [TigerJawLevel2Part1TigerConnectionSort!], where: TigerJawLevel2Part1TigerConnectionWhere): TigerJawLevel2Part1TigerConnection!
             }
@@ -205,12 +205,12 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1ConnectFieldInput {
-              connect: TigerJawLevel2Part1ConnectInput
+              connect: [TigerJawLevel2Part1ConnectInput!]
               where: TigerJawLevel2Part1ConnectWhere
             }
 
             input TigerJawLevel2Part1ConnectInput {
-              tiger: TigerJawLevel2Part1TigerConnectFieldInput
+              tiger: [TigerJawLevel2Part1TigerConnectFieldInput!]
             }
 
             input TigerJawLevel2Part1ConnectWhere {
@@ -249,7 +249,7 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1DeleteInput {
-              tiger: TigerJawLevel2Part1TigerDeleteFieldInput
+              tiger: [TigerJawLevel2Part1TigerDeleteFieldInput!]
             }
 
             input TigerJawLevel2Part1DisconnectFieldInput {
@@ -258,7 +258,7 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1DisconnectInput {
-              tiger: TigerJawLevel2Part1TigerDisconnectFieldInput
+              tiger: [TigerJawLevel2Part1TigerDisconnectFieldInput!]
             }
 
             type TigerJawLevel2Part1Edge {
@@ -267,8 +267,8 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1FieldInput {
-              connect: TigerJawLevel2Part1ConnectFieldInput
-              create: TigerJawLevel2Part1CreateFieldInput
+              connect: [TigerJawLevel2Part1ConnectFieldInput!]
+              create: [TigerJawLevel2Part1CreateFieldInput!]
             }
 
             input TigerJawLevel2Part1NodeAggregationWhereInput {
@@ -346,8 +346,8 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1TigerFieldInput {
-              connect: TigerJawLevel2Part1TigerConnectFieldInput
-              create: TigerJawLevel2Part1TigerCreateFieldInput
+              connect: [TigerJawLevel2Part1TigerConnectFieldInput!]
+              create: [TigerJawLevel2Part1TigerCreateFieldInput!]
             }
 
             input TigerJawLevel2Part1TigerNodeAggregationWhereInput {
@@ -395,10 +395,10 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1TigerUpdateFieldInput {
-              connect: TigerJawLevel2Part1TigerConnectFieldInput
-              create: TigerJawLevel2Part1TigerCreateFieldInput
-              delete: TigerJawLevel2Part1TigerDeleteFieldInput
-              disconnect: TigerJawLevel2Part1TigerDisconnectFieldInput
+              connect: [TigerJawLevel2Part1TigerConnectFieldInput!]
+              create: [TigerJawLevel2Part1TigerCreateFieldInput!]
+              delete: [TigerJawLevel2Part1TigerDeleteFieldInput!]
+              disconnect: [TigerJawLevel2Part1TigerDisconnectFieldInput!]
               update: TigerJawLevel2Part1TigerUpdateConnectionInput
               where: TigerJawLevel2Part1TigerConnectionWhere
             }
@@ -408,10 +408,10 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1UpdateFieldInput {
-              connect: TigerJawLevel2Part1ConnectFieldInput
-              create: TigerJawLevel2Part1CreateFieldInput
-              delete: TigerJawLevel2Part1DeleteFieldInput
-              disconnect: TigerJawLevel2Part1DisconnectFieldInput
+              connect: [TigerJawLevel2Part1ConnectFieldInput!]
+              create: [TigerJawLevel2Part1CreateFieldInput!]
+              delete: [TigerJawLevel2Part1DeleteFieldInput!]
+              disconnect: [TigerJawLevel2Part1DisconnectFieldInput!]
               update: TigerJawLevel2Part1UpdateConnectionInput
               where: TigerJawLevel2Part1ConnectionWhere
             }
@@ -419,7 +419,7 @@ describe("162", () => {
             input TigerJawLevel2Part1UpdateInput {
               id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              tiger: TigerJawLevel2Part1TigerUpdateFieldInput
+              tiger: [TigerJawLevel2Part1TigerUpdateFieldInput!]
             }
 
             input TigerJawLevel2Part1Where {
@@ -432,9 +432,39 @@ describe("162", () => {
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              tiger: TigerWhere
               tigerAggregate: TigerJawLevel2Part1TigerAggregateInput
-              tigerConnection: TigerJawLevel2Part1TigerConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2Part1s where all of the related TigerJawLevel2Part1TigerConnections match this filter
+              \\"\\"\\"
+              tigerConnection_ALL: TigerJawLevel2Part1TigerConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2Part1s where none of the related TigerJawLevel2Part1TigerConnections match this filter
+              \\"\\"\\"
+              tigerConnection_NONE: TigerJawLevel2Part1TigerConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2Part1s where one of the related TigerJawLevel2Part1TigerConnections match this filter
+              \\"\\"\\"
+              tigerConnection_SINGLE: TigerJawLevel2Part1TigerConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2Part1s where some of the related TigerJawLevel2Part1TigerConnections match this filter
+              \\"\\"\\"
+              tigerConnection_SOME: TigerJawLevel2Part1TigerConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2Part1s where all of the related Tigers match this filter
+              \\"\\"\\"
+              tiger_ALL: TigerWhere
+              \\"\\"\\"
+              Return TigerJawLevel2Part1s where none of the related Tigers match this filter
+              \\"\\"\\"
+              tiger_NONE: TigerWhere
+              \\"\\"\\"
+              Return TigerJawLevel2Part1s where one of the related Tigers match this filter
+              \\"\\"\\"
+              tiger_SINGLE: TigerWhere
+              \\"\\"\\"
+              Return TigerJawLevel2Part1s where some of the related Tigers match this filter
+              \\"\\"\\"
+              tiger_SOME: TigerWhere
             }
 
             type TigerJawLevel2Part1sConnection {
@@ -462,7 +492,7 @@ describe("162", () => {
             input TigerJawLevel2UpdateInput {
               id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              part1: TigerJawLevel2Part1UpdateFieldInput
+              part1: [TigerJawLevel2Part1UpdateFieldInput!]
             }
 
             input TigerJawLevel2Where {
@@ -475,9 +505,39 @@ describe("162", () => {
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              part1: TigerJawLevel2Part1Where
               part1Aggregate: TigerJawLevel2Part1AggregateInput
-              part1Connection: TigerJawLevel2Part1ConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2s where all of the related TigerJawLevel2Part1Connections match this filter
+              \\"\\"\\"
+              part1Connection_ALL: TigerJawLevel2Part1ConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2s where none of the related TigerJawLevel2Part1Connections match this filter
+              \\"\\"\\"
+              part1Connection_NONE: TigerJawLevel2Part1ConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2s where one of the related TigerJawLevel2Part1Connections match this filter
+              \\"\\"\\"
+              part1Connection_SINGLE: TigerJawLevel2Part1ConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2s where some of the related TigerJawLevel2Part1Connections match this filter
+              \\"\\"\\"
+              part1Connection_SOME: TigerJawLevel2Part1ConnectionWhere
+              \\"\\"\\"
+              Return TigerJawLevel2s where all of the related TigerJawLevel2Part1s match this filter
+              \\"\\"\\"
+              part1_ALL: TigerJawLevel2Part1Where
+              \\"\\"\\"
+              Return TigerJawLevel2s where none of the related TigerJawLevel2Part1s match this filter
+              \\"\\"\\"
+              part1_NONE: TigerJawLevel2Part1Where
+              \\"\\"\\"
+              Return TigerJawLevel2s where one of the related TigerJawLevel2Part1s match this filter
+              \\"\\"\\"
+              part1_SINGLE: TigerJawLevel2Part1Where
+              \\"\\"\\"
+              Return TigerJawLevel2s where some of the related TigerJawLevel2Part1s match this filter
+              \\"\\"\\"
+              part1_SOME: TigerJawLevel2Part1Where
             }
 
             type TigerJawLevel2sConnection {
