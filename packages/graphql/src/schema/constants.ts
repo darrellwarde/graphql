@@ -26,13 +26,6 @@ export const DEPRECATE_IMPLICIT_EQUAL_FILTERS = {
     },
 };
 
-export const DEPRECATE_DIRECTED_ARGUMENT = {
-    name: DEPRECATED,
-    args: {
-        reason: "The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server",
-    },
-};
-
 export const DEPRECATE_IMPLICIT_SET = {
     name: DEPRECATED,
     args: {
