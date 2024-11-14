@@ -176,6 +176,7 @@ export function createRelationshipFields({
     userDefinedFieldDirectivesForNode: Map<string, Map<string, DirectiveNode[]>>;
     features?: Neo4jFeaturesSettings;
 }): void {
+    // HERE?
     const relationships =
         entityAdapter instanceof ConcreteEntityAdapter
             ? entityAdapter.relationships
@@ -188,6 +189,12 @@ export function createRelationshipFields({
     relationships.forEach((relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter) => {
         if (!relationshipAdapter) {
             return;
+        }
+
+        if (!relationshipAdapter.isList) {
+            throw new Error(
+                `@relationship on non-list field [${relationshipAdapter.source.name}.${relationshipAdapter.name}] not supported`
+            );
         }
 
         // TODO: find a way to merge these 2 into 1 RelationshipProperties generation function
