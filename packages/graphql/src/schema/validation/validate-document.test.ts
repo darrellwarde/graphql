@@ -128,6 +128,63 @@ describe("list of lists warning", () => {
     });
 });
 
+describe("single relationship deprecation warning", () => {
+    let warn: jest.SpyInstance;
+
+    beforeEach(() => {
+        warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        warn.mockReset();
+    });
+
+    test("deprecated warning triggers on single relationships", () => {
+        const doc = gql`
+            type Movie @node {
+                id: ID
+                topActor: Actor @relationship(type: "TOP_ACTOR", direction: OUT)
+            }
+
+            type Actor @node {
+                name: String
+            }
+        `;
+
+        validateDocument({
+            document: doc,
+            additionalDefinitions,
+            features: {},
+        });
+
+        expect(warn).toHaveBeenCalledWith(
+            "Using @relationship directive on a non-list element is deprecated and will be removed in next major version."
+        );
+        expect(warn).toHaveBeenCalledOnce();
+    });
+
+    test("deprecated warning does not trigger on list relationships", () => {
+        const doc = gql`
+            type Movie @node {
+                id: ID
+                actors: [Actor!]! @relationship(type: "TOP_ACTOR", direction: OUT)
+            }
+
+            type Actor @node {
+                name: String
+            }
+        `;
+
+        validateDocument({
+            document: doc,
+            additionalDefinitions,
+            features: {},
+        });
+
+        expect(warn).toHaveBeenCalledTimes(0);
+    });
+});
+
 describe("default max limit bypass warning", () => {
     let warn: jest.SpyInstance;
 

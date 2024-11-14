@@ -82,25 +82,6 @@ describe("WarnObjectFieldsWithoutResolver", () => {
             expect(warn).not.toHaveBeenCalled();
         });
 
-        test("Relationship", () => {
-            const doc = gql`
-                type Movie @node {
-                    actors: Actor @relationship(type: "ACTED_IN", direction: OUT)
-                }
-
-                type Actor @node {
-                    name: String
-                }
-            `;
-
-            validateDocument({
-                document: doc,
-                additionalDefinitions,
-                features: {},
-            });
-            expect(warn).not.toHaveBeenCalled();
-        });
-
         test("Custom Cypher", () => {
             const doc = gql`
                 type Movie @node {
