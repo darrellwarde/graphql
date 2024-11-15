@@ -53,7 +53,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
-                postalCode: ${PostalCode}! @relationship(type: "HAS_POSTAL_CODE", direction: OUT)
+                postalCode: [${PostalCode}!]! @relationship(type: "HAS_POSTAL_CODE", direction: OUT)
             }
 
             extend type ${Address} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
@@ -66,7 +66,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
 
                 price: Float!
 
-                valuation: ${Valuation}! @relationship(type: "HAS_VALUATION", direction: OUT)
+                valuation: [${Valuation}!]! @relationship(type: "HAS_VALUATION", direction: OUT)
             }
 
             extend type ${Mandate} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
@@ -77,7 +77,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
-                estate: ${Estate} @relationship(type: "VALUATION_FOR", direction: OUT)
+                estate: [${Estate}!]! @relationship(type: "VALUATION_FOR", direction: OUT)
             }
 
             extend type ${Valuation} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
@@ -107,7 +107,7 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
                 area: Float!
                 floor: Int
 
-                address: ${Address} @relationship(type: "HAS_ADDRESS", direction: OUT)
+                address: [${Address}!]! @relationship(type: "HAS_ADDRESS", direction: OUT)
             }
 
             extend type ${Estate} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])
@@ -726,10 +726,10 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
             offset: null,
             where: {
                 price_GTE: 0,
-                valuation: {
-                    estate: {
-                        address: {
-                            postalCode: {
+                valuation_SOME: {
+                    estate_SOME: {
+                        address_SOME: {
+                            postalCode_SOME: {
                                 number_IN: ["13001"],
                             },
                         },
@@ -767,10 +767,10 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
             limit: 20,
             where: {
                 price_GTE: 0,
-                valuation: {
-                    estate: {
-                        address: {
-                            postalCode: {
+                valuation_SOME: {
+                    estate_SOME: {
+                        address_SOME: {
+                            postalCode_SOME: {
                                 number_IN: ["13001"],
                             },
                         },
@@ -808,10 +808,10 @@ describe("https://github.com/neo4j/graphql/issues/2396", () => {
             limit: 40,
             where: {
                 price_GTE: 0,
-                valuation: {
-                    estate: {
-                        address: {
-                            postalCode: {
+                valuation_SOME: {
+                    estate_SOME: {
+                        address_SOME: {
+                            postalCode_SOME: {
                                 number_IN: ["13001"],
                             },
                         },

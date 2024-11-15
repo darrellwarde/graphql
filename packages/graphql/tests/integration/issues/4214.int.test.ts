@@ -47,7 +47,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                 id: ID! @id
                 email: String!
                 roles: [String!]!
-                store: ${Store} @relationship(type: "WORKS_AT", direction: OUT)
+                store: [${Store}!]! @relationship(type: "WORKS_AT", direction: OUT)
             }
 
             type ${Store} @node {
@@ -59,14 +59,14 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
 
             type ${Transaction} @node {
                 id: ID! @id
-                store: ${Store}! @relationship(type: "TRANSACTION", direction: OUT)
+                store: [${Store}!]! @relationship(type: "TRANSACTION", direction: OUT)
                 type: String!
                 items: [${TransactionItem}!]! @relationship(type: "ITEM_TRANSACTED", direction: IN)
                 completed: Boolean
             }
 
             type ${TransactionItem} @node {
-                transaction: ${Transaction} @relationship(type: "ITEM_TRANSACTED", direction: OUT)
+                transaction: [${Transaction}!]! @relationship(type: "ITEM_TRANSACTED", direction: OUT)
                 name: String
                 price: Float
                 quantity: Int
@@ -84,7 +84,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                                     { jwt: { roles_INCLUDES: "store-owner" } }
                                     { jwt: { roles_INCLUDES: "employee" } }
                                 ]
-                                node: { store: { id_EQ: "$jwt.store" } }
+                                node: { store_SOME: { id_EQ: "$jwt.store" } }
                             }
                         }
                     ]
@@ -99,7 +99,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                                     { jwt: { roles_INCLUDES: "store-owner" } }
                                     { jwt: { roles_INCLUDES: "employee" } }
                                 ]
-                                node: { store: { id_EQ: "$jwt.store" } }
+                                node: { store_SOME: { id_EQ: "$jwt.store" } }
                             }
                         }
                     ]
@@ -117,7 +117,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                                     { jwt: { roles_INCLUDES: "store-owner" } }
                                     { jwt: { roles_INCLUDES: "employee" } }
                                 ]
-                                node: { transaction: { store: { id_EQ: "$jwt.store" } } }
+                                node: { transaction_SOME: { store_SOME: { id_EQ: "$jwt.store" } } }
                             }
                         }
                     ]
@@ -132,7 +132,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                                     { jwt: { roles_INCLUDES: "store-owner" } }
                                     { jwt: { roles_INCLUDES: "employee" } }
                                 ]
-                                node: { transaction: { store: { id_EQ: "$jwt.store" } } }
+                                node: { transaction_SOME: { store_SOME: { id_EQ: "$jwt.store" } } }
                             }
                         }
                     ]

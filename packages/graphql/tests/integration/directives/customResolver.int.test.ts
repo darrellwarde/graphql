@@ -347,7 +347,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city }")
             }
         `;
@@ -405,7 +405,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city } doesNotExist")
             }
         `;
@@ -444,7 +444,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city doesNotExist }")
             }
         `;
@@ -483,7 +483,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city }")
             }
         `;
@@ -551,7 +551,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address:[${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city }")
             }
         `;
@@ -628,7 +628,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName address { city } lastName")
             }
         `;
@@ -712,7 +712,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city { name population } }")
             }
         `;
@@ -796,19 +796,19 @@ describe("Related Fields", () => {
             type ${City} @node {
                 name: String!
                 population: Int
-                state: ${State}! @relationship(type: "IN_STATE", direction: OUT)
+                state: [${State}!]! @relationship(type: "IN_STATE", direction: OUT)
             }
 
             type ${Address} @node {
                 street: String!
-                city: ${City}! @relationship(type: "IN_CITY", direction: OUT)
+                city:[${City}!]! @relationship(type: "IN_CITY", direction: OUT)
             }
 
             type ${User} @node {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city { name state { someValue } population } }")
             }
         `;
@@ -907,12 +907,12 @@ describe("Related Fields", () => {
 
             type ${Book} @node {
                 title: String!
-                author: ${Author}! @relationship(type: "WROTE", direction: IN)
+                author: [${Author}!]! @relationship(type: "WROTE", direction: IN)
             }
 
             type ${Journal} @node {
                 subject: String!
-                author: ${Author}! @relationship(type: "WROTE", direction: IN)
+                author: [${Author}!]! @relationship(type: "WROTE", direction: IN)
             }
         `;
 
@@ -989,14 +989,14 @@ describe("Related Fields", () => {
 
             type ${Address} @node {
                 street: String!
-                city: ${City}! @relationship(type: "IN_CITY", direction: OUT)
+                city: [${City}!]! @relationship(type: "IN_CITY", direction: OUT)
             }
 
             type ${User} @node {
                 id: ID!
                 firstName: String! @alias(property: "first")
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city { name population } }")
             }
         `;
@@ -1092,14 +1092,14 @@ describe("Related Fields", () => {
 
             type ${Address} @node {
                 street: String!
-                city: ${City}! @relationship(type: "IN_CITY", direction: OUT)
+                city: [${City}!]! @relationship(type: "IN_CITY", direction: OUT)
             }
 
             type ${User} @node {
                 id: ID!
                 firstName: String! @authorization(validate: [{ when: [BEFORE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city { name population } }")
             }
         `;
@@ -1170,14 +1170,14 @@ describe("Related Fields", () => {
 
             type ${Address} @node {
                 street: String!
-                city: ${City}! @relationship(type: "IN_CITY", direction: OUT)
+                city: [${City}!]! @relationship(type: "IN_CITY", direction: OUT)
             }
 
             type ${User} @node {
                 id: ID!
                 firstName: String! @authorization(validate: [{ when: [BEFORE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city { name population } }")
             }
         `;
@@ -1250,14 +1250,14 @@ describe("Related Fields", () => {
 
             type ${Address} @node {
                 street: String!
-                city: ${City}! @relationship(type: "IN_CITY", direction: OUT)
+                city: [${City}!]! @relationship(type: "IN_CITY", direction: OUT)
             }
 
             type ${User} @node {
                 id: ID!
                 firstName: String! @authorization(validate: [{ when: [BEFORE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city { name population } }")
             }
         `;
@@ -1337,7 +1337,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String! @authorization(validate: [{ when: [BEFORE], where: { node: { id_EQ: "$jwt.sub" } } }])
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { city { name population } }")
             }
         `;
@@ -2133,7 +2133,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { houseNumber street }")
             }
         `;
@@ -2193,7 +2193,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { houseNumber street }")
             }
         `;
@@ -2248,7 +2248,7 @@ describe("Related Fields", () => {
                 id: ID!
                 firstName: String!
                 lastName: String!
-                address: ${Address} @relationship(type: "LIVES_AT", direction: OUT)
+                address: [${Address}!]! @relationship(type: "LIVES_AT", direction: OUT)
                 fullName: String @customResolver(requires: "firstName lastName address { houseNumber street }")
             }
 

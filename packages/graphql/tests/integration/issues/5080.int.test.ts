@@ -57,9 +57,9 @@ describe("https://github.com/neo4j/graphql/issues/5080", () => {
          
             type ${Car} @node
                 @mutation(operations: [UPDATE])
-                @authorization(validate: [{ where: { node: { owner: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]) {
+                @authorization(validate: [{ where: { node: { owner_SOME: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]) {
                 id: ID! @id
-                owner: ${Tenant}! @relationship(type: "OWNED_BY", direction: OUT, aggregate: false)
+                owner: [${Tenant}!]! @relationship(type: "OWNED_BY", direction: OUT, aggregate: false)
                 name: String!
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
@@ -67,9 +67,9 @@ describe("https://github.com/neo4j/graphql/issues/5080", () => {
 
             type ${DeletedCar} @node
                 @mutation(operations: [UPDATE])
-                @authorization(validate: [{ where: { node: { owner: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]) {
+                @authorization(validate: [{ where: { node: { owner_SOME: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]) {
                 id: ID! @id
-                owner: ${Tenant}! @relationship(type: "OWNED_BY", direction: OUT, aggregate: false)
+                owner: [${Tenant}!]! @relationship(type: "OWNED_BY", direction: OUT, aggregate: false)
                 name: String!
                 reason: String!
                 createdAt: DateTime! @timestamp(operations: [CREATE])

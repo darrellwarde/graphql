@@ -35,7 +35,7 @@ describe("https://github.com/neo4j/graphql/issues/5270", () => {
         const typeDefs = /* GraphQL */ `
             type ${User} @node(labels: ["${User}"]) @authorization(
                 filter: [
-                    { where: { node: { NOT: { blockedUsers_SOME: { to: { id_EQ: "$jwt.sub" } } } } } },
+                    { where: { node: { NOT: { blockedUsers_SOME: { to_SOME: { id_EQ: "$jwt.sub" } } } } } },
                 ]
             ) {
                 id: ID! @id
@@ -44,12 +44,12 @@ describe("https://github.com/neo4j/graphql/issues/5270", () => {
         
             type ${UserBlockedUser} @node(labels: ["${UserBlockedUser}"]) @authorization(
                 filter: [
-                    { where: { node: { from: { id_EQ: "$jwt.sub" } } } }
+                    { where: { node: { from_SOME: { id_EQ: "$jwt.sub" } } } }
                 ]
             ) {
                 id: ID! @id
-                from: ${User}! @relationship(type: "HAS_BLOCKED", direction: IN) @settable(onCreate: true, onUpdate: false)
-                to: ${User}! @relationship(type: "IS_BLOCKING", direction: OUT) @settable(onCreate: true, onUpdate: false)
+                from: [${User}!]! @relationship(type: "HAS_BLOCKED", direction: IN) @settable(onCreate: true, onUpdate: false)
+                to: [${User}!]! @relationship(type: "IS_BLOCKING", direction: OUT) @settable(onCreate: true, onUpdate: false)
             }
         
             type Query {

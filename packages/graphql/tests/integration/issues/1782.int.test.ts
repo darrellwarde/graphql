@@ -53,7 +53,7 @@ describe("https://github.com/neo4j/graphql/issues/1782", () => {
             type ${testMasterData} @node {
                 id: ID!
                 current: Boolean!
-                nameDetails: ${testNameDetails} @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
+                nameDetails: [${testNameDetails}!]! @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
             }
         `;
 
@@ -124,7 +124,7 @@ describe("https://github.com/neo4j/graphql/issues/1782", () => {
                     node: {
                         architectureConnection_SOME: {
                             node: {
-                                nameDetailsConnection: {
+                                nameDetailsConnection_SOME: {
                                     node: {
                                         fullName_EQ: "MHA",
                                     },
