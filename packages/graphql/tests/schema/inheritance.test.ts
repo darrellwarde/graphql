@@ -182,7 +182,6 @@ describe("inheritance", () => {
 
             input ActorUpdateInput {
               friends: [ActorFriendsUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -293,7 +292,6 @@ describe("inheritance", () => {
             }
 
             input FriendsWithUpdateInput {
-              since: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               since_DECREMENT: Int
               since_INCREMENT: Int
               since_SET: Int
@@ -525,7 +523,6 @@ describe("inheritance", () => {
 
             input PersonUpdateInput {
               friends: [PersonFriendsUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 

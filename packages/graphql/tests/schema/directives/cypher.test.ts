@@ -158,7 +158,6 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -327,7 +326,6 @@ describe("Cypher", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -884,7 +882,6 @@ describe("Cypher", () => {
             }
 
             input BlogUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -983,7 +980,6 @@ describe("Cypher", () => {
             }
 
             input PostUpdateInput {
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
             }
 
@@ -1135,7 +1131,6 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -1400,7 +1395,6 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -1615,7 +1609,6 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -1702,7 +1695,6 @@ describe("Cypher", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -1888,7 +1880,6 @@ describe("Cypher", () => {
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

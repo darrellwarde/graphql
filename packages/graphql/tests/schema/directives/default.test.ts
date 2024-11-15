@@ -271,28 +271,19 @@ describe("@default directive", () => {
             }
 
             input UserUpdateInput {
-              fromInterface: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               fromInterface_SET: String
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              location: Location @deprecated(reason: \\"Please use the explicit _SET field\\")
               location_SET: Location
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              numberOfFriends: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               numberOfFriends_DECREMENT: Int
               numberOfFriends_INCREMENT: Int
               numberOfFriends_SET: Int
-              rating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               rating_ADD: Float
               rating_DIVIDE: Float
               rating_MULTIPLY: Float
               rating_SET: Float
               rating_SUBTRACT: Float
-              toBeOverridden: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               toBeOverridden_SET: String
-              verified: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
-              verifiedDate: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               verifiedDate_SET: DateTime
               verified_SET: Boolean
             }

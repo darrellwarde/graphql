@@ -166,23 +166,17 @@ describe("Comments", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              customScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _SET field\\")
               customScalar_SET: CustomScalar
-              genre: Genre @deprecated(reason: \\"Please use the explicit _SET field\\")
               genre_SET: Genre
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 
@@ -323,7 +317,6 @@ describe("Comments", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -511,7 +504,6 @@ describe("Comments", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -697,7 +689,6 @@ describe("Comments", () => {
                 }
 
                 input ActedInUpdateInput {
-                  screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   screenTime_DECREMENT: Int
                   screenTime_INCREMENT: Int
                   screenTime_SET: Int
@@ -863,7 +854,6 @@ describe("Comments", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -978,11 +968,9 @@ describe("Comments", () => {
                 }
 
                 input MovieUpdateInput {
-                  runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   runtime_DECREMENT: Int
                   runtime_INCREMENT: Int
                   runtime_SET: Int
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -1067,7 +1055,6 @@ describe("Comments", () => {
                 }
 
                 input ProductionUpdateInput {
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -1141,11 +1128,9 @@ describe("Comments", () => {
                 }
 
                 input SeriesUpdateInput {
-                  episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   episodes_DECREMENT: Int
                   episodes_INCREMENT: Int
                   episodes_SET: Int
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -1287,7 +1272,6 @@ describe("Comments", () => {
                 }
 
                 input GenreUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -1486,7 +1470,6 @@ describe("Comments", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                   search: MovieSearchUpdateInput
                 }

@@ -68,7 +68,6 @@ describe("Arrays Methods", () => {
             }
 
             input ActedInUpdateInput {
-              pay: [Float] @deprecated(reason: \\"Please use the explicit _SET field\\")
               pay_POP: Int
               pay_PUSH: [Float]
               pay_SET: [Float]
@@ -254,7 +253,6 @@ describe("Arrays Methods", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -500,15 +498,12 @@ describe("Arrays Methods", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              ratings: [Float!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               ratings_POP: Int
               ratings_PUSH: [Float!]
               ratings_SET: [Float!]

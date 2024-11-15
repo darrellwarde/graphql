@@ -1008,7 +1008,7 @@ describe("Subscription authentication", () => {
                                 title_EQ: "Matrix",
                             }
                             update: {
-                                title: "Matrix 2"
+                                title_SET: "Matrix 2"
                             }
                         ) {
                             ${typeMovie.plural} {
@@ -1096,7 +1096,7 @@ describe("Subscription authentication", () => {
                                 title_EQ: "Matrix",
                             }
                             update: {
-                                title: "Matrix 2"
+                                title_SET: "Matrix 2"
                             }
                         ) {
                             ${typeMovie.plural} {
@@ -1184,7 +1184,7 @@ describe("Subscription authentication", () => {
                                 title_EQ: "Matrix",
                             }
                             update: {
-                                title: "Matrix 2"
+                                title_SET: "Matrix 2"
                             }
                         ) {
                             ${typeMovie.plural} {
@@ -1264,7 +1264,7 @@ describe("Subscription authentication", () => {
                                 title_EQ: "Matrix",
                             }
                             update: {
-                                title: "Matrix 2"
+                                title_SET: "Matrix 2"
                             }
                         ) {
                             ${typeMovie.plural} {
@@ -1340,7 +1340,7 @@ describe("Subscription authentication", () => {
                                 name_EQ: "Keanu"
                             },
                             update: {
-                                name: "Keanu Reeves"
+                                name_SET: "Keanu Reeves"
                             }
                         ) {
                             info {
@@ -1977,7 +1977,7 @@ describe("Subscription authentication", () => {
                                 name_EQ: "Bob"
                             }
                             update: {
-                                name: "John"
+                                name_SET: "John"
                             }
                         ) {
                             ${typePerson.plural} {
@@ -2067,7 +2067,7 @@ describe("Subscription authentication", () => {
                                 name_EQ: "Bob"
                             }
                             update: {
-                                name: "John"
+                                name_SET: "John"
                             }
                         ) {
                             ${typePerson.plural} {
@@ -2158,7 +2158,7 @@ describe("Subscription authentication", () => {
                                 name_EQ: "Bob"
                             }
                             update: {
-                                name: "John"
+                                name_SET: "John"
                             }
                         ) {
                             ${typePerson.plural} {
@@ -2239,7 +2239,7 @@ describe("Subscription authentication", () => {
                                 url_EQ: "/bob"
                             }
                             update: {
-                               url: "/john"
+                               url_SET: "/john"
                             }
                         ) {
                             ${typeInfluencer.plural} {

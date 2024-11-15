@@ -103,9 +103,7 @@ describe("Duration", () => {
             }
 
             input MovieUpdateInput {
-              duration: Duration @deprecated(reason: \\"Please use the explicit _SET field\\")
               duration_SET: Duration
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 

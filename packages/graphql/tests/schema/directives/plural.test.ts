@@ -126,9 +126,7 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -276,9 +274,7 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -426,9 +422,7 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -578,7 +572,6 @@ describe("Plural option", () => {
             }
 
             input TechsUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -731,7 +724,6 @@ describe("Plural option", () => {
             }
 
             input UserUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -863,7 +855,6 @@ describe("Plural option", () => {
             }
 
             input UserUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -1007,7 +998,6 @@ describe("Plural option", () => {
             }
 
             input UsersUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
