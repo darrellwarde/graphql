@@ -67,9 +67,11 @@ describe("https://github.com/neo4j/graphql/issues/5080", () => {
             type Car
                 @node
                 @mutation(operations: [UPDATE])
-                @authorization(validate: [{ where: { node: { owner: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]) {
+                @authorization(
+                    validate: [{ where: { node: { owner_SOME: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]
+                ) {
                 id: ID! @id
-                owner: Tenant! @relationship(type: "OWNED_BY", direction: OUT, aggregate: false)
+                owner: [Tenant!]! @relationship(type: "OWNED_BY", direction: OUT, aggregate: false)
                 name: String!
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
@@ -78,9 +80,11 @@ describe("https://github.com/neo4j/graphql/issues/5080", () => {
             type DeletedCar
                 @node
                 @mutation(operations: [UPDATE])
-                @authorization(validate: [{ where: { node: { owner: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]) {
+                @authorization(
+                    validate: [{ where: { node: { owner_SOME: { admins_SOME: { userId_EQ: "$jwt.id" } } } } }]
+                ) {
                 id: ID! @id
-                owner: Tenant! @relationship(type: "OWNED_BY", direction: OUT, aggregate: false)
+                owner: [Tenant!]! @relationship(type: "OWNED_BY", direction: OUT, aggregate: false)
                 name: String!
                 reason: String!
                 createdAt: DateTime! @timestamp(operations: [CREATE])
@@ -126,10 +130,8 @@ describe("https://github.com/neo4j/graphql/issues/5080", () => {
                 RETURN s AS s
             }
             WITH s AS this0
-            OPTIONAL MATCH (this0)-[:OWNED_BY]->(this1:Tenant)
-            WITH *, count(this1) AS ownerCount
             WITH *
-            WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (ownerCount <> 0 AND size([(this1)<-[:ADMIN_IN]-(this2:User) WHERE ($jwt.id IS NOT NULL AND this2.userId = $jwt.id) | 1]) > 0)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
+            WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND size([(this0)-[:OWNED_BY]->(this2:Tenant) WHERE size([(this2)<-[:ADMIN_IN]-(this1:User) WHERE ($jwt.id IS NOT NULL AND this1.userId = $jwt.id) | 1]) > 0 | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             WITH this0 { .id } AS this0
             RETURN this0 AS this"
         `);

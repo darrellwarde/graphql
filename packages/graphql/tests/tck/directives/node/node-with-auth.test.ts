@@ -35,7 +35,7 @@ describe("Node Directive", () => {
             type Post @node(labels: ["Comment"]) {
                 id: ID
                 content: String
-                creator: User! @relationship(type: "HAS_POST", direction: IN)
+                creator: [User!]! @relationship(type: "HAS_POST", direction: IN)
             }
 
             extend type Post
@@ -102,7 +102,7 @@ describe("Node Directive", () => {
     test("Admin Deletes Post", async () => {
         const query = /* GraphQL */ `
             mutation {
-                deletePosts(where: { creator: { id_EQ: "123" } }) {
+                deletePosts(where: { creator_SOME: { id_EQ: "123" } }) {
                     nodesDeleted
                 }
             }
@@ -113,9 +113,10 @@ describe("Node Directive", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Comment)
-            OPTIONAL MATCH (this)<-[:HAS_POST]-(this0:Person)
-            WITH *, count(this0) AS creatorCount
-            WHERE ((creatorCount <> 0 AND this0.id = $param0) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $param3 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
+            WHERE (EXISTS {
+                MATCH (this)<-[:HAS_POST]-(this0:Person)
+                WHERE this0.id = $param0
+            } AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $param3 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
             DETACH DELETE this"
         `);
 

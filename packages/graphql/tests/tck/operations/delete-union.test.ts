@@ -28,7 +28,7 @@ describe("Cypher Delete - union", () => {
         typeDefs = /* GraphQL */ `
             type Episode @node {
                 runtime: Int!
-                series: Series! @relationship(type: "HAS_EPISODE", direction: IN)
+                series: [Series!]! @relationship(type: "HAS_EPISODE", direction: IN)
             }
 
             union Production = Movie | Series

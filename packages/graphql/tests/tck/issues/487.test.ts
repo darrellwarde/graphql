@@ -33,12 +33,12 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
 
             type Book @node {
                 id: ID!
-                author: Author! @relationship(type: "WROTE", direction: IN)
+                author: [Author!]! @relationship(type: "WROTE", direction: IN)
             }
 
             type Movie @node {
                 id: ID!
-                director: Director! @relationship(type: "DIRECTED", direction: IN)
+                director: [Director!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
             union Thing = Book | Movie
@@ -104,7 +104,7 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
                         WITH this0
                         MATCH (this0)<-[this1:WROTE]-(this2:Author)
                         WITH this2 { .id } AS this2
-                        RETURN head(collect(this2)) AS var3
+                        RETURN collect(this2) AS var3
                     }
                     WITH this0 { .id, author: var3, __resolveType: \\"Book\\", __id: id(this0) } AS this0
                     RETURN this0 AS var4
@@ -116,7 +116,7 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
                         WITH this0
                         MATCH (this0)<-[this5:DIRECTED]-(this6:Director)
                         WITH this6 { .id } AS this6
-                        RETURN head(collect(this6)) AS var7
+                        RETURN collect(this6) AS var7
                     }
                     WITH this0 { .id, director: var7, __resolveType: \\"Movie\\", __id: id(this0) } AS this0
                     RETURN this0 AS var4
@@ -141,12 +141,12 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
 
             type Book implements Thing @node {
                 id: ID!
-                author: Author! @relationship(type: "WROTE", direction: IN)
+                author: [Author!]! @relationship(type: "WROTE", direction: IN)
             }
 
             type Movie implements Thing @node {
                 id: ID!
-                director: Director! @relationship(type: "DIRECTED", direction: IN)
+                director: [Director!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
             interface Thing {
@@ -213,7 +213,7 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
                         WITH this0
                         MATCH (this0)<-[this1:WROTE]-(this2:Author)
                         WITH this2 { .id } AS this2
-                        RETURN head(collect(this2)) AS var3
+                        RETURN collect(this2) AS var3
                     }
                     WITH this0 { .id, author: var3, __resolveType: \\"Book\\", __id: id(this0) } AS this0
                     RETURN this0 AS var4
@@ -225,7 +225,7 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
                         WITH this0
                         MATCH (this0)<-[this5:DIRECTED]-(this6:Director)
                         WITH this6 { .id } AS this6
-                        RETURN head(collect(this6)) AS var7
+                        RETURN collect(this6) AS var7
                     }
                     WITH this0 { .id, director: var7, __resolveType: \\"Movie\\", __id: id(this0) } AS this0
                     RETURN this0 AS var4

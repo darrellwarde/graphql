@@ -39,7 +39,7 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 id: ID! @id
                 name: String
                 members: [Person!]! @relationship(type: "MEMBER_OF", direction: IN)
-                creator: User!
+                creator: [User!]!
                     @relationship(type: "CREATOR_OF", direction: IN)
                     @settable(onCreate: true, onUpdate: true)
 
@@ -53,15 +53,15 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                     validate: [
                         {
                             operations: [CREATE]
-                            where: { node: { group: { creator: { roles_INCLUDES: "plan:paid" } } } }
+                            where: { node: { group_SOME: { creator_SOME: { roles_INCLUDES: "plan:paid" } } } }
                         }
                         {
                             operations: [DELETE]
                             where: {
                                 OR: [
-                                    { node: { creator: { id_EQ: "$jwt.uid" } } }
-                                    { node: { group: { admins_SOME: { user: { id_EQ: "$jwt.uid" } } } } }
-                                    { node: { group: { creator: { id_EQ: "$jwt.uid" } } } }
+                                    { node: { creator_SOME: { id_EQ: "$jwt.uid" } } }
+                                    { node: { group_SOME: { admins_SOME: { user_SOME: { id_EQ: "$jwt.uid" } } } } }
+                                    { node: { group_SOME: { creator_SOME: { id_EQ: "$jwt.uid" } } } }
                                 ]
                             }
                         }
@@ -69,10 +69,14 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                             operations: [READ, UPDATE]
                             where: {
                                 OR: [
-                                    { node: { creator: { id_EQ: "$jwt.uid" } } }
-                                    { node: { group: { admins_SOME: { user: { id_EQ: "$jwt.uid" } } } } }
-                                    { node: { group: { contributors_SOME: { user: { id_EQ: "$jwt.uid" } } } } }
-                                    { node: { group: { creator: { id_EQ: "$jwt.uid" } } } }
+                                    { node: { creator_SOME: { id_EQ: "$jwt.uid" } } }
+                                    { node: { group_SOME: { admins_SOME: { user_SOME: { id_EQ: "$jwt.uid" } } } } }
+                                    {
+                                        node: {
+                                            group_SOME: { contributors_SOME: { user_SOME: { id_EQ: "$jwt.uid" } } }
+                                        }
+                                    }
+                                    { node: { group_SOME: { creator_SOME: { id_EQ: "$jwt.uid" } } } }
                                 ]
                             }
                         }
@@ -80,10 +84,10 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 ) {
                 id: ID! @id
                 name: String!
-                creator: User!
+                creator: [User!]!
                     @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
                     @settable(onCreate: true, onUpdate: true)
-                group: Group! @relationship(type: "MEMBER_OF", direction: OUT)
+                group: [Group!]! @relationship(type: "MEMBER_OF", direction: OUT)
                 partners: [Person!]!
                     @relationship(
                         type: "PARTNER_OF"
@@ -107,32 +111,32 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
                 id: ID!
                 email: String!
                 name: String
-                creator: User! @declareRelationship
-                group: Group! @declareRelationship
+                creator: [User!]! @declareRelationship
+                group: [Group!]! @declareRelationship
                 status: InviteeStatus!
-                user: User @declareRelationship
+                user: [User!]! @declareRelationship
                 role: InviteeRole!
             }
 
             type Admin implements Invitee @node {
                 id: ID! @id
-                group: Group! @relationship(type: "ADMIN_OF", direction: OUT)
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN)
+                group: [Group!]! @relationship(type: "ADMIN_OF", direction: OUT)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN)
                 email: String!
                 name: String
                 status: InviteeStatus! @default(value: INVITED)
-                user: User @relationship(type: "IS_USER", direction: OUT)
+                user: [User!]! @relationship(type: "IS_USER", direction: OUT)
                 role: InviteeRole! @default(value: ADMIN)
             }
 
             type Contributor implements Invitee @node {
                 id: ID! @id
-                group: Group! @relationship(type: "CONTRIBUTOR_TO", direction: OUT)
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN)
+                group: [Group!]! @relationship(type: "CONTRIBUTOR_TO", direction: OUT)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN)
                 email: String!
                 name: String
                 status: InviteeStatus! @default(value: INVITED)
-                user: User @relationship(type: "IS_USER", direction: OUT)
+                user: [User!]! @relationship(type: "IS_USER", direction: OUT)
                 role: InviteeRole! @default(value: CONTRIBUTOR)
             }
 
@@ -187,73 +191,39 @@ describe("https://github.com/neo4j/graphql/issues/4292", () => {
             CALL {
                 WITH this
                 MATCH (this)<-[this0:MEMBER_OF]-(this1:Person)
-                OPTIONAL MATCH (this1)<-[:CREATOR_OF]-(this2:User)
-                WITH *, count(this2) AS creatorCount
-                OPTIONAL MATCH (this1)-[:MEMBER_OF]->(this3:Group)
-                WITH *, count(this3) AS groupCount
-                OPTIONAL MATCH (this1)-[:MEMBER_OF]->(this4:Group)
-                WITH *, count(this4) AS groupCount
-                CALL {
-                    WITH this1
-                    MATCH (this1)-[:MEMBER_OF]->(this5:Group)
-                    OPTIONAL MATCH (this5)<-[:CREATOR_OF]-(this6:User)
-                    WITH *, count(this6) AS creatorCount
-                    WITH *
-                    WHERE (creatorCount <> 0 AND ($jwt.uid IS NOT NULL AND this6.id = $jwt.uid))
-                    RETURN count(this5) = 1 AS var7
-                }
                 WITH *
-                WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ((creatorCount <> 0 AND ($jwt.uid IS NOT NULL AND this2.id = $jwt.uid)) OR (groupCount <> 0 AND size([(this3)<-[:ADMIN_OF]-(this9:Admin) WHERE single(this8 IN [(this9)-[:IS_USER]->(this8:User) WHERE ($jwt.uid IS NOT NULL AND this8.id = $jwt.uid) | 1] WHERE true) | 1]) > 0) OR (groupCount <> 0 AND size([(this4)<-[:CONTRIBUTOR_TO]-(this11:Contributor) WHERE single(this10 IN [(this11)-[:IS_USER]->(this10:User) WHERE ($jwt.uid IS NOT NULL AND this10.id = $jwt.uid) | 1] WHERE true) | 1]) > 0) OR var7 = true)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
+                WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (size([(this1)<-[:CREATOR_OF]-(this2:User) WHERE ($jwt.uid IS NOT NULL AND this2.id = $jwt.uid) | 1]) > 0 OR size([(this1)-[:MEMBER_OF]->(this5:Group) WHERE size([(this5)<-[:ADMIN_OF]-(this4:Admin) WHERE size([(this4)-[:IS_USER]->(this3:User) WHERE ($jwt.uid IS NOT NULL AND this3.id = $jwt.uid) | 1]) > 0 | 1]) > 0 | 1]) > 0 OR size([(this1)-[:MEMBER_OF]->(this8:Group) WHERE size([(this8)<-[:CONTRIBUTOR_TO]-(this7:Contributor) WHERE size([(this7)-[:IS_USER]->(this6:User) WHERE ($jwt.uid IS NOT NULL AND this6.id = $jwt.uid) | 1]) > 0 | 1]) > 0 | 1]) > 0 OR size([(this1)-[:MEMBER_OF]->(this10:Group) WHERE size([(this10)<-[:CREATOR_OF]-(this9:User) WHERE ($jwt.uid IS NOT NULL AND this9.id = $jwt.uid) | 1]) > 0 | 1]) > 0)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
                 CALL {
                     WITH this1
-                    MATCH (this1)-[this12:PARTNER_OF]-(this13:Person)
-                    OPTIONAL MATCH (this13)<-[:CREATOR_OF]-(this14:User)
-                    WITH *, count(this14) AS creatorCount
-                    OPTIONAL MATCH (this13)-[:MEMBER_OF]->(this15:Group)
-                    WITH *, count(this15) AS groupCount
-                    OPTIONAL MATCH (this13)-[:MEMBER_OF]->(this16:Group)
-                    WITH *, count(this16) AS groupCount
-                    OPTIONAL MATCH (this13)-[:MEMBER_OF]->(this17:Group)
-                    WITH *, count(this17) AS groupCount
-                    WITH *
-                    CALL {
-                        WITH this13
-                        MATCH (this13)-[:MEMBER_OF]->(this18:Group)
-                        OPTIONAL MATCH (this18)<-[:CREATOR_OF]-(this19:User)
-                        WITH *, count(this19) AS creatorCount
-                        WITH *
-                        WHERE (creatorCount <> 0 AND ($jwt.uid IS NOT NULL AND this19.id = $jwt.uid))
-                        RETURN count(this18) = 1 AS var20
-                    }
-                    WITH *
-                    WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ((creatorCount <> 0 AND ($jwt.uid IS NOT NULL AND this14.id = $jwt.uid)) OR (groupCount <> 0 AND size([(this15)<-[:ADMIN_OF]-(this22:Admin) WHERE single(this21 IN [(this22)-[:IS_USER]->(this21:User) WHERE ($jwt.uid IS NOT NULL AND this21.id = $jwt.uid) | 1] WHERE true) | 1]) > 0) OR (groupCount <> 0 AND size([(this16)<-[:CONTRIBUTOR_TO]-(this24:Contributor) WHERE single(this23 IN [(this24)-[:IS_USER]->(this23:User) WHERE ($jwt.uid IS NOT NULL AND this23.id = $jwt.uid) | 1] WHERE true) | 1]) > 0) OR var20 = true)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
-                    WITH collect({ node: this13, relationship: this12 }) AS edges
+                    MATCH (this1)-[this11:PARTNER_OF]-(this12:Person)
+                    WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (size([(this12)<-[:CREATOR_OF]-(this13:User) WHERE ($jwt.uid IS NOT NULL AND this13.id = $jwt.uid) | 1]) > 0 OR size([(this12)-[:MEMBER_OF]->(this16:Group) WHERE size([(this16)<-[:ADMIN_OF]-(this15:Admin) WHERE size([(this15)-[:IS_USER]->(this14:User) WHERE ($jwt.uid IS NOT NULL AND this14.id = $jwt.uid) | 1]) > 0 | 1]) > 0 | 1]) > 0 OR size([(this12)-[:MEMBER_OF]->(this19:Group) WHERE size([(this19)<-[:CONTRIBUTOR_TO]-(this18:Contributor) WHERE size([(this18)-[:IS_USER]->(this17:User) WHERE ($jwt.uid IS NOT NULL AND this17.id = $jwt.uid) | 1]) > 0 | 1]) > 0 | 1]) > 0 OR size([(this12)-[:MEMBER_OF]->(this21:Group) WHERE size([(this21)<-[:CREATOR_OF]-(this20:User) WHERE ($jwt.uid IS NOT NULL AND this20.id = $jwt.uid) | 1]) > 0 | 1]) > 0)), \\"@neo4j/graphql/FORBIDDEN\\", [0])
+                    WITH collect({ node: this12, relationship: this11 }) AS edges
                     WITH edges, size(edges) AS totalCount
                     CALL {
                         WITH edges
                         UNWIND edges AS edge
-                        WITH edge.node AS this13, edge.relationship AS this12
-                        RETURN collect({ properties: { active: this12.active, firstDay: this12.firstDay, lastDay: this12.lastDay, __resolveType: \\"PartnerOf\\" }, node: { __id: id(this13), __resolveType: \\"Person\\" } }) AS var25
+                        WITH edge.node AS this12, edge.relationship AS this11
+                        RETURN collect({ properties: { active: this11.active, firstDay: this11.firstDay, lastDay: this11.lastDay, __resolveType: \\"PartnerOf\\" }, node: { __id: id(this12), __resolveType: \\"Person\\" } }) AS var22
                     }
-                    RETURN { edges: var25, totalCount: totalCount } AS var26
+                    RETURN { edges: var22, totalCount: totalCount } AS var23
                 }
-                WITH this1 { .id, .name, partnersConnection: var26 } AS this1
-                RETURN collect(this1) AS var27
+                WITH this1 { .id, .name, partnersConnection: var23 } AS this1
+                RETURN collect(this1) AS var24
             }
-            RETURN this { .id, .name, members: var27 } AS this"
+            RETURN this { .id, .name, members: var24 } AS this"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"family_id_1\\",
+                \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [
                         \\"admin\\"
                     ],
                     \\"id\\": \\"something\\",
                     \\"email\\": \\"something\\"
-                },
-                \\"isAuthenticated\\": true
+                }
             }"
         `);
     });

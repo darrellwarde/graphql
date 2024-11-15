@@ -34,9 +34,9 @@ describe("https://github.com/neo4j/graphql/issues/5143", () => {
 
             type Video @node {
                 id: ID! @id
-                publisher: User! @relationship(type: "PUBLISHER", direction: IN)
+                publisher: [User!]! @relationship(type: "PUBLISHER", direction: IN)
             }
-            extend type Video @authorization(filter: [{ where: { node: { publisher: { id_EQ: "$jwt.sub" } } } }])
+            extend type Video @authorization(filter: [{ where: { node: { publisher_ALL: { id_EQ: "$jwt.sub" } } } }])
 
             type Query {
                 getAllVids: [Video]!
@@ -84,10 +84,8 @@ describe("https://github.com/neo4j/graphql/issues/5143", () => {
                 LIMIT 1
             }
             WITH video AS this0
-            OPTIONAL MATCH (this0)<-[:PUBLISHER]-(this1:User)
-            WITH *, count(this1) AS publisherCount
             WITH *
-            WHERE ($isAuthenticated = true AND (publisherCount <> 0 AND ($jwt.sub IS NOT NULL AND this1.id = $jwt.sub)))
+            WHERE ($isAuthenticated = true AND size([(this0)<-[:PUBLISHER]-(this1:User) WHERE NOT ($jwt.sub IS NOT NULL AND this1.id = $jwt.sub) | 1]) = 0)
             WITH this0 { .id } AS this0
             RETURN this0 AS this"
         `);

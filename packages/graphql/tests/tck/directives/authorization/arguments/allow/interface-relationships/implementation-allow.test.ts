@@ -31,14 +31,14 @@ describe("@auth allow on specific interface implementation", () => {
             interface Content {
                 id: ID
                 content: String
-                creator: User! @declareRelationship
+                creator: [User!]! @declareRelationship
             }
 
             type Comment implements Content @node {
                 id: ID
                 content: String
-                creator: User! @relationship(type: "HAS_CONTENT", direction: IN)
-                post: Post! @relationship(type: "HAS_COMMENT", direction: IN)
+                creator: [User!]! @relationship(type: "HAS_CONTENT", direction: IN)
+                post: [Post!]! @relationship(type: "HAS_COMMENT", direction: IN)
             }
 
             type Post implements Content
@@ -48,13 +48,13 @@ describe("@auth allow on specific interface implementation", () => {
                         {
                             when: BEFORE
                             operations: [READ, UPDATE, DELETE, DELETE_RELATIONSHIP, CREATE_RELATIONSHIP]
-                            where: { node: { creator: { id_EQ: "$jwt.sub" } } }
+                            where: { node: { creator_SOME: { id_EQ: "$jwt.sub" } } }
                         }
                     ]
                 ) {
                 id: ID
                 content: String
-                creator: User! @relationship(type: "HAS_CONTENT", direction: IN)
+                creator: [User!]! @relationship(type: "HAS_CONTENT", direction: IN)
                 comments: [Comment!]! @relationship(type: "HAS_COMMENT", direction: OUT)
             }
 
@@ -105,10 +105,7 @@ describe("@auth allow on specific interface implementation", () => {
                     UNION
                     WITH *
                     MATCH (this)-[this3:HAS_CONTENT]->(this4:Post)
-                    OPTIONAL MATCH (this4)<-[:HAS_CONTENT]-(this5:User)
-                    WITH *, count(this5) AS creatorCount
-                    WITH *
-                    WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this5.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
+                    WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND size([(this4)<-[:HAS_CONTENT]-(this5:User) WHERE ($jwt.sub IS NOT NULL AND this5.id = $jwt.sub) | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0])
                     WITH this4 { .id, .content, __resolveType: \\"Post\\", __id: id(this4) } AS this4
                     RETURN this4 AS var2
                 }
@@ -166,10 +163,7 @@ describe("@auth allow on specific interface implementation", () => {
                     UNION
                     WITH *
                     MATCH (this)-[this3:HAS_CONTENT]->(this4:Post)
-                    OPTIONAL MATCH (this4)<-[:HAS_CONTENT]-(this5:User)
-                    WITH *, count(this5) AS creatorCount
-                    WITH *
-                    WHERE (this4.id = $param2 AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this5.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
+                    WHERE (this4.id = $param2 AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND size([(this4)<-[:HAS_CONTENT]-(this5:User) WHERE ($jwt.sub IS NOT NULL AND this5.id = $jwt.sub) | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
                     CALL {
                         WITH this4
                         MATCH (this4)-[this6:HAS_COMMENT]->(this7:Comment)
@@ -236,21 +230,6 @@ describe("@auth allow on specific interface implementation", () => {
             	WITH this
             	MATCH (this)-[this_has_content0_relationship:HAS_CONTENT]->(this_content0:Comment)
             	SET this_content0.id = $this_update_content0_id_SET
-            	WITH this, this_content0
-            	CALL {
-            		WITH this_content0
-            		MATCH (this_content0)<-[this_content0_creator_User_unique:HAS_CONTENT]-(:User)
-            		WITH count(this_content0_creator_User_unique) as c
-            		WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDComment.creator required exactly once', [0])
-            		RETURN c AS this_content0_creator_User_unique_ignored
-            	}
-            	CALL {
-            		WITH this_content0
-            		MATCH (this_content0)<-[this_content0_post_Post_unique:HAS_COMMENT]-(:Post)
-            		WITH count(this_content0_post_Post_unique) as c
-            		WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDComment.post required exactly once', [0])
-            		RETURN c AS this_content0_post_Post_unique_ignored
-            	}
             	RETURN count(*) AS update_this_content0
             }
             RETURN count(*) AS update_this_Comment
@@ -261,18 +240,8 @@ describe("@auth allow on specific interface implementation", () => {
             CALL {
             	WITH this
             	MATCH (this)-[this_has_content0_relationship:HAS_CONTENT]->(this_content0:Post)
-            	OPTIONAL MATCH (this_content0)<-[:HAS_CONTENT]-(authorization__before_this0:User)
-            	WITH *, count(authorization__before_this0) AS creatorCount
-            	WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
+            	WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND size([(this_content0)<-[:HAS_CONTENT]-(authorization__before_this0:User) WHERE ($jwt.sub IS NOT NULL AND authorization__before_this0.id = $jwt.sub) | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             	SET this_content0.id = $this_update_content0_id_SET
-            	WITH this, this_content0
-            	CALL {
-            		WITH this_content0
-            		MATCH (this_content0)<-[this_content0_creator_User_unique:HAS_CONTENT]-(:User)
-            		WITH count(this_content0_creator_User_unique) as c
-            		WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDPost.creator required exactly once', [0])
-            		RETURN c AS this_content0_creator_User_unique_ignored
-            	}
             	RETURN count(*) AS update_this_content0
             }
             RETURN count(*) AS update_this_Post
@@ -288,10 +257,7 @@ describe("@auth allow on specific interface implementation", () => {
                     UNION
                     WITH *
                     MATCH (this)-[update_this3:HAS_CONTENT]->(update_this4:Post)
-                    OPTIONAL MATCH (update_this4)<-[:HAS_CONTENT]-(update_this5:User)
-                    WITH *, count(update_this5) AS creatorCount
-                    WITH *
-                    WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND update_this5.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0])
+                    WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND size([(update_this4)<-[:HAS_CONTENT]-(update_this5:User) WHERE ($jwt.sub IS NOT NULL AND update_this5.id = $jwt.sub) | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0])
                     WITH update_this4 { .id, __resolveType: \\"Post\\", __id: id(update_this4) } AS update_this4
                     RETURN update_this4 AS update_var2
                 }
@@ -352,9 +318,7 @@ describe("@auth allow on specific interface implementation", () => {
             CALL {
                 WITH *
                 OPTIONAL MATCH (this)-[this4:HAS_CONTENT]->(this5:Post)
-                OPTIONAL MATCH (this5)<-[:HAS_CONTENT]-(this6:User)
-                WITH *, count(this6) AS creatorCount
-                WHERE (this5.id = $param2 AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this6.id = $jwt.sub))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
+                WHERE (this5.id = $param2 AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND size([(this5)<-[:HAS_CONTENT]-(this6:User) WHERE ($jwt.sub IS NOT NULL AND this6.id = $jwt.sub) | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
                 WITH this4, collect(DISTINCT this5) AS var7
                 CALL {
                     WITH var7

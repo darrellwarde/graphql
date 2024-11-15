@@ -32,7 +32,7 @@ describe("Math operators", () => {
 
             type Star implements Wife @node {
                 marriageLength: Int
-                marriedWith: Actor @relationship(type: "MARRIED_WITH", direction: IN)
+                marriedWith: [Actor!]! @relationship(type: "MARRIED_WITH", direction: IN)
             }
 
             type Movie @node {
@@ -47,7 +47,7 @@ describe("Math operators", () => {
                 id: ID!
                 name: String!
                 actedIn: [Movie!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
-                marriedWith: Wife @relationship(type: "MARRIED_WITH", direction: OUT)
+                marriedWith: [Wife!]! @relationship(type: "MARRIED_WITH", direction: OUT)
             }
 
             type ActedIn @relationshipProperties {
@@ -298,14 +298,6 @@ describe("Math operators", () => {
             	SET this_marriedWith0.marriageLength = this_marriedWith0.marriageLength + $this_update_marriedWith0_marriageLength_INCREMENT
             	RETURN this_marriedWith0 as this_marriedWith0_marriageLength__INCREMENT
             	}
-            	WITH this, this_marriedWith0
-            	CALL {
-            		WITH this_marriedWith0
-            		MATCH (this_marriedWith0)<-[this_marriedWith0_marriedWith_Actor_unique:MARRIED_WITH]-(:Actor)
-            		WITH count(this_marriedWith0_marriedWith_Actor_unique) as c
-            		WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDStar.marriedWith must be less than or equal to one', [0])
-            		RETURN c AS this_marriedWith0_marriedWith_Actor_unique_ignored
-            	}
             	RETURN count(*) AS update_this_marriedWith0
             }
             RETURN count(*) AS update_this_Star
@@ -320,7 +312,7 @@ describe("Math operators", () => {
                     RETURN update_this1 AS update_var2
                 }
                 WITH update_var2
-                RETURN head(collect(update_var2)) AS update_var2
+                RETURN collect(update_var2) AS update_var2
             }
             RETURN collect(DISTINCT this { .name, marriedWith: update_var2 }) AS data"
         `);

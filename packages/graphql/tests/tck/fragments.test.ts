@@ -40,17 +40,17 @@ describe("Cypher Fragment", () => {
 
             interface Ownable {
                 id: ID!
-                owner: User
+                owner: [User!]!
             }
 
             type Tile implements Ownable @node {
                 id: ID! @id
-                owner: User! @relationship(type: "OWNS", direction: IN)
+                owner: [User!]! @relationship(type: "OWNS", direction: IN)
             }
 
             type Character implements Ownable @node {
                 id: ID! @id
-                owner: User! @relationship(type: "OWNS", direction: IN)
+                owner: [User!]! @relationship(type: "OWNS", direction: IN)
             }
         `;
 

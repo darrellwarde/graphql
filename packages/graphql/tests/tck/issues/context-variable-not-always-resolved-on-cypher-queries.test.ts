@@ -29,7 +29,7 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
             @mutation(operations: [])
             @limit(default: 100, max: 300) {
             iri: ID! @id @alias(property: "uri")
-            realizationOf: Work @relationship(type: "realizationOf", direction: OUT)
+            realizationOf: [Work!]! @relationship(type: "realizationOf", direction: OUT)
             relToUnion: [unionTarget!]! @relationship(type: "relToUnion", direction: OUT)
             relToInterface: [interfaceTarget!]! @relationship(type: "relToInterface", direction: OUT)
         }
@@ -72,7 +72,9 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
             query {
                 exprs(
                     where: {
-                        realizationOf: { hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" } }
+                        realizationOf_SOME: {
+                            hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" }
+                        }
                     }
                     limit: 1
                 ) {
@@ -91,10 +93,13 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Exprlabel:test:Resource)
-            WHERE single(this0 IN [(this)-[:realizationOf]->(this0:WorkLabel:test:Resource) WHERE EXISTS {
-                MATCH (this0)-[:hasResourceType]->(this1:ResourceType)
-                WHERE this1.uri = $param0
-            } | 1] WHERE true)
+            WHERE EXISTS {
+                MATCH (this)-[:realizationOf]->(this0:WorkLabel:test:Resource)
+                WHERE EXISTS {
+                    MATCH (this0)-[:hasResourceType]->(this1:ResourceType)
+                    WHERE this1.uri = $param0
+                }
+            }
             WITH *
             LIMIT $param1
             RETURN this { iri: this.uri } AS this"
@@ -117,7 +122,9 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
             query {
                 exprs(
                     where: {
-                        realizationOf: { hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" } }
+                        realizationOf_SOME: {
+                            hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" }
+                        }
                     }
                     limit: 1
                 ) {
@@ -141,10 +148,13 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Exprlabel:test:Resource)
-            WHERE single(this0 IN [(this)-[:realizationOf]->(this0:WorkLabel:test:Resource) WHERE EXISTS {
-                MATCH (this0)-[:hasResourceType]->(this1:ResourceType)
-                WHERE this1.uri = $param0
-            } | 1] WHERE true)
+            WHERE EXISTS {
+                MATCH (this)-[:realizationOf]->(this0:WorkLabel:test:Resource)
+                WHERE EXISTS {
+                    MATCH (this0)-[:hasResourceType]->(this1:ResourceType)
+                    WHERE this1.uri = $param0
+                }
+            }
             WITH *
             LIMIT $param1
             CALL {
@@ -183,7 +193,9 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
             query {
                 exprs(
                     where: {
-                        realizationOf: { hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" } }
+                        realizationOf_SOME: {
+                            hasResourceType_SOME: { iri_EQ: "http://data.somesite.com/crown/test-id" }
+                        }
                     }
                     limit: 1
                 ) {
@@ -207,10 +219,13 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Exprlabel:test:Resource)
-            WHERE single(this0 IN [(this)-[:realizationOf]->(this0:WorkLabel:test:Resource) WHERE EXISTS {
-                MATCH (this0)-[:hasResourceType]->(this1:ResourceType)
-                WHERE this1.uri = $param0
-            } | 1] WHERE true)
+            WHERE EXISTS {
+                MATCH (this)-[:realizationOf]->(this0:WorkLabel:test:Resource)
+                WHERE EXISTS {
+                    MATCH (this0)-[:hasResourceType]->(this1:ResourceType)
+                    WHERE this1.uri = $param0
+                }
+            }
             WITH *
             LIMIT $param1
             CALL {

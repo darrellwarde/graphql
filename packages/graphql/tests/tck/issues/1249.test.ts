@@ -29,7 +29,7 @@ describe("https://github.com/neo4j/graphql/issues/1249", () => {
             type Bulk @mutation(operations: []) @node(labels: ["Bulk", "$tenant"]) {
                 id: ID!
                 supplierMaterialNumber: String!
-                material: Material! @relationship(type: "MATERIAL_BULK", direction: OUT)
+                material: [Material!]! @relationship(type: "MATERIAL_BULK", direction: OUT)
             }
 
             type Material @mutation(operations: []) @node {
@@ -99,7 +99,7 @@ describe("https://github.com/neo4j/graphql/issues/1249", () => {
                     RETURN { edges: var4, totalCount: totalCount } AS var5
                 }
                 WITH this1 { .id, suppliersConnection: var5 } AS this1
-                RETURN head(collect(this1)) AS var6
+                RETURN collect(this1) AS var6
             }
             RETURN this { .supplierMaterialNumber, material: var6 } AS this"
         `);

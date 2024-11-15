@@ -28,7 +28,7 @@ describe("https://github.com/neo4j/graphql/issues/2262", () => {
         typeDefs = /* GraphQL */ `
             type Component @node {
                 uuid: String
-                upstreamProcess: Process @relationship(type: "OUTPUT", direction: IN)
+                upstreamProcess: [Process!]! @relationship(type: "OUTPUT", direction: IN)
                 downstreamProcesses: [Process!]! @relationship(type: "INPUT", direction: OUT)
             }
 

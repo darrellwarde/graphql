@@ -34,20 +34,20 @@ describe("Batch Create, Interface", () => {
             type Actor implements Person @node {
                 id: ID!
                 name: String
-                website: Website @relationship(type: "HAS_WEBSITE", direction: OUT)
+                website: [Website!]! @relationship(type: "HAS_WEBSITE", direction: OUT)
                 movies: [Movie!]! @relationship(type: "EMPLOYED", direction: OUT, properties: "ActedIn")
             }
 
             type Modeler implements Person @node {
                 id: ID!
                 name: String
-                website: Website @relationship(type: "HAS_WEBSITE", direction: OUT)
+                website: [Website!]! @relationship(type: "HAS_WEBSITE", direction: OUT)
                 movies: [Movie!]! @relationship(type: "EMPLOYED", direction: OUT, properties: "ActedIn")
             }
 
             type Movie @node {
                 id: ID
-                website: Website @relationship(type: "HAS_WEBSITE", direction: OUT)
+                website: [Website!]! @relationship(type: "HAS_WEBSITE", direction: OUT)
                 workers: [Person!]! @relationship(type: "EMPLOYED", direction: IN, properties: "ActedIn")
             }
 
@@ -85,14 +85,6 @@ describe("Batch Create, Interface", () => {
                 CREATE (create_this1:Movie)
                 SET
                     create_this1.id = create_var0.id
-                WITH create_this1
-                CALL {
-                    WITH create_this1
-                    MATCH (create_this1)-[create_this2:HAS_WEBSITE]->(:Website)
-                    WITH count(create_this2) AS c
-                    WHERE apoc.util.validatePredicate(NOT (c <= 1), \\"@neo4j/graphql/RELATIONSHIP-REQUIREDMovie.website must be less than or equal to one\\", [0])
-                    RETURN c AS create_var3
-                }
                 RETURN create_this1
             }
             RETURN collect(create_this1 { .id }) AS data"
@@ -153,22 +145,6 @@ describe("Batch Create, Interface", () => {
             SET this0_workersActor0_node.name = $this0_workersActor0_node_name
             MERGE (this0)<-[this0_workersActor0_relationship:EMPLOYED]-(this0_workersActor0_node)
             SET this0_workersActor0_relationship.year = $this0_workersActor0_relationship_year
-            WITH *
-            CALL {
-            	WITH this0_workersActor0_node
-            	MATCH (this0_workersActor0_node)-[this0_workersActor0_node_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this0_workersActor0_node_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDActor.website must be less than or equal to one', [0])
-            	RETURN c AS this0_workersActor0_node_website_Website_unique_ignored
-            }
-            WITH *
-            CALL {
-            	WITH this0
-            	MATCH (this0)-[this0_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this0_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDMovie.website must be less than or equal to one', [0])
-            	RETURN c AS this0_website_Website_unique_ignored
-            }
             RETURN this0
             }
             CALL {
@@ -180,22 +156,6 @@ describe("Batch Create, Interface", () => {
             SET this1_workersModeler0_node.name = $this1_workersModeler0_node_name
             MERGE (this1)<-[this1_workersModeler0_relationship:EMPLOYED]-(this1_workersModeler0_node)
             SET this1_workersModeler0_relationship.year = $this1_workersModeler0_relationship_year
-            WITH *
-            CALL {
-            	WITH this1_workersModeler0_node
-            	MATCH (this1_workersModeler0_node)-[this1_workersModeler0_node_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this1_workersModeler0_node_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDModeler.website must be less than or equal to one', [0])
-            	RETURN c AS this1_workersModeler0_node_website_Website_unique_ignored
-            }
-            WITH *
-            CALL {
-            	WITH this1
-            	MATCH (this1)-[this1_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this1_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDMovie.website must be less than or equal to one', [0])
-            	RETURN c AS this1_website_Website_unique_ignored
-            }
             RETURN this1
             }
             CALL {
@@ -308,22 +268,6 @@ describe("Batch Create, Interface", () => {
             SET this0_workersActor0_node.name = $this0_workersActor0_node_name
             MERGE (this0)<-[this0_workersActor0_relationship:EMPLOYED]-(this0_workersActor0_node)
             SET this0_workersActor0_relationship.year = $this0_workersActor0_relationship_year
-            WITH *
-            CALL {
-            	WITH this0_workersActor0_node
-            	MATCH (this0_workersActor0_node)-[this0_workersActor0_node_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this0_workersActor0_node_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDActor.website must be less than or equal to one', [0])
-            	RETURN c AS this0_workersActor0_node_website_Website_unique_ignored
-            }
-            WITH *
-            CALL {
-            	WITH this0
-            	MATCH (this0)-[this0_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this0_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDMovie.website must be less than or equal to one', [0])
-            	RETURN c AS this0_website_Website_unique_ignored
-            }
             RETURN this0
             }
             CALL {
@@ -335,22 +279,6 @@ describe("Batch Create, Interface", () => {
             SET this1_workersActor0_node.name = $this1_workersActor0_node_name
             MERGE (this1)<-[this1_workersActor0_relationship:EMPLOYED]-(this1_workersActor0_node)
             SET this1_workersActor0_relationship.year = $this1_workersActor0_relationship_year
-            WITH *
-            CALL {
-            	WITH this1_workersActor0_node
-            	MATCH (this1_workersActor0_node)-[this1_workersActor0_node_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this1_workersActor0_node_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDActor.website must be less than or equal to one', [0])
-            	RETURN c AS this1_workersActor0_node_website_Website_unique_ignored
-            }
-            WITH *
-            CALL {
-            	WITH this1
-            	MATCH (this1)-[this1_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this1_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDMovie.website must be less than or equal to one', [0])
-            	RETURN c AS this1_website_Website_unique_ignored
-            }
             RETURN this1
             }
             CALL {
@@ -360,14 +288,6 @@ describe("Batch Create, Interface", () => {
             CREATE (this2_website0_node:Website)
             SET this2_website0_node.address = $this2_website0_node_address
             MERGE (this2)-[:HAS_WEBSITE]->(this2_website0_node)
-            WITH *
-            CALL {
-            	WITH this2
-            	MATCH (this2)-[this2_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this2_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDMovie.website must be less than or equal to one', [0])
-            	RETURN c AS this2_website_Website_unique_ignored
-            }
             RETURN this2
             }
             CALL {
@@ -408,14 +328,6 @@ describe("Batch Create, Interface", () => {
             WITH this3, this3_workers_connect1_node
             	RETURN count(*) AS connect_this3_workers_connect_Modeler1
             }
-            WITH *
-            CALL {
-            	WITH this3
-            	MATCH (this3)-[this3_website_Website_unique:HAS_WEBSITE]->(:Website)
-            	WITH count(this3_website_Website_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDMovie.website must be less than or equal to one', [0])
-            	RETURN c AS this3_website_Website_unique_ignored
-            }
             RETURN this3
             }
             CALL {
@@ -424,7 +336,7 @@ describe("Batch Create, Interface", () => {
                     WITH this0
                     MATCH (this0)-[create_this0:HAS_WEBSITE]->(create_this1:Website)
                     WITH create_this1 { .address } AS create_this1
-                    RETURN head(collect(create_this1)) AS create_var2
+                    RETURN collect(create_this1) AS create_var2
                 }
                 CALL {
                     WITH this0
@@ -450,7 +362,7 @@ describe("Batch Create, Interface", () => {
                     WITH this1
                     MATCH (this1)-[create_this9:HAS_WEBSITE]->(create_this10:Website)
                     WITH create_this10 { .address } AS create_this10
-                    RETURN head(collect(create_this10)) AS create_var11
+                    RETURN collect(create_this10) AS create_var11
                 }
                 CALL {
                     WITH this1
@@ -476,7 +388,7 @@ describe("Batch Create, Interface", () => {
                     WITH this2
                     MATCH (this2)-[create_this18:HAS_WEBSITE]->(create_this19:Website)
                     WITH create_this19 { .address } AS create_this19
-                    RETURN head(collect(create_this19)) AS create_var20
+                    RETURN collect(create_this19) AS create_var20
                 }
                 CALL {
                     WITH this2
@@ -502,7 +414,7 @@ describe("Batch Create, Interface", () => {
                     WITH this3
                     MATCH (this3)-[create_this27:HAS_WEBSITE]->(create_this28:Website)
                     WITH create_this28 { .address } AS create_this28
-                    RETURN head(collect(create_this28)) AS create_var29
+                    RETURN collect(create_this28) AS create_var29
                 }
                 CALL {
                     WITH this3

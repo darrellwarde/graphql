@@ -61,7 +61,8 @@ describe("Missing custom Cypher on unions", () => {
             iri: ID! @id @alias(property: "uri")
             relatesToChild: [hierarchicalNodeTarget!]!
                 @relationship(type: "relatesToChild", properties: "RelateProps", direction: OUT)
-            isContained: HierarchicalRoot! @relationship(type: "isContained", properties: "RelateProps", direction: OUT)
+            isContained: [HierarchicalRoot!]!
+                @relationship(type: "isContained", properties: "RelateProps", direction: OUT)
 
             hierarchicalPathNodes: [choNode]
                 @cypher(
@@ -122,7 +123,9 @@ describe("Missing custom Cypher on unions", () => {
     test("should include checks for auth jwt param is not null", async () => {
         const query = /* GraphQL */ `
             query browseHierarchicalComponents($hierarchicalRootId: ID!, $choNodeIris: [ID!]!) {
-                hierarchicalComponents(where: { isContained: { iri_EQ: $hierarchicalRootId }, iri_IN: $choNodeIris }) {
+                hierarchicalComponents(
+                    where: { isContained_SOME: { iri_EQ: $hierarchicalRootId }, iri_IN: $choNodeIris }
+                ) {
                     #...hierarchicalComponentFields
                     relatesToChild {
                         ...hierarchicalComponentFields
@@ -150,10 +153,10 @@ describe("Missing custom Cypher on unions", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:HierarchicalComponent:Resource)
-            OPTIONAL MATCH (this)-[:isContained]->(this0:HierarchicalRoot:Resource)
-            WITH *, count(this0) AS isContainedCount
-            WITH *
-            WHERE (this.uri IN $param0 AND (isContainedCount <> 0 AND this0.uri = $param1))
+            WHERE (this.uri IN $param0 AND EXISTS {
+                MATCH (this)-[:isContained]->(this0:HierarchicalRoot:Resource)
+                WHERE this0.uri = $param1
+            })
             WITH *
             LIMIT $param2
             CALL {
