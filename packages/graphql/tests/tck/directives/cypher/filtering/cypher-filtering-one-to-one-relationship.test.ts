@@ -120,7 +120,7 @@ describe("cypher directive filtering - One To One Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { released: 2003, actor: { name_EQ: "Keanu Reeves", age_GT: 30 } }) {
+                movies(where: { released_EQ: 2003, actor: { name_EQ: "Keanu Reeves", age_GT: 30 } }) {
                     title
                 }
             }
@@ -921,7 +921,7 @@ describe("cypher directive filtering - One To One Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                people(where: { directed: { title: "The Matrix" } }) {
+                people(where: { directed: { title_EQ: "The Matrix" } }) {
                     directed {
                         title
                         directed_by {

@@ -808,7 +808,7 @@ describe("cypher directive filtering - One To One Relationship", () => {
             type ${Movie} @node {
                 title: String
                 released: Int
-                directed_by: ${Person}! @authorization(validate: [{ where: { node: { directed_by: { name: "$jwt.custom_value" } } } }])
+                directed_by: ${Person}! @authorization(validate: [{ where: { node: { directed_by: { name_EQ: "$jwt.custom_value" } } } }])
                     @cypher(
                         statement: """
                         MATCH (this)<-[:DIRECTED]-(director:${Person})

@@ -113,13 +113,11 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               viewers_EQ: Int
               viewers_GT: Int
               viewers_GTE: Int
@@ -274,13 +272,11 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              viewers: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
               viewers_EQ: BigInt
               viewers_GT: BigInt
               viewers_GTE: BigInt
@@ -433,13 +429,11 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              viewers: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               viewers_EQ: Float
               viewers_GT: Float
               viewers_GTE: Float
@@ -579,7 +573,6 @@ describe("Algebraic", () => {
               AND: [DirectorDirectsAggregateInput!]
               NOT: DirectorDirectsAggregateInput
               OR: [DirectorDirectsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -744,7 +737,6 @@ describe("Algebraic", () => {
               directs_SINGLE: MovieWhere
               \\"\\"\\"Return Directors where some of the related Movies match this filter\\"\\"\\"
               directs_SOME: MovieWhere
-              lastName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               lastName_CONTAINS: String
               lastName_ENDS_WITH: String
               lastName_EQ: String
@@ -806,7 +798,6 @@ describe("Algebraic", () => {
               AND: [MovieDirectedByAggregateInput!]
               NOT: MovieDirectedByAggregateInput
               OR: [MovieDirectedByAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -938,13 +929,11 @@ describe("Algebraic", () => {
               directedBy: DirectorWhere
               directedByAggregate: MovieDirectedByAggregateInput
               directedByConnection: MovieDirectedByConnectionWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               viewers_EQ: Int
               viewers_GT: Int
               viewers_GTE: Int
@@ -1143,13 +1132,11 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               viewers_EQ: Int
               viewers_GT: Int
               viewers_GTE: Int
@@ -1187,7 +1174,6 @@ describe("Algebraic", () => {
               AND: [MovieWorkersAggregateInput!]
               NOT: MovieWorkersAggregateInput
               OR: [MovieWorkersAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1369,7 +1355,6 @@ describe("Algebraic", () => {
               AND: [PersonWhere!]
               NOT: PersonWhere
               OR: [PersonWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1406,7 +1391,6 @@ describe("Algebraic", () => {
               AND: [PersonWorksInProductionAggregateInput!]
               NOT: PersonWorksInProductionAggregateInput
               OR: [PersonWorksInProductionAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1542,7 +1526,6 @@ describe("Algebraic", () => {
               NOT: ProductionWhere
               OR: [ProductionWhere!]
               typename_IN: [ProductionImplementation!]
-              viewers: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               viewers_EQ: Int
               viewers_GT: Int
               viewers_GTE: Int
@@ -1693,14 +1676,12 @@ describe("Algebraic", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              pay: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               pay_EQ: Float
               pay_GT: Float
               pay_GTE: Float
               pay_IN: [Float]
               pay_LT: Float
               pay_LTE: Float
-              roles: [String!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               roles_EQ: [String!]
               roles_INCLUDES: String
             }
@@ -1749,7 +1730,6 @@ describe("Algebraic", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1932,7 +1912,6 @@ describe("Algebraic", () => {
               actors_SINGLE: PersonWhere
               \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
               actors_SOME: PersonWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -1980,7 +1959,6 @@ describe("Algebraic", () => {
               AND: [PersonActedInMoviesAggregateInput!]
               NOT: PersonActedInMoviesAggregateInput
               OR: [PersonActedInMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -2163,7 +2141,6 @@ describe("Algebraic", () => {
               actedInMovies_SINGLE: MovieWhere
               \\"\\"\\"Return People where some of the related Movies match this filter\\"\\"\\"
               actedInMovies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String

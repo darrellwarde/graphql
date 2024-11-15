@@ -59,7 +59,7 @@ describe("https://github.com/neo4j/graphql/issues/5698", () => {
 
         const query = /* GraphQL */ `
             query {
-                ${Movie.plural}(where: { released: 1999, director: null }) {
+                ${Movie.plural}(where: { released_EQ: 1999, director: null }) {
                     title
                 }
             }
@@ -79,7 +79,7 @@ describe("https://github.com/neo4j/graphql/issues/5698", () => {
 
         const query = /* GraphQL */ `
             query {
-                ${Movie.plural}(where: { released: 1999, secondDirector: null }) {
+                ${Movie.plural}(where: { released_EQ: 1999, secondDirector: null }) {
                     title
                 }
             }

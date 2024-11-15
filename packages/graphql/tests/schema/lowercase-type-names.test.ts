@@ -210,7 +210,6 @@ describe("lower case type names", () => {
               AND: [actorMoviesAggregateInput!]
               NOT: actorMoviesAggregateInput
               OR: [actorMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -369,7 +368,6 @@ describe("lower case type names", () => {
               AND: [actorWhere!]
               NOT: actorWhere
               OR: [actorWhere!]
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               createdAt_EQ: DateTime
               createdAt_GT: DateTime
               createdAt_GTE: DateTime
@@ -401,13 +399,11 @@ describe("lower case type names", () => {
               movies_SINGLE: movieWhere
               \\"\\"\\"Return actors where some of the related movies match this filter\\"\\"\\"
               movies_SOME: movieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String]
               name_STARTS_WITH: String
-              year: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               year_EQ: Int
               year_GT: Int
               year_GTE: Int
@@ -442,7 +438,6 @@ describe("lower case type names", () => {
               AND: [movieActorsAggregateInput!]
               NOT: movieActorsAggregateInput
               OR: [movieActorsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -651,26 +646,22 @@ describe("lower case type names", () => {
               actors_SINGLE: actorWhere
               \\"\\"\\"Return movies where some of the related actors match this filter\\"\\"\\"
               actors_SOME: actorWhere
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               createdAt_EQ: DateTime
               createdAt_GT: DateTime
               createdAt_GTE: DateTime
               createdAt_IN: [DateTime]
               createdAt_LT: DateTime
               createdAt_LTE: DateTime
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String]
               name_STARTS_WITH: String
-              testId: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               testId_CONTAINS: String
               testId_ENDS_WITH: String
               testId_EQ: String
               testId_IN: [String]
               testId_STARTS_WITH: String
-              year: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               year_EQ: Int
               year_GT: Int
               year_GTE: Int

@@ -135,7 +135,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
               AND: [BookTitle_ENBookAggregateInput!]
               NOT: BookTitle_ENBookAggregateInput
               OR: [BookTitle_ENBookAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -295,7 +294,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
               book: BookWhere
               bookAggregate: BookTitle_ENBookAggregateInput
               bookConnection: BookTitle_ENBookConnectionWhere
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String
@@ -319,7 +317,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
               AND: [BookTitle_SVBookAggregateInput!]
               NOT: BookTitle_SVBookAggregateInput
               OR: [BookTitle_SVBookAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -479,7 +476,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
               book: BookWhere
               bookAggregate: BookTitle_SVBookAggregateInput
               bookConnection: BookTitle_SVBookConnectionWhere
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String
@@ -628,13 +624,11 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
               AND: [BookWhere!]
               NOT: BookWhere
               OR: [BookWhere!]
-              isbn: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               isbn_CONTAINS: String
               isbn_ENDS_WITH: String
               isbn_EQ: String
               isbn_IN: [String!]
               isbn_STARTS_WITH: String
-              originalTitle: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               originalTitle_CONTAINS: String
               originalTitle_ENDS_WITH: String
               originalTitle_EQ: String

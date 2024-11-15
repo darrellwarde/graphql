@@ -234,25 +234,21 @@ describe("@populatedBy tests", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  callback1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback1_CONTAINS: String
                   callback1_ENDS_WITH: String
                   callback1_EQ: String
                   callback1_IN: [String!]
                   callback1_STARTS_WITH: String
-                  callback2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback2_CONTAINS: String
                   callback2_ENDS_WITH: String
                   callback2_EQ: String
                   callback2_IN: [String!]
                   callback2_STARTS_WITH: String
-                  callback3: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback3_CONTAINS: String
                   callback3_ENDS_WITH: String
                   callback3_EQ: String
                   callback3_IN: [String!]
                   callback3_STARTS_WITH: String
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -432,28 +428,24 @@ describe("@populatedBy tests", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  callback1: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback1_EQ: Int
                   callback1_GT: Int
                   callback1_GTE: Int
                   callback1_IN: [Int!]
                   callback1_LT: Int
                   callback1_LTE: Int
-                  callback2: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback2_EQ: Int
                   callback2_GT: Int
                   callback2_GTE: Int
                   callback2_IN: [Int!]
                   callback2_LT: Int
                   callback2_LTE: Int
-                  callback3: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback3_EQ: Int
                   callback3_GT: Int
                   callback3_GTE: Int
                   callback3_IN: [Int!]
                   callback3_LT: Int
                   callback3_LTE: Int
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -755,7 +747,6 @@ describe("@populatedBy tests", () => {
                   AND: [GenreWhere!]
                   NOT: GenreWhere
                   OR: [GenreWhere!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -821,7 +812,6 @@ describe("@populatedBy tests", () => {
                   AND: [MovieGenresAggregateInput!]
                   NOT: MovieGenresAggregateInput
                   OR: [MovieGenresAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -951,7 +941,6 @@ describe("@populatedBy tests", () => {
                   genres_SINGLE: GenreWhere
                   \\"\\"\\"Return Movies where some of the related Genres match this filter\\"\\"\\"
                   genres_SOME: GenreWhere
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -1086,25 +1075,21 @@ describe("@populatedBy tests", () => {
                   AND: [RelPropertiesWhere!]
                   NOT: RelPropertiesWhere
                   OR: [RelPropertiesWhere!]
-                  callback1: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback1_CONTAINS: String
                   callback1_ENDS_WITH: String
                   callback1_EQ: String
                   callback1_IN: [String!]
                   callback1_STARTS_WITH: String
-                  callback2: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback2_CONTAINS: String
                   callback2_ENDS_WITH: String
                   callback2_EQ: String
                   callback2_IN: [String!]
                   callback2_STARTS_WITH: String
-                  callback3: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback3_CONTAINS: String
                   callback3_ENDS_WITH: String
                   callback3_EQ: String
                   callback3_IN: [String!]
                   callback3_STARTS_WITH: String
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -1255,7 +1240,6 @@ describe("@populatedBy tests", () => {
                   AND: [GenreWhere!]
                   NOT: GenreWhere
                   OR: [GenreWhere!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -1328,7 +1312,6 @@ describe("@populatedBy tests", () => {
                   AND: [MovieGenresAggregateInput!]
                   NOT: MovieGenresAggregateInput
                   OR: [MovieGenresAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -1458,7 +1441,6 @@ describe("@populatedBy tests", () => {
                   genres_SINGLE: GenreWhere
                   \\"\\"\\"Return Movies where some of the related Genres match this filter\\"\\"\\"
                   genres_SOME: GenreWhere
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -1610,28 +1592,24 @@ describe("@populatedBy tests", () => {
                   AND: [RelPropertiesWhere!]
                   NOT: RelPropertiesWhere
                   OR: [RelPropertiesWhere!]
-                  callback1: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback1_EQ: Int
                   callback1_GT: Int
                   callback1_GTE: Int
                   callback1_IN: [Int!]
                   callback1_LT: Int
                   callback1_LTE: Int
-                  callback2: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback2_EQ: Int
                   callback2_GT: Int
                   callback2_GTE: Int
                   callback2_IN: [Int!]
                   callback2_LT: Int
                   callback2_LTE: Int
-                  callback3: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   callback3_EQ: Int
                   callback3_GT: Int
                   callback3_GTE: Int
                   callback3_IN: [Int!]
                   callback3_LT: Int
                   callback3_LTE: Int
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID

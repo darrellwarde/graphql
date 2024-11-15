@@ -53,7 +53,7 @@ describe("https://github.com/neo4j/graphql/issues/5599", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    update: { actors: { LeadActor: [{ delete: [{ where: { node: { name: "Actor1" } } }] }] } }
+                    update: { actors: { LeadActor: [{ delete: [{ where: { node: { name_EQ: "Actor1" } } }] }] } }
                 ) {
                     movies {
                         title
@@ -94,7 +94,7 @@ describe("https://github.com/neo4j/graphql/issues/5599", () => {
                                             {
                                                 \\"where\\": {
                                                     \\"node\\": {
-                                                        \\"name\\": \\"Actor1\\"
+                                                        \\"name_EQ\\": \\"Actor1\\"
                                                     }
                                                 }
                                             }
@@ -116,8 +116,8 @@ describe("https://github.com/neo4j/graphql/issues/5599", () => {
                 updateMovies(
                     update: {
                         actors: {
-                            LeadActor: [{ delete: [{ where: { node: { name: "Actor1" } } }] }]
-                            Extra: [{ delete: [{ where: { node: { name: "Actor2" } } }] }]
+                            LeadActor: [{ delete: [{ where: { node: { name_EQ: "Actor1" } } }] }]
+                            Extra: [{ delete: [{ where: { node: { name_EQ: "Actor2" } } }] }]
                         }
                     }
                 ) {
@@ -173,7 +173,7 @@ describe("https://github.com/neo4j/graphql/issues/5599", () => {
                                             {
                                                 \\"where\\": {
                                                     \\"node\\": {
-                                                        \\"name\\": \\"Actor1\\"
+                                                        \\"name_EQ\\": \\"Actor1\\"
                                                     }
                                                 }
                                             }
@@ -186,7 +186,7 @@ describe("https://github.com/neo4j/graphql/issues/5599", () => {
                                             {
                                                 \\"where\\": {
                                                     \\"node\\": {
-                                                        \\"name\\": \\"Actor2\\"
+                                                        \\"name_EQ\\": \\"Actor2\\"
                                                     }
                                                 }
                                             }

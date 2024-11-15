@@ -124,7 +124,6 @@ describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
               AND: [FriendOfWhere!]
               NOT: FriendOfWhere
               OR: [FriendOfWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
@@ -198,7 +197,6 @@ describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
               AND: [PersonFriendsAggregateInput!]
               NOT: PersonFriendsAggregateInput
               OR: [PersonFriendsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -341,7 +339,6 @@ describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
               friends_SINGLE: PersonWhere
               \\"\\"\\"Return People where some of the related People match this filter\\"\\"\\"
               friends_SOME: PersonWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID

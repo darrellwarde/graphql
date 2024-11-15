@@ -99,13 +99,11 @@ describe("@selectable", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
               description_EQ: String
               description_IN: [String]
               description_STARTS_WITH: String
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -244,13 +242,11 @@ describe("@selectable", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
               description_EQ: String
               description_IN: [String]
               description_STARTS_WITH: String
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -388,13 +384,11 @@ describe("@selectable", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
               description_EQ: String
               description_IN: [String]
               description_STARTS_WITH: String
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -551,13 +545,11 @@ describe("@selectable", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
               description_EQ: String
               description_IN: [String]
               description_STARTS_WITH: String
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -583,13 +575,11 @@ describe("@selectable", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
               description_EQ: String
               description_IN: [String]
               description_STARTS_WITH: String
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -691,7 +681,6 @@ describe("@selectable", () => {
                   AND: [ActorActedInAggregateInput!]
                   NOT: ActorActedInAggregateInput
                   OR: [ActorActedInAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -848,7 +837,6 @@ describe("@selectable", () => {
                   actedIn_SINGLE: MovieWhere
                   \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                   actedIn_SOME: MovieWhere
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -932,13 +920,11 @@ describe("@selectable", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -1045,7 +1031,6 @@ describe("@selectable", () => {
                   AND: [ActorActedInAggregateInput!]
                   NOT: ActorActedInAggregateInput
                   OR: [ActorActedInAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -1217,7 +1202,6 @@ describe("@selectable", () => {
                   actedIn_SINGLE: MovieWhere
                   \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                   actedIn_SOME: MovieWhere
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -1301,13 +1285,11 @@ describe("@selectable", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -1579,7 +1561,6 @@ describe("@selectable", () => {
                   actedIn_SINGLE: ProductionWhere
                   \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
                   actedIn_SOME: ProductionWhere
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -1668,13 +1649,11 @@ describe("@selectable", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -1778,13 +1757,11 @@ describe("@selectable", () => {
                   AND: [SeriesWhere!]
                   NOT: SeriesWhere
                   OR: [SeriesWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -2039,7 +2016,6 @@ describe("@selectable", () => {
                   actedIn_SINGLE: ProductionWhere
                   \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
                   actedIn_SOME: ProductionWhere
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -2128,13 +2104,11 @@ describe("@selectable", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -2238,13 +2212,11 @@ describe("@selectable", () => {
                   AND: [SeriesWhere!]
                   NOT: SeriesWhere
                   OR: [SeriesWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -2335,7 +2307,6 @@ describe("@selectable", () => {
                   AND: [ActorActedInAggregateInput!]
                   NOT: ActorActedInAggregateInput
                   OR: [ActorActedInAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -2492,7 +2463,6 @@ describe("@selectable", () => {
                   actedIn_SINGLE: ProductionWhere
                   \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
                   actedIn_SOME: ProductionWhere
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -2577,13 +2547,11 @@ describe("@selectable", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -2666,13 +2634,11 @@ describe("@selectable", () => {
                   AND: [ProductionWhere!]
                   NOT: ProductionWhere
                   OR: [ProductionWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -2748,13 +2714,11 @@ describe("@selectable", () => {
                   AND: [SeriesWhere!]
                   NOT: SeriesWhere
                   OR: [SeriesWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -2844,7 +2808,6 @@ describe("@selectable", () => {
                   AND: [ActorActedInAggregateInput!]
                   NOT: ActorActedInAggregateInput
                   OR: [ActorActedInAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -3016,7 +2979,6 @@ describe("@selectable", () => {
                   actedIn_SINGLE: ProductionWhere
                   \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
                   actedIn_SOME: ProductionWhere
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -3101,13 +3063,11 @@ describe("@selectable", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -3190,13 +3150,11 @@ describe("@selectable", () => {
                   AND: [ProductionWhere!]
                   NOT: ProductionWhere
                   OR: [ProductionWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -3272,13 +3230,11 @@ describe("@selectable", () => {
                   AND: [SeriesWhere!]
                   NOT: SeriesWhere
                   OR: [SeriesWhere!]
-                  description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   description_CONTAINS: String
                   description_ENDS_WITH: String
                   description_EQ: String
                   description_IN: [String]
                   description_STARTS_WITH: String
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String

@@ -447,7 +447,6 @@ export type Neo4jFeaturesSettings = {
      * NOTE: this will not remove user defined deprecated fields
      **/
     excludeDeprecatedFields?: {
-        implicitEqualFilters?: boolean;
         implicitSet?: boolean;
     };
     vector?: Neo4jVectorSettings;

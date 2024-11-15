@@ -84,13 +84,11 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               AND: [AWSAccountWhere!]
               NOT: AWSAccountWhere
               OR: [AWSAccountWhere!]
-              accountName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               accountName_CONTAINS: String
               accountName_ENDS_WITH: String
               accountName_EQ: String
               accountName_IN: [String]
               accountName_STARTS_WITH: String
-              code: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               code_CONTAINS: String
               code_ENDS_WITH: String
               code_EQ: String
@@ -162,13 +160,11 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               AND: [DNSZoneWhere!]
               NOT: DNSZoneWhere
               OR: [DNSZoneWhere!]
-              awsId: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               awsId_CONTAINS: String
               awsId_ENDS_WITH: String
               awsId_EQ: String
               awsId_IN: [String]
               awsId_STARTS_WITH: String
-              zoneType: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               zoneType_CONTAINS: String
               zoneType_ENDS_WITH: String
               zoneType_EQ: String

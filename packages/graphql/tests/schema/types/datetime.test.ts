@@ -113,14 +113,12 @@ describe("Datetime", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              datetime: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               datetime_EQ: DateTime
               datetime_GT: DateTime
               datetime_GTE: DateTime
               datetime_IN: [DateTime]
               datetime_LT: DateTime
               datetime_LTE: DateTime
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID

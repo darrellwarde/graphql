@@ -180,7 +180,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -292,7 +291,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -317,7 +315,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -386,7 +383,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [INodeWhere!]
               NOT: INodeWhere
               OR: [INodeWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
@@ -451,13 +447,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [IProductWhere!]
               NOT: IProductWhere
               OR: [IProductWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -522,7 +516,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreAggregateInput!]
               NOT: MovieGenreAggregateInput
               OR: [MovieGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -632,13 +625,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -668,13 +659,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: MovieGenreAggregateInput
               genreConnection: MovieGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -782,7 +771,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreAggregateInput!]
               NOT: SeriesGenreAggregateInput
               OR: [SeriesGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -892,13 +880,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -928,13 +914,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: SeriesGenreAggregateInput
               genreConnection: SeriesGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1145,7 +1129,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1257,7 +1240,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1282,7 +1264,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1371,13 +1352,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [IProductWhere!]
               NOT: IProductWhere
               OR: [IProductWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1442,7 +1421,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreAggregateInput!]
               NOT: MovieGenreAggregateInput
               OR: [MovieGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1552,13 +1530,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1588,13 +1564,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: MovieGenreAggregateInput
               genreConnection: MovieGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1699,7 +1673,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreAggregateInput!]
               NOT: SeriesGenreAggregateInput
               OR: [SeriesGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1809,13 +1782,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1845,13 +1816,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: SeriesGenreAggregateInput
               genreConnection: SeriesGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -2070,7 +2039,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -2185,7 +2153,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -2210,7 +2177,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -2292,7 +2258,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [IProductGenreAggregateInput!]
               NOT: IProductGenreAggregateInput
               OR: [IProductGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -2478,13 +2443,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: IProductGenreAggregateInput
               genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -2556,7 +2519,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieGenreAggregateInput!]
               NOT: MovieGenreAggregateInput
               OR: [MovieGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -2684,7 +2646,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MoviePropsWhere!]
               NOT: MoviePropsWhere
               OR: [MoviePropsWhere!]
-              year: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               year_EQ: Int
               year_GT: Int
               year_GTE: Int
@@ -2705,13 +2666,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -2741,13 +2700,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: MovieGenreAggregateInput
               genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -2852,7 +2809,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesGenreAggregateInput!]
               NOT: SeriesGenreAggregateInput
               OR: [SeriesGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -2980,7 +2936,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesPropsWhere!]
               NOT: SeriesPropsWhere
               OR: [SeriesPropsWhere!]
-              episodes: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               episodes_EQ: Int
               episodes_GT: Int
               episodes_GTE: Int
@@ -3001,13 +2956,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -3037,13 +2990,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               genre: GenreWhere
               genreAggregate: SeriesGenreAggregateInput
               genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -3274,7 +3225,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -3389,7 +3339,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -3414,7 +3363,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -3700,13 +3648,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               OR: [IProductWhere!]
               genre: UGenreWhere
               genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -3875,7 +3821,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MoviePropsWhere!]
               NOT: MoviePropsWhere
               OR: [MoviePropsWhere!]
-              year: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               year_EQ: Int
               year_GT: Int
               year_GTE: Int
@@ -3896,13 +3841,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -3931,13 +3874,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               OR: [MovieWhere!]
               genre: UGenreWhere
               genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -4061,7 +4002,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [RatingProductAggregateInput!]
               NOT: RatingProductAggregateInput
               OR: [RatingProductAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -4176,7 +4116,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [RatingSubscriptionWhere!]
               NOT: RatingSubscriptionWhere
               OR: [RatingSubscriptionWhere!]
-              number: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               number_EQ: Int
               number_GT: Int
               number_GTE: Int
@@ -4204,7 +4143,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [RatingWhere!]
               NOT: RatingWhere
               OR: [RatingWhere!]
-              number: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               number_EQ: Int
               number_GT: Int
               number_GTE: Int
@@ -4397,7 +4335,6 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesPropsWhere!]
               NOT: SeriesPropsWhere
               OR: [SeriesPropsWhere!]
-              episodes: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               episodes_EQ: Int
               episodes_GT: Int
               episodes_GTE: Int
@@ -4418,13 +4355,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -4453,13 +4388,11 @@ describe("https://github.com/neo4j/graphql/issues/3439", () => {
               OR: [SeriesWhere!]
               genre: UGenreWhere
               genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: String
               id_ENDS_WITH: String
               id_EQ: String
               id_IN: [String!]
               id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String

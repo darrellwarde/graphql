@@ -92,7 +92,6 @@ describe("Point", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              filmedAt: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               filmedAt_DISTANCE: PointDistance
               filmedAt_EQ: PointInput
               filmedAt_GT: PointDistance
@@ -271,7 +270,6 @@ describe("Point", () => {
               AND: [MachineWhere!]
               NOT: MachineWhere
               OR: [MachineWhere!]
-              partLocation: CartesianPointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               partLocation_DISTANCE: CartesianPointDistance
               partLocation_EQ: CartesianPointInput
               partLocation_GT: CartesianPointDistance
@@ -396,7 +394,6 @@ describe("Point", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              filmedAt: [PointInput!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               filmedAt_EQ: [PointInput!]
               filmedAt_INCLUDES: PointInput
             }
@@ -544,7 +541,6 @@ describe("Point", () => {
               AND: [MachineWhere!]
               NOT: MachineWhere
               OR: [MachineWhere!]
-              partLocations: [CartesianPointInput!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               partLocations_EQ: [CartesianPointInput!]
               partLocations_INCLUDES: CartesianPointInput
             }

@@ -32,7 +32,7 @@ describe("cypher directive filtering - Auth", () => {
         const Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} @node @authorization(filter: [{ where: { node: { custom_field: "$jwt.custom_value" } } }]) {
+            type ${Movie} @node @authorization(filter: [{ where: { node: { custom_field_EQ: "$jwt.custom_value" } } }]) {
                 title: String
                 custom_field: String
                     @cypher(
@@ -177,7 +177,7 @@ describe("cypher directive filtering - Auth", () => {
                         """
                         columnName: "s"
                     )
-                    @authorization(filter: [{ where: { node: { title: "$jwt.custom_value" } } }])
+                    @authorization(filter: [{ where: { node: { title_EQ: "$jwt.custom_value" } } }])
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
@@ -250,7 +250,7 @@ describe("cypher directive filtering - Auth", () => {
                 actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${Actor} @node @authorization(filter: [{ where: { node: { movies_SOME: { custom_field: "$jwt.custom_value" } } } }]) {
+            type ${Actor} @node @authorization(filter: [{ where: { node: { movies_SOME: { custom_field_EQ: "$jwt.custom_value" } } } }]) {
                 name: String
                 movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -306,7 +306,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const typeDefs = /* GraphQL */ `
             type ${Movie} @node {
-                title: String @authorization(filter: [{ where: { node: { custom_field: "$jwt.custom_value" } } }])
+                title: String @authorization(filter: [{ where: { node: { custom_field_EQ: "$jwt.custom_value" } } }])
                 custom_field: String
                     @cypher(
                         statement: """
@@ -374,7 +374,7 @@ describe("cypher directive filtering - Auth", () => {
         const Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} @node @authorization(validate: [{ where: { node: { custom_field: "$jwt.custom_value" } } }]) {
+            type ${Movie} @node @authorization(validate: [{ where: { node: { custom_field_EQ: "$jwt.custom_value" } } }]) {
                 title: String
                 custom_field: String
                     @cypher(
@@ -434,7 +434,7 @@ describe("cypher directive filtering - Auth", () => {
         const Actor = testHelper.createUniqueType("Actor");
 
         const typeDefs = /* GraphQL */ `
-            type ${Movie} @node @authorization(validate: [{ where: { node: { custom_field: "$jwt.custom_value" } } }]) {
+            type ${Movie} @node @authorization(validate: [{ where: { node: { custom_field_EQ: "$jwt.custom_value" } } }]) {
                 title: String
                 custom_field: String
                     @cypher(

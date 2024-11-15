@@ -86,7 +86,6 @@ describe("Relationship nested operations", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -213,7 +212,6 @@ describe("Relationship nested operations", () => {
               actors_SINGLE: PersonWhere
               \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
               actors_SOME: PersonWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -287,13 +285,11 @@ describe("Relationship nested operations", () => {
               AND: [PersonWhere!]
               NOT: PersonWhere
               OR: [PersonWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -497,7 +493,6 @@ describe("Relationship nested operations", () => {
               actors_SINGLE: PersonWhere
               \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
               actors_SOME: PersonWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -567,7 +562,6 @@ describe("Relationship nested operations", () => {
               AND: [PersonOneWhere!]
               NOT: PersonOneWhere
               OR: [PersonOneWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -615,7 +609,6 @@ describe("Relationship nested operations", () => {
               AND: [PersonTwoWhere!]
               NOT: PersonTwoWhere
               OR: [PersonTwoWhere!]
-              nameTwo: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               nameTwo_CONTAINS: String
               nameTwo_ENDS_WITH: String
               nameTwo_EQ: String

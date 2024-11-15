@@ -113,14 +113,12 @@ describe("Duration", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              duration: Duration @deprecated(reason: \\"Please use the explicit _EQ version\\")
               duration_EQ: Duration
               duration_GT: Duration
               duration_GTE: Duration
               duration_IN: [Duration]
               duration_LT: Duration
               duration_LTE: Duration
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID

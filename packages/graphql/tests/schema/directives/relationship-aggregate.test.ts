@@ -271,13 +271,11 @@ describe("@relationship directive, aggregate argument", () => {
                   AND: [ActorWhere!]
                   NOT: ActorWhere
                   OR: [ActorWhere!]
-                  password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   password_CONTAINS: String
                   password_ENDS_WITH: String
                   password_EQ: String
                   password_IN: [String!]
                   password_STARTS_WITH: String
-                  username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   username_CONTAINS: String
                   username_ENDS_WITH: String
                   username_EQ: String
@@ -327,7 +325,6 @@ describe("@relationship directive, aggregate argument", () => {
                   AND: [MovieActorsAggregateInput!]
                   NOT: MovieActorsAggregateInput
                   OR: [MovieActorsAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -489,7 +486,6 @@ describe("@relationship directive, aggregate argument", () => {
                   actors_SINGLE: ActorWhere
                   \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                   actors_SOME: ActorWhere
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -630,13 +626,11 @@ describe("@relationship directive, aggregate argument", () => {
                   AND: [ActorWhere!]
                   NOT: ActorWhere
                   OR: [ActorWhere!]
-                  password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   password_CONTAINS: String
                   password_ENDS_WITH: String
                   password_EQ: String
                   password_IN: [String!]
                   password_STARTS_WITH: String
-                  username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   username_CONTAINS: String
                   username_ENDS_WITH: String
                   username_EQ: String
@@ -697,7 +691,6 @@ describe("@relationship directive, aggregate argument", () => {
                   AND: [MovieActorsAggregateInput!]
                   NOT: MovieActorsAggregateInput
                   OR: [MovieActorsAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -859,7 +852,6 @@ describe("@relationship directive, aggregate argument", () => {
                   actors_SINGLE: ActorWhere
                   \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                   actors_SOME: ActorWhere
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -1002,13 +994,11 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -1058,7 +1048,6 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -1220,7 +1209,6 @@ describe("@relationship directive, aggregate argument", () => {
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -1304,14 +1292,12 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [PersonWhere!]
                       NOT: PersonWhere
                       OR: [PersonWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
                       typename_IN: [PersonImplementation!]
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -1432,13 +1418,11 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -1489,7 +1473,6 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -1661,7 +1644,6 @@ describe("@relationship directive, aggregate argument", () => {
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -1745,14 +1727,12 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [PersonWhere!]
                       NOT: PersonWhere
                       OR: [PersonWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
                       typename_IN: [PersonImplementation!]
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -1881,13 +1861,11 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -2118,7 +2096,6 @@ describe("@relationship directive, aggregate argument", () => {
                       actors_SINGLE: CastMemberWhere
                       \\"\\"\\"Return Movies where some of the related CastMembers match this filter\\"\\"\\"
                       actors_SOME: CastMemberWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -2196,7 +2173,6 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [PersonWhere!]
                       NOT: PersonWhere
                       OR: [PersonWhere!]
-                      name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       name_CONTAINS: String
                       name_ENDS_WITH: String
                       name_EQ: String
@@ -2328,13 +2304,11 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [ActorWhere!]
                       NOT: ActorWhere
                       OR: [ActorWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -2565,7 +2539,6 @@ describe("@relationship directive, aggregate argument", () => {
                       actors_SINGLE: CastMemberWhere
                       \\"\\"\\"Return Movies where some of the related CastMembers match this filter\\"\\"\\"
                       actors_SOME: CastMemberWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -2643,7 +2616,6 @@ describe("@relationship directive, aggregate argument", () => {
                       AND: [PersonWhere!]
                       NOT: PersonWhere
                       OR: [PersonWhere!]
-                      name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       name_CONTAINS: String
                       name_ENDS_WITH: String
                       name_EQ: String

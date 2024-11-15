@@ -19,13 +19,6 @@
 
 import { DEPRECATED } from "../constants";
 
-export const DEPRECATE_IMPLICIT_EQUAL_FILTERS = {
-    name: DEPRECATED,
-    args: {
-        reason: "Please use the explicit _EQ version",
-    },
-};
-
 export const DEPRECATE_IMPLICIT_SET = {
     name: DEPRECATED,
     args: {

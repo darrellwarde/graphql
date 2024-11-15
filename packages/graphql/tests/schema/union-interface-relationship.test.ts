@@ -134,7 +134,6 @@ describe("Union Interface Relationships", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
@@ -203,7 +202,6 @@ describe("Union Interface Relationships", () => {
               AND: [ActorMoviesAggregateInput!]
               NOT: ActorMoviesAggregateInput
               OR: [ActorMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -341,7 +339,6 @@ describe("Union Interface Relationships", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              id: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_EQ: Int
               id_GT: Int
               id_GTE: Int
@@ -373,7 +370,6 @@ describe("Union Interface Relationships", () => {
               movies_SINGLE: MovieWhere
               \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
               movies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -450,7 +446,6 @@ describe("Union Interface Relationships", () => {
               AND: [DirectedWhere!]
               NOT: DirectedWhere
               OR: [DirectedWhere!]
-              year: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               year_EQ: Int
               year_GT: Int
               year_GTE: Int
@@ -516,21 +511,18 @@ describe("Union Interface Relationships", () => {
               AND: [InfluencerWhere!]
               NOT: InfluencerWhere
               OR: [InfluencerWhere!]
-              reputation: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               reputation_EQ: Int
               reputation_GT: Int
               reputation_GTE: Int
               reputation_IN: [Int!]
               reputation_LT: Int
               reputation_LTE: Int
-              reviewerId: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               reviewerId_EQ: Int
               reviewerId_GT: Int
               reviewerId_GTE: Int
               reviewerId_IN: [Int]
               reviewerId_LT: Int
               reviewerId_LTE: Int
-              url: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               url_CONTAINS: String
               url_ENDS_WITH: String
               url_EQ: String
@@ -583,7 +575,6 @@ describe("Union Interface Relationships", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -901,7 +892,6 @@ describe("Union Interface Relationships", () => {
               AND: [MovieReviewersAggregateInput!]
               NOT: MovieReviewersAggregateInput
               OR: [MovieReviewersAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1092,7 +1082,6 @@ describe("Union Interface Relationships", () => {
               directors_SINGLE: DirectorWhere
               \\"\\"\\"Return Movies where some of the related Directors match this filter\\"\\"\\"
               directors_SOME: DirectorWhere
-              imdbId: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               imdbId_EQ: Int
               imdbId_GT: Int
               imdbId_GTE: Int
@@ -1124,7 +1113,6 @@ describe("Union Interface Relationships", () => {
               reviewers_SINGLE: ReviewerWhere
               \\"\\"\\"Return Movies where some of the related Reviewers match this filter\\"\\"\\"
               reviewers_SOME: ReviewerWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -1233,7 +1221,6 @@ describe("Union Interface Relationships", () => {
               AND: [PersonMoviesAggregateInput!]
               NOT: PersonMoviesAggregateInput
               OR: [PersonMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1381,7 +1368,6 @@ describe("Union Interface Relationships", () => {
               AND: [PersonWhere!]
               NOT: PersonWhere
               OR: [PersonWhere!]
-              id: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_EQ: Int
               id_GT: Int
               id_GTE: Int
@@ -1413,20 +1399,17 @@ describe("Union Interface Relationships", () => {
               movies_SINGLE: MovieWhere
               \\"\\"\\"Return People where some of the related Movies match this filter\\"\\"\\"
               movies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String!]
               name_STARTS_WITH: String
-              reputation: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               reputation_EQ: Int
               reputation_GT: Int
               reputation_GTE: Int
               reputation_IN: [Int!]
               reputation_LT: Int
               reputation_LTE: Int
-              reviewerId: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               reviewerId_EQ: Int
               reviewerId_GT: Int
               reviewerId_GTE: Int
@@ -1508,7 +1491,6 @@ describe("Union Interface Relationships", () => {
               AND: [ReviewWhere!]
               NOT: ReviewWhere
               OR: [ReviewWhere!]
-              score: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               score_EQ: Int
               score_GT: Int
               score_GTE: Int
@@ -1570,14 +1552,12 @@ describe("Union Interface Relationships", () => {
               AND: [ReviewerWhere!]
               NOT: ReviewerWhere
               OR: [ReviewerWhere!]
-              reputation: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               reputation_EQ: Int
               reputation_GT: Int
               reputation_GTE: Int
               reputation_IN: [Int!]
               reputation_LT: Int
               reputation_LTE: Int
-              reviewerId: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               reviewerId_EQ: Int
               reviewerId_GT: Int
               reviewerId_GTE: Int
