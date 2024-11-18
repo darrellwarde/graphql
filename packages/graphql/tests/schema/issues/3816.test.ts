@@ -219,7 +219,6 @@ describe("https://github.com/neo4j/graphql/issues/3816", () => {
 
             input GenreUpdateInput {
               movies: [GenreMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -394,7 +393,6 @@ describe("https://github.com/neo4j/graphql/issues/3816", () => {
 
             input MovieUpdateInput {
               genre: MovieGenreUpdateFieldInput
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -662,7 +660,6 @@ describe("https://github.com/neo4j/graphql/issues/3816", () => {
 
             input GenreUpdateInput {
               movies: [GenreMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -807,7 +804,6 @@ describe("https://github.com/neo4j/graphql/issues/3816", () => {
             }
 
             input MovieUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 

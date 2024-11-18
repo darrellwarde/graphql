@@ -92,7 +92,6 @@ describe("Implicit Equality filters", () => {
             }
 
             input ActedInUpdateInput {
-              role: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               role_SET: String
             }
 
@@ -264,7 +263,6 @@ describe("Implicit Equality filters", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -503,7 +501,6 @@ describe("Implicit Equality filters", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 

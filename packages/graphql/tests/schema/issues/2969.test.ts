@@ -243,7 +243,6 @@ describe("https://github.com/neo4j/graphql/issues/2969", () => {
 
             input PostUpdateInput {
               author: PostAuthorUpdateFieldInput
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
             }
 
@@ -472,9 +471,7 @@ describe("https://github.com/neo4j/graphql/issues/2969", () => {
             }
 
             input UserUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
               posts: [UserPostsUpdateFieldInput!]
             }

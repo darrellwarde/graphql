@@ -96,9 +96,7 @@ describe("Node Interface Types", () => {
             }
 
             input MovieUpdateInput {
-              imdb: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdb_SET: ID
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

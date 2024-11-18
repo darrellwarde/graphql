@@ -242,7 +242,6 @@ describe("Unions", () => {
             }
 
             input AuthorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
               publications: AuthorPublicationsUpdateInput
             }
@@ -454,7 +453,6 @@ describe("Unions", () => {
 
             input BookUpdateInput {
               author: [BookAuthorUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -700,7 +698,6 @@ describe("Unions", () => {
 
             input JournalUpdateInput {
               author: [JournalAuthorUpdateFieldInput!]
-              subject: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               subject_SET: String
             }
 
@@ -870,7 +867,6 @@ describe("Unions", () => {
             }
 
             input WroteUpdateInput {
-              words: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               words_DECREMENT: Int
               words_INCREMENT: Int
               words_SET: Int

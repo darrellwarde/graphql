@@ -107,9 +107,7 @@ describe("Timestamps", () => {
             }
 
             input MovieUpdateInput {
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               createdAt_SET: DateTime
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 

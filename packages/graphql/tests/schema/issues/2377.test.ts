@@ -427,21 +427,14 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
 
             input ResourceUpdateInput {
               containedBy: [ResourceContainedByUpdateFieldInput!]
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               createdAt_SET: DateTime
-              externalIds: [ID!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               externalIds_POP: Int
               externalIds_PUSH: [ID!]
               externalIds_SET: [ID!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              properties: [Property!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               properties_SET: [Property!]
-              tags: [Tag!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               tags_SET: [Tag!]
-              type: ResourceType @deprecated(reason: \\"Please use the explicit _SET field\\")
               type_SET: ResourceType
             }
 

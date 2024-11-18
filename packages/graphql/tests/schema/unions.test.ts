@@ -102,7 +102,6 @@ describe("Unions", () => {
             }
 
             input GenreUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -301,7 +300,6 @@ describe("Unions", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
               search: MovieSearchUpdateInput
             }

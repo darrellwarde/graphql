@@ -73,7 +73,6 @@ describe("nested aggregation on interface", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -280,7 +279,6 @@ describe("nested aggregation on interface", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -405,17 +403,14 @@ describe("nested aggregation on interface", () => {
             }
 
             input MovieUpdateInput {
-              cost: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               cost_ADD: Float
               cost_DIVIDE: Float
               cost_MULTIPLY: Float
               cost_SET: Float
               cost_SUBTRACT: Float
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

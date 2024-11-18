@@ -97,9 +97,7 @@ describe("Date", () => {
             }
 
             input MovieUpdateInput {
-              date: Date @deprecated(reason: \\"Please use the explicit _SET field\\")
               date_SET: Date
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 

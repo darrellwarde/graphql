@@ -32,10 +32,3 @@ export const DEPRECATE_DIRECTED_ARGUMENT = {
         reason: "The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server",
     },
 };
-
-export const DEPRECATE_IMPLICIT_SET = {
-    name: DEPRECATED,
-    args: {
-        reason: "Please use the explicit _SET field",
-    },
-};
