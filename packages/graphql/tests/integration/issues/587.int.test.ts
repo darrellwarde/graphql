@@ -21,7 +21,7 @@ import { generate } from "randomstring";
 import type { UniqueType } from "../../utils/graphql-types";
 import { TestHelper } from "../../utils/tests-helper";
 
-describe("587: Dates in edges can cause wrongly generated cypher", () => {
+describe("https://github.com/neo4j/graphql/pull/587", () => {
     const testHelper = new TestHelper();
     let typeDefs: string;
     let Genre: UniqueType;
@@ -53,7 +53,7 @@ describe("587: Dates in edges can cause wrongly generated cypher", () => {
             type ${Actor} @node {
                 name: String!
                 birthday: DateTime!
-                movie: ${Movie}! @relationship(type: "ACTOR", direction: IN)
+                movie: [${Movie}!]! @relationship(type: "ACTOR", direction: IN)
             }
         `;
 

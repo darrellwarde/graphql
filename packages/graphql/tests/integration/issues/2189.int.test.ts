@@ -37,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/2189", () => {
                 str: String
                 bool: Boolean
 
-                feedback: ${Test_Feedback} @relationship(type: "TEST_RELATIONSHIP", direction: IN)
+                feedback: [${Test_Feedback}!]! @relationship(type: "TEST_RELATIONSHIP", direction: IN)
                 feedbackCypher: ${Test_Feedback}
                     @cypher(
                         statement: """
@@ -54,7 +54,7 @@ describe("https://github.com/neo4j/graphql/issues/2189", () => {
                 str: String
                 bool: Boolean
 
-                item: ${Test_Item} @relationship(type: "TEST_RELATIONSHIP", direction: OUT)
+                item: [${Test_Item}!]! @relationship(type: "TEST_RELATIONSHIP", direction: OUT)
             }
         `;
 
@@ -171,10 +171,10 @@ describe("https://github.com/neo4j/graphql/issues/2189", () => {
 
         expect(queryResult.errors).toBeFalsy();
         expect((queryResult?.data as any)[Test_Item.plural]).toHaveLength(2);
-        expect((queryResult?.data as any)[Test_Item.plural].filter((t) => t.str === "one")[0].feedback.str).toBe(
+        expect((queryResult?.data as any)[Test_Item.plural].filter((t) => t.str === "one")[0].feedback[0].str).toBe(
             "hi there"
         );
-        expect((queryResult?.data as any)[Test_Item.plural].filter((t) => t.str == "two")[0].feedback).toBeNull();
+        expect((queryResult?.data as any)[Test_Item.plural].filter((t) => t.str == "two")[0].feedback).toBeEmpty();
     });
 
     test("Mutation with Cypher relationship in projection should return 2 nodes", async () => {
@@ -269,11 +269,11 @@ describe("https://github.com/neo4j/graphql/issues/2189", () => {
         expect((result?.data as any)[Test_Item.operations.create][Test_Item.plural]).toHaveLength(2);
         expect(
             (result?.data as any)[Test_Item.operations.create][Test_Item.plural].filter((t) => t.str === "one")[0]
-                .feedback.str
+                .feedback[0].str
         ).toBe("hi there");
         expect(
             (result?.data as any)[Test_Item.operations.create][Test_Item.plural].filter((t) => t.str == "two")[0]
                 .feedback
-        ).toBeNull();
+        ).toBeEmpty();
     });
 });

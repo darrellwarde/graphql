@@ -44,7 +44,7 @@ describe("https://github.com/neo4j/graphql/issues/1760", () => {
     
                 interface BusinessObject {
                     id: ID!
-                    nameDetails: ${NameDetails}
+                    nameDetails: [${NameDetails}!]!
                 }
     
                 type ${ApplicationVariant} implements BusinessObject @node
@@ -54,9 +54,9 @@ describe("https://github.com/neo4j/graphql/issues/1760", () => {
                     id: ID!
                     relatedId: ID
                     @cypher(statement: "MATCH (this)<-[:HAS_BASE]-(n:${BaseObject}) RETURN n.id as res", columnName: "res")
-                    baseObject: ${BaseObject}! @relationship(type: "HAS_BASE", direction: IN)
+                    baseObject: [${BaseObject}!]! @relationship(type: "HAS_BASE", direction: IN)
                     current: Boolean!
-                    nameDetails: ${NameDetails} @relationship(type: "HAS_NAME", direction: OUT)
+                    nameDetails: [${NameDetails}!]! @relationship(type: "HAS_NAME", direction: OUT)
                 }
     
                 type ${NameDetails} @node
@@ -70,7 +70,7 @@ describe("https://github.com/neo4j/graphql/issues/1760", () => {
                     @authorization(validate: [{ when: [BEFORE], where: { jwt: { roles_INCLUDES: "ALL" } } }])
                     @mutation(operations: []) {
                     id: ID!
-                    nameDetails: ${NameDetails} @relationship(type: "HAS_NAME", direction: OUT)
+                    nameDetails: [${NameDetails}!]! @relationship(type: "HAS_NAME", direction: OUT)
                 }
     
                 type ${BaseObject} @node

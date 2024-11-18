@@ -88,7 +88,7 @@ describe("https://github.com/neo4j/graphql/issues/5635", () => {
                     jwt: { roles_INCLUDES: "overlord" }
                 ) {
                 id: ID! @id
-                tenant: ${Tenant}! @relationship(type: "TENANT_HAS_GARAGE", direction: OUT)
+                tenant: [${Tenant}!]! @relationship(type: "TENANT_HAS_GARAGE", direction: OUT)
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
                 updatedBy: String @populatedBy(callback: "getUserIDFromContext", operations: [CREATE, UPDATE])
@@ -100,7 +100,7 @@ describe("https://github.com/neo4j/graphql/issues/5635", () => {
                     jwt: { roles_INCLUDES: "overlord" }
                 ) {
                 id: ID! @id
-                tenant: ${Tenant}! @relationship(type: "VEHICLECARD_OWNER", direction: OUT) # <---  this line
+                tenant: [${Tenant}!]! @relationship(type: "VEHICLECARD_OWNER", direction: OUT) # <---  this line
                 garages: [${Garage}!]! @relationship(type: "VALID_GARAGES", direction: OUT)
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])

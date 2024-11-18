@@ -35,12 +35,12 @@ describe("https://github.com/neo4j/graphql/issues/1536", () => {
         const typeDefs = `
             type ${SomeNodeType} @node {
                 id: ID! @id
-                other: ${OtherNodeType}! @relationship(type: "HAS_OTHER_NODES", direction: OUT)
+                other: [${OtherNodeType}!]! @relationship(type: "HAS_OTHER_NODES", direction: OUT)
             }
 
             type ${OtherNodeType} @node {
                 id: ID! @id
-                interfaceField: MyInterface! @relationship(type: "HAS_INTERFACE_NODES", direction: OUT)
+                interfaceField: [MyInterface!]! @relationship(type: "HAS_INTERFACE_NODES", direction: OUT)
             }
 
             interface MyInterface {
@@ -84,11 +84,15 @@ describe("https://github.com/neo4j/graphql/issues/1536", () => {
             [SomeNodeType.plural]: [
                 {
                     id: "1",
-                    other: {
-                        interfaceField: {
-                            id: "3",
+                    other: [
+                        {
+                            interfaceField: [
+                                {
+                                    id: "3",
+                                },
+                            ],
                         },
-                    },
+                    ],
                 },
             ],
         });

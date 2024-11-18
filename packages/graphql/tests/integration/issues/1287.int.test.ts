@@ -37,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/1287", () => {
                 id: ID! @id
                 title: String
                 beginsAt: DateTime!
-                movie: ${norwegianScreenable}! @relationship(type: "SCREENS_MOVIE", direction: OUT)
+                movie: [${norwegianScreenable}!]! @relationship(type: "SCREENS_MOVIE", direction: OUT)
             }
     
             interface ScreenableMeta {
@@ -70,7 +70,7 @@ describe("https://github.com/neo4j/graphql/issues/1287", () => {
 
         const query = `
             query queryScreenings {
-                ${screeningsType.plural}(where: { movieConnection: { node: { id_EQ: "my-id" } } }) {
+                ${screeningsType.plural}(where: { movieConnection_SINGLE: { node: { id_EQ: "my-id" } } }) {
                     beginsAt
                     movie {
                         id

@@ -41,7 +41,7 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
             IRI
             """
             iri: ID! @id @alias(property: "uri")
-            realizationOf: ${work.name} @relationship(type: "realizationOf", direction: OUT)
+            realizationOf: [${work.name}!]! @relationship(type: "realizationOf", direction: OUT)
         }
         type ${work.name}
             @node(labels: ["WorkLabel", "$context.tenant", "Resource"])
@@ -82,7 +82,7 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
         query {
                 ${expr.plural}(
                     where: {
-                        realizationOf: {
+                        realizationOf_SOME: {
                             hasResourceType_SOME: {
                                 iri_EQ: "uri-to-be-found"
                             }
@@ -111,7 +111,7 @@ describe("context-variable-not-always-resolved-on-cypher-queries", () => {
 
         expect(gqlResult.errors).toBeFalsy();
         expect(gqlResult.data?.[expr.plural]).toIncludeSameMembers([
-            { iri: "stuff", realizationOf: { iri: "another-stuff", hasResourceType: [{ iri: "uri-to-be-found" }] } },
+            { iri: "stuff", realizationOf: [{ iri: "another-stuff", hasResourceType: [{ iri: "uri-to-be-found" }] }] },
         ]);
     });
 });

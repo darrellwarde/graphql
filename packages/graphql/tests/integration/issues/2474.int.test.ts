@@ -51,7 +51,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
             uuid: ID! @id
             createdAt: DateTime! @timestamp(operations: [CREATE])
             updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
-            postalCode: ${PostalCode.name} @relationship(type: "HAS_POSTAL_CODE", direction: OUT)
+            postalCode: [${PostalCode.name}!]! @relationship(type: "HAS_POSTAL_CODE", direction: OUT)
             node: [AddressNode!]! @relationship(type: "HAS_ADDRESS", direction: IN)
           }
           
@@ -61,7 +61,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
             createdAt: DateTime! @timestamp(operations: [CREATE])
             updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
             price: Float!
-            valuation: ${Valuation.name}! @relationship(type: "HAS_VALUATION", direction: OUT)
+            valuation: [${Valuation.name}!]! @relationship(type: "HAS_VALUATION", direction: OUT)
           }
           
           type ${Valuation.name} @mutation(operations: [CREATE, UPDATE]) @node {
@@ -69,7 +69,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
             uuid: ID! @id
             createdAt: DateTime! @timestamp(operations: [CREATE])
             updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
-            estate: ${Estate.name}  @relationship(type: "VALUATION_FOR", direction: OUT)
+            estate: [${Estate.name}!]!  @relationship(type: "VALUATION_FOR", direction: OUT)
           }
           
           enum EstateType {
@@ -95,7 +95,7 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
             estateType: EstateType!
             area: Float!
             floor: Int
-            address: ${Address.name} @relationship(type: "HAS_ADDRESS", direction: OUT)
+            address: [${Address.name}!]! @relationship(type: "HAS_ADDRESS", direction: OUT)
           }
         `;
 
@@ -172,21 +172,29 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
                 [Mandate.plural]: [
                     {
                         price: 99000,
-                        valuation: {
-                            uuid: expect.any(String),
-                            estate: {
+                        valuation: [
+                            {
                                 uuid: expect.any(String),
-                                area: 75,
-                                estateType: "APARTMENT",
-                                floor: 2,
-                                address: {
-                                    uuid: expect.any(String),
-                                    postalCode: {
-                                        number: "13001",
+                                estate: [
+                                    {
+                                        uuid: expect.any(String),
+                                        area: 75,
+                                        estateType: "APARTMENT",
+                                        floor: 2,
+                                        address: [
+                                            {
+                                                uuid: expect.any(String),
+                                                postalCode: [
+                                                    {
+                                                        number: "13001",
+                                                    },
+                                                ],
+                                            },
+                                        ],
                                     },
-                                },
+                                ],
                             },
-                        },
+                        ],
                     },
                 ],
                 info: {
@@ -291,26 +299,32 @@ describe("https://github.com/neo4j/graphql/issues/2474", () => {
                 [Mandate.plural]: [
                     {
                         price: 99000,
-                        valuation: {
-                            uuid: expect.any(String),
-                            estate: {
+                        valuation: [
+                            {
                                 uuid: expect.any(String),
-                                area: 75,
-                                estateType: "APARTMENT",
-                                floor: 2,
-                                address: {
-                                    uuid: expect.any(String),
-                                    node: expect.arrayContaining([
-                                        {
-                                            area: 13.2,
-                                        },
-                                        {
-                                            area: 75,
-                                        },
-                                    ]),
-                                },
+                                estate: [
+                                    {
+                                        uuid: expect.any(String),
+                                        area: 75,
+                                        estateType: "APARTMENT",
+                                        floor: 2,
+                                        address: [
+                                            {
+                                                uuid: expect.any(String),
+                                                node: expect.arrayContaining([
+                                                    {
+                                                        area: 13.2,
+                                                    },
+                                                    {
+                                                        area: 75,
+                                                    },
+                                                ]),
+                                            },
+                                        ],
+                                    },
+                                ],
                             },
-                        },
+                        ],
                     },
                 ],
                 info: {
