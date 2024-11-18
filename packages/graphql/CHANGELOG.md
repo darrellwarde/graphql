@@ -1,5 +1,65 @@
 # @neo4j/graphql
 
+## 6.1.0
+
+### Minor Changes
+
+-   [#5746](https://github.com/neo4j/graphql/pull/5746) [`c581f9e`](https://github.com/neo4j/graphql/commit/c581f9e02b232bf09277ee76aac930eace0877f6) Thanks [@mjfwebb](https://github.com/mjfwebb)! - Add filtering on 1 to 1 relationship custom cypher fields
+
+### Patch Changes
+
+-   [#5738](https://github.com/neo4j/graphql/pull/5738) [`c6ea37d`](https://github.com/neo4j/graphql/commit/c6ea37dd0ec8485812906bbb7a3b09ae27a54c2f) Thanks [@angrykoala](https://github.com/angrykoala)! - Add deprecation warning when using `@unique`
+
+-   [#5788](https://github.com/neo4j/graphql/pull/5788) [`62a9f61`](https://github.com/neo4j/graphql/commit/62a9f618b7e19813a4c0f162e894aebbe065813a) Thanks [@angrykoala](https://github.com/angrykoala)! - Deprecate single element relationships:
+
+    ```graphql
+    type Movie {
+        director: Person @relationship(type: "DIRECTED", direction: "IN")
+    }
+    ```
+
+    In favor of list relationships:
+
+    ```graphql
+    type Movie {
+        director: [Person!]! @relationship(type: "DIRECTED", direction: "IN")
+    }
+    ```
+
+    1-1 relationships cannot be reliably enforced, leading to a data inconsistent between the schema and the database. For this reason, these have been removed in favor of the more accurate list relationships.
+
+-   [#5771](https://github.com/neo4j/graphql/pull/5771) [`c56f9b0`](https://github.com/neo4j/graphql/commit/c56f9b03b10c833099cf9a876b9a62278c152465) Thanks [@MacondoExpress](https://github.com/MacondoExpress)! - Deprecate implicit `SET`:
+
+    ```graphql
+    mutation {
+        updateMovies(update: { id: "2" }) {
+            movies {
+                id
+            }
+        }
+    }
+    ```
+
+    in favour of the explicit `_SET` version:
+
+    ```graphql
+    mutation {
+        updateMovies(update: { id_SET: "2" }) {
+            movies {
+                id
+            }
+        }
+    }
+    ```
+
+-   [#5771](https://github.com/neo4j/graphql/pull/5771) [`f624668`](https://github.com/neo4j/graphql/commit/f624668345939c34dc2f4af56315922ec376d585) Thanks [@MacondoExpress](https://github.com/MacondoExpress)! - Added `implicitSet` to the `excludeDeprecatedFields` setting, to disable generation of the deprecated mutation field without the suffix `_SET`.
+
+-   [#5758](https://github.com/neo4j/graphql/pull/5758) [`7521476`](https://github.com/neo4j/graphql/commit/752147634df57dcfc167e9b1e13943728b80e6e8) Thanks [@angrykoala](https://github.com/angrykoala)! - Argument `overwrite` in `connect` operations has been deprecated
+
+-   [#5748](https://github.com/neo4j/graphql/pull/5748) [`f23bb91`](https://github.com/neo4j/graphql/commit/f23bb91a8afc0ff5d7ca5f0c4d8f867d30127e0b) Thanks [@darrellwarde](https://github.com/darrellwarde)! - The `connectOrCreate` operation has been deprecated and will be removed in the next major version of the Neo4j GraphQL Library. Its implementation has always been more limited than the other operations, so the decision has been taken to remove it for the time being with a view of potentially refocussing on it again in the future.
+
+-   [#5764](https://github.com/neo4j/graphql/pull/5764) [`1ec1bd3`](https://github.com/neo4j/graphql/commit/1ec1bd35a375d3f42e394fffe2d74f62bb4c8359) Thanks [@darrellwarde](https://github.com/darrellwarde)! - Fix issues #5759 and #5760 to do with sorting vector search results
+
 ## 6.0.0
 
 ### Major Changes
