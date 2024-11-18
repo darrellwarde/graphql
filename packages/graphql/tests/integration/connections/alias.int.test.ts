@@ -743,7 +743,7 @@ describe("Connections Alias", () => {
             }
             type Comment @node {
                 flag: Boolean!
-                post: Post! @relationship(type: "HAS_COMMENT", direction: IN)
+                post: [Post!]! @relationship(type: "HAS_COMMENT", direction: IN)
             }
         `;
 

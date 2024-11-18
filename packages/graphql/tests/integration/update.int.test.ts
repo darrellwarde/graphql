@@ -156,12 +156,12 @@ describe("update (deprecate implicit _SET)", () => {
 
             type ${Person} implements Creature @node {
                 id: ID
-                movies: Production! @relationship(type: "DIRECTED", direction: OUT)
+                movies: [Production!]! @relationship(type: "DIRECTED", direction: OUT)
             }
 
             interface Creature {
                 id: ID
-                movies: Production! @declareRelationship
+                movies: [Production!]! @declareRelationship
             }
         `;
 
@@ -987,7 +987,7 @@ describe("update (deprecate implicit _SET)", () => {
 
             type ${Photo} @node {
                 id: ID
-                color: ${Color} @relationship(type: "OF_COLOR", direction: OUT)
+                color: [${Color}!]! @relationship(type: "OF_COLOR", direction: OUT)
             }
         `;
 
@@ -1053,7 +1053,7 @@ describe("update (deprecate implicit _SET)", () => {
         expect(gqlResult.errors).toBeFalsy();
 
         expect(gqlResult?.data?.[Product.operations.update]).toEqual({
-            [Product.plural]: [{ id: productId, photos: [{ id: photoId, color: null }] }],
+            [Product.plural]: [{ id: productId, photos: [{ id: photoId, color: [] }] }],
         });
     });
 
@@ -1074,7 +1074,7 @@ describe("update (deprecate implicit _SET)", () => {
            type ${Photo} @node {
              id: ID
              name: String
-             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
+             color: [${Color}!]! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
@@ -1196,7 +1196,7 @@ describe("update (deprecate implicit _SET)", () => {
         expect(greenPhoto).toMatchObject({
             id: photo0Id,
             name: "Light Green Photo",
-            color: { id: photo0Color1Id, name: "Light Green" },
+            color: [{ id: photo0Color1Id, name: "Light Green" }],
         });
 
         const yellowPhoto = photos.find((x) => x.id === photo1Id);
@@ -1204,7 +1204,7 @@ describe("update (deprecate implicit _SET)", () => {
         expect(yellowPhoto).toMatchObject({
             id: photo1Id,
             name: "Light Yellow Photo",
-            color: { id: photo1Color1Id, name: "Light Yellow" },
+            color: [{ id: photo1Color1Id, name: "Light Yellow" }],
         });
     });
 
@@ -1225,7 +1225,7 @@ describe("update (deprecate implicit _SET)", () => {
            type ${Photo} @node {
              id: ID
              name: String
-             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
+             color: [${Color}!]! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
@@ -1296,7 +1296,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         expect((gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0]).toMatchObject({
             id: productId,
-            photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
+            photos: [{ id: photoId, name: "Green Photo", color: [{ id: colorId, name: "Green" }] }],
         });
     });
 
@@ -1317,7 +1317,7 @@ describe("update (deprecate implicit _SET)", () => {
            type ${Photo} @node {
              id: ID
              name: String
-             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
+             color: [${Color}!]! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
@@ -1386,7 +1386,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         expect((gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0]).toMatchObject({
             id: productId,
-            photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
+            photos: [{ id: photoId, name: "Green Photo", color: [{ id: colorId, name: "Green" }] }],
         });
     });
 });
