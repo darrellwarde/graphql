@@ -129,8 +129,8 @@ describe("https://github.com/neo4j/graphql/issues/1430", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateAbces(
-                    where: { id: "TestId" }
-                    update: { interface: { connect: { where: { node: { name: "childone name connect" } } } } }
+                    where: { id_EQ: "TestId" }
+                    update: { interface: { connect: { where: { node: { name_EQ: "childone name connect" } } } } }
                 ) {
                     abces {
                         id

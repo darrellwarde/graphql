@@ -111,13 +111,11 @@ describe("Localdatetime", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              localDT: LocalDateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               localDT_EQ: LocalDateTime
               localDT_GT: LocalDateTime
               localDT_GTE: LocalDateTime

@@ -111,16 +111,13 @@ describe("Relationship-properties", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              leadRole: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
               leadRole_EQ: Boolean
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
               screenTime_IN: [Int!]
               screenTime_LT: Int
               screenTime_LTE: Int
-              startDate: Date @deprecated(reason: \\"Please use the explicit _EQ version\\")
               startDate_EQ: Date
               startDate_GT: Date
               startDate_GTE: Date
@@ -185,7 +182,6 @@ describe("Relationship-properties", () => {
               AND: [ActorMoviesAggregateInput!]
               NOT: ActorMoviesAggregateInput
               OR: [ActorMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -322,7 +318,6 @@ describe("Relationship-properties", () => {
               movies_SINGLE: MovieWhere
               \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
               movies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -397,7 +392,6 @@ describe("Relationship-properties", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -565,7 +559,6 @@ describe("Relationship-properties", () => {
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -744,20 +737,17 @@ describe("Relationship-properties", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
               screenTime_IN: [Int!]
               screenTime_LT: Int
               screenTime_LTE: Int
-              timestamp: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               timestamp_EQ: DateTime
               timestamp_GT: DateTime
               timestamp_GTE: DateTime
@@ -824,7 +814,6 @@ describe("Relationship-properties", () => {
               AND: [ActorMoviesAggregateInput!]
               NOT: ActorMoviesAggregateInput
               OR: [ActorMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -961,7 +950,6 @@ describe("Relationship-properties", () => {
               movies_SINGLE: MovieWhere
               \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
               movies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1048,7 +1036,6 @@ describe("Relationship-properties", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1216,7 +1203,6 @@ describe("Relationship-properties", () => {
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -1362,13 +1348,11 @@ describe("Relationship-properties", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              timestamp: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               timestamp_EQ: DateTime
               timestamp_GT: DateTime
               timestamp_GTE: DateTime
@@ -1434,7 +1418,6 @@ describe("Relationship-properties", () => {
               AND: [ActorMoviesAggregateInput!]
               NOT: ActorMoviesAggregateInput
               OR: [ActorMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1568,7 +1551,6 @@ describe("Relationship-properties", () => {
               movies_SINGLE: MovieWhere
               \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
               movies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1647,7 +1629,6 @@ describe("Relationship-properties", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1812,7 +1793,6 @@ describe("Relationship-properties", () => {
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

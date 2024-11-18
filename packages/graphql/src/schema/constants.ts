@@ -17,18 +17,4 @@
  * limitations under the License.
  */
 
-import { DEPRECATED } from "../constants";
-
-export const DEPRECATE_IMPLICIT_EQUAL_FILTERS = {
-    name: DEPRECATED,
-    args: {
-        reason: "Please use the explicit _EQ version",
-    },
-};
-
-export const DEPRECATE_DIRECTED_ARGUMENT = {
-    name: DEPRECATED,
-    args: {
-        reason: "The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server",
-    },
-};
+// TODO: Add constant deprecations here

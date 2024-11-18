@@ -38,7 +38,7 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
         testNameDetails = testHelper.createUniqueType("NameDetails");
         testMasterData = testHelper.createUniqueType("MasterData");
 
-        typeDefs = `
+        typeDefs = /* GraphQL */ `
             type ${testSeries} @node {
                 id: ID!
                 current: Boolean!
@@ -91,7 +91,7 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
                 CREATE (:${testNameDetails} { fullName: "MHBB" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "523" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "621" })
             `);
 
-        const query = `
+        const query = /* GraphQL */ `
                 query (
                     $where: ${testSeries}Where = { current_EQ: true }
                     $connectionWhere: RelationPropsWhere = { current_EQ: true }
@@ -397,8 +397,8 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
 
         const query = `
                 query (
-                    $where: ${testMain}Where = { current: true }
-                    $connectionWhere: RelationPropsWhere = { current: true }
+                    $where: ${testMain}Where = { current_EQ: true }
+                    $connectionWhere: RelationPropsWhere = { current_EQ: true }
                 ) {
                     ${testMain.plural}(where: $where) {
                         id

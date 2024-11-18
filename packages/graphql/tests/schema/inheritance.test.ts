@@ -88,7 +88,6 @@ describe("inheritance", () => {
               AND: [ActorFriendsAggregateInput!]
               NOT: ActorFriendsAggregateInput
               OR: [ActorFriendsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -214,7 +213,6 @@ describe("inheritance", () => {
               friends_SINGLE: PersonWhere
               \\"\\"\\"Return Actors where some of the related People match this filter\\"\\"\\"
               friends_SOME: PersonWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -301,7 +299,6 @@ describe("inheritance", () => {
               AND: [FriendsWithWhere!]
               NOT: FriendsWithWhere
               OR: [FriendsWithWhere!]
-              since: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               since_EQ: Int
               since_GT: Int
               since_GTE: Int
@@ -377,7 +374,6 @@ describe("inheritance", () => {
               AND: [PersonFriendsAggregateInput!]
               NOT: PersonFriendsAggregateInput
               OR: [PersonFriendsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -555,7 +551,6 @@ describe("inheritance", () => {
               friends_SINGLE: PersonWhere
               \\"\\"\\"Return People where some of the related People match this filter\\"\\"\\"
               friends_SOME: PersonWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String

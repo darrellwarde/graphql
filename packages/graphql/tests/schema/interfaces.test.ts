@@ -133,7 +133,6 @@ describe("Interfaces", () => {
               AND: [MovieMoviesAggregateInput!]
               NOT: MovieMoviesAggregateInput
               OR: [MovieMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -210,7 +209,6 @@ describe("Interfaces", () => {
               AND: [MovieNodeMoviesAggregateInput!]
               NOT: MovieNodeMoviesAggregateInput
               OR: [MovieNodeMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -278,7 +276,6 @@ describe("Interfaces", () => {
               AND: [MovieNodeWhere!]
               NOT: MovieNodeWhere
               OR: [MovieNodeWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -334,7 +331,6 @@ describe("Interfaces", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -534,7 +530,6 @@ describe("Interfaces", () => {
               AND: [MovieMoviesAggregateInput!]
               NOT: MovieMoviesAggregateInput
               OR: [MovieMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -611,7 +606,6 @@ describe("Interfaces", () => {
               AND: [MovieNodeMoviesAggregateInput!]
               NOT: MovieNodeMoviesAggregateInput
               OR: [MovieNodeMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -679,7 +673,6 @@ describe("Interfaces", () => {
               AND: [MovieNodeWhere!]
               NOT: MovieNodeWhere
               OR: [MovieNodeWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -735,7 +728,6 @@ describe("Interfaces", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID

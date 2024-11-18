@@ -82,7 +82,6 @@ describe("nested aggregation on interface", () => {
               AND: [ActedInWhere!]
               NOT: ActedInWhere
               OR: [ActedInWhere!]
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
@@ -102,7 +101,6 @@ describe("nested aggregation on interface", () => {
               AND: [ActorActedInAggregateInput!]
               NOT: ActorActedInAggregateInput
               OR: [ActorActedInAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -311,7 +309,6 @@ describe("nested aggregation on interface", () => {
               actedIn_SINGLE: MovieWhere
               \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
               actedIn_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -418,21 +415,18 @@ describe("nested aggregation on interface", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              cost: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               cost_EQ: Float
               cost_GT: Float
               cost_GTE: Float
               cost_IN: [Float!]
               cost_LT: Float
               cost_LTE: Float
-              runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               runtime_EQ: Int
               runtime_GT: Int
               runtime_GTE: Int
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

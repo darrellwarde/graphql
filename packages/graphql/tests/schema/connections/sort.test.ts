@@ -124,7 +124,6 @@ describe("Sort", () => {
               AND: [Node1RelatedToAggregateInput!]
               NOT: Node1RelatedToAggregateInput
               OR: [Node1RelatedToAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -203,7 +202,6 @@ describe("Sort", () => {
               AND: [Node1Where!]
               NOT: Node1Where
               OR: [Node1Where!]
-              property: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               property_CONTAINS: String
               property_ENDS_WITH: String
               property_EQ: String
@@ -290,7 +288,6 @@ describe("Sort", () => {
               AND: [Node2RelatedToAggregateInput!]
               NOT: Node2RelatedToAggregateInput
               OR: [Node2RelatedToAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int

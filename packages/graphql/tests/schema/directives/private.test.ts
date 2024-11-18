@@ -164,7 +164,6 @@ describe("@private directive", () => {
               AND: [UserInterfaceWhere!]
               NOT: UserInterfaceWhere
               OR: [UserInterfaceWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -194,7 +193,6 @@ describe("@private directive", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -359,7 +357,6 @@ describe("@private directive", () => {
               AND: [UserInterfaceWhere!]
               NOT: UserInterfaceWhere
               OR: [UserInterfaceWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -391,13 +388,11 @@ describe("@private directive", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              private: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               private_CONTAINS: String
               private_ENDS_WITH: String
               private_EQ: String

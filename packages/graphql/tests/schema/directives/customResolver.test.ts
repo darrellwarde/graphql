@@ -186,7 +186,6 @@ describe("@customResolver directive", () => {
               AND: [UserInterfaceWhere!]
               NOT: UserInterfaceWhere
               OR: [UserInterfaceWhere!]
-              customResolver: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               customResolver_CONTAINS: String
               customResolver_ENDS_WITH: String
               customResolver_EQ: String
@@ -220,19 +219,16 @@ describe("@customResolver directive", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               password_CONTAINS: String
               password_ENDS_WITH: String
               password_EQ: String
               password_IN: [String!]
               password_STARTS_WITH: String
-              username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               username_CONTAINS: String
               username_ENDS_WITH: String
               username_EQ: String

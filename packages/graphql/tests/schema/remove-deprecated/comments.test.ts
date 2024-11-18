@@ -186,33 +186,27 @@ describe("Comments", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               actorCount_EQ: Int
               actorCount_GT: Int
               actorCount_GTE: Int
               actorCount_IN: [Int]
               actorCount_LT: Int
               actorCount_LTE: Int
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               averageRating_EQ: Float
               averageRating_GT: Float
               averageRating_GTE: Float
               averageRating_IN: [Float]
               averageRating_LT: Float
               averageRating_LTE: Float
-              customScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _EQ version\\")
               customScalar_EQ: CustomScalar
               customScalar_IN: [CustomScalar]
-              genre: Genre @deprecated(reason: \\"Please use the explicit _EQ version\\")
               genre_EQ: Genre
               genre_IN: [Genre]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
               isActive_EQ: Boolean
             }
 
@@ -328,7 +322,6 @@ describe("Comments", () => {
                   AND: [ActorWhere!]
                   NOT: ActorWhere
                   OR: [ActorWhere!]
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -394,7 +387,6 @@ describe("Comments", () => {
                   AND: [MovieActorsAggregateInput!]
                   NOT: MovieActorsAggregateInput
                   OR: [MovieActorsAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -540,7 +532,6 @@ describe("Comments", () => {
                   actors_SINGLE: ActorWhere
                   \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                   actors_SOME: ActorWhere
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -704,7 +695,6 @@ describe("Comments", () => {
                   AND: [ActedInWhere!]
                   NOT: ActedInWhere
                   OR: [ActedInWhere!]
-                  screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   screenTime_EQ: Int
                   screenTime_GT: Int
                   screenTime_GTE: Int
@@ -725,7 +715,6 @@ describe("Comments", () => {
                   AND: [ActorActedInAggregateInput!]
                   NOT: ActorActedInAggregateInput
                   OR: [ActorActedInAggregateInput!]
-                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
@@ -892,7 +881,6 @@ describe("Comments", () => {
                   actedIn_SINGLE: ProductionWhere
                   \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
                   actedIn_SOME: ProductionWhere
-                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
                   name_EQ: String
@@ -984,14 +972,12 @@ describe("Comments", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   runtime_EQ: Int
                   runtime_GT: Int
                   runtime_GTE: Int
                   runtime_IN: [Int!]
                   runtime_LT: Int
                   runtime_LTE: Int
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -1068,7 +1054,6 @@ describe("Comments", () => {
                   AND: [ProductionWhere!]
                   NOT: ProductionWhere
                   OR: [ProductionWhere!]
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -1144,14 +1129,12 @@ describe("Comments", () => {
                   AND: [SeriesWhere!]
                   NOT: SeriesWhere
                   OR: [SeriesWhere!]
-                  episodes: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   episodes_EQ: Int
                   episodes_GT: Int
                   episodes_GTE: Int
                   episodes_IN: [Int!]
                   episodes_LT: Int
                   episodes_LTE: Int
-                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
                   title_EQ: String
@@ -1287,7 +1270,6 @@ describe("Comments", () => {
                   AND: [GenreWhere!]
                   NOT: GenreWhere
                   OR: [GenreWhere!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID
@@ -1486,7 +1468,6 @@ describe("Comments", () => {
                   AND: [MovieWhere!]
                   NOT: MovieWhere
                   OR: [MovieWhere!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
                   id_EQ: ID

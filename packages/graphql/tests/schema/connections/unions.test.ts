@@ -250,7 +250,6 @@ describe("Unions", () => {
               AND: [AuthorWhere!]
               NOT: AuthorWhere
               OR: [AuthorWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -308,7 +307,6 @@ describe("Unions", () => {
               AND: [BookAuthorAggregateInput!]
               NOT: BookAuthorAggregateInput
               OR: [BookAuthorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -485,7 +483,6 @@ describe("Unions", () => {
               author_SINGLE: AuthorWhere
               \\"\\"\\"Return Books where some of the related Authors match this filter\\"\\"\\"
               author_SOME: AuthorWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -553,7 +550,6 @@ describe("Unions", () => {
               AND: [JournalAuthorAggregateInput!]
               NOT: JournalAuthorAggregateInput
               OR: [JournalAuthorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -730,7 +726,6 @@ describe("Unions", () => {
               author_SINGLE: AuthorWhere
               \\"\\"\\"Return Journals where some of the related Authors match this filter\\"\\"\\"
               author_SOME: AuthorWhere
-              subject: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               subject_CONTAINS: String
               subject_ENDS_WITH: String
               subject_EQ: String
@@ -876,7 +871,6 @@ describe("Unions", () => {
               AND: [WroteWhere!]
               NOT: WroteWhere
               OR: [WroteWhere!]
-              words: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               words_EQ: Int
               words_GT: Int
               words_GTE: Int

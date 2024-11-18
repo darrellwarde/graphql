@@ -185,7 +185,6 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               AND: [ResourceContainedByAggregateInput!]
               NOT: ResourceContainedByAggregateInput
               OR: [ResourceContainedByAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -372,25 +371,20 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               AND: [ResourceEntityWhere!]
               NOT: ResourceEntityWhere
               OR: [ResourceEntityWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String]
               name_STARTS_WITH: String
-              properties: [Property!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               properties_EQ: [Property!]
               properties_INCLUDES: Property
-              tags: [Tag!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               tags_EQ: [Tag!]
               tags_INCLUDES: Tag
-              type: ResourceType @deprecated(reason: \\"Please use the explicit _EQ version\\")
               type_EQ: ResourceType
               type_IN: [ResourceType!]
               typename_IN: [ResourceEntityImplementation!]
@@ -467,38 +461,30 @@ describe("https://github.com/neo4j/graphql/issues/2377", () => {
               containedBy_SINGLE: ResourceWhere
               \\"\\"\\"Return Resources where some of the related Resources match this filter\\"\\"\\"
               containedBy_SOME: ResourceWhere
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               createdAt_EQ: DateTime
               createdAt_GT: DateTime
               createdAt_GTE: DateTime
               createdAt_IN: [DateTime!]
               createdAt_LT: DateTime
               createdAt_LTE: DateTime
-              externalIds: [ID!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               externalIds_EQ: [ID!]
               externalIds_INCLUDES: ID
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String]
               name_STARTS_WITH: String
-              properties: [Property!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               properties_EQ: [Property!]
               properties_INCLUDES: Property
-              tags: [Tag!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               tags_EQ: [Tag!]
               tags_INCLUDES: Tag
-              type: ResourceType @deprecated(reason: \\"Please use the explicit _EQ version\\")
               type_EQ: ResourceType
               type_IN: [ResourceType!]
-              updatedAt: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               updatedAt_EQ: DateTime
               updatedAt_GT: DateTime
               updatedAt_GTE: DateTime

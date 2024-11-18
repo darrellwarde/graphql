@@ -51,7 +51,7 @@ describe("https://github.com/neo4j/graphql/issues/4268", () => {
             }
         `;
 
-        const token = createBearerToken("secret", { roles: ["admin"], id: "something", email: "something" });
+        const token = createBearerToken("secret", { roles_EQ: ["admin"], id: "something", email: "something" });
         const result = await translateQuery(neoSchema, query, { token });
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
@@ -65,7 +65,8 @@ describe("https://github.com/neo4j/graphql/issues/4268", () => {
             "{
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
-                    \\"roles\\": [
+                    \\"roles\\": [],
+                    \\"roles_EQ\\": [
                         \\"admin\\"
                     ],
                     \\"id\\": \\"something\\",
@@ -94,8 +95,8 @@ describe("https://github.com/neo4j/graphql/issues/4268", () => {
                             where: {
                                 jwt: {
                                     OR: [
-                                        { OR: [{ roles: "admin" }, { roles: "super-admin" }] }
-                                        { OR: [{ roles: "user" }, { roles: "super-user" }] }
+                                        { OR: [{ roles_EQ: "admin" }, { roles_EQ: "super-admin" }] }
+                                        { OR: [{ roles_EQ: "user" }, { roles_EQ: "super-user" }] }
                                     ]
                                 }
                             }
@@ -161,7 +162,10 @@ describe("https://github.com/neo4j/graphql/issues/4268", () => {
                 @node
                 @authorization(
                     validate: [
-                        { when: [BEFORE], where: { jwt: { AND: [{ roles_EQ: "admin" }, { roles_EQ: "super-admin" }] } } }
+                        {
+                            when: [BEFORE]
+                            where: { jwt: { AND: [{ roles_EQ: "admin" }, { roles_EQ: "super-admin" }] } }
+                        }
                     ]
                 ) {
                 title: String
@@ -346,7 +350,9 @@ describe("https://github.com/neo4j/graphql/issues/4268", () => {
 
             type Movie
                 @node
-                @authorization(validate: [{ when: [BEFORE], where: { jwt: { NOT: { NOT: { roles_EQ: "admin" } } } } }]) {
+                @authorization(
+                    validate: [{ when: [BEFORE], where: { jwt: { NOT: { NOT: { roles_EQ: "admin" } } } } }]
+                ) {
                 title: String
                 director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
             }

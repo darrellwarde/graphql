@@ -165,7 +165,6 @@ describe("Cypher", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -334,16 +333,13 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
-              custom_big_int: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_big_int_EQ: BigInt
               custom_big_int_GT: BigInt
               custom_big_int_GTE: BigInt
               custom_big_int_IN: [BigInt]
               custom_big_int_LT: BigInt
               custom_big_int_LTE: BigInt
-              custom_boolean: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_boolean_EQ: Boolean
-              custom_cartesian_point: CartesianPointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_cartesian_point_DISTANCE: CartesianPointDistance
               custom_cartesian_point_EQ: CartesianPointInput
               custom_cartesian_point_GT: CartesianPointDistance
@@ -351,62 +347,53 @@ describe("Cypher", () => {
               custom_cartesian_point_IN: [CartesianPointInput]
               custom_cartesian_point_LT: CartesianPointDistance
               custom_cartesian_point_LTE: CartesianPointDistance
-              custom_date: Date @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_date_EQ: Date
               custom_date_GT: Date
               custom_date_GTE: Date
               custom_date_IN: [Date]
               custom_date_LT: Date
               custom_date_LTE: Date
-              custom_datetime: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_datetime_EQ: DateTime
               custom_datetime_GT: DateTime
               custom_datetime_GTE: DateTime
               custom_datetime_IN: [DateTime]
               custom_datetime_LT: DateTime
               custom_datetime_LTE: DateTime
-              custom_duration: Duration @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_duration_EQ: Duration
               custom_duration_GT: Duration
               custom_duration_GTE: Duration
               custom_duration_IN: [Duration]
               custom_duration_LT: Duration
               custom_duration_LTE: Duration
-              custom_float: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_float_EQ: Float
               custom_float_GT: Float
               custom_float_GTE: Float
               custom_float_IN: [Float]
               custom_float_LT: Float
               custom_float_LTE: Float
-              custom_id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_id_CONTAINS: ID
               custom_id_ENDS_WITH: ID
               custom_id_EQ: ID
               custom_id_IN: [ID]
               custom_id_STARTS_WITH: ID
-              custom_int: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_int_EQ: Int
               custom_int_GT: Int
               custom_int_GTE: Int
               custom_int_IN: [Int]
               custom_int_LT: Int
               custom_int_LTE: Int
-              custom_localdatetime: LocalDateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_localdatetime_EQ: LocalDateTime
               custom_localdatetime_GT: LocalDateTime
               custom_localdatetime_GTE: LocalDateTime
               custom_localdatetime_IN: [LocalDateTime]
               custom_localdatetime_LT: LocalDateTime
               custom_localdatetime_LTE: LocalDateTime
-              custom_localtime: LocalTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_localtime_EQ: LocalTime
               custom_localtime_GT: LocalTime
               custom_localtime_GTE: LocalTime
               custom_localtime_IN: [LocalTime]
               custom_localtime_LT: LocalTime
               custom_localtime_LTE: LocalTime
-              custom_point: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_point_DISTANCE: PointDistance
               custom_point_EQ: PointInput
               custom_point_GT: PointDistance
@@ -414,64 +401,47 @@ describe("Cypher", () => {
               custom_point_IN: [PointInput]
               custom_point_LT: PointDistance
               custom_point_LTE: PointDistance
-              custom_string: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_string_CONTAINS: String
               custom_string_ENDS_WITH: String
               custom_string_EQ: String
               custom_string_IN: [String]
               custom_string_STARTS_WITH: String
-              custom_time: Time @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_time_EQ: Time
               custom_time_GT: Time
               custom_time_GTE: Time
               custom_time_IN: [Time]
               custom_time_LT: Time
               custom_time_LTE: Time
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              list_custom_of_ids: [ID] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_custom_of_ids_EQ: [ID]
               list_custom_of_ids_INCLUDES: ID
-              list_of_custom_big_ints: [BigInt] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_big_ints_EQ: [BigInt]
               list_of_custom_big_ints_INCLUDES: BigInt
-              list_of_custom_booleans: [Boolean] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_booleans_EQ: [Boolean]
-              list_of_custom_cartesian_points: [CartesianPointInput] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_cartesian_points_EQ: [CartesianPointInput]
               list_of_custom_cartesian_points_INCLUDES: CartesianPointInput
-              list_of_custom_dates: [Date] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_dates_EQ: [Date]
               list_of_custom_dates_INCLUDES: Date
-              list_of_custom_datetimes: [DateTime] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_datetimes_EQ: [DateTime]
               list_of_custom_datetimes_INCLUDES: DateTime
-              list_of_custom_durations: [Duration] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_durations_EQ: [Duration]
               list_of_custom_durations_INCLUDES: Duration
-              list_of_custom_floats: [Float] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_floats_EQ: [Float]
               list_of_custom_floats_INCLUDES: Float
-              list_of_custom_ints: [Int] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_ints_EQ: [Int]
               list_of_custom_ints_INCLUDES: Int
-              list_of_custom_localdatetimes: [LocalDateTime] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_localdatetimes_EQ: [LocalDateTime]
               list_of_custom_localdatetimes_INCLUDES: LocalDateTime
-              list_of_custom_localtimes: [LocalTime] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_localtimes_EQ: [LocalTime]
               list_of_custom_localtimes_INCLUDES: LocalTime
-              list_of_custom_points: [PointInput] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_points_EQ: [PointInput]
               list_of_custom_points_INCLUDES: PointInput
-              list_of_custom_strings: [String] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_strings_EQ: [String]
               list_of_custom_strings_INCLUDES: String
-              list_of_custom_times: [Time] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               list_of_custom_times_EQ: [Time]
               list_of_custom_times_INCLUDES: Time
             }
@@ -639,7 +609,6 @@ describe("Cypher", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              custom_cypher_string_list: [String] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_cypher_string_list_EQ: [String]
               custom_cypher_string_list_INCLUDES: String
             }
@@ -890,7 +859,6 @@ describe("Cypher", () => {
               NOT: BlogWhere
               OR: [BlogWhere!]
               post: PostWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -987,7 +955,6 @@ describe("Cypher", () => {
               AND: [PostWhere!]
               NOT: PostWhere
               OR: [PostWhere!]
-              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               content_CONTAINS: String
               content_ENDS_WITH: String
               content_EQ: String
@@ -1139,7 +1106,6 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1403,7 +1369,6 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1616,13 +1581,11 @@ describe("Cypher", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String]
               name_STARTS_WITH: String
-              totalScreenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               totalScreenTime_EQ: Int
               totalScreenTime_GT: Int
               totalScreenTime_GTE: Int
@@ -1702,7 +1665,6 @@ describe("Cypher", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -1871,7 +1833,6 @@ describe("Cypher", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -1894,13 +1855,11 @@ describe("Cypher", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              custom_title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_title_CONTAINS: String
               custom_title_ENDS_WITH: String
               custom_title_EQ: String
               custom_title_IN: [String]
               custom_title_STARTS_WITH: String
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

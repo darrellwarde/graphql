@@ -56,7 +56,7 @@ describe("https://github.com/neo4j/graphql/issues/988", () => {
 
     test("where with multiple filters and params", async () => {
         const query = /* GraphQL */ `
-            query getSeriesWithRelationFilters($where: SeriesWhere = { current: true }) {
+            query getSeriesWithRelationFilters($where: SeriesWhere = { current_EQ: true }) {
                 series(where: $where) {
                     name
                     current

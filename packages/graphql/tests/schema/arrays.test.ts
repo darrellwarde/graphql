@@ -120,20 +120,17 @@ describe("Arrays", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               averageRating_EQ: Float
               averageRating_GT: Float
               averageRating_GTE: Float
               averageRating_IN: [Float!]
               averageRating_LT: Float
               averageRating_LTE: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              ratings: [Float!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               ratings_EQ: [Float!]
               ratings_INCLUDES: Float
             }
