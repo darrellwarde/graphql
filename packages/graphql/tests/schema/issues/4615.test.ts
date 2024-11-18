@@ -108,7 +108,6 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -286,7 +285,6 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -499,13 +497,10 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              release: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               release_SET: DateTime
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -721,11 +716,9 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
 
             input SeriesUpdateInput {
               actors: [SeriesActorsUpdateFieldInput!]
-              episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodes_DECREMENT: Int
               episodes_INCREMENT: Int
               episodes_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -963,7 +956,6 @@ describe("https://github.com/neo4j/graphql/issues/4615", () => {
 
             input ShowUpdateInput {
               actors: [ShowActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

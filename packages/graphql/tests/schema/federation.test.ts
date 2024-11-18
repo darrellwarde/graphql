@@ -251,7 +251,6 @@ describe("Apollo Federation", () => {
 
             input PostUpdateInput {
               author: PostAuthorUpdateFieldInput
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
             }
 
@@ -474,7 +473,6 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
               posts: [UserPostsUpdateFieldInput!]
             }
@@ -756,7 +754,6 @@ describe("Apollo Federation", () => {
 
             input PostUpdateInput {
               author: PostAuthorUpdateFieldInput
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
             }
 
@@ -863,7 +860,6 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 

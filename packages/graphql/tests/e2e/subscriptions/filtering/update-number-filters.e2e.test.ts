@@ -894,8 +894,8 @@ describe("Update Subscriptions", () => {
                 query: `
                         mutation {
                             ${typeMovie.operations.update}(where: { ${fieldName}_EQ: ${makeTypedFieldValue(
-                    oldValue
-                )} }, update: { ${fieldName}: ${makeTypedFieldValue(newValue)} }) {
+                                oldValue
+                            )} }, update: { ${fieldName}_SET: ${makeTypedFieldValue(newValue)} }) {
                                 ${typeMovie.plural} {
                                     title
                                     releasedIn

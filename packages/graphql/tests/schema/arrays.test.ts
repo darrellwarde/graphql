@@ -105,15 +105,12 @@ describe("Arrays", () => {
             }
 
             input MovieUpdateInput {
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              ratings: [Float!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               ratings_POP: Int
               ratings_PUSH: [Float!]
               ratings_SET: [Float!]

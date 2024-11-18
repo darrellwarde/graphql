@@ -118,19 +118,15 @@ describe("Simple", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 

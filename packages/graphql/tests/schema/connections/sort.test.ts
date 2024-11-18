@@ -194,7 +194,6 @@ describe("Sort", () => {
             }
 
             input Node1UpdateInput {
-              property: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               property_SET: String
               relatedTo: [Node1RelatedToUpdateFieldInput!]
             }

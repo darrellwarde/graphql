@@ -215,9 +215,7 @@ describe("Alias", () => {
             }
 
             input ActorActedInPropsUpdateInput {
-              character: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               character_SET: String
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -307,9 +305,7 @@ describe("Alias", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              city: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               city_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -434,13 +430,11 @@ describe("Alias", () => {
             }
 
             input MovieUpdateInput {
-              rating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               rating_ADD: Float
               rating_DIVIDE: Float
               rating_MULTIPLY: Float
               rating_SET: Float
               rating_SUBTRACT: Float
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

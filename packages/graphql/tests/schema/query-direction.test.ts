@@ -247,7 +247,6 @@ describe("Query Direction", () => {
 
             input UserUpdateInput {
               friends: [UserFriendsUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -528,7 +527,6 @@ describe("Query Direction", () => {
 
             input UserUpdateInput {
               friends: [UserFriendsUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 

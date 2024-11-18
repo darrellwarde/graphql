@@ -157,49 +157,36 @@ describe("Null", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
-              actorCounts: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCounts_POP: Int
               actorCounts_PUSH: [Int!]
               actorCounts_SET: [Int!]
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              averageRatings: [Float!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRatings_POP: Int
               averageRatings_PUSH: [Float!]
               averageRatings_SET: [Float!]
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               createdAt_SET: DateTime
-              createdAts: [DateTime!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               createdAts_POP: Int
               createdAts_PUSH: [DateTime!]
               createdAts_SET: [DateTime!]
-              filmedAt: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               filmedAt_SET: PointInput
-              filmedAts: [PointInput!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               filmedAts_POP: Int
               filmedAts_PUSH: [PointInput!]
               filmedAts_SET: [PointInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              ids: [ID!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               ids_POP: Int
               ids_PUSH: [ID!]
               ids_SET: [ID!]
-              isActives: [Boolean!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActives_POP: Int
               isActives_PUSH: [Boolean!]
               isActives_SET: [Boolean!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              names: [String!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               names_POP: Int
               names_PUSH: [String!]
               names_SET: [String!]

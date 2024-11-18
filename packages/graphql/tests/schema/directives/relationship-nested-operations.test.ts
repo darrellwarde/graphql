@@ -174,7 +174,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -269,7 +268,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -487,7 +485,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -582,7 +579,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -800,7 +796,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -899,7 +894,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -1112,7 +1106,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -1207,7 +1200,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -1424,7 +1416,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -1519,7 +1510,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -1732,7 +1722,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -1827,7 +1816,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -2031,7 +2019,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -2126,7 +2113,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -2342,7 +2328,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -2440,7 +2425,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -2765,7 +2749,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                   producers: [MovieProducersUpdateFieldInput!]
                 }
@@ -2890,7 +2873,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -3185,7 +3167,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                   producers: [MovieProducersUpdateFieldInput!]
                 }
@@ -3306,7 +3287,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -3492,7 +3472,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -3585,7 +3564,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -3632,7 +3610,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -3869,7 +3846,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -3962,7 +3938,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -4009,7 +3984,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -4246,7 +4220,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -4343,7 +4316,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -4394,7 +4366,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -4617,7 +4588,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -4710,7 +4680,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -4757,7 +4726,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -4989,7 +4957,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -5082,7 +5049,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -5129,7 +5095,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -5352,7 +5317,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -5445,7 +5409,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -5492,7 +5455,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -5692,7 +5654,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -5785,7 +5746,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -5832,7 +5792,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -6034,7 +5993,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -6130,7 +6088,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -6185,7 +6142,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -6534,7 +6490,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                   producers: MovieProducersUpdateInput
                 }
@@ -6656,7 +6611,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -6707,7 +6661,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -7000,7 +6953,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: MovieActorsUpdateInput
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                   producers: MovieProducersUpdateInput
                 }
@@ -7118,7 +7070,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -7165,7 +7116,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  nameTwo: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   nameTwo_SET: String
                 }
 
@@ -7409,7 +7359,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -7528,9 +7477,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
-                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
                   someExtraProp_SET: [Int!]
@@ -7588,7 +7535,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -7849,7 +7795,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -7973,9 +7918,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
-                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
                   someExtraProp_SET: [Int!]
@@ -8033,7 +7976,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -8294,7 +8236,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -8417,9 +8358,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
-                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
                   someExtraProp_SET: [Int!]
@@ -8477,7 +8416,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -8733,7 +8671,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -8852,9 +8789,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
-                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
                   someExtraProp_SET: [Int!]
@@ -8912,7 +8847,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -8934,7 +8868,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -9177,7 +9110,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -9296,9 +9228,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
-                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
                   someExtraProp_SET: [Int!]
@@ -9356,7 +9286,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -9612,7 +9541,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                 }
 
@@ -9731,9 +9659,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
-                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
                   someExtraProp_SET: [Int!]
@@ -9791,7 +9717,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -10154,7 +10079,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                   producers: [MovieProducersUpdateFieldInput!]
                 }
@@ -10308,9 +10232,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
-                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
                   someExtraProp_SET: [Int!]
@@ -10368,7 +10290,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -10390,7 +10311,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -10721,7 +10641,6 @@ describe("Relationship nested operations", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
                   id_SET: ID
                   producers: [MovieProducersUpdateFieldInput!]
                 }
@@ -10871,9 +10790,7 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonOneUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
-                  someExtraProp: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
                   someExtraProp_POP: Int
                   someExtraProp_PUSH: [Int!]
                   someExtraProp_SET: [Int!]
@@ -10931,7 +10848,6 @@ describe("Relationship nested operations", () => {
                 }
 
                 input PersonTwoUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 

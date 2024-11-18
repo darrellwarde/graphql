@@ -71,7 +71,6 @@ describe("Enums", () => {
             }
 
             input ActedInUpdateInput {
-              roleType: RoleType @deprecated(reason: \\"Please use the explicit _SET field\\")
               roleType_SET: RoleType
             }
 
@@ -237,7 +236,6 @@ describe("Enums", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -463,7 +461,6 @@ describe("Enums", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

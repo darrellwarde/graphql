@@ -84,7 +84,6 @@ describe("Point", () => {
             }
 
             input MovieUpdateInput {
-              filmedAt: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               filmedAt_SET: PointInput
             }
 
@@ -262,7 +261,6 @@ describe("Point", () => {
             }
 
             input MachineUpdateInput {
-              partLocation: CartesianPointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               partLocation_SET: CartesianPointInput
             }
 
@@ -384,7 +382,6 @@ describe("Point", () => {
             }
 
             input MovieUpdateInput {
-              filmedAt: [PointInput!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               filmedAt_POP: Int
               filmedAt_PUSH: [PointInput!]
               filmedAt_SET: [PointInput!]
@@ -531,7 +528,6 @@ describe("Point", () => {
             }
 
             input MachineUpdateInput {
-              partLocations: [CartesianPointInput!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               partLocations_POP: Int
               partLocations_PUSH: [CartesianPointInput!]
               partLocations_SET: [CartesianPointInput!]

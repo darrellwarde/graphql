@@ -94,7 +94,6 @@ describe("Autogenerate", () => {
             }
 
             input MovieUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 

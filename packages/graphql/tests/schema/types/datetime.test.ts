@@ -103,9 +103,7 @@ describe("Datetime", () => {
             }
 
             input MovieUpdateInput {
-              datetime: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               datetime_SET: DateTime
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 

@@ -110,7 +110,6 @@ describe("Subscriptions", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -377,20 +376,16 @@ describe("Subscriptions", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
               actors: [MovieActorsUpdateFieldInput!]
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 
@@ -1009,20 +1004,16 @@ describe("Subscriptions", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
               actors: [MovieActorsUpdateFieldInput!]
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 
@@ -1482,20 +1473,16 @@ describe("Subscriptions", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
               actors: MovieActorsUpdateInput
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 
@@ -2176,7 +2163,6 @@ describe("Subscriptions", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -2661,20 +2647,16 @@ describe("Subscriptions", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
               actors: [MovieActorsUpdateFieldInput!]
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 
@@ -2891,7 +2873,6 @@ describe("Subscriptions", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -3115,20 +3096,16 @@ describe("Subscriptions", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
               actors: [MovieActorsUpdateFieldInput!]
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 
@@ -3457,11 +3434,9 @@ describe("Subscriptions", () => {
             }
 
             input AgreementUpdateInput {
-              id: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_DECREMENT: Int
               id_INCREMENT: Int
               id_SET: Int
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
               owner: AgreementOwnerUpdateFieldInput
             }
@@ -3636,9 +3611,7 @@ describe("Subscriptions", () => {
             }
 
             input UserUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               username_SET: String
             }
 
@@ -3995,20 +3968,16 @@ describe("Subscriptions", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
               actors: MovieActorsUpdateInput
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 
@@ -4920,9 +4889,7 @@ describe("Subscriptions", () => {
 
             input MovieUpdateInput {
               director: MovieDirectorUpdateFieldInput
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -5214,7 +5181,6 @@ describe("Subscriptions", () => {
 
             input ProductionUpdateInput {
               director: ProductionDirectorUpdateFieldInput
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -5398,13 +5364,10 @@ describe("Subscriptions", () => {
 
             input SeriesUpdateInput {
               director: SeriesDirectorUpdateFieldInput
-              episode: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episode_DECREMENT: Int
               episode_INCREMENT: Int
               episode_SET: Int
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

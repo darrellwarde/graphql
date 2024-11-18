@@ -89,9 +89,7 @@ describe("@settable", () => {
             }
 
             input MovieUpdateInput {
-              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               description_SET: String
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -233,7 +231,6 @@ describe("@settable", () => {
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -416,7 +413,6 @@ describe("@settable", () => {
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -671,7 +667,6 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -777,9 +772,7 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -1019,7 +1012,6 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -1125,9 +1117,7 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -1385,7 +1375,6 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -1609,9 +1598,7 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -1902,7 +1889,6 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -2126,9 +2112,7 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -2401,7 +2385,6 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: ActorActedInUpdateInput
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -2511,9 +2494,7 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -2619,9 +2600,7 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -2817,7 +2796,6 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -2927,9 +2905,7 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -3035,9 +3011,7 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -3265,7 +3239,6 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -3493,9 +3466,7 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -3626,9 +3597,7 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -3872,7 +3841,6 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: ActorActedInUpdateInput
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -4100,9 +4068,7 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -4233,9 +4199,7 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -4472,7 +4436,6 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -4579,9 +4542,7 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -4666,9 +4627,7 @@ describe("@settable", () => {
                 }
 
                 input ProductionUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -4746,9 +4705,7 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -4971,7 +4928,6 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -5078,9 +5034,7 @@ describe("@settable", () => {
                 }
 
                 input MovieUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -5238,9 +5192,7 @@ describe("@settable", () => {
                 }
 
                 input SeriesUpdateInput {
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -5483,7 +5435,6 @@ describe("@settable", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -5668,9 +5619,7 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -6040,9 +5989,7 @@ describe("@settable", () => {
 
                 input SeriesUpdateInput {
                   actors: [SeriesActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -6318,7 +6265,6 @@ describe("@settable", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   name_SET: String
                 }
 
@@ -6503,9 +6449,7 @@ describe("@settable", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -6717,9 +6661,7 @@ describe("@settable", () => {
 
                 input ProductionUpdateInput {
                   actors: [ProductionActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 
@@ -6900,9 +6842,7 @@ describe("@settable", () => {
 
                 input SeriesUpdateInput {
                   actors: [SeriesActorsUpdateFieldInput!]
-                  description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   description_SET: String
-                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                   title_SET: String
                 }
 

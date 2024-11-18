@@ -124,7 +124,6 @@ describe("Union Interface Relationships", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -326,12 +325,10 @@ describe("Union Interface Relationships", () => {
             }
 
             input ActorUpdateInput {
-              id: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_DECREMENT: Int
               id_INCREMENT: Int
               id_SET: Int
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -436,7 +433,6 @@ describe("Union Interface Relationships", () => {
             }
 
             input DirectedUpdateInput {
-              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
               year_SET: Int
@@ -495,15 +491,12 @@ describe("Union Interface Relationships", () => {
             }
 
             input InfluencerUpdateInput {
-              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
               reputation_SET: Int
-              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
               reviewerId_SET: Int
-              url: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               url_SET: String
             }
 
@@ -1020,12 +1013,10 @@ describe("Union Interface Relationships", () => {
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
               directors: MovieDirectorsUpdateInput
-              imdbId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdbId_DECREMENT: Int
               imdbId_INCREMENT: Int
               imdbId_SET: Int
               reviewers: [MovieReviewersUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -1347,18 +1338,14 @@ describe("Union Interface Relationships", () => {
             }
 
             input PersonUpdateInput {
-              id: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_DECREMENT: Int
               id_INCREMENT: Int
               id_SET: Int
               movies: [PersonMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
               reputation_SET: Int
-              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
               reviewerId_SET: Int
@@ -1481,7 +1468,6 @@ describe("Union Interface Relationships", () => {
             }
 
             input ReviewUpdateInput {
-              score: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               score_DECREMENT: Int
               score_INCREMENT: Int
               score_SET: Int
@@ -1538,11 +1524,9 @@ describe("Union Interface Relationships", () => {
             }
 
             input ReviewerUpdateInput {
-              reputation: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reputation_DECREMENT: Int
               reputation_INCREMENT: Int
               reputation_SET: Int
-              reviewerId: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               reviewerId_DECREMENT: Int
               reviewerId_INCREMENT: Int
               reviewerId_SET: Int

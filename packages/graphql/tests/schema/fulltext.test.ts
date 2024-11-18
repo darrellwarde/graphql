@@ -122,9 +122,7 @@ describe("@fulltext schema", () => {
             }
 
             input MovieUpdateInput {
-              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               description_SET: String
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

@@ -16,12 +16,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import { DEPRECATED } from "../constants";
-
-export const DEPRECATE_IMPLICIT_SET = {
-    name: DEPRECATED,
-    args: {
-        reason: "Please use the explicit _SET field",
-    },
-};

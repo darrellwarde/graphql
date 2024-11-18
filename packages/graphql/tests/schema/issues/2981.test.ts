@@ -283,7 +283,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
 
             input BookTitle_ENUpdateInput {
               book: BookTitle_ENBookUpdateFieldInput
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -465,7 +464,6 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
 
             input BookTitle_SVUpdateInput {
               book: BookTitle_SVBookUpdateFieldInput
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -613,9 +611,7 @@ describe("https://github.com/neo4j/graphql/issues/2981", () => {
             }
 
             input BookUpdateInput {
-              isbn: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               isbn_SET: String
-              originalTitle: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               originalTitle_SET: String
               translatedTitle: BookTranslatedTitleUpdateInput
             }

@@ -108,7 +108,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             input FOLLOWSUpdateInput {
-              since: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               since_SET: DateTime
             }
 
@@ -180,9 +179,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             input ProfileUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              userName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               userName_SET: String
             }
 
@@ -403,7 +400,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
 
             input UserUpdateInput {
               following: [UserFollowingUpdateFieldInput!]
-              userName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               userName_SET: String
             }
 

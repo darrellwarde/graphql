@@ -215,7 +215,6 @@ describe("Connection with interfaces", () => {
             }
 
             input CreatureUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
               movies: CreatureMoviesUpdateFieldInput
             }
@@ -374,9 +373,7 @@ describe("Connection with interfaces", () => {
 
             input MovieUpdateInput {
               director: [MovieDirectorUpdateFieldInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -561,7 +558,6 @@ describe("Connection with interfaces", () => {
             }
 
             input PersonUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
               movies: PersonMoviesUpdateFieldInput
             }
@@ -713,7 +709,6 @@ describe("Connection with interfaces", () => {
 
             input ProductionUpdateInput {
               director: [ProductionDirectorUpdateFieldInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -909,13 +904,10 @@ describe("Connection with interfaces", () => {
 
             input SeriesUpdateInput {
               director: [SeriesDirectorUpdateFieldInput!]
-              episode: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episode_DECREMENT: Int
               episode_INCREMENT: Int
               episode_SET: Int
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

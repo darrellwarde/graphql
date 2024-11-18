@@ -98,7 +98,6 @@ describe("Inputs", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 

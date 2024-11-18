@@ -97,7 +97,6 @@ describe("String Comparators", () => {
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -236,7 +235,6 @@ describe("String Comparators", () => {
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -380,7 +378,6 @@ describe("String Comparators", () => {
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -530,7 +527,6 @@ describe("String Comparators", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_SET: String
             }
 
@@ -709,7 +705,6 @@ describe("String Comparators", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -945,7 +940,6 @@ describe("String Comparators", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

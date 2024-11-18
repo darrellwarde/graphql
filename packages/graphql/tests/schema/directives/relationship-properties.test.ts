@@ -100,13 +100,10 @@ describe("Relationship-properties", () => {
             }
 
             input ActedInUpdateInput {
-              leadRole: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               leadRole_SET: Boolean
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
-              startDate: Date @deprecated(reason: \\"Please use the explicit _SET field\\")
               startDate_SET: Date
             }
 
@@ -289,7 +286,6 @@ describe("Relationship-properties", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -531,7 +527,6 @@ describe("Relationship-properties", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -733,7 +728,6 @@ describe("Relationship-properties", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -924,7 +918,6 @@ describe("Relationship-properties", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -1178,7 +1171,6 @@ describe("Relationship-properties", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -1527,7 +1519,6 @@ describe("Relationship-properties", () => {
 
             input ActorUpdateInput {
               movies: [ActorMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -1770,7 +1761,6 @@ describe("Relationship-properties", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 

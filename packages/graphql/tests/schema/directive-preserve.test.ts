@@ -98,7 +98,6 @@ describe("Directive-preserve", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -410,7 +409,6 @@ describe("Directive-preserve", () => {
 
             input GenreUpdateInput {
               movies: [GenreMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -619,15 +617,12 @@ describe("Directive-preserve", () => {
 
             input MovieUpdateInput {
               genres: [MovieGenresUpdateFieldInput!] @deprecated(reason: \\"Do not use\\")
-              imdbRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdbRating_ADD: Float
               imdbRating_DIVIDE: Float
               imdbRating_MULTIPLY: Float
               imdbRating_SET: Float
               imdbRating_SUBTRACT: Float
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
-              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
               year_SET: Int
@@ -836,7 +831,6 @@ describe("Directive-preserve", () => {
             }
 
             input ActedInUpdateInput {
-              role: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               role_SET: String
             }
 
@@ -1011,7 +1005,6 @@ describe("Directive-preserve", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -1212,11 +1205,9 @@ describe("Directive-preserve", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!] @deprecated(reason: \\"Do not use\\")
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -1480,7 +1471,6 @@ describe("Directive-preserve", () => {
 
             input ProductionUpdateInput {
               actors: [ProductionActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -1665,11 +1655,9 @@ describe("Directive-preserve", () => {
 
             input SeriesUpdateInput {
               actors: [SeriesActorsUpdateFieldInput!]
-              episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodes_DECREMENT: Int
               episodes_INCREMENT: Int
               episodes_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -1844,7 +1832,6 @@ describe("Directive-preserve", () => {
             }
 
             input ActedInUpdateInput {
-              role: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               role_SET: String
             }
 
@@ -2016,7 +2003,6 @@ describe("Directive-preserve", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -2252,11 +2238,9 @@ describe("Directive-preserve", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!] @deprecated(reason: \\"Do not use\\")
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -2365,7 +2349,6 @@ describe("Directive-preserve", () => {
             }
 
             input ProductionUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -2560,11 +2543,9 @@ describe("Directive-preserve", () => {
 
             input SeriesUpdateInput {
               actors: [SeriesActorsUpdateFieldInput!]
-              episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodes_DECREMENT: Int
               episodes_INCREMENT: Int
               episodes_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -2727,7 +2708,6 @@ describe("Directive-preserve", () => {
             }
 
             input ActedInUpdateInput {
-              role: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               role_SET: String
             }
 
@@ -2899,7 +2879,6 @@ describe("Directive-preserve", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -3135,11 +3114,9 @@ describe("Directive-preserve", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -3248,7 +3225,6 @@ describe("Directive-preserve", () => {
             }
 
             input ProductionUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -3443,11 +3419,9 @@ describe("Directive-preserve", () => {
 
             input SeriesUpdateInput {
               actors: [SeriesActorsUpdateFieldInput!]
-              episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodes_DECREMENT: Int
               episodes_INCREMENT: Int
               episodes_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -3708,7 +3682,6 @@ describe("Directive-preserve", () => {
 
             input BlogUpdateInput {
               posts: [BlogPostsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -3842,7 +3815,6 @@ describe("Directive-preserve", () => {
             }
 
             input PostUpdateInput {
-              content: String @deprecated(reason: \\"Do not use post.content\\")
               content_SET: String @deprecated(reason: \\"Do not use post.content\\")
             }
 
@@ -4064,7 +4036,6 @@ describe("Directive-preserve", () => {
 
             input UserUpdateInput {
               content: UserContentUpdateInput @deprecated(reason: \\"Do not use user.content\\")
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 

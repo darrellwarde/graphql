@@ -100,7 +100,6 @@ describe("Interface Relationships", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -263,7 +262,6 @@ describe("Interface Relationships", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -377,11 +375,9 @@ describe("Interface Relationships", () => {
             }
 
             input MovieUpdateInput {
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -464,7 +460,6 @@ describe("Interface Relationships", () => {
             }
 
             input ProductionUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -537,11 +532,9 @@ describe("Interface Relationships", () => {
             }
 
             input SeriesUpdateInput {
-              episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodes_DECREMENT: Int
               episodes_INCREMENT: Int
               episodes_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -690,7 +683,6 @@ describe("Interface Relationships", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -868,7 +860,6 @@ describe("Interface Relationships", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -1118,7 +1109,6 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeUpdateInput {
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
@@ -1270,11 +1260,9 @@ describe("Interface Relationships", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -1541,7 +1529,6 @@ describe("Interface Relationships", () => {
 
             input ProductionUpdateInput {
               actors: [ProductionActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -1854,12 +1841,10 @@ describe("Interface Relationships", () => {
 
             input SeriesUpdateInput {
               actors: [SeriesActorsUpdateFieldInput!]
-              episodeCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodeCount_DECREMENT: Int
               episodeCount_INCREMENT: Int
               episodeCount_SET: Int
               episodes: [SeriesEpisodesUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -2066,7 +2051,6 @@ describe("Interface Relationships", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -2244,7 +2228,6 @@ describe("Interface Relationships", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -2494,7 +2477,6 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeUpdateInput {
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
@@ -2646,11 +2628,9 @@ describe("Interface Relationships", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -2937,7 +2917,6 @@ describe("Interface Relationships", () => {
 
             input ProductionUpdateInput {
               actors: [ProductionActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -3250,12 +3229,10 @@ describe("Interface Relationships", () => {
 
             input SeriesUpdateInput {
               actors: [SeriesActorsUpdateFieldInput!]
-              episodeCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodeCount_DECREMENT: Int
               episodeCount_INCREMENT: Int
               episodeCount_SET: Int
               episodes: [SeriesEpisodesUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -3377,7 +3354,6 @@ describe("Interface Relationships", () => {
             }
 
             input StarredInUpdateInput {
-              seasons: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               seasons_DECREMENT: Int
               seasons_INCREMENT: Int
               seasons_SET: Int
@@ -3651,7 +3627,6 @@ describe("Interface Relationships", () => {
             }
 
             input Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Interface1Interface2UpdateFieldInput!]
             }
@@ -3743,7 +3718,6 @@ describe("Interface Relationships", () => {
             }
 
             input Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -4065,7 +4039,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Type1Interface1Interface2UpdateFieldInput!]
             }
@@ -4146,7 +4119,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -4175,7 +4147,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface1: [Type1Interface1UpdateFieldInput!]
             }
@@ -4332,7 +4303,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type2Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Type2Interface1Interface2UpdateFieldInput!]
             }
@@ -4413,7 +4383,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type2Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -4760,7 +4729,6 @@ describe("Interface Relationships", () => {
             }
 
             input Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Interface1Interface2UpdateFieldInput!]
             }
@@ -4852,7 +4820,6 @@ describe("Interface Relationships", () => {
             }
 
             input Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -4944,7 +4911,6 @@ describe("Interface Relationships", () => {
             }
 
             input PropsUpdateInput {
-              propsField: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               propsField_DECREMENT: Int
               propsField_INCREMENT: Int
               propsField_SET: Int
@@ -5245,7 +5211,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Type1Interface1Interface2UpdateFieldInput!]
             }
@@ -5326,7 +5291,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -5355,7 +5319,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface1: [Type1Interface1UpdateFieldInput!]
             }
@@ -5521,7 +5484,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type2Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Type2Interface1Interface2UpdateFieldInput!]
             }
@@ -5602,7 +5564,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type2Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -5975,7 +5936,6 @@ describe("Interface Relationships", () => {
             }
 
             input Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Interface1Interface2UpdateFieldInput!]
             }
@@ -6067,7 +6027,6 @@ describe("Interface Relationships", () => {
             }
 
             input Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -6398,7 +6357,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Type1Interface1Interface2UpdateFieldInput!]
             }
@@ -6479,7 +6437,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -6543,7 +6500,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1PropsUpdateInput {
-              type1Field: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               type1Field_DECREMENT: Int
               type1Field_INCREMENT: Int
               type1Field_SET: Int
@@ -6569,7 +6525,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface1: [Type1Interface1UpdateFieldInput!]
             }
@@ -6735,7 +6690,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type2Interface1UpdateInput {
-              field1: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field1_SET: String
               interface2: [Type2Interface1Interface2UpdateFieldInput!]
             }
@@ -6816,7 +6770,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type2Interface2UpdateInput {
-              field2: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               field2_SET: String
             }
 
@@ -6880,7 +6833,6 @@ describe("Interface Relationships", () => {
             }
 
             input Type2PropsUpdateInput {
-              type2Field: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               type2Field_DECREMENT: Int
               type2Field_INCREMENT: Int
               type2Field_SET: Int
@@ -7217,10 +7169,8 @@ describe("Interface Relationships", () => {
             }
 
             input CommentUpdateInput {
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
               creator: CommentCreatorUpdateFieldInput
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
               post: CommentPostUpdateFieldInput
             }
@@ -7413,10 +7363,8 @@ describe("Interface Relationships", () => {
             }
 
             input ContentUpdateInput {
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
               creator: ContentCreatorUpdateFieldInput
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -7742,10 +7690,8 @@ describe("Interface Relationships", () => {
 
             input PostUpdateInput {
               comments: [PostCommentsUpdateFieldInput!]
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
               creator: PostCreatorUpdateFieldInput
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -8025,9 +7971,7 @@ describe("Interface Relationships", () => {
 
             input UserUpdateInput {
               content: [UserContentUpdateFieldInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -8171,7 +8115,6 @@ describe("Interface Relationships", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -8349,7 +8292,6 @@ describe("Interface Relationships", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -8550,11 +8492,9 @@ describe("Interface Relationships", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -8812,11 +8752,9 @@ describe("Interface Relationships", () => {
 
             input SeriesUpdateInput {
               actors: [SeriesActorsUpdateFieldInput!]
-              episodeCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodeCount_DECREMENT: Int
               episodeCount_INCREMENT: Int
               episodeCount_SET: Int
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -9074,7 +9012,6 @@ describe("Interface Relationships", () => {
 
             input ShowUpdateInput {
               actors: [ShowActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -9172,7 +9109,6 @@ describe("Interface Relationships", () => {
             }
 
             input StarredInUpdateInput {
-              episodeNr: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episodeNr_DECREMENT: Int
               episodeNr_INCREMENT: Int
               episodeNr_SET: Int
