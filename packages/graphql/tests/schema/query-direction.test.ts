@@ -150,7 +150,6 @@ describe("Query Direction", () => {
               AND: [UserFriendsAggregateInput!]
               NOT: UserFriendsAggregateInput
               OR: [UserFriendsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -248,7 +247,6 @@ describe("Query Direction", () => {
 
             input UserUpdateInput {
               friends: [UserFriendsUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -290,7 +288,6 @@ describe("Query Direction", () => {
               friends_SINGLE: UserWhere
               \\"\\"\\"Return Users where some of the related Users match this filter\\"\\"\\"
               friends_SOME: UserWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -433,7 +430,6 @@ describe("Query Direction", () => {
               AND: [UserFriendsAggregateInput!]
               NOT: UserFriendsAggregateInput
               OR: [UserFriendsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -531,7 +527,6 @@ describe("Query Direction", () => {
 
             input UserUpdateInput {
               friends: [UserFriendsUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -573,7 +568,6 @@ describe("Query Direction", () => {
               friends_SINGLE: UserWhere
               \\"\\"\\"Return Users where some of the related Users match this filter\\"\\"\\"
               friends_SOME: UserWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String

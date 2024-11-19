@@ -126,9 +126,7 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -136,13 +134,11 @@ describe("Plural option", () => {
               AND: [TechWhere!]
               NOT: TechWhere
               OR: [TechWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String]
               name_STARTS_WITH: String
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String
@@ -276,9 +272,7 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -286,13 +280,11 @@ describe("Plural option", () => {
               AND: [TechWhere!]
               NOT: TechWhere
               OR: [TechWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String]
               name_STARTS_WITH: String
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String
@@ -426,9 +418,7 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -436,13 +426,11 @@ describe("Plural option", () => {
               AND: [TechWhere!]
               NOT: TechWhere
               OR: [TechWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String]
               name_STARTS_WITH: String
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String
@@ -578,7 +566,6 @@ describe("Plural option", () => {
             }
 
             input TechsUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -586,7 +573,6 @@ describe("Plural option", () => {
               AND: [TechsWhere!]
               NOT: TechsWhere
               OR: [TechsWhere!]
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String
@@ -731,7 +717,6 @@ describe("Plural option", () => {
             }
 
             input UserUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -739,7 +724,6 @@ describe("Plural option", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String
@@ -863,7 +847,6 @@ describe("Plural option", () => {
             }
 
             input UserUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -871,7 +854,6 @@ describe("Plural option", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String
@@ -1007,7 +989,6 @@ describe("Plural option", () => {
             }
 
             input UsersUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               value_SET: String
             }
 
@@ -1015,7 +996,6 @@ describe("Plural option", () => {
               AND: [UsersWhere!]
               NOT: UsersWhere
               OR: [UsersWhere!]
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               value_CONTAINS: String
               value_ENDS_WITH: String
               value_EQ: String

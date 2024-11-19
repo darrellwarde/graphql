@@ -104,13 +104,9 @@ describe("Scalar", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              myCustomArrayScalar: [CustomScalar!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               myCustomArrayScalar_SET: [CustomScalar!]
-              myCustomScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _SET field\\")
               myCustomScalar_SET: CustomScalar
-              myRequiredCustomArrayScalar: [CustomScalar!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               myRequiredCustomArrayScalar_SET: [CustomScalar!]
             }
 
@@ -118,19 +114,15 @@ describe("Scalar", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              myCustomArrayScalar: [CustomScalar!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               myCustomArrayScalar_EQ: [CustomScalar!]
               myCustomArrayScalar_INCLUDES: CustomScalar
-              myCustomScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _EQ version\\")
               myCustomScalar_EQ: CustomScalar
               myCustomScalar_IN: [CustomScalar]
-              myRequiredCustomArrayScalar: [CustomScalar!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               myRequiredCustomArrayScalar_EQ: [CustomScalar!]
               myRequiredCustomArrayScalar_INCLUDES: CustomScalar
             }

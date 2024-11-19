@@ -190,7 +190,6 @@ describe("162", () => {
               AND: [TigerJawLevel2Part1AggregateInput!]
               NOT: TigerJawLevel2Part1AggregateInput
               OR: [TigerJawLevel2Part1AggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -303,7 +302,6 @@ describe("162", () => {
               AND: [TigerJawLevel2Part1TigerAggregateInput!]
               NOT: TigerJawLevel2Part1TigerAggregateInput
               OR: [TigerJawLevel2Part1TigerAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -417,7 +415,6 @@ describe("162", () => {
             }
 
             input TigerJawLevel2Part1UpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
               tiger: [TigerJawLevel2Part1TigerUpdateFieldInput!]
             }
@@ -426,7 +423,6 @@ describe("162", () => {
               AND: [TigerJawLevel2Part1Where!]
               NOT: TigerJawLevel2Part1Where
               OR: [TigerJawLevel2Part1Where!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -490,7 +486,6 @@ describe("162", () => {
             }
 
             input TigerJawLevel2UpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
               part1: [TigerJawLevel2Part1UpdateFieldInput!]
             }
@@ -499,7 +494,6 @@ describe("162", () => {
               AND: [TigerJawLevel2Where!]
               NOT: TigerJawLevel2Where
               OR: [TigerJawLevel2Where!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -554,7 +548,6 @@ describe("162", () => {
             }
 
             input TigerUpdateInput {
-              x: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               x_DECREMENT: Int
               x_INCREMENT: Int
               x_SET: Int
@@ -564,7 +557,6 @@ describe("162", () => {
               AND: [TigerWhere!]
               NOT: TigerWhere
               OR: [TigerWhere!]
-              x: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               x_EQ: Int
               x_GT: Int
               x_GTE: Int

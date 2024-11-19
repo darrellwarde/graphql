@@ -118,19 +118,15 @@ describe("Simple", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActive_SET: Boolean
             }
 
@@ -138,27 +134,23 @@ describe("Simple", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               actorCount_EQ: Int
               actorCount_GT: Int
               actorCount_GTE: Int
               actorCount_IN: [Int]
               actorCount_LT: Int
               actorCount_LTE: Int
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               averageRating_EQ: Float
               averageRating_GT: Float
               averageRating_GTE: Float
               averageRating_IN: [Float]
               averageRating_LT: Float
               averageRating_LTE: Float
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              isActive: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
               isActive_EQ: Boolean
             }
 

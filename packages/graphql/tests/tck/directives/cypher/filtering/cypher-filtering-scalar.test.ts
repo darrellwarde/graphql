@@ -38,7 +38,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const query = `
             query {
-                movies(where: { special_count_GTE: 1, title: "CustomType One" }) {
+                movies(where: { special_count_GTE: 1, title_EQ: "CustomType One" }) {
                     special_count
                 }
             }
@@ -107,7 +107,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const query = `
             query {
-                movies(where: { special_count_GTE: 1, title: "CustomType Unknown" }) {
+                movies(where: { special_count_GTE: 1, title_EQ: "CustomType Unknown" }) {
                     special_count
                 }
             }

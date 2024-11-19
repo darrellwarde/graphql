@@ -157,49 +157,36 @@ describe("Null", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
               actorCount_SET: Int
-              actorCounts: [Int!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCounts_POP: Int
               actorCounts_PUSH: [Int!]
               actorCounts_SET: [Int!]
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
               averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              averageRatings: [Float!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRatings_POP: Int
               averageRatings_PUSH: [Float!]
               averageRatings_SET: [Float!]
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               createdAt_SET: DateTime
-              createdAts: [DateTime!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               createdAts_POP: Int
               createdAts_PUSH: [DateTime!]
               createdAts_SET: [DateTime!]
-              filmedAt: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               filmedAt_SET: PointInput
-              filmedAts: [PointInput!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               filmedAts_POP: Int
               filmedAts_PUSH: [PointInput!]
               filmedAts_SET: [PointInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              ids: [ID!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               ids_POP: Int
               ids_PUSH: [ID!]
               ids_SET: [ID!]
-              isActives: [Boolean!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               isActives_POP: Int
               isActives_PUSH: [Boolean!]
               isActives_SET: [Boolean!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              names: [String!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               names_POP: Int
               names_PUSH: [String!]
               names_SET: [String!]
@@ -209,37 +196,30 @@ describe("Null", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              actorCount: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               actorCount_EQ: Int
               actorCount_GT: Int
               actorCount_GTE: Int
               actorCount_IN: [Int!]
               actorCount_LT: Int
               actorCount_LTE: Int
-              actorCounts: [Int!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               actorCounts_EQ: [Int!]
               actorCounts_INCLUDES: Int
-              averageRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               averageRating_EQ: Float
               averageRating_GT: Float
               averageRating_GTE: Float
               averageRating_IN: [Float!]
               averageRating_LT: Float
               averageRating_LTE: Float
-              averageRatings: [Float!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               averageRatings_EQ: [Float!]
               averageRatings_INCLUDES: Float
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               createdAt_EQ: DateTime
               createdAt_GT: DateTime
               createdAt_GTE: DateTime
               createdAt_IN: [DateTime!]
               createdAt_LT: DateTime
               createdAt_LTE: DateTime
-              createdAts: [DateTime!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               createdAts_EQ: [DateTime!]
               createdAts_INCLUDES: DateTime
-              filmedAt: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               filmedAt_DISTANCE: PointDistance
               filmedAt_EQ: PointInput
               filmedAt_GT: PointDistance
@@ -247,27 +227,21 @@ describe("Null", () => {
               filmedAt_IN: [PointInput!]
               filmedAt_LT: PointDistance
               filmedAt_LTE: PointDistance
-              filmedAts: [PointInput!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               filmedAts_EQ: [PointInput!]
               filmedAts_INCLUDES: PointInput
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              ids: [ID!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               ids_EQ: [ID!]
               ids_INCLUDES: ID
-              isActives: [Boolean!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               isActives_EQ: [Boolean!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String!]
               name_STARTS_WITH: String
-              names: [String!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               names_EQ: [String!]
               names_INCLUDES: String
             }

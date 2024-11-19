@@ -97,9 +97,7 @@ describe("Date", () => {
             }
 
             input MovieUpdateInput {
-              date: Date @deprecated(reason: \\"Please use the explicit _SET field\\")
               date_SET: Date
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -107,14 +105,12 @@ describe("Date", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              date: Date @deprecated(reason: \\"Please use the explicit _EQ version\\")
               date_EQ: Date
               date_GT: Date
               date_GTE: Date
               date_IN: [Date]
               date_LT: Date
               date_LTE: Date
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID

@@ -87,11 +87,8 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
             }
 
             input ActorUpdateInput {
-              dob: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               dob_SET: DateTime
-              homeAddress: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               homeAddress_SET: PointInput
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -99,14 +96,12 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              dob: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               dob_EQ: DateTime
               dob_GT: DateTime
               dob_GTE: DateTime
               dob_IN: [DateTime!]
               dob_LT: DateTime
               dob_LTE: DateTime
-              homeAddress: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               homeAddress_DISTANCE: PointDistance
               homeAddress_EQ: PointInput
               homeAddress_GT: PointDistance
@@ -114,13 +109,11 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               homeAddress_IN: [PointInput!]
               homeAddress_LT: PointDistance
               homeAddress_LTE: PointDistance
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -196,7 +189,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               AND: [MovieActorsAggregateInput!]
               NOT: MovieActorsAggregateInput
               OR: [MovieActorsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -332,7 +324,6 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
 
             input MovieUpdateInput {
               actors: [MovieActorsUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -365,13 +356,11 @@ describe("https://github.com/neo4j/graphql/issues/1182", () => {
               actors_SINGLE: ActorWhere
               \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
               actors_SOME: ActorWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

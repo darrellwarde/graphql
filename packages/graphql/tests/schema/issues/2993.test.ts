@@ -108,7 +108,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             input FOLLOWSUpdateInput {
-              since: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               since_SET: DateTime
             }
 
@@ -116,7 +115,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [FOLLOWSWhere!]
               NOT: FOLLOWSWhere
               OR: [FOLLOWSWhere!]
-              since: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               since_EQ: DateTime
               since_GT: DateTime
               since_GTE: DateTime
@@ -181,9 +179,7 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
             }
 
             input ProfileUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              userName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               userName_SET: String
             }
 
@@ -191,14 +187,12 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [ProfileWhere!]
               NOT: ProfileWhere
               OR: [ProfileWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
               typename_IN: [ProfileImplementation!]
-              userName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               userName_CONTAINS: String
               userName_ENDS_WITH: String
               userName_EQ: String
@@ -281,7 +275,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               AND: [UserFollowingAggregateInput!]
               NOT: UserFollowingAggregateInput
               OR: [UserFollowingAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -407,7 +400,6 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
 
             input UserUpdateInput {
               following: [UserFollowingUpdateFieldInput!]
-              userName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               userName_SET: String
             }
 
@@ -440,13 +432,11 @@ describe("https://github.com/neo4j/graphql/issues/2993", () => {
               following_SINGLE: ProfileWhere
               \\"\\"\\"Return Users where some of the related Profiles match this filter\\"\\"\\"
               following_SOME: ProfileWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              userName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               userName_CONTAINS: String
               userName_ENDS_WITH: String
               userName_EQ: String

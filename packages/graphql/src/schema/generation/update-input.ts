@@ -44,12 +44,10 @@ export function withUpdateInputType({
     entityAdapter,
     userDefinedFieldDirectives,
     composer,
-    features,
 }: {
     entityAdapter: ConcreteEntityAdapter | InterfaceEntityAdapter | RelationshipAdapter;
     userDefinedFieldDirectives: Map<string, DirectiveNode[]>;
     composer: SchemaComposer;
-    features?: Neo4jFeaturesSettings;
 }): InputTypeComposer {
     const inputTypeName =
         entityAdapter instanceof RelationshipAdapter
@@ -70,7 +68,6 @@ export function withUpdateInputType({
                 objectFields: entityAdapter.updateInputFields,
                 userDefinedFieldDirectives,
                 additionalFieldsCallbacks: [withMathOperators(), withArrayOperators()],
-                features,
             })
         );
     } else {
@@ -85,7 +82,6 @@ export function withUpdateInputType({
                 objectFields: entityAdapter.updateInputFields,
                 userDefinedFieldDirectives,
                 additionalFieldsCallbacks: [withMathOperators()],
-                features,
             })
         );
     }

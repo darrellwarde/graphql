@@ -105,9 +105,7 @@ describe("Localtime", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              time: LocalTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               time_SET: LocalTime
             }
 
@@ -115,13 +113,11 @@ describe("Localtime", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              time: LocalTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               time_EQ: LocalTime
               time_GT: LocalTime
               time_GTE: LocalTime

@@ -96,9 +96,7 @@ describe("Node Interface Types", () => {
             }
 
             input MovieUpdateInput {
-              imdb: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdb_SET: ID
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -107,13 +105,11 @@ describe("Node Interface Types", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               id: ID
-              imdb: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               imdb_CONTAINS: ID
               imdb_ENDS_WITH: ID
               imdb_EQ: ID
               imdb_IN: [ID!]
               imdb_STARTS_WITH: ID
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

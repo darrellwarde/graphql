@@ -928,7 +928,7 @@ describe("@populatedBy directive - Relationship properties", () => {
                                 genres: {
                                     update: {
                                         edge: {
-                                            id: "${relId}"
+                                            id_SET: "${relId}"
                                         }
                                     }
                                 }

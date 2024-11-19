@@ -37,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/5515", () => {
                         { operations: [CREATE, DELETE], where: { jwt: { roles_INCLUDES: "admin" } } }
                         { operations: [READ, UPDATE], where: { node: { id_EQ: "$jwt.sub" } } }
                     ]
-                    filter: [{ where: { node: { id: "$jwt.sub" } } }]
+                    filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]
                 ) {
                 id: ID!
                 cabinets: [Cabinet!]! @relationship(type: "HAS_CABINET", direction: OUT)

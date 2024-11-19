@@ -33,10 +33,8 @@ import type { RelationshipAdapter } from "../../schema-model/relationship/model-
 import { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { Neo4jFeaturesSettings } from "../../types";
 import type { AggregationTypesMapper } from "../aggregations/aggregation-types-mapper";
-import { DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "../constants";
 import { numericalResolver } from "../resolvers/field/numerical";
 import { graphqlDirectivesToCompose } from "../to-compose";
-import { shouldAddDeprecatedFields } from "./utils";
 
 export function withAggregateSelectionType({
     entityAdapter,
@@ -110,12 +108,6 @@ export function withAggregateInputType({
             count_GTE: GraphQLInt,
         },
     });
-
-    if (shouldAddDeprecatedFields(features, "implicitEqualFilters")) {
-        aggregateWhereInput.addFields({
-            count: { type: GraphQLInt, directives: [DEPRECATE_IMPLICIT_EQUAL_FILTERS] },
-        });
-    }
 
     aggregateWhereInput.addFields({
         AND: aggregateWhereInput.NonNull.List,
@@ -251,8 +243,8 @@ function addAggregationFieldsByType(
             const averageType = attribute.typeHelper.isBigInt()
                 ? "BigInt"
                 : attribute.typeHelper.isDuration()
-                ? "Duration"
-                : GraphQLFloat;
+                  ? "Duration"
+                  : GraphQLFloat;
             fields[`${attribute.name}_AVERAGE_${operator}`] = { type: averageType, directives: deprecatedDirectives };
         }
         return fields;

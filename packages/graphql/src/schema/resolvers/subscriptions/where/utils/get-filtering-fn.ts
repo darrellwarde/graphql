@@ -22,6 +22,7 @@ import type { AttributeAdapter } from "../../../../../schema-model/attribute/mod
 type ComparatorFn<T> = (received: T, filtered: T, fieldMeta?: AttributeAdapter | undefined) => boolean;
 
 const operatorCheckMap = {
+    EQ: (received: string, filtered: string) => received == filtered,
     NOT: (received: string, filtered: string) => received !== filtered,
     LT: (received: number | string, filtered: number) => {
         const parsed = typeof received === "string" ? BigInt(received) : received;

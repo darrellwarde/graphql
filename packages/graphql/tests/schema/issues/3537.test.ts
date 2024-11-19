@@ -93,9 +93,7 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input ActorUpdateInput {
-              password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               password_SET: String
-              username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               username_SET: String
             }
 
@@ -103,13 +101,11 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               password_CONTAINS: String
               password_ENDS_WITH: String
               password_EQ: String
               password_IN: [String!]
               password_STARTS_WITH: String
-              username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               username_CONTAINS: String
               username_ENDS_WITH: String
               username_EQ: String
@@ -170,7 +166,6 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -178,7 +173,6 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -340,13 +334,11 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               password_CONTAINS: String
               password_ENDS_WITH: String
               password_EQ: String
               password_IN: [String!]
               password_STARTS_WITH: String
-              username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               username_CONTAINS: String
               username_ENDS_WITH: String
               username_EQ: String
@@ -385,7 +377,6 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -537,13 +528,11 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
               AND: [ActorSubscriptionWhere!]
               NOT: ActorSubscriptionWhere
               OR: [ActorSubscriptionWhere!]
-              password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               password_CONTAINS: String
               password_ENDS_WITH: String
               password_EQ: String
               password_IN: [String!]
               password_STARTS_WITH: String
-              username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               username_CONTAINS: String
               username_ENDS_WITH: String
               username_EQ: String
@@ -552,9 +541,7 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input ActorUpdateInput {
-              password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               password_SET: String
-              username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               username_SET: String
             }
 
@@ -569,13 +556,11 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               password_CONTAINS: String
               password_ENDS_WITH: String
               password_EQ: String
               password_IN: [String!]
               password_STARTS_WITH: String
-              username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               username_CONTAINS: String
               username_ENDS_WITH: String
               username_EQ: String
@@ -656,7 +641,6 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -665,7 +649,6 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -680,7 +663,6 @@ describe("Extending the schema in when using getSubgraphSchema", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

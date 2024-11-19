@@ -107,7 +107,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               AND: [CrewMemberMoviesAggregateInput!]
               NOT: CrewMemberMoviesAggregateInput
               OR: [CrewMemberMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -263,7 +262,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewPositionUpdateInput {
-              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _SET field\\")
               position_SET: CrewPositionType
             }
 
@@ -271,7 +269,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               AND: [CrewPositionWhere!]
               NOT: CrewPositionWhere
               OR: [CrewPositionWhere!]
-              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _EQ version\\")
               position_EQ: CrewPositionType
               position_IN: [CrewPositionType]
             }
@@ -314,7 +311,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input MovieUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -322,7 +318,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String

@@ -53,7 +53,7 @@ describe("https://github.com/neo4j/graphql/issues/5635", () => {
             type ${User}
                 @authorization(
                     validate: [
-                        { where: { node: { userId: "$jwt.sub" } } }
+                        { where: { node: { userId_EQ: "$jwt.sub" } } }
                         { where: { jwt: { roles_INCLUDES: "overlord" } } }
                     ]
                 )
@@ -181,7 +181,7 @@ describe("https://github.com/neo4j/graphql/issues/5635", () => {
                 connect: {
                     where: {
                         node: {
-                            id: tenantId,
+                            id_EQ: tenantId,
                         },
                     },
                 },
@@ -219,7 +219,7 @@ describe("https://github.com/neo4j/graphql/issues/5635", () => {
                 connect: {
                     where: {
                         node: {
-                            id: tenantId,
+                            id_EQ: tenantId,
                         },
                     },
                 },
@@ -228,7 +228,7 @@ describe("https://github.com/neo4j/graphql/issues/5635", () => {
                 connect: {
                     where: {
                         node: {
-                            id: garageId,
+                            id_EQ: garageId,
                         },
                     },
                 },

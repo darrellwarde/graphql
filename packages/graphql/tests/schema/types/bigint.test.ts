@@ -102,9 +102,7 @@ describe("Bigint", () => {
             }
 
             input FileUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              size: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               size_DECREMENT: BigInt
               size_INCREMENT: BigInt
               size_SET: BigInt
@@ -114,13 +112,11 @@ describe("Bigint", () => {
               AND: [FileWhere!]
               NOT: FileWhere
               OR: [FileWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String!]
               name_STARTS_WITH: String
-              size: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
               size_EQ: BigInt
               size_GT: BigInt
               size_GTE: BigInt

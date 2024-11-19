@@ -126,14 +126,12 @@ describe("https://github.com/neo4j/graphql/issues/5428", () => {
             }
 
             input TestUpdateInput {
-              Name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               Name_SET: String
             }
 
             input TestWhere {
               AND: [TestWhere!]
               NOT: TestWhere
-              Name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               Name_CONTAINS: String
               Name_ENDS_WITH: String
               Name_EQ: String

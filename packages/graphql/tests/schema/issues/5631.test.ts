@@ -98,7 +98,6 @@ describe("https://github.com/neo4j/graphql/issues/5631", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              custom_string_with_zero_param: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               custom_string_with_zero_param_CONTAINS: String
               custom_string_with_zero_param_ENDS_WITH: String
               custom_string_with_zero_param_EQ: String

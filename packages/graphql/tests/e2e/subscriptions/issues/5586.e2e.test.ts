@@ -97,7 +97,7 @@ describe("https://github.com/neo4j/graphql/issues/5586", () => {
             .send({
                 query: /* GraphQL */ `
                     mutation {
-                        ${Entity.operations.update}(update: { name: "new" }) {
+                        ${Entity.operations.update}(update: { name_SET: "new" }) {
                             ${Entity.plural} {
                                 name
                                 id

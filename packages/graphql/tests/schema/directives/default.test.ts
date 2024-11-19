@@ -234,13 +234,11 @@ describe("@default directive", () => {
               AND: [UserInterfaceWhere!]
               NOT: UserInterfaceWhere
               OR: [UserInterfaceWhere!]
-              fromInterface: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               fromInterface_CONTAINS: String
               fromInterface_ENDS_WITH: String
               fromInterface_EQ: String
               fromInterface_IN: [String!]
               fromInterface_STARTS_WITH: String
-              toBeOverridden: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               toBeOverridden_CONTAINS: String
               toBeOverridden_ENDS_WITH: String
               toBeOverridden_EQ: String
@@ -271,28 +269,19 @@ describe("@default directive", () => {
             }
 
             input UserUpdateInput {
-              fromInterface: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               fromInterface_SET: String
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              location: Location @deprecated(reason: \\"Please use the explicit _SET field\\")
               location_SET: Location
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
-              numberOfFriends: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               numberOfFriends_DECREMENT: Int
               numberOfFriends_INCREMENT: Int
               numberOfFriends_SET: Int
-              rating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               rating_ADD: Float
               rating_DIVIDE: Float
               rating_MULTIPLY: Float
               rating_SET: Float
               rating_SUBTRACT: Float
-              toBeOverridden: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               toBeOverridden_SET: String
-              verified: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
-              verifiedDate: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               verifiedDate_SET: DateTime
               verified_SET: Boolean
             }
@@ -301,49 +290,40 @@ describe("@default directive", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              fromInterface: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               fromInterface_CONTAINS: String
               fromInterface_ENDS_WITH: String
               fromInterface_EQ: String
               fromInterface_IN: [String!]
               fromInterface_STARTS_WITH: String
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              location: Location @deprecated(reason: \\"Please use the explicit _EQ version\\")
               location_EQ: Location
               location_IN: [Location!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
               name_IN: [String!]
               name_STARTS_WITH: String
-              numberOfFriends: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               numberOfFriends_EQ: Int
               numberOfFriends_GT: Int
               numberOfFriends_GTE: Int
               numberOfFriends_IN: [Int!]
               numberOfFriends_LT: Int
               numberOfFriends_LTE: Int
-              rating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               rating_EQ: Float
               rating_GT: Float
               rating_GTE: Float
               rating_IN: [Float!]
               rating_LT: Float
               rating_LTE: Float
-              toBeOverridden: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               toBeOverridden_CONTAINS: String
               toBeOverridden_ENDS_WITH: String
               toBeOverridden_EQ: String
               toBeOverridden_IN: [String!]
               toBeOverridden_STARTS_WITH: String
-              verified: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              verifiedDate: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               verifiedDate_EQ: DateTime
               verifiedDate_GT: DateTime
               verifiedDate_GTE: DateTime

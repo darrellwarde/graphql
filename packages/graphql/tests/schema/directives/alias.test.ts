@@ -62,7 +62,6 @@ describe("Alias", () => {
               AND: [ActorActedInAggregateInput!]
               NOT: ActorActedInAggregateInput
               OR: [ActorActedInAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -216,9 +215,7 @@ describe("Alias", () => {
             }
 
             input ActorActedInPropsUpdateInput {
-              character: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               character_SET: String
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
               screenTime_SET: Int
@@ -228,13 +225,11 @@ describe("Alias", () => {
               AND: [ActorActedInPropsWhere!]
               NOT: ActorActedInPropsWhere
               OR: [ActorActedInPropsWhere!]
-              character: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               character_CONTAINS: String
               character_ENDS_WITH: String
               character_EQ: String
               character_IN: [String!]
               character_STARTS_WITH: String
-              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
@@ -310,9 +305,7 @@ describe("Alias", () => {
 
             input ActorUpdateInput {
               actedIn: [ActorActedInUpdateFieldInput!]
-              city: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               city_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -345,13 +338,11 @@ describe("Alias", () => {
               actedIn_SINGLE: MovieWhere
               \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
               actedIn_SOME: MovieWhere
-              city: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               city_CONTAINS: String
               city_ENDS_WITH: String
               city_EQ: String
               city_IN: [String]
               city_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -439,13 +430,11 @@ describe("Alias", () => {
             }
 
             input MovieUpdateInput {
-              rating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               rating_ADD: Float
               rating_DIVIDE: Float
               rating_MULTIPLY: Float
               rating_SET: Float
               rating_SUBTRACT: Float
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -453,14 +442,12 @@ describe("Alias", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              rating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               rating_EQ: Float
               rating_GT: Float
               rating_GTE: Float
               rating_IN: [Float]
               rating_LT: Float
               rating_LTE: Float
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

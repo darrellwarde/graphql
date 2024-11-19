@@ -1,4 +1,5 @@
 {
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": ["config:best-practices"],
     "baseBranches": ["dev", "lts"],
     "rebaseWhen": "auto",
@@ -17,8 +18,19 @@
         "**/tests/**",
         "**/__fixtures__/**"
     ],
-    "ignoreDeps": ["neo4j"],
+    "ignoreDeps": ["neo4j", "typescript"],
+    "separateMajorMinor": true,
     "packageRules": [
+        {
+            "matchUpdateTypes": ["major"],
+            "groupName": null,
+            "automerge": false
+        },
+        {
+            "matchUpdateTypes": ["minor", "patch"],
+            "groupName": "minor-and-patch",
+            "automerge": true
+        },
         {
             "matchFileNames": ["packages/package-tests/graphql-15/package.json"],
             "allowedVersions": "15",

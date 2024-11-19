@@ -84,7 +84,6 @@ describe("Point", () => {
             }
 
             input MovieUpdateInput {
-              filmedAt: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               filmedAt_SET: PointInput
             }
 
@@ -92,7 +91,6 @@ describe("Point", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              filmedAt: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               filmedAt_DISTANCE: PointDistance
               filmedAt_EQ: PointInput
               filmedAt_GT: PointDistance
@@ -263,7 +261,6 @@ describe("Point", () => {
             }
 
             input MachineUpdateInput {
-              partLocation: CartesianPointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               partLocation_SET: CartesianPointInput
             }
 
@@ -271,7 +268,6 @@ describe("Point", () => {
               AND: [MachineWhere!]
               NOT: MachineWhere
               OR: [MachineWhere!]
-              partLocation: CartesianPointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               partLocation_DISTANCE: CartesianPointDistance
               partLocation_EQ: CartesianPointInput
               partLocation_GT: CartesianPointDistance
@@ -386,7 +382,6 @@ describe("Point", () => {
             }
 
             input MovieUpdateInput {
-              filmedAt: [PointInput!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               filmedAt_POP: Int
               filmedAt_PUSH: [PointInput!]
               filmedAt_SET: [PointInput!]
@@ -396,7 +391,6 @@ describe("Point", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              filmedAt: [PointInput!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               filmedAt_EQ: [PointInput!]
               filmedAt_INCLUDES: PointInput
             }
@@ -534,7 +528,6 @@ describe("Point", () => {
             }
 
             input MachineUpdateInput {
-              partLocations: [CartesianPointInput!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               partLocations_POP: Int
               partLocations_PUSH: [CartesianPointInput!]
               partLocations_SET: [CartesianPointInput!]
@@ -544,7 +537,6 @@ describe("Point", () => {
               AND: [MachineWhere!]
               NOT: MachineWhere
               OR: [MachineWhere!]
-              partLocations: [CartesianPointInput!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               partLocations_EQ: [CartesianPointInput!]
               partLocations_INCLUDES: CartesianPointInput
             }

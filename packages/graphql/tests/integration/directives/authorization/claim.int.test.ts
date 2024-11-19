@@ -44,7 +44,7 @@ describe("auth claim", () => {
 
     test("should allow checks against standard claim properties when jwt payload is undefined", async () => {
         const typeDefs = `
-                type ${User} @authorization(validate: [ { operations: [READ], when: BEFORE, where: { jwt: { iss: "test" } } }]) {
+                type ${User} @authorization(validate: [ { operations: [READ], when: BEFORE, where: { jwt: { iss_EQ: "test" } } }]) {
                     id: ID
                     password: String
                 }
@@ -87,7 +87,7 @@ describe("auth claim", () => {
                     myClaim: String
                 }
 
-                type ${User} @authorization(validate: [ { operations: [READ], when: BEFORE, where: { jwt: { iss: "test" } } }]) {
+                type ${User} @authorization(validate: [ { operations: [READ], when: BEFORE, where: { jwt: { iss_EQ: "test" } } }]) {
                     id: ID
                     password: String
                 }

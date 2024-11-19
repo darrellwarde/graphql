@@ -129,7 +129,6 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               AND: [CreatureMoviesAggregateInput!]
               NOT: CreatureMoviesAggregateInput
               OR: [CreatureMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -318,7 +317,6 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               AND: [MovieDirectorAggregateInput!]
               NOT: MovieDirectorAggregateInput
               OR: [MovieDirectorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -378,9 +376,7 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
 
             input MovieUpdateInput {
               director: [MovieDirectorUpdateFieldInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -413,13 +409,11 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               director_SINGLE: CreatureWhere
               \\"\\"\\"Return Movies where some of the related Creatures match this filter\\"\\"\\"
               director_SOME: CreatureWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -496,7 +490,6 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               AND: [PersonMoviesAggregateInput!]
               NOT: PersonMoviesAggregateInput
               OR: [PersonMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -639,7 +632,6 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               AND: [ProductionDirectorAggregateInput!]
               NOT: ProductionDirectorAggregateInput
               OR: [ProductionDirectorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -720,7 +712,6 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
 
             input ProductionUpdateInput {
               director: [ProductionDirectorUpdateFieldInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -761,7 +752,6 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               Return Productions where some of the related Creatures match this filter
               \\"\\"\\"
               director_SOME: CreatureWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -847,7 +837,6 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               AND: [SeriesDirectorAggregateInput!]
               NOT: SeriesDirectorAggregateInput
               OR: [SeriesDirectorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -916,20 +905,17 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               AND: [SeriesSubscriptionWhere!]
               NOT: SeriesSubscriptionWhere
               OR: [SeriesSubscriptionWhere!]
-              episode: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               episode_EQ: Int
               episode_GT: Int
               episode_GTE: Int
               episode_IN: [Int!]
               episode_LT: Int
               episode_LTE: Int
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -939,13 +925,10 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
 
             input SeriesUpdateInput {
               director: [SeriesDirectorUpdateFieldInput!]
-              episode: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               episode_DECREMENT: Int
               episode_INCREMENT: Int
               episode_SET: Int
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -985,20 +968,17 @@ describe("https://github.com/neo4j/graphql/issues/4511", () => {
               director_SINGLE: CreatureWhere
               \\"\\"\\"Return Series where some of the related Creatures match this filter\\"\\"\\"
               director_SOME: CreatureWhere
-              episode: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               episode_EQ: Int
               episode_GT: Int
               episode_GTE: Int
               episode_IN: [Int!]
               episode_LT: Int
               episode_LTE: Int
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

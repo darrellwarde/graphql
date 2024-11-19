@@ -122,9 +122,7 @@ describe("@fulltext schema", () => {
             }
 
             input MovieUpdateInput {
-              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               description_SET: String
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -132,13 +130,11 @@ describe("@fulltext schema", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
               description_EQ: String
               description_IN: [String]
               description_STARTS_WITH: String
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String

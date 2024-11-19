@@ -25,13 +25,13 @@ import { Neo4jGraphQL } from "../../src";
 describe("Authorization", () => {
     test("Authorization", async () => {
         const typeDefs = gql`
-            type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+            type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                 id: ID!
                 name: String!
                 posts: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
             }
 
-            type Post @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+            type Post @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                 id: ID!
                 name: String!
                 author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
@@ -113,7 +113,6 @@ describe("Authorization", () => {
               AND: [PostAuthorAggregateInput!]
               NOT: PostAuthorAggregateInput
               OR: [PostAuthorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -237,9 +236,7 @@ describe("Authorization", () => {
 
             input PostUpdateInput {
               author: [PostAuthorUpdateFieldInput!]
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -282,13 +279,11 @@ describe("Authorization", () => {
               author_SINGLE: UserWhere
               \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
               author_SOME: UserWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -389,7 +384,6 @@ describe("Authorization", () => {
               AND: [UserPostsAggregateInput!]
               NOT: UserPostsAggregateInput
               OR: [UserPostsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -497,9 +491,7 @@ describe("Authorization", () => {
             }
 
             input UserUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
               posts: [UserPostsUpdateFieldInput!]
             }
@@ -518,13 +510,11 @@ describe("Authorization", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID!]
               id_STARTS_WITH: ID
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String

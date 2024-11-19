@@ -90,7 +90,6 @@ describe("Enum", () => {
             }
 
             input MovieUpdateInput {
-              status: Status @deprecated(reason: \\"Please use the explicit _SET field\\")
               status_SET: Status
             }
 
@@ -98,7 +97,6 @@ describe("Enum", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              status: Status @deprecated(reason: \\"Please use the explicit _EQ version\\")
               status_EQ: Status
               status_IN: [Status]
             }

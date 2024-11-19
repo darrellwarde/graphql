@@ -107,9 +107,7 @@ describe("Timestamps", () => {
             }
 
             input MovieUpdateInput {
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               createdAt_SET: DateTime
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
             }
 
@@ -117,20 +115,17 @@ describe("Timestamps", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               createdAt_EQ: DateTime
               createdAt_GT: DateTime
               createdAt_GTE: DateTime
               createdAt_IN: [DateTime!]
               createdAt_LT: DateTime
               createdAt_LTE: DateTime
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              updatedAt: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               updatedAt_EQ: DateTime
               updatedAt_GT: DateTime
               updatedAt_GTE: DateTime

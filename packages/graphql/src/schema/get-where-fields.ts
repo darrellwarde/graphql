@@ -23,8 +23,6 @@ import { DEPRECATED } from "../constants";
 import type { AttributeAdapter } from "../schema-model/attribute/model-adapters/AttributeAdapter";
 import { ConcreteEntityAdapter } from "../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import type { Neo4jFeaturesSettings } from "../types";
-import { DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "./constants";
-import { shouldAddDeprecatedFields } from "./generation/utils";
 import { graphqlDirectivesToCompose } from "./to-compose";
 
 // TODO: refactoring needed!
@@ -81,12 +79,6 @@ export function getWhereFieldsForAttributes({
             }
         }
 
-        if (shouldAddDeprecatedFields(features, "implicitEqualFilters")) {
-            result[field.name] = {
-                type: field.getInputTypeNames().where.pretty,
-                directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_IMPLICIT_EQUAL_FILTERS],
-            };
-        }
         result[`${field.name}_EQ`] = {
             type: field.getInputTypeNames().where.pretty,
             directives: deprecatedDirectives,

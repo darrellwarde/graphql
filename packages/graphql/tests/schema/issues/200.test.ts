@@ -82,13 +82,10 @@ describe("200", () => {
             }
 
             input CategoryUpdateInput {
-              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               description_SET: String
-              exampleImageLocations: [String!] @deprecated(reason: \\"Please use the explicit _SET field\\")
               exampleImageLocations_POP: Int
               exampleImageLocations_PUSH: [String!]
               exampleImageLocations_SET: [String!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -96,22 +93,18 @@ describe("200", () => {
               AND: [CategoryWhere!]
               NOT: CategoryWhere
               OR: [CategoryWhere!]
-              categoryId: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               categoryId_CONTAINS: ID
               categoryId_ENDS_WITH: ID
               categoryId_EQ: ID
               categoryId_IN: [ID!]
               categoryId_STARTS_WITH: ID
-              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
               description_EQ: String
               description_IN: [String!]
               description_STARTS_WITH: String
-              exampleImageLocations: [String!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
               exampleImageLocations_EQ: [String!]
               exampleImageLocations_INCLUDES: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String

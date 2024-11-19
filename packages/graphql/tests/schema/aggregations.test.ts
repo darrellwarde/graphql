@@ -200,35 +200,24 @@ describe("Aggregations", () => {
             }
 
             input MovieUpdateInput {
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               createdAt_SET: DateTime
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               id_SET: ID
-              imdbRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdbRating_ADD: Float
               imdbRating_DIVIDE: Float
               imdbRating_MULTIPLY: Float
               imdbRating_SET: Float
               imdbRating_SUBTRACT: Float
-              isbn: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               isbn_SET: String
-              screenTime: Duration @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_SET: Duration
-              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               someBigInt_DECREMENT: BigInt
               someBigInt_INCREMENT: BigInt
               someBigInt_SET: BigInt
-              someInt: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               someInt_DECREMENT: Int
               someInt_INCREMENT: Int
               someInt_SET: Int
-              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               someLocalDateTime_SET: LocalDateTime
-              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               someLocalTime_SET: LocalTime
-              someTime: Time @deprecated(reason: \\"Please use the explicit _SET field\\")
               someTime_SET: Time
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -236,75 +225,64 @@ describe("Aggregations", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              createdAt: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               createdAt_EQ: DateTime
               createdAt_GT: DateTime
               createdAt_GTE: DateTime
               createdAt_IN: [DateTime]
               createdAt_LT: DateTime
               createdAt_LTE: DateTime
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              imdbRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               imdbRating_EQ: Float
               imdbRating_GT: Float
               imdbRating_GTE: Float
               imdbRating_IN: [Float]
               imdbRating_LT: Float
               imdbRating_LTE: Float
-              isbn: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               isbn_CONTAINS: String
               isbn_ENDS_WITH: String
               isbn_EQ: String
               isbn_IN: [String!]
               isbn_STARTS_WITH: String
-              screenTime: Duration @deprecated(reason: \\"Please use the explicit _EQ version\\")
               screenTime_EQ: Duration
               screenTime_GT: Duration
               screenTime_GTE: Duration
               screenTime_IN: [Duration]
               screenTime_LT: Duration
               screenTime_LTE: Duration
-              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someBigInt_EQ: BigInt
               someBigInt_GT: BigInt
               someBigInt_GTE: BigInt
               someBigInt_IN: [BigInt]
               someBigInt_LT: BigInt
               someBigInt_LTE: BigInt
-              someInt: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someInt_EQ: Int
               someInt_GT: Int
               someInt_GTE: Int
               someInt_IN: [Int]
               someInt_LT: Int
               someInt_LTE: Int
-              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someLocalDateTime_EQ: LocalDateTime
               someLocalDateTime_GT: LocalDateTime
               someLocalDateTime_GTE: LocalDateTime
               someLocalDateTime_IN: [LocalDateTime]
               someLocalDateTime_LT: LocalDateTime
               someLocalDateTime_LTE: LocalDateTime
-              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someLocalTime_EQ: LocalTime
               someLocalTime_GT: LocalTime
               someLocalTime_GTE: LocalTime
               someLocalTime_IN: [LocalTime]
               someLocalTime_LT: LocalTime
               someLocalTime_LTE: LocalTime
-              someTime: Time @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someTime_EQ: Time
               someTime_GT: Time
               someTime_GTE: Time
               someTime_IN: [Time]
               someTime_LT: Time
               someTime_LTE: Time
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -681,33 +659,23 @@ describe("Aggregations", () => {
             }
 
             input LikesUpdateInput {
-              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               someBigInt_DECREMENT: BigInt
               someBigInt_INCREMENT: BigInt
               someBigInt_SET: BigInt
-              someDateTime: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               someDateTime_SET: DateTime
-              someDuration: Duration @deprecated(reason: \\"Please use the explicit _SET field\\")
               someDuration_SET: Duration
-              someFloat: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               someFloat_ADD: Float
               someFloat_DIVIDE: Float
               someFloat_MULTIPLY: Float
               someFloat_SET: Float
               someFloat_SUBTRACT: Float
-              someId: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               someId_SET: ID
-              someInt: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               someInt_DECREMENT: Int
               someInt_INCREMENT: Int
               someInt_SET: Int
-              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               someLocalDateTime_SET: LocalDateTime
-              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               someLocalTime_SET: LocalTime
-              someString: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               someString_SET: String
-              someTime: Time @deprecated(reason: \\"Please use the explicit _SET field\\")
               someTime_SET: Time
             }
 
@@ -715,68 +683,58 @@ describe("Aggregations", () => {
               AND: [LikesWhere!]
               NOT: LikesWhere
               OR: [LikesWhere!]
-              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someBigInt_EQ: BigInt
               someBigInt_GT: BigInt
               someBigInt_GTE: BigInt
               someBigInt_IN: [BigInt]
               someBigInt_LT: BigInt
               someBigInt_LTE: BigInt
-              someDateTime: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someDateTime_EQ: DateTime
               someDateTime_GT: DateTime
               someDateTime_GTE: DateTime
               someDateTime_IN: [DateTime]
               someDateTime_LT: DateTime
               someDateTime_LTE: DateTime
-              someDuration: Duration @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someDuration_EQ: Duration
               someDuration_GT: Duration
               someDuration_GTE: Duration
               someDuration_IN: [Duration]
               someDuration_LT: Duration
               someDuration_LTE: Duration
-              someFloat: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someFloat_EQ: Float
               someFloat_GT: Float
               someFloat_GTE: Float
               someFloat_IN: [Float]
               someFloat_LT: Float
               someFloat_LTE: Float
-              someId: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someId_CONTAINS: ID
               someId_ENDS_WITH: ID
               someId_EQ: ID
               someId_IN: [ID]
               someId_STARTS_WITH: ID
-              someInt: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someInt_EQ: Int
               someInt_GT: Int
               someInt_GTE: Int
               someInt_IN: [Int]
               someInt_LT: Int
               someInt_LTE: Int
-              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someLocalDateTime_EQ: LocalDateTime
               someLocalDateTime_GT: LocalDateTime
               someLocalDateTime_GTE: LocalDateTime
               someLocalDateTime_IN: [LocalDateTime]
               someLocalDateTime_LT: LocalDateTime
               someLocalDateTime_LTE: LocalDateTime
-              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someLocalTime_EQ: LocalTime
               someLocalTime_GT: LocalTime
               someLocalTime_GTE: LocalTime
               someLocalTime_IN: [LocalTime]
               someLocalTime_LT: LocalTime
               someLocalTime_LTE: LocalTime
-              someString: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someString_CONTAINS: String
               someString_ENDS_WITH: String
               someString_EQ: String
               someString_IN: [String]
               someString_STARTS_WITH: String
-              someTime: Time @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someTime_EQ: Time
               someTime_GT: Time
               someTime_GTE: Time
@@ -850,7 +808,6 @@ describe("Aggregations", () => {
               AND: [PostLikesAggregateInput!]
               NOT: PostLikesAggregateInput
               OR: [PostLikesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -1077,7 +1034,6 @@ describe("Aggregations", () => {
 
             input PostUpdateInput {
               likes: [PostLikesUpdateFieldInput!]
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               title_SET: String
             }
 
@@ -1142,7 +1098,6 @@ describe("Aggregations", () => {
               likes_SINGLE: UserWhere
               \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
               likes_SOME: UserWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -1272,33 +1227,23 @@ describe("Aggregations", () => {
             }
 
             input UserUpdateInput {
-              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               someBigInt_DECREMENT: BigInt
               someBigInt_INCREMENT: BigInt
               someBigInt_SET: BigInt
-              someDateTime: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               someDateTime_SET: DateTime
-              someDuration: Duration @deprecated(reason: \\"Please use the explicit _SET field\\")
               someDuration_SET: Duration
-              someFloat: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               someFloat_ADD: Float
               someFloat_DIVIDE: Float
               someFloat_MULTIPLY: Float
               someFloat_SET: Float
               someFloat_SUBTRACT: Float
-              someId: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
               someId_SET: ID
-              someInt: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               someInt_DECREMENT: Int
               someInt_INCREMENT: Int
               someInt_SET: Int
-              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               someLocalDateTime_SET: LocalDateTime
-              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _SET field\\")
               someLocalTime_SET: LocalTime
-              someString: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               someString_SET: String
-              someTime: Time @deprecated(reason: \\"Please use the explicit _SET field\\")
               someTime_SET: Time
             }
 
@@ -1306,68 +1251,58 @@ describe("Aggregations", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              someBigInt: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someBigInt_EQ: BigInt
               someBigInt_GT: BigInt
               someBigInt_GTE: BigInt
               someBigInt_IN: [BigInt]
               someBigInt_LT: BigInt
               someBigInt_LTE: BigInt
-              someDateTime: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someDateTime_EQ: DateTime
               someDateTime_GT: DateTime
               someDateTime_GTE: DateTime
               someDateTime_IN: [DateTime]
               someDateTime_LT: DateTime
               someDateTime_LTE: DateTime
-              someDuration: Duration @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someDuration_EQ: Duration
               someDuration_GT: Duration
               someDuration_GTE: Duration
               someDuration_IN: [Duration]
               someDuration_LT: Duration
               someDuration_LTE: Duration
-              someFloat: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someFloat_EQ: Float
               someFloat_GT: Float
               someFloat_GTE: Float
               someFloat_IN: [Float]
               someFloat_LT: Float
               someFloat_LTE: Float
-              someId: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someId_CONTAINS: ID
               someId_ENDS_WITH: ID
               someId_EQ: ID
               someId_IN: [ID]
               someId_STARTS_WITH: ID
-              someInt: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someInt_EQ: Int
               someInt_GT: Int
               someInt_GTE: Int
               someInt_IN: [Int]
               someInt_LT: Int
               someInt_LTE: Int
-              someLocalDateTime: LocalDateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someLocalDateTime_EQ: LocalDateTime
               someLocalDateTime_GT: LocalDateTime
               someLocalDateTime_GTE: LocalDateTime
               someLocalDateTime_IN: [LocalDateTime]
               someLocalDateTime_LT: LocalDateTime
               someLocalDateTime_LTE: LocalDateTime
-              someLocalTime: LocalTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someLocalTime_EQ: LocalTime
               someLocalTime_GT: LocalTime
               someLocalTime_GTE: LocalTime
               someLocalTime_IN: [LocalTime]
               someLocalTime_LT: LocalTime
               someLocalTime_LTE: LocalTime
-              someString: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someString_CONTAINS: String
               someString_ENDS_WITH: String
               someString_EQ: String
               someString_IN: [String]
               someString_STARTS_WITH: String
-              someTime: Time @deprecated(reason: \\"Please use the explicit _EQ version\\")
               someTime_EQ: Time
               someTime_GT: Time
               someTime_GTE: Time

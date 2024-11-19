@@ -52,13 +52,13 @@ describe("@filterable directive", () => {
 
             const movieWhereFields = movieWhereType.getFields();
 
-            const title = movieWhereFields["title"];
+            const title_EQ = movieWhereFields["title_EQ"];
             const title_IN = movieWhereFields["title_IN"];
             const title_CONTAINS = movieWhereFields["title_CONTAINS"];
             const title_STARTS_WITH = movieWhereFields["title_STARTS_WITH"];
             const title_ENDS_WITH = movieWhereFields["title_ENDS_WITH"];
 
-            const titleFilters = [title, title_IN, title_CONTAINS, title_STARTS_WITH, title_ENDS_WITH];
+            const titleFilters = [title_EQ, title_IN, title_CONTAINS, title_STARTS_WITH, title_ENDS_WITH];
 
             for (const scalarFilter of titleFilters) {
                 expect(scalarFilter).toBeDefined();
@@ -70,14 +70,14 @@ describe("@filterable directive", () => {
 
             const movieSubscriptionWhereFields = movieSubscriptionWhereType.getFields();
 
-            const subscriptionTitle = movieSubscriptionWhereFields["title"];
+            const subscriptionTitle_EQ = movieSubscriptionWhereFields["title_EQ"];
             const subscriptionTitle_IN = movieSubscriptionWhereFields["title_IN"];
             const subscriptionTitle_CONTAINS = movieSubscriptionWhereFields["title_CONTAINS"];
             const subscriptionTitle_STARTS_WITH = movieSubscriptionWhereFields["title_STARTS_WITH"];
             const subscriptionTitle_ENDS_WITH = movieSubscriptionWhereFields["title_ENDS_WITH"];
 
             const subscriptionTitleFilters = [
-                subscriptionTitle,
+                subscriptionTitle_EQ,
                 subscriptionTitle_IN,
                 subscriptionTitle_CONTAINS,
                 subscriptionTitle_STARTS_WITH,
@@ -120,13 +120,13 @@ describe("@filterable directive", () => {
             expect(movieWhereType).toBeDefined();
 
             const movieWhereFields = movieWhereType.getFields();
-            const title = movieWhereFields["title"];
+            const title_EQ = movieWhereFields["title_EQ"];
             const title_IN = movieWhereFields["title_IN"];
             const title_CONTAINS = movieWhereFields["title_CONTAINS"];
             const title_STARTS_WITH = movieWhereFields["title_STARTS_WITH"];
             const title_ENDS_WITH = movieWhereFields["title_ENDS_WITH"];
 
-            const titleFilters = [title, title_IN, title_CONTAINS, title_STARTS_WITH, title_ENDS_WITH];
+            const titleFilters = [title_EQ, title_IN, title_CONTAINS, title_STARTS_WITH, title_ENDS_WITH];
 
             for (const scalarFilter of titleFilters) {
                 expect(scalarFilter).toBeDefined();
@@ -138,14 +138,14 @@ describe("@filterable directive", () => {
 
             const movieSubscriptionWhereFields = movieSubscriptionWhereType.getFields();
 
-            const subscriptionTitle = movieSubscriptionWhereFields["title"];
+            const subscriptionTitle_EQ = movieSubscriptionWhereFields["title_EQ"];
             const subscriptionTitle_IN = movieSubscriptionWhereFields["title_IN"];
             const subscriptionTitle_CONTAINS = movieSubscriptionWhereFields["title_CONTAINS"];
             const subscriptionTitle_STARTS_WITH = movieSubscriptionWhereFields["title_STARTS_WITH"];
             const subscriptionTitle_ENDS_WITH = movieSubscriptionWhereFields["title_ENDS_WITH"];
 
             const subscriptionTitleFilters = [
-                subscriptionTitle,
+                subscriptionTitle_EQ,
                 subscriptionTitle_IN,
                 subscriptionTitle_CONTAINS,
                 subscriptionTitle_STARTS_WITH,
@@ -964,7 +964,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -1043,13 +1042,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -1059,9 +1056,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -1101,13 +1096,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -1176,7 +1169,6 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -1338,7 +1330,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -1348,7 +1339,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -1388,7 +1378,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -1571,7 +1560,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -1672,13 +1660,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -1688,9 +1674,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -1730,13 +1714,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -1805,7 +1787,6 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -1967,7 +1948,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -1977,7 +1957,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -2017,7 +1996,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -2200,7 +2178,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -2301,13 +2278,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -2317,9 +2292,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -2359,13 +2332,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -2434,7 +2405,6 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -2594,7 +2564,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -2814,7 +2783,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -2915,13 +2883,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -2931,9 +2897,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -2973,13 +2937,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -3161,7 +3123,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -3171,7 +3132,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -3210,7 +3170,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -3395,7 +3354,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -3496,13 +3454,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -3512,9 +3468,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -3554,13 +3508,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -3629,7 +3581,6 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -3791,7 +3742,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -3801,7 +3751,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -3841,7 +3790,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -4026,7 +3974,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -4127,13 +4074,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -4143,9 +4088,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -4185,13 +4128,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -4260,7 +4201,6 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -4422,7 +4362,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -4432,7 +4371,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -4448,7 +4386,6 @@ describe("@filterable directive", () => {
                       NOT: MovieWhere
                       OR: [MovieWhere!]
                       actorsAggregate: MovieActorsAggregateInput
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -4633,7 +4570,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -4734,13 +4670,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -4750,9 +4684,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -4792,13 +4724,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -4980,7 +4910,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -4990,7 +4919,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -5029,7 +4957,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: ActorWhere
                       \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                       actors_SOME: ActorWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -5207,7 +5134,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -5308,13 +5234,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -5324,9 +5248,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -5366,13 +5288,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -5550,7 +5470,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -5560,7 +5479,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -5599,7 +5517,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -5670,7 +5587,6 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -5679,7 +5595,6 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename_IN: [PersonImplementation!]
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -5837,7 +5752,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -5938,13 +5852,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -5954,9 +5866,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -5996,13 +5906,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -6061,7 +5969,6 @@ describe("@filterable directive", () => {
                       AND: [MovieActorsAggregateInput!]
                       NOT: MovieActorsAggregateInput
                       OR: [MovieActorsAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -6214,7 +6121,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -6224,7 +6130,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -6264,7 +6169,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -6335,7 +6239,6 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -6344,7 +6247,6 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename_IN: [PersonImplementation!]
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -6502,7 +6404,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -6603,13 +6504,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -6619,9 +6518,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -6661,13 +6558,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -6845,7 +6740,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -6855,7 +6749,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: [MovieActorsUpdateFieldInput!]
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -6894,7 +6787,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -6965,7 +6857,6 @@ describe("@filterable directive", () => {
                     }
 
                     input PersonUpdateInput {
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -6974,7 +6865,6 @@ describe("@filterable directive", () => {
                       NOT: PersonWhere
                       OR: [PersonWhere!]
                       typename_IN: [PersonImplementation!]
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -7148,7 +7038,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -7249,13 +7138,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -7265,9 +7152,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -7307,13 +7192,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -7398,7 +7281,6 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesAggregateInput!]
                       NOT: AppearanceMoviesAggregateInput
                       OR: [AppearanceMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -7499,13 +7381,11 @@ describe("@filterable directive", () => {
                       AND: [AppearanceSubscriptionWhere!]
                       NOT: AppearanceSubscriptionWhere
                       OR: [AppearanceSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -7515,9 +7395,7 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -7557,13 +7435,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Appearances where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -7809,7 +7685,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -7819,7 +7694,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -7858,7 +7732,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -8074,7 +7947,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -8175,13 +8047,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -8191,9 +8061,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -8233,13 +8101,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -8324,7 +8190,6 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesAggregateInput!]
                       NOT: AppearanceMoviesAggregateInput
                       OR: [AppearanceMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -8425,13 +8290,11 @@ describe("@filterable directive", () => {
                       AND: [AppearanceSubscriptionWhere!]
                       NOT: AppearanceSubscriptionWhere
                       OR: [AppearanceSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -8441,9 +8304,7 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -8483,13 +8344,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Appearances where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -8735,7 +8594,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -8745,7 +8603,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -8784,7 +8641,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -9000,7 +8856,6 @@ describe("@filterable directive", () => {
                       AND: [ActorMoviesAggregateInput!]
                       NOT: ActorMoviesAggregateInput
                       OR: [ActorMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -9101,13 +8956,11 @@ describe("@filterable directive", () => {
                       AND: [ActorSubscriptionWhere!]
                       NOT: ActorSubscriptionWhere
                       OR: [ActorSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -9117,9 +8970,7 @@ describe("@filterable directive", () => {
 
                     input ActorUpdateInput {
                       movies: [ActorMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -9159,13 +9010,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Actors where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -9250,7 +9099,6 @@ describe("@filterable directive", () => {
                       AND: [AppearanceMoviesAggregateInput!]
                       NOT: AppearanceMoviesAggregateInput
                       OR: [AppearanceMoviesAggregateInput!]
-                      count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       count_EQ: Int
                       count_GT: Int
                       count_GTE: Int
@@ -9351,13 +9199,11 @@ describe("@filterable directive", () => {
                       AND: [AppearanceSubscriptionWhere!]
                       NOT: AppearanceSubscriptionWhere
                       OR: [AppearanceSubscriptionWhere!]
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -9367,9 +9213,7 @@ describe("@filterable directive", () => {
 
                     input AppearanceUpdateInput {
                       movies: [AppearanceMoviesUpdateFieldInput!]
-                      password: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       password_SET: String
-                      username: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       username_SET: String
                     }
 
@@ -9409,13 +9253,11 @@ describe("@filterable directive", () => {
                       movies_SINGLE: MovieWhere
                       \\"\\"\\"Return Appearances where some of the related Movies match this filter\\"\\"\\"
                       movies_SOME: MovieWhere
-                      password: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       password_CONTAINS: String
                       password_ENDS_WITH: String
                       password_EQ: String
                       password_IN: [String!]
                       password_STARTS_WITH: String
-                      username: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       username_CONTAINS: String
                       username_ENDS_WITH: String
                       username_EQ: String
@@ -9661,7 +9503,6 @@ describe("@filterable directive", () => {
                       AND: [MovieSubscriptionWhere!]
                       NOT: MovieSubscriptionWhere
                       OR: [MovieSubscriptionWhere!]
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String
@@ -9671,7 +9512,6 @@ describe("@filterable directive", () => {
 
                     input MovieUpdateInput {
                       actors: MovieActorsUpdateInput
-                      title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
                       title_SET: String
                     }
 
@@ -9710,7 +9550,6 @@ describe("@filterable directive", () => {
                       actors_SINGLE: PersonWhere
                       \\"\\"\\"Return Movies where some of the related People match this filter\\"\\"\\"
                       actors_SOME: PersonWhere
-                      title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                       title_CONTAINS: String
                       title_ENDS_WITH: String
                       title_EQ: String

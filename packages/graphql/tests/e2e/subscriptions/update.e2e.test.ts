@@ -236,7 +236,7 @@ describe("Delete Subscription", () => {
             .send({
                 query: `
                         mutation {
-                            ${typeMovie.operations.update}(where: { title_EQ: "${oldTitle}" }, update: { title: "${newTitle}" }) {
+                            ${typeMovie.operations.update}(where: { title_EQ: "${oldTitle}" }, update: { title_SET: "${newTitle}" }) {
                                 ${typeMovie.plural} {
                                     title
                                 }
@@ -253,7 +253,7 @@ describe("Delete Subscription", () => {
             .send({
                 query: `
                         mutation {
-                            ${typeActor.operations.update}(where: { name_EQ: "${oldName}" }, update: { name: "${newName}" }) {
+                            ${typeActor.operations.update}(where: { name_EQ: "${oldName}" }, update: { name_SET: "${newName}" }) {
                                 ${typeActor.plural} {
                                     name
                                 }

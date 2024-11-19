@@ -134,7 +134,6 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
               AND: [GenreMoviesAggregateInput!]
               NOT: GenreMoviesAggregateInput
               OR: [GenreMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -272,7 +271,6 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
 
             input GenreUpdateInput {
               movies: [GenreMoviesUpdateFieldInput!]
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -305,7 +303,6 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
               movies_SINGLE: MovieWhere
               \\"\\"\\"Return Genres where some of the related Movies match this filter\\"\\"\\"
               movies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -383,7 +380,6 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
               AND: [MovieGenresAggregateInput!]
               NOT: MovieGenresAggregateInput
               OR: [MovieGenresAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -483,15 +479,12 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
 
             input MovieUpdateInput {
               genres: [MovieGenresUpdateFieldInput!] @deprecated(reason: \\"Do not use genre\\")
-              imdbRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               imdbRating_ADD: Float
               imdbRating_DIVIDE: Float
               imdbRating_MULTIPLY: Float
               imdbRating_SET: Float
               imdbRating_SUBTRACT: Float
-              title: String @deprecated(reason: \\"Do not use title\\")
               title_SET: String @deprecated(reason: \\"Do not use title\\")
-              year: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               year_DECREMENT: Int
               year_INCREMENT: Int
               year_SET: Int
@@ -526,20 +519,17 @@ describe("https://github.com/neo4j/graphql/issues/2187", () => {
               genres_SINGLE: GenreWhere @deprecated(reason: \\"Do not use genre\\")
               \\"\\"\\"Return Movies where some of the related Genres match this filter\\"\\"\\"
               genres_SOME: GenreWhere @deprecated(reason: \\"Do not use genre\\")
-              imdbRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
               imdbRating_EQ: Float
               imdbRating_GT: Float
               imdbRating_GTE: Float
               imdbRating_IN: [Float]
               imdbRating_LT: Float
               imdbRating_LTE: Float
-              title: String @deprecated(reason: \\"Do not use title\\")
               title_CONTAINS: String @deprecated(reason: \\"Do not use title\\")
               title_ENDS_WITH: String @deprecated(reason: \\"Do not use title\\")
               title_EQ: String @deprecated(reason: \\"Do not use title\\")
               title_IN: [String] @deprecated(reason: \\"Do not use title\\")
               title_STARTS_WITH: String @deprecated(reason: \\"Do not use title\\")
-              year: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               year_EQ: Int
               year_GT: Int
               year_GTE: Int

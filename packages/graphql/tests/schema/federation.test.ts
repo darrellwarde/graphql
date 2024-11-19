@@ -128,7 +128,6 @@ describe("Apollo Federation", () => {
               AND: [PostAuthorAggregateInput!]
               NOT: PostAuthorAggregateInput
               OR: [PostAuthorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -252,7 +251,6 @@ describe("Apollo Federation", () => {
 
             input PostUpdateInput {
               author: [PostAuthorUpdateFieldInput!]
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
             }
 
@@ -294,7 +292,6 @@ describe("Apollo Federation", () => {
               author_SINGLE: UserWhere
               \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
               author_SOME: UserWhere
-              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               content_CONTAINS: String
               content_ENDS_WITH: String
               content_EQ: String
@@ -402,7 +399,6 @@ describe("Apollo Federation", () => {
               AND: [UserPostsAggregateInput!]
               NOT: UserPostsAggregateInput
               OR: [UserPostsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -499,7 +495,6 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
               posts: [UserPostsUpdateFieldInput!]
             }
@@ -508,7 +503,6 @@ describe("Apollo Federation", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -674,7 +668,6 @@ describe("Apollo Federation", () => {
               AND: [PostAuthorAggregateInput!]
               NOT: PostAuthorAggregateInput
               OR: [PostAuthorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -783,7 +776,6 @@ describe("Apollo Federation", () => {
 
             input PostUpdateInput {
               author: [PostAuthorUpdateFieldInput!]
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               content_SET: String
             }
 
@@ -825,7 +817,6 @@ describe("Apollo Federation", () => {
               author_SINGLE: UserWhere
               \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
               author_SOME: UserWhere
-              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               content_CONTAINS: String
               content_ENDS_WITH: String
               content_EQ: String
@@ -913,7 +904,6 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
               name_SET: String
             }
 
@@ -921,7 +911,6 @@ describe("Apollo Federation", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String

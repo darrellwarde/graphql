@@ -201,7 +201,7 @@ describe("Subscriptions authorization with update events", () => {
             .send({
                 query: `
                     mutation {
-                        ${User.operations.update}(where: { id_EQ: "${id1}" }, update: { id: "${id2}" }) {
+                        ${User.operations.update}(where: { id_EQ: "${id1}" }, update: { id_SET: "${id2}" }) {
                             ${User.plural} {
                                 id
                             }
