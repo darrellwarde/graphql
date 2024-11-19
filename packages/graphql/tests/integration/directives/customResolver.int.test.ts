@@ -1727,12 +1727,12 @@ describe("Related Fields", () => {
 
             type ${Book} @node {
                 title: String!
-                author: ${Author}! @relationship(type: "WROTE", direction: IN)
+                author: [${Author}!]! @relationship(type: "WROTE", direction: IN)
             }
 
             type ${Journal} @node {
                 subject: String!
-                author: ${Author}! @relationship(type: "WROTE", direction: IN)
+                author: [${Author}!]! @relationship(type: "WROTE", direction: IN)
             }
         `;
 
