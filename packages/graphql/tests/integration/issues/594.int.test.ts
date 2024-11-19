@@ -17,58 +17,40 @@
  * limitations under the License.
  */
 
-import { gql } from "apollo-server";
-import { graphql } from "graphql";
-import type { Driver, Session } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { generateUniqueType } from "../../utils/graphql-types";
-import { Neo4jGraphQL } from "../../../src";
+import { gql } from "graphql-tag";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/594", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
-    let neoSchema: Neo4jGraphQL;
+    const testHelper = new TestHelper();
 
-    const typeMovie = generateUniqueType("Movie");
-    const typePerson = generateUniqueType("Person");
+    let typeMovie: UniqueType;
+    let typePerson: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        typeMovie = testHelper.createUniqueType("Movie");
+        typePerson = testHelper.createUniqueType("Person");
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typePerson.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typePerson.name} {
+            type ${typePerson.name} @node {
                 name: String!
                 nickname: String
                 surname: String
             }
         `;
 
-        neoSchema = new Neo4jGraphQL({ typeDefs });
-        try {
-            session = await neo4j.getSession();
-            await session.run(`CREATE (:${typeMovie.name} {title: "Cool Movie"})<-[:ACTED_IN]-(:${typePerson.name} {name: "Some Name", nickname: "SName"})
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+
+        await testHelper.executeCypher(`CREATE (:${typeMovie.name} {title: "Cool Movie"})<-[:ACTED_IN]-(:${typePerson.name} {name: "Some Name", nickname: "SName"})
                 CREATE (:${typeMovie.name} {title: "Super Cool Movie"})<-[:ACTED_IN]-(:${typePerson.name} {name: "Super Cool Some Name"})`);
-        } finally {
-            await session.close();
-        }
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
-    });
-
-    afterEach(async () => {
-        await session.close();
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should support nullable fields in field aggregations", async () => {
@@ -86,16 +68,11 @@ describe("https://github.com/neo4j/graphql/issues/594", () => {
             }
         `;
 
-        const gqlResult: any = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult: any = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
-        expect(gqlResult.data[typeMovie.plural]).toHaveLength(2);
         expect(gqlResult.data[typeMovie.plural]).toEqual(
-            expect.arrayContaining([
+            expect.toIncludeSameMembers([
                 { actorsAggregate: { node: { nickname: { shortest: "SName" } } } },
                 { actorsAggregate: { node: { nickname: { shortest: null } } } },
             ])
@@ -113,11 +90,7 @@ describe("https://github.com/neo4j/graphql/issues/594", () => {
             }
         `;
 
-        const gqlResult: any = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult: any = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
         expect(gqlResult.data[`${typePerson.plural}Aggregate`]).toEqual({ surname: { shortest: null } });

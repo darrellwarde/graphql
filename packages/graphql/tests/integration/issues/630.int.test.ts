@@ -17,46 +17,42 @@
  * limitations under the License.
  */
 
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/630", () => {
-    const testLabel = generate({ charset: "alphabetic" });
-    const typeMovie = generateUniqueType("Movie");
-    const typeActor = generateUniqueType("Actor");
-    let driver: Driver;
-    let neo4j: Neo4j;
+    let typeMovie: UniqueType;
+    let typeActor: UniqueType;
+    const testHelper = new TestHelper();
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        typeMovie = testHelper.createUniqueType("Movie");
+        typeActor = testHelper.createUniqueType("Actor");
+
+        const typeDefs = `
+         type ${typeActor} @node {
+             id: ID!
+             name: String!
+             movies: [${typeMovie}!]! @cypher(statement: "MATCH (this)-[:ACTED_IN]->(m:${typeMovie}) RETURN m", columnName:"m")
+         }
+ 
+         type ${typeMovie} @node {
+             id: ID!
+             title: String!
+             actors: [${typeActor}!]! @relationship(type: "ACTED_IN", direction: IN)
+         }
+     `;
+
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should query nested connection", async () => {
-        const typeDefs = `
-        type ${typeActor} {
-            id: ID!
-            name: String!
-            movies: [${typeMovie}!]! @cypher(statement: "MATCH (this)-[:ACTED_IN]->(m:${typeMovie}) RETURN m")
-        }
-
-        type ${typeMovie} {
-            id: ID!
-            title: String!
-            actors: [${typeActor}!]! @relationship(type: "ACTED_IN", direction: IN)
-        }
-    `;
-
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
-        const schema = await neoSchema.getSchema();
+        const testLabel = generate({ charset: "alphabetic" });
 
         const actors = [
             {
@@ -74,21 +70,19 @@ describe("https://github.com/neo4j/graphql/issues/630", () => {
             title: "The Matrix",
         };
 
-        const session = await neo4j.getSession();
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
             CREATE (movie:${typeMovie}:${testLabel}) SET movie = $movie
             CREATE (actor1:${typeActor}:${testLabel}) SET actor1 = $actors[0]
             CREATE (actor2:${typeActor}:${testLabel}) SET actor2 = $actors[1]
             MERGE (actor1)-[:ACTED_IN]->(movie)<-[:ACTED_IN]-(actor2)
         `,
-                { actors, movie }
-            );
+            { actors, movie }
+        );
 
-            const source = `
+        const source = `
             query($actorId: ID!) {
-                ${typeActor.plural}(where: { id: $actorId }) {
+                ${typeActor.plural}(where: { id_EQ: $actorId }) {
                     id
                     name
                     movies {
@@ -108,40 +102,33 @@ describe("https://github.com/neo4j/graphql/issues/630", () => {
             }
         `;
 
-            const gqlResult = await graphql({
-                schema,
-                source,
-                contextValue: neo4j.getContextValues(),
-                variableValues: { actorId: actors[0].id },
-            });
+        const gqlResult = await testHelper.executeGraphQL(source, {
+            variableValues: { actorId: actors[0]?.id },
+        });
 
-            expect(gqlResult.errors).toBeUndefined();
+        expect(gqlResult.errors).toBeUndefined();
 
-            const gqlActor = (gqlResult.data as any)[typeActor.plural][0];
+        const gqlActor = (gqlResult.data as any)[typeActor.plural][0];
 
-            expect(gqlActor).toBeDefined();
-            expect(gqlActor).toEqual({
-                ...actors[0],
-                movies: [
-                    {
-                        ...movie,
-                        actorsConnection: {
-                            totalCount: 2,
-                            edges: expect.arrayContaining([
-                                {
-                                    node: actors[0],
-                                },
-                                {
-                                    node: actors[1],
-                                },
-                            ]),
-                        },
+        expect(gqlActor).toBeDefined();
+        expect(gqlActor).toEqual({
+            ...actors[0],
+            movies: [
+                {
+                    ...movie,
+                    actorsConnection: {
+                        totalCount: 2,
+                        edges: expect.toIncludeSameMembers([
+                            {
+                                node: actors[0],
+                            },
+                            {
+                                node: actors[1],
+                            },
+                        ]),
                     },
-                ],
-            });
-        } finally {
-            await session.run(`MATCH (node:${testLabel}) DETACH DELETE node`);
-            await session.close();
-        }
+                },
+            ],
+        });
     });
 });

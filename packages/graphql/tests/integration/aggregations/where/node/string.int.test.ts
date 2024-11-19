@@ -17,368 +17,501 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "../../../neo4j";
-import { Neo4jGraphQL } from "../../../../../src/classes";
+import type { UniqueType } from "../../../../utils/graphql-types";
+import { TestHelper } from "../../../../utils/tests-helper";
 
 describe("aggregations-where-node-string", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    let testHelper: TestHelper;
+    let User: UniqueType;
+    let Post: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeEach(async () => {
+        testHelper = new TestHelper();
+        User = testHelper.createUniqueType("User");
+        Post = testHelper.createUniqueType("Post");
 
-    afterAll(async () => {
-        await driver.close();
-    });
-
-    test("should return posts where a like String is EQUAL to", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type User {
+        const typeDefs = /* GraphQL */ `
+            type ${User} @node {
                 testString: String!
             }
 
-            type Post {
-              testString: String!
-              likes: [User!]! @relationship(type: "LIKES", direction: IN)
+            type ${Post} @node {
+                testString: String!
+                likes: [${User}!]! @relationship(type: "LIKES", direction: IN)
             }
         `;
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+    });
 
+    afterEach(async () => {
+        await testHelper.close();
+    });
+
+    test("should return posts where the SHORTEST like String is EQUAL to", async () => {
         const testString = generate({
             charset: "alphabetic",
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        const shortestTestString = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${testString}"})
-                    CREATE (:Post {testString: "${testString}"})
-                `
-            );
+        const testString2 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 11,
+        });
 
-            const query = `
-                {
-                    posts(where: { testString: "${testString}", likesAggregate: { node: { testString_EQUAL: "${testString}" } } }) {
-                        testString
-                        likes {
+        const longestTestString = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 12,
+        });
+
+        await testHelper.executeCypher(
+            `
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${shortestTestString}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${longestTestString}"})
+                    `
+        );
+
+        const query = `
+                    {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_SHORTEST_LENGTH_EQUAL: ${shortestTestString.length} } } }) {
                             testString
+                            likes {
+                                testString
+                            }
                         }
                     }
-                }
-            `;
+                `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
-
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).posts).toEqual([
-                {
-                    testString,
-                    likes: [{ testString }],
-                },
-            ]);
-        } finally {
-            await session.close();
+        if (gqlResult.errors) {
+            console.log(JSON.stringify(gqlResult.errors, null, 2));
         }
+
+        expect(gqlResult.errors).toBeUndefined();
+
+        expect((gqlResult.data as any)[Post.plural]).toIncludeSameMembers([
+            {
+                testString,
+                likes: [{ testString: shortestTestString }],
+            },
+        ]);
     });
 
-    test("should return posts where a like String is GT than", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type User {
-                testString: String!
-            }
-
-            type Post {
-              testString: String!
-              likes: [User!]! @relationship(type: "LIKES", direction: IN)
-            }
-        `;
-
-        const length = 5;
-        const gtLength = length - 1;
-
+    test("should return posts where the LONGEST like String is EQUAL to", async () => {
         const testString = generate({
             charset: "alphabetic",
             readable: true,
-            length,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        const shortestTestString = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${testString}"})
-                    CREATE (:Post {testString: "${testString}"})
-                `
-            );
+        const testString2 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 11,
+        });
 
-            const query = `
-                {
-                    posts(where: { testString: "${testString}", likesAggregate: { node: { testString_GT: ${gtLength} } } }) {
-                        testString
-                        likes {
+        const longestTestString = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 12,
+        });
+
+        await testHelper.executeCypher(
+            `
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${shortestTestString}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${longestTestString}"})
+                    `
+        );
+
+        const query = `
+                    {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_LONGEST_LENGTH_EQUAL: ${longestTestString.length} } } }) {
                             testString
+                            likes {
+                                testString
+                            }
                         }
                     }
-                }
-            `;
+                `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
-
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).posts).toEqual([
-                {
-                    testString,
-                    likes: [{ testString }],
-                },
-            ]);
-        } finally {
-            await session.close();
+        if (gqlResult.errors) {
+            console.log(JSON.stringify(gqlResult.errors, null, 2));
         }
+
+        expect(gqlResult.errors).toBeUndefined();
+
+        expect((gqlResult.data as any)[Post.plural]).toIncludeSameMembers([
+            {
+                testString,
+                likes: [{ testString: longestTestString }],
+            },
+        ]);
     });
 
-    test("should return posts where a like String is GTE than", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type User {
-                testString: String!
-            }
-
-            type Post {
-              testString: String!
-              likes: [User!]! @relationship(type: "LIKES", direction: IN)
-            }
-        `;
-
-        const length = 5;
-
+    test("should return posts where the AVERAGE of like Strings is EQUAL to", async () => {
         const testString = generate({
             charset: "alphabetic",
             readable: true,
-            length,
+            length: 10,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        const testString1 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${testString}"})
-                    CREATE (:Post {testString: "${testString}"})
-                `
-            );
+        const testString2 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 11,
+        });
 
-            const query = `
-                {
-                    posts(where: { testString: "${testString}", likesAggregate: { node: { testString_GTE: ${length} } } }) {
-                        testString
-                        likes {
+        const testString3 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 12,
+        });
+
+        const avg = (10 + 11 + 12) / 3;
+
+        await testHelper.executeCypher(
+            `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
+                    `
+        );
+
+        const query = `
+                    {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_EQUAL: ${avg} } } }) {
                             testString
+                            likes {
+                                testString
+                            }
                         }
                     }
-                }
-            `;
+                `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
-
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
-
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).posts).toEqual([
-                {
-                    testString,
-                    likes: [{ testString }],
-                },
-            ]);
-        } finally {
-            await session.close();
+        const gqlResult = await testHelper.executeGraphQL(query);
+        if (gqlResult.errors) {
+            console.log(JSON.stringify(gqlResult.errors, null, 2));
         }
+
+        expect(gqlResult.errors).toBeUndefined();
+
+        const [post] = (gqlResult.data as any)[Post.plural] as any[];
+        expect(post.testString).toEqual(testString);
+        expect(post.likes).toHaveLength(3);
     });
 
-    test("should return posts where a like String is LT than", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type User {
-                testString: String!
-            }
-
-            type Post {
-              testString: String!
-              likes: [User!]! @relationship(type: "LIKES", direction: IN)
-            }
-        `;
-
-        const length = 5;
-
+    test("should return posts where the average of like Strings is GT than", async () => {
         const testString = generate({
             charset: "alphabetic",
             readable: true,
-            length: length - 1,
+            length: 10,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        const testString1 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${testString}"})
-                    CREATE (:Post {testString: "${testString}"})
-                `
-            );
+        const testString2 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 11,
+        });
 
-            const query = `
-                {
-                    posts(where: { testString: "${testString}", likesAggregate: { node: { testString_LT: ${length} } } }) {
-                        testString
-                        likes {
+        const testString3 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 12,
+        });
+
+        const avg = (10 + 11 + 12) / 3;
+        const avgGT = avg - 1;
+
+        await testHelper.executeCypher(
+            `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
+                    `
+        );
+
+        const query = `
+                    {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_GT: ${avgGT} } } }) {
                             testString
+                            likes {
+                                testString
+                            }
                         }
                     }
-                }
-            `;
+                `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
-
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).posts).toEqual([
-                {
-                    testString,
-                    likes: [{ testString }],
-                },
-            ]);
-        } finally {
-            await session.close();
+        if (gqlResult.errors) {
+            console.log(JSON.stringify(gqlResult.errors, null, 2));
         }
+
+        expect(gqlResult.errors).toBeUndefined();
+
+        const [post] = (gqlResult.data as any)[Post.plural] as any[];
+        expect(post.testString).toEqual(testString);
+        expect(post.likes).toHaveLength(3);
     });
 
-    test("should return posts where a like String is LTE than", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type User {
-                testString: String!
-            }
-
-            type Post {
-              testString: String!
-              likes: [User!]! @relationship(type: "LIKES", direction: IN)
-            }
-        `;
-
-        const length = 5;
-
+    test("should return posts where the average of like Strings is GTE than", async () => {
         const testString = generate({
             charset: "alphabetic",
             readable: true,
-            length,
+            length: 10,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        const testString1 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${testString}"})
-                    CREATE (:Post {testString: "${testString}"})
-                `
-            );
+        const testString2 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 11,
+        });
 
-            const query = `
-                {
-                    posts(where: { testString: "${testString}", likesAggregate: { node: { testString_LTE: ${length} } } }) {
-                        testString
-                        likes {
+        const testString3 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 12,
+        });
+
+        const avg = (10 + 11 + 12) / 3;
+
+        await testHelper.executeCypher(
+            `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
+                    `
+        );
+
+        const query = `
+                    {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_GTE: ${avg} } } }) {
                             testString
+                            likes {
+                                testString
+                            }
                         }
                     }
-                }
-            `;
+                `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
+        if (gqlResult.errors) {
+            console.log(JSON.stringify(gqlResult.errors, null, 2));
+        }
+
+        expect(gqlResult.errors).toBeUndefined();
+
+        const [post] = (gqlResult.data as any)[Post.plural] as any[];
+        expect(post.testString).toEqual(testString);
+        expect(post.likes).toHaveLength(3);
+    });
+
+    test("should return posts where the average of like Strings is LT than", async () => {
+        const testString = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
+
+        const testString1 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
+
+        const testString2 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 11,
+        });
+
+        const testString3 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 12,
+        });
+
+        const avg = (10 + 11 + 12) / 3;
+        const avgLT = avg + 1;
+
+        await testHelper.executeCypher(
+            `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
+                    `
+        );
+
+        const query = `
+                    {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_LT: ${avgLT} } } }) {
+                            testString
+                            likes {
+                                testString
+                            }
+                        }
+                    }
+                `;
+
+        const gqlResult = await testHelper.executeGraphQL(query);
+
+        if (gqlResult.errors) {
+            console.log(JSON.stringify(gqlResult.errors, null, 2));
+        }
+
+        expect(gqlResult.errors).toBeUndefined();
+
+        const [post] = (gqlResult.data as any)[Post.plural] as any[];
+        expect(post.testString).toEqual(testString);
+        expect(post.likes).toHaveLength(3);
+    });
+
+    test("should return posts where the average of like Strings is LTE than", async () => {
+        const testString = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
+
+        const testString1 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
+
+        const testString2 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 11,
+        });
+
+        const testString3 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 12,
+        });
+
+        const avg = (10 + 11 + 12) / 3;
+
+        await testHelper.executeCypher(
+            `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
+                    `
+        );
+
+        const query = `
+                    {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_LTE: ${avg} } } }) {
+                            testString
+                            likes {
+                                testString
+                            }
+                        }
+                    }
+                `;
+
+        const gqlResult = await testHelper.executeGraphQL(query);
+
+        if (gqlResult.errors) {
+            console.log(JSON.stringify(gqlResult.errors, null, 2));
+        }
+
+        expect(gqlResult.errors).toBeUndefined();
+
+        const [post] = (gqlResult.data as any)[Post.plural] as any[];
+        expect(post.testString).toEqual(testString);
+        expect(post.likes).toHaveLength(3);
+    });
+});
+
+describe("aggregations-where-node-string interface relationships of concrete types", () => {
+    let testHelper: TestHelper;
+    let User: UniqueType;
+    let Post: UniqueType;
+    let Person: UniqueType;
+
+    beforeEach(async () => {
+        testHelper = new TestHelper();
+        User = testHelper.createUniqueType("User");
+        Post = testHelper.createUniqueType("Post");
+        Person = testHelper.createUniqueType("Person");
+
+        const typeDefs = /* GraphQL */ `
+            interface Human {
+                testString: String!
             }
 
-            expect(gqlResult.errors).toBeUndefined();
+            type ${User} implements Human @node {
+                testString: String!
+            }
 
-            expect((gqlResult.data as any).posts).toEqual([
-                {
-                    testString,
-                    likes: [{ testString }],
-                },
-            ]);
-        } finally {
-            await session.close();
-        }
+            type ${Person} implements Human @node {
+                testString: String!
+            }
+
+            type ${Post} @node {
+                testString: String!
+                likes: [Human!]! @relationship(type: "LIKES", direction: IN)
+            }
+        `;
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+    });
+
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     describe("SHORTEST", () => {
-        test("should return posts where the shortest like String is EQUAL to", async () => {
-            const session = await neo4j.getSession();
-
-            const typeDefs = `
-                type User {
-                    testString: String!
-                }
-
-                type Post {
-                  testString: String!
-                  likes: [User!]! @relationship(type: "LIKES", direction: IN)
-                }
-            `;
-
+        test("should return posts where the %s like String is EQUAL to", async () => {
             const testString = generate({
                 charset: "alphabetic",
                 readable: true,
@@ -402,20 +535,17 @@ describe("aggregations-where-node-string", () => {
                 length: 12,
             });
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-            try {
-                await session.run(
+            await testHelper.executeCypher(
+                `
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${shortestTestString}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${longestTestString}"})
                     `
-                        CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${shortestTestString}"})
-                        CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${testString2}"})
-                        CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${longestTestString}"})
-                    `
-                );
+            );
 
-                const query = `
+            const query = `
                     {
-                        posts(where: { testString: "${testString}", likesAggregate: { node: { testString_SHORTEST_EQUAL: ${shortestTestString.length} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_SHORTEST_LENGTH_EQUAL: ${shortestTestString.length} } } }) {
                             testString
                             likes {
                                 testString
@@ -424,45 +554,25 @@ describe("aggregations-where-node-string", () => {
                     }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-
-                expect((gqlResult.data as any).posts).toEqual([
-                    {
-                        testString,
-                        likes: [{ testString: shortestTestString }],
-                    },
-                ]);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+
+            expect((gqlResult.data as any)[Post.plural]).toIncludeSameMembers([
+                {
+                    testString,
+                    likes: [{ testString: shortestTestString }],
+                },
+            ]);
         });
     });
 
     describe("LONGEST", () => {
-        test("should return posts where the longest like String is EQUAL to", async () => {
-            const session = await neo4j.getSession();
-
-            const typeDefs = `
-                type User {
-                    testString: String!
-                }
-
-                type Post {
-                  testString: String!
-                  likes: [User!]! @relationship(type: "LIKES", direction: IN)
-                }
-            `;
-
+        test("should return posts where the %s like String is EQUAL to", async () => {
             const testString = generate({
                 charset: "alphabetic",
                 readable: true,
@@ -486,20 +596,17 @@ describe("aggregations-where-node-string", () => {
                 length: 12,
             });
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-            try {
-                await session.run(
+            await testHelper.executeCypher(
+                `
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${shortestTestString}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {testString: "${longestTestString}"})
                     `
-                        CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${shortestTestString}"})
-                        CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${testString2}"})
-                        CREATE (:Post {testString: "${testString}"})<-[:LIKES]-(:User {testString: "${longestTestString}"})
-                    `
-                );
+            );
 
-                const query = `
+            const query = `
                     {
-                        posts(where: { testString: "${testString}", likesAggregate: { node: { testString_LONGEST_EQUAL: ${longestTestString.length} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_LONGEST_LENGTH_EQUAL: ${longestTestString.length} } } }) {
                             testString
                             likes {
                                 testString
@@ -508,45 +615,25 @@ describe("aggregations-where-node-string", () => {
                     }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-
-                expect((gqlResult.data as any).posts).toEqual([
-                    {
-                        testString,
-                        likes: [{ testString: longestTestString }],
-                    },
-                ]);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+
+            expect((gqlResult.data as any)[Post.plural]).toIncludeSameMembers([
+                {
+                    testString,
+                    likes: [{ testString: longestTestString }],
+                },
+            ]);
         });
     });
 
     describe("AVERAGE", () => {
-        test("should return posts where the average of like Strings is EQUAL to", async () => {
-            const session = await neo4j.getSession();
-
-            const typeDefs = `
-                type User {
-                    testString: String!
-                }
-
-                type Post {
-                  testString: String!
-                  likes: [User!]! @relationship(type: "LIKES", direction: IN)
-                }
-            `;
-
+        test("should return posts where the AVERAGE of like Strings is EQUAL to", async () => {
             const testString = generate({
                 charset: "alphabetic",
                 readable: true,
@@ -573,22 +660,19 @@ describe("aggregations-where-node-string", () => {
 
             const avg = (10 + 11 + 12) / 3;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-            try {
-                await session.run(
+            await testHelper.executeCypher(
+                `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
                     `
-                        CREATE (p:Post {testString: "${testString}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString1}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString2}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString3}"})
-                        CREATE (:Post {testString: "${testString}"})
-                    `
-                );
+            );
 
-                const query = `
+            const query = `
                     {
-                        posts(where: { testString: "${testString}", likesAggregate: { node: { testString_AVERAGE_EQUAL: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_EQUAL: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -597,40 +681,20 @@ describe("aggregations-where-node-string", () => {
                     }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-
-                const [post] = (gqlResult.data as any).posts as any[];
-                expect(post.testString).toEqual(testString);
-                expect(post.likes).toHaveLength(3);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+
+            const [post] = (gqlResult.data as any)[Post.plural] as any[];
+            expect(post.testString).toEqual(testString);
+            expect(post.likes).toHaveLength(3);
         });
 
         test("should return posts where the average of like Strings is GT than", async () => {
-            const session = await neo4j.getSession();
-
-            const typeDefs = `
-                type User {
-                    testString: String!
-                }
-
-                type Post {
-                  testString: String!
-                  likes: [User!]! @relationship(type: "LIKES", direction: IN)
-                }
-            `;
-
             const testString = generate({
                 charset: "alphabetic",
                 readable: true,
@@ -658,22 +722,19 @@ describe("aggregations-where-node-string", () => {
             const avg = (10 + 11 + 12) / 3;
             const avgGT = avg - 1;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-            try {
-                await session.run(
+            await testHelper.executeCypher(
+                `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
                     `
-                        CREATE (p:Post {testString: "${testString}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString1}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString2}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString3}"})
-                        CREATE (:Post {testString: "${testString}"})
-                    `
-                );
+            );
 
-                const query = `
+            const query = `
                     {
-                        posts(where: { testString: "${testString}", likesAggregate: { node: { testString_AVERAGE_GT: ${avgGT} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_GT: ${avgGT} } } }) {
                             testString
                             likes {
                                 testString
@@ -682,40 +743,20 @@ describe("aggregations-where-node-string", () => {
                     }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-
-                const [post] = (gqlResult.data as any).posts as any[];
-                expect(post.testString).toEqual(testString);
-                expect(post.likes).toHaveLength(3);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+
+            const [post] = (gqlResult.data as any)[Post.plural] as any[];
+            expect(post.testString).toEqual(testString);
+            expect(post.likes).toHaveLength(3);
         });
 
         test("should return posts where the average of like Strings is GTE than", async () => {
-            const session = await neo4j.getSession();
-
-            const typeDefs = `
-                type User {
-                    testString: String!
-                }
-
-                type Post {
-                  testString: String!
-                  likes: [User!]! @relationship(type: "LIKES", direction: IN)
-                }
-            `;
-
             const testString = generate({
                 charset: "alphabetic",
                 readable: true,
@@ -742,22 +783,19 @@ describe("aggregations-where-node-string", () => {
 
             const avg = (10 + 11 + 12) / 3;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-            try {
-                await session.run(
+            await testHelper.executeCypher(
+                `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
                     `
-                        CREATE (p:Post {testString: "${testString}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString1}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString2}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString3}"})
-                        CREATE (:Post {testString: "${testString}"})
-                    `
-                );
+            );
 
-                const query = `
+            const query = `
                     {
-                        posts(where: { testString: "${testString}", likesAggregate: { node: { testString_AVERAGE_GTE: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_GTE: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -766,40 +804,20 @@ describe("aggregations-where-node-string", () => {
                     }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-
-                const [post] = (gqlResult.data as any).posts as any[];
-                expect(post.testString).toEqual(testString);
-                expect(post.likes).toHaveLength(3);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+
+            const [post] = (gqlResult.data as any)[Post.plural] as any[];
+            expect(post.testString).toEqual(testString);
+            expect(post.likes).toHaveLength(3);
         });
 
         test("should return posts where the average of like Strings is LT than", async () => {
-            const session = await neo4j.getSession();
-
-            const typeDefs = `
-                type User {
-                    testString: String!
-                }
-
-                type Post {
-                  testString: String!
-                  likes: [User!]! @relationship(type: "LIKES", direction: IN)
-                }
-            `;
-
             const testString = generate({
                 charset: "alphabetic",
                 readable: true,
@@ -827,22 +845,19 @@ describe("aggregations-where-node-string", () => {
             const avg = (10 + 11 + 12) / 3;
             const avgLT = avg + 1;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-            try {
-                await session.run(
+            await testHelper.executeCypher(
+                `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
                     `
-                        CREATE (p:Post {testString: "${testString}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString1}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString2}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString3}"})
-                        CREATE (:Post {testString: "${testString}"})
-                    `
-                );
+            );
 
-                const query = `
+            const query = `
                     {
-                        posts(where: { testString: "${testString}", likesAggregate: { node: { testString_AVERAGE_LT: ${avgLT} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_LT: ${avgLT} } } }) {
                             testString
                             likes {
                                 testString
@@ -851,40 +866,20 @@ describe("aggregations-where-node-string", () => {
                     }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-
-                const [post] = (gqlResult.data as any).posts as any[];
-                expect(post.testString).toEqual(testString);
-                expect(post.likes).toHaveLength(3);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+
+            const [post] = (gqlResult.data as any)[Post.plural] as any[];
+            expect(post.testString).toEqual(testString);
+            expect(post.likes).toHaveLength(3);
         });
 
         test("should return posts where the average of like Strings is LTE than", async () => {
-            const session = await neo4j.getSession();
-
-            const typeDefs = `
-                type User {
-                    testString: String!
-                }
-
-                type Post {
-                  testString: String!
-                  likes: [User!]! @relationship(type: "LIKES", direction: IN)
-                }
-            `;
-
             const testString = generate({
                 charset: "alphabetic",
                 readable: true,
@@ -911,22 +906,19 @@ describe("aggregations-where-node-string", () => {
 
             const avg = (10 + 11 + 12) / 3;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-            try {
-                await session.run(
+            await testHelper.executeCypher(
+                `
+                        CREATE (p:${Post} {testString: "${testString}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString1}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString2}"})
+                        CREATE (p)<-[:LIKES]-(:${User} {testString: "${testString3}"})
+                        CREATE (:${Post} {testString: "${testString}"})
                     `
-                        CREATE (p:Post {testString: "${testString}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString1}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString2}"})
-                        CREATE (p)<-[:LIKES]-(:User {testString: "${testString3}"})
-                        CREATE (:Post {testString: "${testString}"})
-                    `
-                );
+            );
 
-                const query = `
+            const query = `
                     {
-                        posts(where: { testString: "${testString}", likesAggregate: { node: { testString_AVERAGE_LTE: ${avg} } } }) {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_AVERAGE_LENGTH_LTE: ${avg} } } }) {
                             testString
                             likes {
                                 testString
@@ -935,24 +927,118 @@ describe("aggregations-where-node-string", () => {
                     }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
-
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-
-                const [post] = (gqlResult.data as any).posts as any[];
-                expect(post.testString).toEqual(testString);
-                expect(post.likes).toHaveLength(3);
-            } finally {
-                await session.close();
+            const gqlResult = await testHelper.executeGraphQL(query);
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+
+            const [post] = (gqlResult.data as any)[Post.plural] as any[];
+            expect(post.testString).toEqual(testString);
+            expect(post.likes).toHaveLength(3);
         });
+    });
+});
+
+describe("aggregations-where-node-string relationships of interface types", () => {
+    let testHelper: TestHelper;
+    let User: UniqueType;
+    let Post: UniqueType;
+    let Person: UniqueType;
+
+    beforeEach(() => {
+        testHelper = new TestHelper();
+        User = testHelper.createUniqueType("User");
+        Post = testHelper.createUniqueType("Post");
+        Person = testHelper.createUniqueType("Person");
+    });
+
+    afterEach(async () => {
+        await testHelper.close();
+    });
+
+    test("should return posts where the SHORTEST like String is EQUAL to", async () => {
+        const typeDefs = /* GraphQL */ `
+                    interface Thing {
+                        testString: String!
+                        likes: [Human!]! @declareRelationship
+                    }
+
+                    interface Human {
+                        testString: String!
+                    }
+
+                    type ${User} implements Human @node {
+                        testString: String! @alias(property: "user_testString")
+                    }
+
+                    type ${Person} implements Human @node {
+                        testString: String! @alias(property: "person_testString")
+                    }
+
+                    type ${Post} implements Thing @node {
+                        testString: String!
+                        likes: [Human!]! @relationship(type: "LIKES", direction: IN)
+                    }
+                `;
+
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+
+        const testString = generate({
+            charset: "alphabetic",
+            readable: true,
+        });
+
+        const shortestTestString = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 10,
+        });
+
+        const testString2 = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 11,
+        });
+
+        const longestTestString = generate({
+            charset: "alphabetic",
+            readable: true,
+            length: 12,
+        });
+
+        await testHelper.executeCypher(
+            `
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {user_testString: "${shortestTestString}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {user_testString: "${testString2}"})
+                        CREATE (:${Post} {testString: "${testString}"})<-[:LIKES]-(:${User} {user_testString: "${longestTestString}"})
+                    `
+        );
+
+        const query = `
+                    {
+                        ${Post.plural}(where: { testString_EQ: "${testString}", likesAggregate: { node: { testString_SHORTEST_LENGTH_EQUAL: ${shortestTestString.length} } } }) {
+                            testString
+                            likes {
+                                testString
+                            }
+                        }
+                    }
+                `;
+
+        const gqlResult = await testHelper.executeGraphQL(query);
+        if (gqlResult.errors) {
+            console.log(JSON.stringify(gqlResult.errors, null, 2));
+        }
+
+        expect(gqlResult.errors).toBeUndefined();
+
+        expect((gqlResult.data as any)[Post.plural]).toIncludeSameMembers([
+            {
+                testString,
+                likes: [{ testString: shortestTestString }],
+            },
+        ]);
     });
 });

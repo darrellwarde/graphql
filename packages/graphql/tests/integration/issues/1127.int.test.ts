@@ -17,53 +17,47 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1127", () => {
-    const customerType = generateUniqueType("Customer");
-    const addressType = generateUniqueType("Address");
-    const postalCodeType = generateUniqueType("PostalCode");
+    let customerType: UniqueType;
+    let addressType: UniqueType;
+    let postalCodeType: UniqueType;
 
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        customerType = testHelper.createUniqueType("Customer");
+        addressType = testHelper.createUniqueType("Address");
+        postalCodeType = testHelper.createUniqueType("PostalCode");
 
         const typeDefs = `
-            type ${customerType.name} {
-                uuid: ID! @id
+            type ${customerType.name} @node {
+                uuid: ID! @id @unique
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
                 address: ${addressType.name}! @relationship(type: "TEST_HAS_ADDRESS", direction: OUT)
             }
 
-            type ${addressType.name} {
-                uuid: ID! @id
+            type ${addressType.name} @node {
+                uuid: ID! @id @unique
                 createdAt: DateTime! @timestamp(operations: [CREATE])
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE])
 
                 postalCode: ${postalCodeType.name}! @relationship(type: "TEST_HAS_POSTAL_CODE", direction: OUT)
             }
 
-            type ${postalCodeType.name} {
+            type ${postalCodeType.name} @node {
                 number: String! @unique
             }
         `;
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should be able to connectOrCreate under nested create", async () => {
@@ -85,10 +79,7 @@ describe("https://github.com/neo4j/graphql/issues/1127", () => {
             }
         `;
 
-        const res = await graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues(),
+        const res = await testHelper.executeGraphQL(query, {
             variableValues: {
                 input: [
                     {
@@ -99,7 +90,7 @@ describe("https://github.com/neo4j/graphql/issues/1127", () => {
                                         connectOrCreate: {
                                             where: {
                                                 node: {
-                                                    number: "00001",
+                                                    number_EQ: "00001",
                                                 },
                                             },
                                             onCreate: {

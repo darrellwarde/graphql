@@ -17,51 +17,66 @@
  * limitations under the License.
  */
 
+import { asArray, type IResolvers } from "@graphql-tools/utils";
 import type {
     DefinitionNode,
     DocumentNode,
-    ObjectTypeDefinitionNode,
-    InputValueDefinitionNode,
+    EnumTypeDefinitionNode,
     FieldDefinitionNode,
-    TypeNode} from "graphql";
-import {
-    GraphQLSchema,
-    extendSchema,
-    validateSchema,
-    specifiedDirectives,
-    Kind,
+    GraphQLDirective,
+    GraphQLNamedType,
+    InputValueDefinitionNode,
+    InterfaceTypeDefinitionNode,
+    ObjectTypeDefinitionNode,
+    TypeNode,
+    UnionTypeDefinitionNode,
 } from "graphql";
+import { GraphQLSchema, Kind, extendSchema, specifiedDirectives, validateSchema } from "graphql";
+import { specifiedSDLRules } from "graphql/validation/specifiedRules";
 import pluralize from "pluralize";
-import * as scalars from "../../graphql/scalars";
 import * as directives from "../../graphql/directives";
-import { Point } from "../../graphql/objects/Point";
-import { CartesianPoint } from "../../graphql/objects/CartesianPoint";
-import { PointInput } from "../../graphql/input-objects/PointInput";
+import { typeDependantDirectivesScaffolds } from "../../graphql/directives/type-dependant-directives/scaffolds";
+import { SortDirection } from "../../graphql/enums/SortDirection";
+import { CartesianPointDistance } from "../../graphql/input-objects/CartesianPointDistance";
 import { CartesianPointInput } from "../../graphql/input-objects/CartesianPointInput";
 import { PointDistance } from "../../graphql/input-objects/PointDistance";
-import { CartesianPointDistance } from "../../graphql/input-objects/CartesianPointDistance";
-import { RESERVED_TYPE_NAMES } from "../../constants";
+import { PointInput } from "../../graphql/input-objects/PointInput";
+import { CartesianPoint } from "../../graphql/objects/CartesianPoint";
+import { Point } from "../../graphql/objects/Point";
+import * as scalars from "../../graphql/scalars";
+import type { Neo4jFeaturesSettings } from "../../types";
 import { isRootType } from "../../utils/is-root-type";
+import { DirectiveArgumentOfCorrectType } from "./custom-rules/directive-argument-of-correct-type";
+import { directiveIsValid } from "./custom-rules/directives/valid-directive";
+import { ValidDirectiveAtFieldLocation } from "./custom-rules/directives/valid-directive-field-location";
+import { ValidJwtDirectives } from "./custom-rules/features/valid-jwt-directives";
+import { ValidRelationshipDeclaration } from "./custom-rules/features/valid-relationship-declaration";
+import { ValidRelationshipProperties } from "./custom-rules/features/valid-relationship-properties";
+import { ValidRelayID } from "./custom-rules/features/valid-relay-id";
+import { ValidDirectiveInheritance } from "./custom-rules/valid-types/directive-multiple-inheritance";
+import { ReservedTypeNames } from "./custom-rules/valid-types/reserved-type-names";
+import {
+    DirectiveCombinationValid,
+    SchemaOrTypeDirectives,
+} from "./custom-rules/valid-types/valid-directive-combination";
+import { ValidFieldTypes } from "./custom-rules/valid-types/valid-field-types";
+import { ValidObjectType } from "./custom-rules/valid-types/valid-object-type";
+import { WarnIfAuthorizationFeatureDisabled } from "./custom-rules/warnings/authorization-feature-disabled";
+import { WarnUniqueDeprecation } from "./custom-rules/warnings/deprecated-unique";
+import { WarnIfAMaxLimitCanBeBypassedThroughInterface } from "./custom-rules/warnings/limit-max-can-be-bypassed";
+import { WarnIfListOfListsFieldDefinition } from "./custom-rules/warnings/list-of-lists";
+import { WarnObjectFieldsWithoutResolver } from "./custom-rules/warnings/object-fields-without-resolver";
+import { WarnIfQueryDirectionIsUsedWithDeprecatedValues } from "./custom-rules/warnings/query-direction-deprecated-values";
+import { WarnIfSingleRelationships } from "./custom-rules/warnings/single-relationship";
+import { WarnIfSubscriptionsAuthorizationMissing } from "./custom-rules/warnings/subscriptions-authorization-missing";
+import { WarnIfTypeIsNotMarkedAsNode } from "./custom-rules/warnings/warn-if-type-is-not-marked-as-node";
+import { validateSchemaCustomizations } from "./validate-schema-customizations";
+import { validateSDL } from "./validate-sdl";
 
-function filterDocument(document: DocumentNode): DocumentNode {
+function filterDocument(document: DocumentNode, filterDirectives: boolean = false): DocumentNode {
     const nodeNames = document.definitions
         .filter((definition) => {
-            if (
-                definition.kind === "ObjectTypeDefinition" ||
-                definition.kind === "ScalarTypeDefinition" ||
-                definition.kind === "InterfaceTypeDefinition" ||
-                definition.kind === "UnionTypeDefinition" ||
-                definition.kind === "EnumTypeDefinition" ||
-                definition.kind === "InputObjectTypeDefinition"
-            ) {
-                RESERVED_TYPE_NAMES.forEach((reservedName) => {
-                    if (reservedName.regex.test(definition.name.value)) {
-                        throw new Error(reservedName.error);
-                    }
-                });
-            }
-
-            if (definition.kind === "ObjectTypeDefinition") {
+            if (definition.kind === Kind.OBJECT_TYPE_DEFINITION) {
                 if (!isRootType(definition)) {
                     return true;
                 }
@@ -82,7 +97,9 @@ function filterDocument(document: DocumentNode): DocumentNode {
         return type.name.value;
     };
 
-    const filterInputTypes = (fields: readonly InputValueDefinitionNode[] | undefined) => {
+    const filterInputTypes = (
+        fields: readonly InputValueDefinitionNode[] | undefined
+    ): InputValueDefinitionNode[] | undefined => {
         return fields?.filter((f) => {
             const type = getArgumentType(f.type);
 
@@ -100,10 +117,10 @@ function filterDocument(document: DocumentNode): DocumentNode {
         });
     };
 
-    const filterFields = (fields: readonly FieldDefinitionNode[] | undefined) => {
+    const filterFields = (fields: readonly FieldDefinitionNode[] | undefined): FieldDefinitionNode[] | undefined => {
         return fields
-            ?.filter((f) => {
-                const type = getArgumentType(f.type);
+            ?.filter((field) => {
+                const type = getArgumentType(field.type);
                 const match = /(?:Create|Update)(?<nodeName>.+)MutationResponse/gm.exec(type);
                 if (match?.groups?.nodeName) {
                     if (nodeNames.map((nodeName) => pluralize(nodeName)).includes(match.groups.nodeName)) {
@@ -112,17 +129,26 @@ function filterDocument(document: DocumentNode): DocumentNode {
                 }
                 return true;
             })
-            .map((f) => ({
-                ...f,
-                arguments: filterInputTypes(f.arguments),
-                directives: f.directives?.filter((x) => !["auth"].includes(x.name.value)),
-            }));
+            .map((field) => {
+                return {
+                    ...field,
+                    arguments: filterInputTypes(field.arguments),
+                    directives: filterDirectives ? filterDirectiveNodes(field.directives) : field.directives,
+                };
+            });
     };
 
-    return {
+    // currentDirectiveDirective is of type ConstDirectiveNode, has to be any to support GraphQL 15
+    const filterDirectiveNodes = (directives: readonly any[] | undefined): any[] | undefined => {
+        return directives?.filter((directive) => {
+            return !["authentication", "authorization", "subscriptionsAuthorization"].includes(directive.name.value);
+        });
+    };
+
+    const filteredDocument: DocumentNode = {
         ...document,
         definitions: document.definitions.reduce((res: DefinitionNode[], def) => {
-            if (def.kind === "InputObjectTypeDefinition") {
+            if (def.kind === Kind.INPUT_OBJECT_TYPE_DEFINITION) {
                 const fields = filterInputTypes(def.fields);
 
                 if (!fields?.length) {
@@ -138,9 +164,12 @@ function filterDocument(document: DocumentNode): DocumentNode {
                 ];
             }
 
-            if (def.kind === "ObjectTypeDefinition" || def.kind === "InterfaceTypeDefinition") {
-                const fields = filterFields(def.fields);
+            if (def.kind === Kind.OBJECT_TYPE_DEFINITION || def.kind === Kind.INTERFACE_TYPE_DEFINITION) {
+                if (!def.fields?.length) {
+                    return [...res, def];
+                }
 
+                const fields = filterFields(def.fields);
                 if (!fields?.length) {
                     return res;
                 }
@@ -149,8 +178,8 @@ function filterDocument(document: DocumentNode): DocumentNode {
                     ...res,
                     {
                         ...def,
-                        directives: def.directives?.filter((x) => !["auth"].includes(x.name.value)),
                         fields,
+                        directives: filterDirectives ? filterDirectiveNodes(def.directives) : def.directives,
                     },
                 ];
             }
@@ -158,13 +187,92 @@ function filterDocument(document: DocumentNode): DocumentNode {
             return [...res, def];
         }, []),
     };
+
+    return filteredDocument;
 }
 
-function validateDocument(document: DocumentNode): void {
-    const doc = filterDocument(document);
+function runValidationRulesOnFilteredDocument({
+    schema,
+    document,
+    extra,
+    userCustomResolvers,
+    features,
+}: {
+    schema: GraphQLSchema;
+    document: DocumentNode;
+    extra: {
+        enums?: EnumTypeDefinitionNode[];
+        interfaces?: InterfaceTypeDefinitionNode[];
+        unions?: UnionTypeDefinitionNode[];
+        objects?: ObjectTypeDefinitionNode[];
+    };
+    userCustomResolvers?: IResolvers | Array<IResolvers>;
+    features: Neo4jFeaturesSettings | undefined;
+}) {
+    const errors = validateSDL(
+        document,
+        [
+            ...specifiedSDLRules,
+            directiveIsValid(extra, features?.populatedBy?.callbacks),
+            ValidDirectiveAtFieldLocation,
+            DirectiveCombinationValid,
+            SchemaOrTypeDirectives,
+            ValidJwtDirectives,
+            ValidRelayID,
+            ValidRelationshipProperties,
+            ValidRelationshipDeclaration,
+            ValidFieldTypes,
+            ReservedTypeNames,
+            ValidObjectType,
+            ValidDirectiveInheritance,
+            DirectiveArgumentOfCorrectType(false),
+            WarnIfAuthorizationFeatureDisabled(features?.authorization),
+            WarnIfListOfListsFieldDefinition,
+            WarnIfSingleRelationships,
+            WarnIfAMaxLimitCanBeBypassedThroughInterface(),
+            WarnObjectFieldsWithoutResolver({
+                customResolvers: asArray(userCustomResolvers ?? []),
+            }),
+            WarnIfSubscriptionsAuthorizationMissing(Boolean(features?.subscriptions)),
+            WarnIfTypeIsNotMarkedAsNode(),
+            WarnIfQueryDirectionIsUsedWithDeprecatedValues,
+            WarnUniqueDeprecation(),
+        ],
+        schema
+    );
+    const filteredErrors = errors.filter((e) => e.message !== "Query root type must be provided.");
+    if (filteredErrors.length) {
+        throw filteredErrors;
+    }
+}
 
+function validateDocument({
+    document,
+    features,
+    additionalDefinitions,
+    userCustomResolvers,
+}: {
+    document: DocumentNode;
+    features: Neo4jFeaturesSettings | undefined;
+    additionalDefinitions: {
+        additionalDirectives?: Array<GraphQLDirective>;
+        additionalTypes?: Array<GraphQLNamedType>;
+        enums?: EnumTypeDefinitionNode[];
+        interfaces?: InterfaceTypeDefinitionNode[];
+        unions?: UnionTypeDefinitionNode[];
+        objects?: ObjectTypeDefinitionNode[];
+    };
+    userCustomResolvers?: IResolvers | Array<IResolvers>;
+}): void {
+    const filteredDocument = filterDocument(document);
+    const { additionalDirectives, additionalTypes, ...extra } = additionalDefinitions;
     const schemaToExtend = new GraphQLSchema({
-        directives: [...Object.values(directives), ...specifiedDirectives],
+        directives: [
+            ...Object.values(directives),
+            ...typeDependantDirectivesScaffolds,
+            ...specifiedDirectives,
+            ...(additionalDirectives || []),
+        ],
         types: [
             ...Object.values(scalars),
             Point,
@@ -173,18 +281,30 @@ function validateDocument(document: DocumentNode): void {
             PointDistance,
             CartesianPointInput,
             CartesianPointDistance,
+            SortDirection,
+            ...(additionalTypes || []),
         ],
     });
 
-    const schema = extendSchema(schemaToExtend, doc);
+    runValidationRulesOnFilteredDocument({
+        schema: schemaToExtend,
+        document: filteredDocument,
+        extra,
+        userCustomResolvers,
+        features,
+    });
+
+    const schema = extendSchema(schemaToExtend, filteredDocument);
 
     const errors = validateSchema(schema);
-
     const filteredErrors = errors.filter((e) => e.message !== "Query root type must be provided.");
-
     if (filteredErrors.length) {
-        throw new Error(filteredErrors.join("\n"));
+        throw filteredErrors;
     }
+
+    // TODO: how to improve this??
+    // validates `@customResolver`, which needs to additionally have authorization directives filtered out for mergeSchemas not to error
+    validateSchemaCustomizations({ document, schema: extendSchema(schemaToExtend, filterDocument(document, true)) });
 }
 
 export default validateDocument;

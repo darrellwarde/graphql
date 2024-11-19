@@ -24,17 +24,9 @@ export const nodeDirective = new GraphQLDirective({
     description: "Informs @neo4j/graphql of node metadata",
     locations: [DirectiveLocation.OBJECT],
     args: {
-        label: {
-            description: "Map the GraphQL type to a custom Neo4j node label",
-            type: GraphQLString,
-        },
-        additionalLabels: {
-            description: "Map the GraphQL type to match additional Neo4j node labels",
+        labels: {
+            description: "The labels to map this GraphQL type to in the Neo4j database",
             type: new GraphQLList(new GraphQLNonNull(GraphQLString)),
-        },
-        plural: {
-            description: "Allows for the specification of the plural of the type name.",
-            type: GraphQLString,
         },
     },
 });

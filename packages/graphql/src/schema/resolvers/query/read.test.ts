@@ -17,21 +17,40 @@
  * limitations under the License.
  */
 
+import { SchemaComposer } from "graphql-compose";
+import { ConcreteEntity } from "../../../schema-model/entity/ConcreteEntity";
+import { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import { findResolver } from "./read";
-import { NodeBuilder } from "../../../../tests/utils/builders/node-builder";
 
 describe("Read resolver", () => {
     test("should return the correct; type, args and resolve", () => {
-        const node = new NodeBuilder({
+        const concreteEntity = new ConcreteEntity({
             name: "Movie",
-        }).instance();
+            labels: ["Movie"],
+            annotations: {},
+            attributes: [],
+            compositeEntities: [],
+            description: undefined,
+            relationships: [],
+        });
+        const concreteEntityAdapter = new ConcreteEntityAdapter(concreteEntity);
 
-        const result = findResolver({ node });
+        const result = findResolver({ entityAdapter: concreteEntityAdapter, composer: new SchemaComposer() });
         expect(result.type).toBe(`[Movie!]!`);
         expect(result.resolve).toBeInstanceOf(Function);
         expect(result.args).toMatchObject({
             where: `MovieWhere`,
-            options: `MovieOptions`,
+            options: {
+                directives: [
+                    {
+                        args: {
+                            reason: "Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.",
+                        },
+                        name: "deprecated",
+                    },
+                ],
+                type: "MovieOptions",
+            },
         });
     });
 });

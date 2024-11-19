@@ -17,139 +17,148 @@
  * limitations under the License.
  */
 
-import { Neo4jGraphQLAuthJWTPlugin } from "@neo4j/graphql-plugin-auth";
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { createJwtRequest } from "../../utils/create-jwt-request";
+import { createBearerToken } from "../../utils/create-bearer-token";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 // Reference: https://github.com/neo4j/graphql/pull/330
 // Reference: https://github.com/neo4j/graphql/pull/303#discussion_r671148932
 describe("unauthenticated-requests", () => {
     const secret = "secret";
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let User: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        User = testHelper.createUniqueType("User");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should throw Unauthenticated when trying to pluck undefined value with allow", async () => {
         const typeDefs = `
-            type User {
+            type ${User} @node {
                 id: ID
             }
 
-            extend type User @auth(rules: [{ allow: { id: "$jwt.sub" } }])
+            extend type ${User} @authorization(validate: [{ when: BEFORE, where: { node: { id_EQ: "$jwt.sub" } } }])
         `;
 
         const query = `
             {
-                users {
+                ${User.plural} {
                     id
                 }
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.executeCypher(`CREATE (:${User} { id: "ID" })`);
+
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            plugins: {
-                auth: new Neo4jGraphQLAuthJWTPlugin({
-                    secret: "secret",
-                }),
+            features: {
+                authorization: {
+                    key: "secret",
+                },
             },
         });
 
-        const req = createJwtRequest(secret);
+        const token = createBearerToken(secret);
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValues({ req }),
-        });
+        const gqlResult = await testHelper.executeGraphQLWithToken(query, token);
 
-        expect((gqlResult.errors as any[])[0].message).toBe("Unauthenticated");
+        expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
     });
 
     test("should throw Unauthenticated when trying to pluck undefined value with where", async () => {
         const typeDefs = `
-            type User {
+            type ${User} @node {
                 id: ID
             }
 
-            extend type User @auth(rules: [{ where: { id: "$jwt.sub" } }])
+            extend type ${User} @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
         `;
 
         const query = `
             {
-                users {
+                ${User.plural} {
                     id
                 }
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.executeCypher(`CREATE (:${User} { id: "ID" })`);
+
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            plugins: {
-                auth: new Neo4jGraphQLAuthJWTPlugin({
-                    secret: "secret",
-                }),
+            features: {
+                authorization: {
+                    key: "secret",
+                },
             },
         });
 
-        const req = createJwtRequest(secret);
+        const token = testHelper.createBearerToken(secret);
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValues({ req }),
+        const gqlResult = await testHelper.executeGraphQLWithToken(query, token);
+
+        expect(gqlResult.errors).toBeUndefined();
+        expect(gqlResult.data).toEqual({
+            [User.plural]: [],
         });
-
-        expect((gqlResult.errors as any[])[0].message).toBe("Unauthenticated");
     });
 
     test("should throw Unauthenticated when trying to pluck undefined value with bind", async () => {
         const typeDefs = `
-            type User {
+            type ${User} @node {
                 id: ID
             }
 
-            extend type User @auth(rules: [{ bind: { id: "$jwt.sub" } }])
+            extend type ${User} @authorization(validate: [{ when: AFTER, where: { node: { id_EQ: "$jwt.sub" } } }])
         `;
 
         const query = `
             mutation {
-                createUsers(input: [{ id: "some-id" }]) {
-                    users {
+                ${User.operations.create}(input: [{ id: "some-id" }]) {
+                    ${User.plural} {
                         id
                     }
                 }
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            plugins: {
-                auth: new Neo4jGraphQLAuthJWTPlugin({
-                    secret: "secret",
-                }),
+            features: {
+                authorization: {
+                    key: "secret",
+                },
             },
         });
 
-        const req = createJwtRequest(secret);
+        const token = testHelper.createBearerToken(secret);
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValues({ req }),
+        const gqlResult = await testHelper.executeGraphQLWithToken(query, token);
+
+        expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
+    });
+
+    // If the below test starts failing, we will need to change the default value that we use for non-existent JWT claims
+    test("maps are not supported in the database and can be used as JWT default value", async () => {
+        const typeDefs = `
+            type ${User} @node {
+                id: ID
+            }
+        `;
+
+        // This is not really used, only needed to execute runCypher afterwards
+        await testHelper.initNeo4jGraphQL({
+            typeDefs,
         });
 
-        expect((gqlResult.errors as any[])[0].message).toBe("Unauthenticated");
+        await expect(() => testHelper.executeCypher(`CREATE (:${User} { shouldFail: {} })`)).rejects.toThrow(
+            "Property values can only be of primitive types or arrays thereof. Encountered: Map{}."
+        );
     });
 });

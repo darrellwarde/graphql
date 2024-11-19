@@ -36,11 +36,21 @@ export const GraphQLDateTime = new GraphQLScalarType({
         throw new GraphQLError(`DateTime cannot represent value: ${outputValue}`);
     },
     parseValue: (inputValue: unknown) => {
-        if (typeof inputValue !== "string") {
-            throw new GraphQLError(`DateTime cannot represent non string value: ${inputValue}`);
+        if (typeof inputValue === "string") {
+            const date = new Date(inputValue);
+
+            if (date.toString() === "Invalid Date") {
+                throw new GraphQLError(`DateTime cannot represent non temporal value: ${inputValue}`);
+            }
+
+            return neo4j.types.DateTime.fromStandardDate(date);
         }
 
-        return neo4j.types.DateTime.fromStandardDate(new Date(inputValue));
+        if (isDateTime(inputValue)) {
+            return inputValue;
+        }
+
+        throw new GraphQLError(`DateTime cannot represent non string value: ${inputValue}`);
     },
     parseLiteral(ast: ValueNode) {
         if (ast.kind !== Kind.STRING) {

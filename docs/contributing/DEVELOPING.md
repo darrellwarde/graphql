@@ -56,12 +56,29 @@ yarn install
 [Visual Studio Code](https://code.visualstudio.com/) comes highly recommended
 for working in this repository, and we additionally recommend the following extensions:
 
--   [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
--   [Jest](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest)
--   [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+* [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+* [Jest](https://marketplace.visualstudio.com/items?itemName=Orta.vscode-jest)
+* [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
 The Jest extension should automatically detect the tests for this repository and
 watch them in the Status Bar.
+
+## Using local Cypher-Builder
+
+In some cases, it may be worth testing `@neo4j/graphql` with a local version of `@neo4j/cypher-builder`, to do this, you'll need a version of the Cypher Builder repository cloned locally.
+
+In the Cypher Builder folder run:
+
+* `yarn link`
+* `yarn build` - This step needs to be done each time a change is done in the Cypher Builder
+
+In the root of the `neo4j/graphql` monorepo run:
+
+* `yarn link -p [path-to-local-cypher-builder]
+
+To unlink, in the graphql project:
+
+* `yarn unlink @neo4j/cypher-builder`
 
 ## Testing
 
@@ -73,22 +90,12 @@ easily get up and running with a local Neo4j instance.
 
 1. Create and start a new DBMS with a database named neo4j (default).
 2. Install APOC plugin for that DB.
-3. Create appropriate user by running the following command in the DB:
+3. Run tests with `yarn test`.
 
-    ```cypher
-    CREATE USER admin
-    SET PASSWORD "password"
-    SET PASSWORD CHANGE NOT REQUIRED
-    SET STATUS ACTIVE
-    ```
+**This might cause you errors with running the tests!**
 
-4. Grant roles to admin user:
-
-    ```cypher
-    GRANT ROLE admin to admin
-    ```
-
-5. Run tests with `yarn test`.
+We used to require an `admin` user to be created and further assigned permissions.
+We have since settled for the default `neo4j` user, which already has the required permissions.
 
 Tests are run using Jest, which has been configured to allow for execution of
 test suites at any level in the project.
@@ -97,10 +104,10 @@ You can execute tests with a different database, user and password with the
 following command:
 
 ```bash
-NEO_URL=neo4j://localhost:7687 NEO_USER=admin NEO_PASSWORD=password yarn test
+NEO_URL=neo4j://localhost:7687 NEO_USER=neo4j NEO_PASSWORD=password yarn test
 ```
 
-The above command can additionally be run from `packages/graphql`, `packages/ogm`,
+The above command can additionally be run from `packages/graphql`,
 or any directory where there is a `jest.config.js` file!
 
 Alternatively, you can put these environment variables in a `.env` file in the
@@ -108,11 +115,11 @@ root of the repo which will automatically get picked up:
 
 ```env
 NEO_URL=neo4j://localhost:7687
-NEO_USER=admin
+NEO_USER=neo4j
 NEO_PASSWORD=password
 ```
 
-The above command can additionally be run from `packages/graphql`, `packages/ogm`,
+The above command can additionally be run from `packages/graphql`,
 or any directory where there is a `jest.config.js` file!
 
 Additionally, for projects which have the appropriate Yarn scripts setup, you can
@@ -123,6 +130,14 @@ run the following from `packages/graphql`:
 yarn test:tck
 ```
 
+### Verify TCK Tests
+
+You can run all the TCK tests against the database to check that the Cypher generated is valid. This can be done with the env variable `VERIFY_TCK`
+
+```bash
+VERIFY_TCK yarn test:tck
+```
+
 ### Testing using docker
 
 ```bash
@@ -131,10 +146,16 @@ npm run test-docker
 
 ### Performance
 
-`packages/graphql` has a performance benchmark built in. To run it:
+`packages/graphql` has several performance benchmarks built in. To run the benchmarks:
 
 1. Go to `packages/graphql`
-2. Run `yarn performance`
+2. Run `yarn performance` (by default, Database Query Performance test will be run)
+
+#### Database Query Performance
+
+The Database query benchmarks will translate several GraphQL queries and run the generated Cypher against a test dataset in Neo4j, measuring time and dbHits.
+
+These will be run by default when executing `yarn performance`.
 
 All `.graphql` files in `tests/performance/graphql` are part of the performance suite. To skip or run a test, append `_skip` or `_only` to the query, e.g.:
 
@@ -154,11 +175,48 @@ query SimpleUnionQuery_only {
 }
 ```
 
-To update the file `performance.json`, with the results of the performance test, run `yarn performance -u`
+**Saving metrics**
+With the option `-u` a file `performance.json` will be generated, that can be used to compare metrics between runs. This is only available for database query benchmark.
 
-## Running with Cypher
+**Running Cypher queries**
 
-The performance tests can also run raw Cypher, to enable it, run `yarn performance --cypher`. Cypher queries must be located at `tests/performance/cypher`
+The performance tests can also run raw Cypher, to enable it, run `yarn performance --cypher`. Cypher queries must be located at `tests/performance/databaseQuery/cypher`. This allows for comparison between GraphQL and an alternative Cypher query.
+
+**Generating markdown**
+
+With the option `--markdown` the output will be formatted in markdown instead of the CLI. This is only available for database query benchmark.
+
+#### Schema Generation
+
+This benchmark runs the schema generation for a large GraphQL Schema and outputs the time that took to generate it. No database needed.
+
+To execute this, run `yarn performance --schema`.
+
+**Subgraph Schema**
+Alternatively, the schema can be run ready for subgraph by executing `yarn performance --subgraph-schema`.
+
+#### Translation
+
+This benchmark will measure the time it takes to translate a certain GraphQL query (without hitting the database). All of the queries in the `graphql` folder will be used, along with the queries located in `translation/graphql` `_skip` and `_only` can be used to limit how many queries are run.
+
+This can be run with `yarn performance --translation`.
+
+Note that the output will be rounded to milliseconds.
+
+**Change test runs**
+By default, each query will be translated 100 times, and the total time will be shown.
+
+With the option `--runs` you can change how many runs to do per query (e.g. `yarn performance --translation --runs 1000`).
+
+With the flag `--single` each query translation will only run once. Note that this option makes the tests faster and logging easier but will yield less accurate results.
+
+**Make runs asynchronous**
+With the flag `--async`, all the runs for each test will be done asynchronously, this makes the tests slightly faster, and it may yield a more accurate depiction of a real server, but makes it harder to get reliable results and debugging.
+
+**Increase Schema Size**
+The option `--schemaSize` allows to artificially increase the schema size x times.
+
+For instance `--schemaSize 500` will generate a schema roughly 500x. This is done by appending a test default schema to the base schema
 
 ## Linting/formatting
 
@@ -170,8 +228,8 @@ adhere to our linting and formatting rules.
 For the sake of completeness, add an entry for the new project into the following
 files in the root of the repository:
 
--   `tsconfig.json` (`references` entry)
--   `jest.config.base.js` (`moduleNameMapper` entry)
+* `tsconfig.json` (`references` entry)
+* `jest.config.base.js` (`moduleNameMapper` entry)
 
 ### Dependencies within the monorepo
 
@@ -210,10 +268,10 @@ like:
 
 The real key entries here are:
 
--   `baseUrl` - for all of the relative references in this file, this will tell
+* `baseUrl` - for all of the relative references in this file, this will tell
     `tsc` where to start from
--   `paths` - this will translate `import` statements in code to the relative dependency
--   `references` - gives TypeScript "permission" to accesss the projects at these paths
+* `paths` - this will translate `import` statements in code to the relative dependency
+* `references` - gives TypeScript "permission" to accesss the projects at these paths
 
 Finally, it is highly likely that Jest will also need access to this internal
 dependency, so `packages/project/jest.config.js` will need to look like:

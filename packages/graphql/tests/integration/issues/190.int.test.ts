@@ -17,77 +17,57 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { DocumentNode } from "graphql";
+import { gql } from "graphql-tag";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/190", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let bookmarks: string[];
-    const typeDefs = gql`
-        type User {
+    let User: UniqueType;
+    let UserDemographics: UniqueType;
+    let typeDefs: DocumentNode;
+
+    const testHelper = new TestHelper();
+
+    beforeAll(async () => {
+        User = testHelper.createUniqueType("User");
+        UserDemographics = testHelper.createUniqueType("UserDemographics");
+
+        typeDefs = gql`
+        type ${User} @node {
             client_id: String
             uid: String
-            demographics: [UserDemographics!]! @relationship(type: "HAS_DEMOGRAPHIC", direction: OUT)
+            demographics: [${UserDemographics}!]! @relationship(type: "HAS_DEMOGRAPHIC", direction: OUT)
         }
 
-        type UserDemographics {
+        type ${UserDemographics} @node {
             client_id: String
             type: String
             value: String
-            users: [User!]! @relationship(type: "HAS_DEMOGRAPHIC", direction: IN)
+            users: [${User}!]! @relationship(type: "HAS_DEMOGRAPHIC", direction: IN)
         }
     `;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-        const session = await neo4j.getSession();
-
-        try {
-            await session.run(
-                `
-                    CREATE (user1:User {uid: 'user1'}),(user2:User {uid: 'user2'}),(female:UserDemographics{type:'Gender',value:'Female'}),(male:UserDemographics{type:'Gender',value:'Male'}),(age:UserDemographics{type:'Age',value:'50+'}),(state:UserDemographics{type:'State',value:'VIC'})
+        await testHelper.executeCypher(`
+                    CREATE (user1:${User} {uid: 'user1'}),(user2:${User} {uid: 'user2'}),(female:${UserDemographics}{type:'Gender',value:'Female'}),(male:${UserDemographics}{type:'Gender',value:'Male'}),(age:${UserDemographics}{type:'Age',value:'50+'}),(state:${UserDemographics}{type:'State',value:'VIC'})
                     CREATE (user1)-[:HAS_DEMOGRAPHIC]->(female)
                     CREATE (user2)-[:HAS_DEMOGRAPHIC]->(male)
                     CREATE (user1)-[:HAS_DEMOGRAPHIC]->(age)
                     CREATE (user2)-[:HAS_DEMOGRAPHIC]->(age)
                     CREATE (user1)-[:HAS_DEMOGRAPHIC]->(state)
                     CREATE (user2)-[:HAS_DEMOGRAPHIC]->(state)
-                `
-            );
-            bookmarks = session.lastBookmark();
-        } finally {
-            await session.close();
-        }
+                `);
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        const session = await neo4j.getSession();
-
-        try {
-            await session.run("MATCH (u:User) WHERE (u.uid = 'user1' OR u.uid = 'user2') DETACH DELETE u");
-            await session.run(
-                "MATCH (ud:UserDemographics) WHERE ((ud.type = 'Gender' AND ud.value = 'Female') OR (ud.type = 'Gender' AND ud.value = 'Male') OR (ud.type = 'Age' AND ud.value = '50+') OR (ud.type = 'State' AND ud.value = 'VIC')) DELETE ud"
-            );
-        } finally {
-            await session.close();
-        }
-
-        await driver.close();
+        await testHelper.close();
     });
 
     test("Example 1", async () => {
-        const session = await neo4j.getSession();
-
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
-
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                users(where: { demographics: { type: "Gender", value: "Female" } }) {
+                ${User.plural}(where: { demographics_SOME: { type_EQ: "Gender", value_EQ: "Female" } }) {
                     uid
                     demographics {
                         type
@@ -97,45 +77,31 @@ describe("https://github.com/neo4j/graphql/issues/190", () => {
             }
         `;
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        const result = await testHelper.executeGraphQL(query);
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(bookmarks),
-            });
-
-            expect(result.errors).toBeFalsy();
-            expect((result?.data as any)?.users[0].uid).toBe("user1");
-            expect((result?.data as any)?.users[0].demographics).toHaveLength(3);
-            expect((result?.data as any)?.users[0].demographics).toContainEqual({
-                type: "Age",
-                value: "50+",
-            });
-            expect((result?.data as any)?.users[0].demographics).toContainEqual({
-                type: "Gender",
-                value: "Female",
-            });
-            expect((result?.data as any)?.users[0].demographics).toContainEqual({
-                type: "State",
-                value: "VIC",
-            });
-        } finally {
-            await session.close();
-        }
+        expect(result.errors).toBeFalsy();
+        expect((result?.data as any)?.[User.plural][0].uid).toBe("user1");
+        expect((result?.data as any)?.[User.plural][0].demographics).toHaveLength(3);
+        expect((result?.data as any)?.[User.plural][0].demographics).toContainEqual({
+            type: "Age",
+            value: "50+",
+        });
+        expect((result?.data as any)?.[User.plural][0].demographics).toContainEqual({
+            type: "Gender",
+            value: "Female",
+        });
+        expect((result?.data as any)?.[User.plural][0].demographics).toContainEqual({
+            type: "State",
+            value: "VIC",
+        });
     });
 
     test("Example 2", async () => {
-        const session = await neo4j.getSession();
-
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
-
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                users(
+                ${User.plural}(
                     where: {
-                        demographics: { OR: [{ type: "Gender", value: "Female" }, { type: "State" }, { type: "Age" }] }
+                        demographics_SOME: { OR: [{ type_EQ: "Gender", value_EQ: "Female" }, { type_EQ: "State" }, { type_EQ: "Age" }] }
                     }
                 ) {
                     uid
@@ -147,48 +113,38 @@ describe("https://github.com/neo4j/graphql/issues/190", () => {
             }
         `;
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        const result = await testHelper.executeGraphQL(query);
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(bookmarks),
-            });
+        expect(result.errors).toBeFalsy();
 
-            expect(result.errors).toBeFalsy();
+        expect((result?.data as any)?.[User.plural]).toHaveLength(2);
 
-            expect(result?.data?.users).toHaveLength(2);
+        expect((result?.data as any)?.[User.plural].filter((u) => u.uid === "user1")[0].demographics).toHaveLength(3);
+        expect((result?.data as any)?.[User.plural].filter((u) => u.uid === "user1")[0].demographics).toContainEqual({
+            type: "Gender",
+            value: "Female",
+        });
+        expect((result?.data as any)?.[User.plural].filter((u) => u.uid === "user1")[0].demographics).toContainEqual({
+            type: "State",
+            value: "VIC",
+        });
+        expect((result?.data as any)?.[User.plural].filter((u) => u.uid === "user1")[0].demographics).toContainEqual({
+            type: "Age",
+            value: "50+",
+        });
 
-            expect((result?.data as any)?.users.filter((u) => u.uid === "user1")[0].demographics).toHaveLength(3);
-            expect((result?.data as any)?.users.filter((u) => u.uid === "user1")[0].demographics).toContainEqual({
-                type: "Gender",
-                value: "Female",
-            });
-            expect((result?.data as any)?.users.filter((u) => u.uid === "user1")[0].demographics).toContainEqual({
-                type: "State",
-                value: "VIC",
-            });
-            expect((result?.data as any)?.users.filter((u) => u.uid === "user1")[0].demographics).toContainEqual({
-                type: "Age",
-                value: "50+",
-            });
-
-            expect((result?.data as any)?.users.filter((u) => u.uid === "user2")[0].demographics).toHaveLength(3);
-            expect((result?.data as any)?.users.filter((u) => u.uid === "user2")[0].demographics).toContainEqual({
-                type: "Gender",
-                value: "Male",
-            });
-            expect((result?.data as any)?.users.filter((u) => u.uid === "user2")[0].demographics).toContainEqual({
-                type: "State",
-                value: "VIC",
-            });
-            expect((result?.data as any)?.users.filter((u) => u.uid === "user2")[0].demographics).toContainEqual({
-                type: "Age",
-                value: "50+",
-            });
-        } finally {
-            await session.close();
-        }
+        expect((result?.data as any)?.[User.plural].filter((u) => u.uid === "user2")[0].demographics).toHaveLength(3);
+        expect((result?.data as any)?.[User.plural].filter((u) => u.uid === "user2")[0].demographics).toContainEqual({
+            type: "Gender",
+            value: "Male",
+        });
+        expect((result?.data as any)?.[User.plural].filter((u) => u.uid === "user2")[0].demographics).toContainEqual({
+            type: "State",
+            value: "VIC",
+        });
+        expect((result?.data as any)?.[User.plural].filter((u) => u.uid === "user2")[0].demographics).toContainEqual({
+            type: "Age",
+            value: "50+",
+        });
     });
 });

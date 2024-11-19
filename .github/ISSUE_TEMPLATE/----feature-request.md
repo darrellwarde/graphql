@@ -2,7 +2,7 @@
 name: "\U0001F680  Feature request"
 about: Request a new feature for this project
 title: ''
-labels: feature request
+labels: enhancement
 assignees: ''
 
 ---

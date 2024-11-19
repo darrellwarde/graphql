@@ -17,76 +17,59 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/526 - Int Argument on Custom Query Converted to Float", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let bookmarks: string[];
-    const typeDefs = gql`
-        type Movie {
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let Tag: UniqueType;
+    let typeDefs: string;
+
+    beforeAll(async () => {
+        Movie = testHelper.createUniqueType("Movie");
+        Tag = testHelper.createUniqueType("Tag");
+
+        typeDefs = `
+        type ${Movie} @node {
             title: String
-            tags: [Tag!]! @relationship(type: "HAS", direction: OUT)
+            tags: [${Tag}!]! @relationship(type: "HAS", direction: OUT)
         }
 
-        type Tag {
+        type ${Tag} @node {
             name: String!
-            papers: [Movie!]! @relationship(type: "HAS", direction: IN)
+            papers: [${Movie}!]! @relationship(type: "HAS", direction: IN)
         }
 
         type Query {
-            movie_tags(tagName: String = "", limit: Int): [Movie]
+            movie_tags(tagName: String = "", limit: Int): [${Movie}]
                 @cypher(
                     statement: """
-                    MATCH (tag:Tag)<-[:HAS]-(movie:Movie)
+                    MATCH (tag:${Tag})<-[:HAS]-(movie:${Movie})
                     WHERE tag.name = $tagName
                     RETURN movie
                     LIMIT $limit
                     """
+                    columnName: "movie"
                 )
         }
     `;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-        const session = await neo4j.getSession();
-
-        try {
-            await session.run(
-                `
-                    CREATE (m1:Movie {title: "M1"}), (m2:Movie {title: "M2"}), (t1:Tag {name: "T1"}), (t2:Tag {name: "T2"})
+        await testHelper.executeCypher(
+            `
+                    CREATE (m1:${Movie} {title: "M1"}), (m2:${Movie} {title: "M2"}), (t1:${Tag} {name: "T1"}), (t2:${Tag} {name: "T2"})
                     CREATE (m1)-[:HAS]->(t1)<-[:HAS]-(m2)
                     CREATE (m1)-[:HAS]->(t2)
                 `
-            );
-            bookmarks = session.lastBookmark();
-        } finally {
-            await session.close();
-        }
+        );
     });
 
     afterAll(async () => {
-        const session = await neo4j.getSession();
-
-        try {
-            await session.run(`MATCH (m:Movie) WHERE m.title IN ["M1", "M2"] DETACH DELETE m`);
-            await session.run(`MATCH (t:Tag) WHERE t.name IN ["T1", "T2"] DETACH DELETE t`);
-        } finally {
-            await session.close();
-        }
-
-        await driver.close();
+        await testHelper.close();
     });
 
     test("Query with a limit", async () => {
-        const session = await neo4j.getSession();
-
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             {
@@ -101,19 +84,15 @@ describe("https://github.com/neo4j/graphql/issues/526 - Int Argument on Custom Q
 
         await neoSchema.checkNeo4jCompat();
 
-        const result = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(bookmarks),
-        });
+        const result = await testHelper.executeGraphQL(query);
 
         expect(result.errors).toBeFalsy();
 
         expect(result.data as any).toEqual({
-            movie_tags: expect.arrayContaining([
+            movie_tags: expect.toIncludeSameMembers([
                 expect.objectContaining({
                     title: "M1",
-                    tags: expect.arrayContaining([{ name: "T1" }, { name: "T2" }]),
+                    tags: expect.toIncludeSameMembers([{ name: "T1" }, { name: "T2" }]),
                 }),
                 expect.objectContaining({
                     title: "M2",
@@ -121,6 +100,5 @@ describe("https://github.com/neo4j/graphql/issues/526 - Int Argument on Custom Q
                 }),
             ]),
         });
-        await session.close();
     });
 });

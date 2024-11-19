@@ -1,11 +1,4 @@
 {
     "files": [],
-    "references": [
-        { "path": "./packages/graphql/tsconfig.json" },
-        { "path": "./packages/ogm/tsconfig.json" },
-        { "path": "./packages/introspector/tsconfig.json" },
-        { "path": "./packages/plugins/graphql-plugin-auth/tsconfig.json" },
-        { "path": "./examples/neo-push/client/src/tsconfig.json" },
-        { "path": "./examples/neo-push/server/src/tsconfig.json" }
-    ]
+    "references": [{ "path": "./packages/graphql/tsconfig.json" }, { "path": "./packages/introspector/tsconfig.json" }]
 }

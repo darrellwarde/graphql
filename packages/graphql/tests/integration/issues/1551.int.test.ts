@@ -17,34 +17,20 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql, GraphQLError } from "graphql";
-import type { Driver } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { GraphQLError } from "graphql";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1551", () => {
-    const testType = generateUniqueType("AttribValue");
+    let testType: UniqueType;
 
-    let schema: GraphQLSchema;
-    let neo4j: Neo4j;
-    let driver: Driver;
-
-    async function graphqlQuery(query: string) {
-        return graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
-    }
+    const testHelper = new TestHelper();
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        testType = testHelper.createUniqueType("AttribValue");
 
         const typeDefs = `
-            type ${testType} {
+            type ${testType} @node {
                 prodid: Int!
                 attribid: Int!
                 level: Int!
@@ -53,12 +39,11 @@ describe("https://github.com/neo4j/graphql/issues/1551", () => {
             }
         `;
 
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should throw an error when trying to set non-nullable field to null", async () => {
@@ -66,7 +51,6 @@ describe("https://github.com/neo4j/graphql/issues/1551", () => {
             mutation {
                 ${testType.operations.create}(input: [{ prodid: 1, attribid: 2, level: 1, ord: 1 }]) {
                     info {
-                        bookmark
                         nodesCreated
                         relationshipsCreated
                     }
@@ -81,11 +65,11 @@ describe("https://github.com/neo4j/graphql/issues/1551", () => {
             }
         `;
 
-        await graphqlQuery(createMutation);
+        await testHelper.executeGraphQL(createMutation);
 
         const updateMutation = `
             mutation {
-                ${testType.operations.update}(where: { prodid: 1, attribid: 2 }, update: { level: null }) {
+                ${testType.operations.update}(where: { prodid_EQ: 1, attribid_EQ: 2 }, update: { level_SET: null }) {
                     ${testType.plural} {
                         prodid
                         attribid
@@ -96,7 +80,7 @@ describe("https://github.com/neo4j/graphql/issues/1551", () => {
             }
         `;
 
-        const updateResult = await graphqlQuery(updateMutation);
+        const updateResult = await testHelper.executeGraphQL(updateMutation);
         expect(updateResult.errors).toEqual([
             new GraphQLError(`Cannot set non-nullable field ${testType.name}.level to null`),
         ]);

@@ -18,17 +18,21 @@
  */
 
 import { on } from "events";
+import type { GraphQLResolveInfo } from "graphql";
 import { Neo4jGraphQLError } from "../../../classes";
-import type Node from "../../../classes/Node";
-import type { SubscriptionsEvent } from "../../../types";
+import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import type { NodeSubscriptionsEvent, SubscriptionsEvent } from "../../../types";
+import type { Neo4jGraphQLComposedSubscriptionsContext } from "../composition/wrap-subscription";
+import { checkAuthentication } from "./authentication/check-authentication";
+import { checkAuthenticationOnSelectionSet } from "./authentication/check-authentication-selection-set";
 import { filterAsyncIterator } from "./filter-async-iterator";
-import { SubscriptionAuth } from "./subscription-auth";
-import type { SubscriptionContext } from "./types";
+import type { SubscriptionEventType } from "./types";
 import { updateDiffFilter } from "./update-diff-filter";
-import { subscriptionWhere } from "./where";
+import { subscriptionAuthorization } from "./where/authorization";
+import { subscriptionWhere } from "./where/where";
 
-export function subscriptionResolve(payload: [SubscriptionsEvent]): SubscriptionsEvent {
-    if (!payload) {
+export function subscriptionResolve(payload: SubscriptionsEvent[]): SubscriptionsEvent {
+    if (payload === undefined || payload[0] === undefined) {
         throw new Neo4jGraphQLError("Payload is undefined. Can't call subscriptions resolver directly.");
     }
     return payload[0];
@@ -38,26 +42,47 @@ type SubscriptionArgs = {
     where?: Record<string, any>;
 };
 
-export function generateSubscribeMethod(node: Node, type: "create" | "update" | "delete") {
-    return (_root: any, args: SubscriptionArgs, context: SubscriptionContext): AsyncIterator<[SubscriptionsEvent]> => {
-        if (node.auth) {
-            const authRules = node.auth.getRules(["SUBSCRIBE"]);
-            for (const rule of authRules) {
-                if (!SubscriptionAuth.validateAuthenticationRule(rule, context)) {
-                    throw new Error("Error, request not authenticated");
+function isNodeSubscriptionEvent(event: SubscriptionsEvent | undefined): event is NodeSubscriptionsEvent {
+    if (event === undefined) {
+        return false;
+    }
+
+    return "typename" in event;
+}
+
+export function generateSubscribeMethod({
+    entityAdapter,
+    type,
+}: {
+    entityAdapter: ConcreteEntityAdapter;
+    type: SubscriptionEventType;
+}) {
+    return (
+        _root: any,
+        args: SubscriptionArgs,
+        context: Neo4jGraphQLComposedSubscriptionsContext,
+        resolveInfo: GraphQLResolveInfo
+    ): AsyncIterator<SubscriptionsEvent[]> => {
+        checkAuthenticationOnSelectionSet(resolveInfo, entityAdapter, type, context);
+
+        checkAuthentication({ authenticated: entityAdapter, operation: "SUBSCRIBE", context });
+
+        const iterable: AsyncIterableIterator<SubscriptionsEvent[]> = on(context.subscriptionsEngine.events, type);
+        if (["create", "update", "delete"].includes(type)) {
+            return filterAsyncIterator<SubscriptionsEvent[]>(iterable, (data) => {
+                if (!isNodeSubscriptionEvent(data[0])) {
+                    return false;
                 }
-                if (!SubscriptionAuth.validateRolesRule(rule, context)) {
-                    throw new Error("Error, request not authorized");
-                }
-            }
+
+                return (
+                    data[0].typename === entityAdapter.name &&
+                    subscriptionAuthorization({ event: data[0], entity: entityAdapter, context }) &&
+                    subscriptionWhere({ where: args.where, event: data[0], entityAdapter }) &&
+                    updateDiffFilter(data[0])
+                );
+            });
         }
 
-        const iterable: AsyncIterableIterator<[SubscriptionsEvent]> = on(context.plugin.events, type);
-
-        return filterAsyncIterator<[SubscriptionsEvent]>(iterable, (data) => {
-            return (
-                data[0].typename === node.name && subscriptionWhere(args.where, data[0]) && updateDiffFilter(data[0])
-            );
-        });
+        throw new Neo4jGraphQLError(`Invalid type in subscription: ${type}`);
     };
 }

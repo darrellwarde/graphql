@@ -1,10 +1,16 @@
 name: "Pull Request"
 
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     branches:
       - dev
-      - master
+      - lts
+      - "*.*.*"
+      - "*.x"
     paths-ignore:
       - "docs/**"
 
@@ -13,23 +19,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
-          node-version: lts/*
+          node-version: 18.13.0
           cache: yarn
       - name: Install dependencies
         run: yarn --immutable
-      - uses: reviewdog/action-eslint@d3395027ea2cfc5cf8f460b1ea939b6c86fea656 # renovate: tag=v1.17.0
+      - uses: reviewdog/action-eslint@9a6606695f1ef9709cce821919ca3b2a6d5e6bb5 # v1.32.0
         with:
           fail_on_error: true
           eslint_flags: "."
+          node_options: "--max_old_space_size=4096"
+
+  code-scanning:
+    uses: ./.github/workflows/reusable-codeql-analysis.yml
 
   package-tests:
     uses: ./.github/workflows/reusable-package-tests.yml
-
-  neo-push-tests:
-    uses: ./.github/workflows/reusable-neo-push-tests.yml
 
   typescript-changes:
     runs-on: ubuntu-latest
@@ -39,14 +46,14 @@ jobs:
       typescript_files: ${{ steps.filter.outputs.typescript_files }}
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@b2feaf19c27470162a626bd6fa8438ae5b263721 # renovate: tag=v2.10.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: filter
         with:
           list-files: shell
           filters: |
             typescript:
-              - added|modified: 'packages/**/*.ts'
+              - added|modified: 'packages/*/src/**/*.ts'
 
   license-header-check:
     needs: typescript-changes
@@ -55,8 +62,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-go@41dfa10bad2bb2ae585af6ee5bb4d7d973ad74ed # v5
         with:
           go-version: "^1.17.0"
       - name: Install addlicense
@@ -67,34 +74,40 @@ jobs:
   unit-tests:
     uses: ./.github/workflows/reusable-unit-tests.yml
 
-  e2e-tests-plugins:
-    uses: ./.github/workflows/reusable-subscriptions-plugin-amqp-e2e-test.yml
-
   api-library-tests:
     uses: ./.github/workflows/reusable-api-library-tests.yml
-
-  # nextjs-app-setup:
-  #   uses: ./.github/workflows/reusable-nextjs-app-setup.yml
-
-  toolbox-tests:
-    uses: ./.github/workflows/reusable-toolbox-tests.yml
 
   integration-tests-on-prem:
     uses: ./.github/workflows/reusable-integration-tests-on-prem.yml
 
+  federation-tests:
+    uses: ./.github/workflows/reusable-federation-tests.yml
+
   quality-gate:
+    if: ${{ always() }}
     needs:
       - reviewdog-eslint
+      - code-scanning
       - package-tests
-      - neo-push-tests
-      - license-header-check
       - unit-tests
-      - e2e-tests-plugins
       - api-library-tests
-      - toolbox-tests
       - integration-tests-on-prem
+      - federation-tests
 
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo "Passed!"
+      - name: Check Job Status
+        run: |
+          if [ ${{ needs.reviewdog-eslint.result }} != 'success' ] || 
+            [ ${{ needs.code-scanning.result }} != 'success' ] ||
+            [ ${{ needs.package-tests.result }} != 'success' ] ||
+            [ ${{ needs.unit-tests.result }} != 'success' ] ||
+            [ ${{ needs.api-library-tests.result }} != 'success' ] ||
+            [ ${{ needs.federation-tests.result }} != 'success' ] ||
+            [ ${{ needs.integration-tests-on-prem.result }} != 'success' ]; then
+            echo "One or more jobs failed"
+            exit 1
+          else
+            echo "Passed!"
+          fi

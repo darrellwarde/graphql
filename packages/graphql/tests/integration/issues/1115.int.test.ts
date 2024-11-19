@@ -17,80 +17,75 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import { Neo4jGraphQLAuthJWTPlugin } from "@neo4j/graphql-plugin-auth";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
-import { runCypher } from "../../utils/run-cypher";
-import { createJwtRequest } from "../../utils/create-jwt-request";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1115", () => {
-    const parentType = generateUniqueType("Parent");
-    const childType = generateUniqueType("Child");
+    let parentType: UniqueType;
+    let childType: UniqueType;
 
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        parentType = testHelper.createUniqueType("Parent");
+        childType = testHelper.createUniqueType("Child");
 
         const typeDefs = `
-            type ${parentType} {
+            type JWTPayload @jwt {
+                roles: [String!]!
+            }
+
+            type ${parentType} @node {
                 children: [${childType}!]! @relationship(type: "HAS", direction: IN)
             }
-            type ${childType} {
+
+            type ${childType} @node {
                 tcId: String @unique
             }
 
             extend type ${childType}
-                @auth(
-                    rules: [
-                        { operations: [READ, CREATE, UPDATE, DELETE, CONNECT, DISCONNECT], roles: ["upstream"] }
-                        { operations: [READ], roles: ["downstream"] }
+                @authorization(
+                    validate: [
+                        { operations: [READ, CREATE, UPDATE, DELETE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP], where: { jwt: { roles_INCLUDES: "upstream" } } }
+                        { operations: [READ], where: { jwt: { roles_INCLUDES: "downstream" } } }
                     ]
                 )
         `;
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
-            plugins: {
-                auth: new Neo4jGraphQLAuthJWTPlugin({
-                    secret: "secret",
-                }),
+            features: {
+                authorization: {
+                    key: "secret",
+                },
             },
         });
-        schema = await neoGraphql.getSchema();
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should not throw on multiple connectOrCreate with auth", async () => {
-        const session = await neo4j.getSession();
-        await runCypher(session, `CREATE (:${parentType})<-[:HAS]-(:${childType} {tcId: "123"})`);
+        await testHelper.executeCypher(`CREATE (:${parentType})<-[:HAS]-(:${childType} {tcId: "123"})`);
 
-        const req = createJwtRequest("secret", { roles: ["upstream"] });
-        const query = `
+        const token = testHelper.createBearerToken("secret", { roles: ["upstream"] });
+        const query = /* GraphQL */ `
         mutation {
           ${parentType.operations.update}(
-            connectOrCreate: {
+            update: {
               children: [
                 {
-                  where: { node: { tcId: "123" } }
-                  onCreate: { node: { tcId: "123" } }
-                }
-                {
-                  where: { node: { tcId: "456" } }
-                  onCreate: { node: { tcId: "456" } }
-                }
-              ]
-            }
+                  connectOrCreate: {
+                    where: { node: { tcId_EQ: "123" } }
+                    onCreate: { node: { tcId: "123" } }
+                  }}
+                  {
+                    connectOrCreate: {
+                    where: { node: { tcId_EQ: "456" } }
+                    onCreate: { node: { tcId: "456" } }
+                  }}
+                ]
+              }
           ) {
             info {
               nodesCreated
@@ -99,11 +94,7 @@ describe("https://github.com/neo4j/graphql/issues/1115", () => {
         }
         `;
 
-        const res = await graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues({ req }),
-        });
+        const res = await testHelper.executeGraphQLWithToken(query, token);
 
         expect(res.errors).toBeUndefined();
         expect(res.data).toEqual({

@@ -17,37 +17,34 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
-describe("433", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+describe("https://github.com/neo4j/graphql/issues/433", () => {
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let Person: UniqueType;
+    let typeDefs: string;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeAll(() => {
+        Movie = testHelper.createUniqueType("Movie");
+        Person = testHelper.createUniqueType("Person");
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should recreate issue and return correct data", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = gql`
+        typeDefs = `
             # Cannot use 'type Node'
-            type Movie {
+            type ${Movie} @node {
                 title: String
-                actors: [Person!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Person}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Person {
+            type ${Person} @node {
                 name: String
             }
         `;
@@ -60,11 +57,11 @@ describe("433", () => {
             charset: "alphabetic",
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             query {
-                movies(where: {title: "${movieTitle}"}) {
+               ${Movie.plural}(where: {title_EQ: "${movieTitle}"}) {
                     title
                     actorsConnection(where: {}) {
                       edges {
@@ -77,34 +74,26 @@ describe("433", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Movie {title: $movieTitle})<-[:ACTED_IN]-(:Person {name: $personName})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${Movie} {title: $movieTitle})<-[:ACTED_IN]-(:${Person} {name: $personName})
                 `,
-                { movieTitle, personName }
-            );
+            { movieTitle, personName }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            expect(result.data as any).toEqual({
-                movies: [
-                    {
-                        title: movieTitle,
-                        actorsConnection: {
-                            edges: [{ node: { name: personName } }],
-                        },
+        expect(result.data as any).toEqual({
+            [Movie.plural]: [
+                {
+                    title: movieTitle,
+                    actorsConnection: {
+                        edges: [{ node: { name: personName } }],
                     },
-                ],
-            });
-        } finally {
-            await session.close();
-        }
+                },
+            ],
+        });
     });
 });

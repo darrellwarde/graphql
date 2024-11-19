@@ -17,10 +17,10 @@
  * limitations under the License.
  */
 
-import type { MutationResponseTypeNames, NodeConstructor, RootTypeFieldNames, SubscriptionEvents } from "./Node";
-import Node from "./Node";
 import { ContextBuilder } from "../../tests/utils/builders/context-builder";
 import { NodeBuilder } from "../../tests/utils/builders/node-builder";
+import type { MutationResponseTypeNames, NodeConstructor, RootTypeFieldNames, SubscriptionEvents } from "./Node";
+import Node from "./Node";
 import { NodeDirective } from "./NodeDirective";
 
 describe("Node", () => {
@@ -350,7 +350,8 @@ describe("Node", () => {
             (plural: string, rootTypeFieldNames: RootTypeFieldNames) => {
                 const node = new NodeBuilder({
                     name: "Test",
-                    nodeDirective: new NodeDirective({ plural }),
+                    nodeDirective: new NodeDirective({}),
+                    plural,
                 }).instance();
 
                 expect(node.rootTypeFieldNames).toStrictEqual(rootTypeFieldNames);
@@ -503,7 +504,8 @@ describe("Node", () => {
             (plural: string, mutationResponseTypeNames: MutationResponseTypeNames) => {
                 const node = new NodeBuilder({
                     name: "Test",
-                    nodeDirective: new NodeDirective({ plural }),
+                    nodeDirective: new NodeDirective({}),
+                    plural,
                 }).instance();
 
                 expect(node.mutationResponseTypeNames).toStrictEqual(mutationResponseTypeNames);
@@ -519,6 +521,8 @@ describe("Node", () => {
                     create: "AccountCreatedEvent",
                     update: "AccountUpdatedEvent",
                     delete: "AccountDeletedEvent",
+                    create_relationship: "AccountRelationshipCreatedEvent",
+                    delete_relationship: "AccountRelationshipDeletedEvent",
                 },
             ],
             [
@@ -527,6 +531,8 @@ describe("Node", () => {
                     create: "AwsAccountCreatedEvent",
                     update: "AwsAccountUpdatedEvent",
                     delete: "AwsAccountDeletedEvent",
+                    create_relationship: "AwsAccountRelationshipCreatedEvent",
+                    delete_relationship: "AwsAccountRelationshipDeletedEvent",
                 },
             ],
             [
@@ -535,6 +541,8 @@ describe("Node", () => {
                     create: "AwsAccountCreatedEvent",
                     update: "AwsAccountUpdatedEvent",
                     delete: "AwsAccountDeletedEvent",
+                    create_relationship: "AwsAccountRelationshipCreatedEvent",
+                    delete_relationship: "AwsAccountRelationshipDeletedEvent",
                 },
             ],
             [
@@ -543,6 +551,8 @@ describe("Node", () => {
                     create: "AwsAccountCreatedEvent",
                     update: "AwsAccountUpdatedEvent",
                     delete: "AwsAccountDeletedEvent",
+                    create_relationship: "AwsAccountRelationshipCreatedEvent",
+                    delete_relationship: "AwsAccountRelationshipDeletedEvent",
                 },
             ],
             [
@@ -551,6 +561,8 @@ describe("Node", () => {
                     create: "AwsAccountCreatedEvent",
                     update: "AwsAccountUpdatedEvent",
                     delete: "AwsAccountDeletedEvent",
+                    create_relationship: "AwsAccountRelationshipCreatedEvent",
+                    delete_relationship: "AwsAccountRelationshipDeletedEvent",
                 },
             ],
             [
@@ -559,6 +571,8 @@ describe("Node", () => {
                     create: "AccountCreatedEvent",
                     update: "AccountUpdatedEvent",
                     delete: "AccountDeletedEvent",
+                    create_relationship: "AccountRelationshipCreatedEvent",
+                    delete_relationship: "AccountRelationshipDeletedEvent",
                 },
             ],
             [
@@ -567,6 +581,8 @@ describe("Node", () => {
                     create: "AccountCreatedEvent",
                     update: "AccountUpdatedEvent",
                     delete: "AccountDeletedEvent",
+                    create_relationship: "AccountRelationshipCreatedEvent",
+                    delete_relationship: "AccountRelationshipDeletedEvent",
                 },
             ],
             [
@@ -575,6 +591,8 @@ describe("Node", () => {
                     create: "ACreatedEvent",
                     update: "AUpdatedEvent",
                     delete: "ADeletedEvent",
+                    create_relationship: "ARelationshipCreatedEvent",
+                    delete_relationship: "ARelationshipDeletedEvent",
                 },
             ],
             [
@@ -583,6 +601,8 @@ describe("Node", () => {
                     create: "_2NumberCreatedEvent",
                     update: "_2NumberUpdatedEvent",
                     delete: "_2NumberDeletedEvent",
+                    create_relationship: "_2NumberRelationshipCreatedEvent",
+                    delete_relationship: "_2NumberRelationshipDeletedEvent",
                 },
             ],
             [
@@ -591,6 +611,8 @@ describe("Node", () => {
                     create: "__2NumberCreatedEvent",
                     update: "__2NumberUpdatedEvent",
                     delete: "__2NumberDeletedEvent",
+                    create_relationship: "__2NumberRelationshipCreatedEvent",
+                    delete_relationship: "__2NumberRelationshipDeletedEvent",
                 },
             ],
             [
@@ -599,6 +621,8 @@ describe("Node", () => {
                     create: "_numberCreatedEvent",
                     update: "_numberUpdatedEvent",
                     delete: "_numberDeletedEvent",
+                    create_relationship: "_numberRelationshipCreatedEvent",
+                    delete_relationship: "_numberRelationshipDeletedEvent",
                 },
             ],
         ])(
@@ -621,6 +645,8 @@ describe("Node", () => {
                     create: "createdAccount",
                     update: "updatedAccount",
                     delete: "deletedAccount",
+                    create_relationship: "account",
+                    delete_relationship: "account",
                 },
             ],
             [
@@ -629,6 +655,8 @@ describe("Node", () => {
                     create: "createdAwsAccount",
                     update: "updatedAwsAccount",
                     delete: "deletedAwsAccount",
+                    create_relationship: "awsAccount",
+                    delete_relationship: "awsAccount",
                 },
             ],
             [
@@ -637,6 +665,8 @@ describe("Node", () => {
                     create: "createdAwsAccount",
                     update: "updatedAwsAccount",
                     delete: "deletedAwsAccount",
+                    create_relationship: "awsAccount",
+                    delete_relationship: "awsAccount",
                 },
             ],
             [
@@ -645,6 +675,8 @@ describe("Node", () => {
                     create: "createdAwsAccount",
                     update: "updatedAwsAccount",
                     delete: "deletedAwsAccount",
+                    create_relationship: "awsAccount",
+                    delete_relationship: "awsAccount",
                 },
             ],
             [
@@ -653,6 +685,8 @@ describe("Node", () => {
                     create: "createdAwsAccount",
                     update: "updatedAwsAccount",
                     delete: "deletedAwsAccount",
+                    create_relationship: "awsAccount",
+                    delete_relationship: "awsAccount",
                 },
             ],
             [
@@ -661,6 +695,8 @@ describe("Node", () => {
                     create: "createdAccount",
                     update: "updatedAccount",
                     delete: "deletedAccount",
+                    create_relationship: "account",
+                    delete_relationship: "account",
                 },
             ],
             [
@@ -669,6 +705,8 @@ describe("Node", () => {
                     create: "createdAccount",
                     update: "updatedAccount",
                     delete: "deletedAccount",
+                    create_relationship: "account",
+                    delete_relationship: "account",
                 },
             ],
             [
@@ -677,6 +715,8 @@ describe("Node", () => {
                     create: "createdA",
                     update: "updatedA",
                     delete: "deletedA",
+                    create_relationship: "a",
+                    delete_relationship: "a",
                 },
             ],
             [
@@ -685,6 +725,8 @@ describe("Node", () => {
                     create: "created_2Number",
                     update: "updated_2Number",
                     delete: "deleted_2Number",
+                    create_relationship: "_2Number",
+                    delete_relationship: "_2Number",
                 },
             ],
             [
@@ -693,6 +735,8 @@ describe("Node", () => {
                     create: "created__2Number",
                     update: "updated__2Number",
                     delete: "deleted__2Number",
+                    create_relationship: "__2Number",
+                    delete_relationship: "__2Number",
                 },
             ],
             [
@@ -701,6 +745,8 @@ describe("Node", () => {
                     create: "created_number",
                     update: "updated_number",
                     delete: "deleted_number",
+                    create_relationship: "_number",
+                    delete_relationship: "_number",
                 },
             ],
         ])(
@@ -770,7 +816,7 @@ describe("Node", () => {
                 name: "Film",
             })
                 .withNodeDirective({
-                    label: "$jwt.movielabel",
+                    labels: ["$jwt.movielabel"],
                 })
                 .instance();
 
@@ -779,7 +825,6 @@ describe("Node", () => {
                     jwt: {
                         movielabel: "Movie",
                     },
-                    myKey: "key",
                 })
                 .instance();
 
@@ -787,7 +832,7 @@ describe("Node", () => {
             const labelString = node.getLabelString(context);
 
             expect(labels).toEqual(["Movie"]);
-            expect(labelString).toBe(":`Movie`");
+            expect(labelString).toBe(":Movie");
         });
 
         test("should return labels updated with context values from Context", () => {
@@ -795,21 +840,17 @@ describe("Node", () => {
                 name: "Film",
             })
                 .withNodeDirective({
-                    label: "$context.myKey",
+                    labels: ["$context.myKey"],
                 })
                 .instance();
 
-            const context = new ContextBuilder()
-                .with({
-                    myKey: "Movie",
-                })
-                .instance();
+            const context = new ContextBuilder().instance();
 
-            const labels = node.getLabels(context);
-            const labelString = node.getLabelString(context);
+            const labels = node.getLabels({ ...context, myKey: "Movie" } as Record<string, any>);
+            const labelString = node.getLabelString({ ...context, myKey: "Movie" } as Record<string, any>);
 
             expect(labels).toEqual(["Movie"]);
-            expect(labelString).toBe(":`Movie`");
+            expect(labelString).toBe(":Movie");
         });
 
         test("should return additional labels updated with jwt values from Context", () => {
@@ -817,8 +858,7 @@ describe("Node", () => {
                 name: "Film",
             })
                 .withNodeDirective({
-                    label: "Film",
-                    additionalLabels: ["$jwt.movielabel"],
+                    labels: ["Film", "$jwt.movielabel"],
                 })
                 .instance();
 
@@ -827,7 +867,6 @@ describe("Node", () => {
                     jwt: {
                         movielabel: "Movie",
                     },
-                    myKey: "key",
                 })
                 .instance();
 
@@ -835,7 +874,7 @@ describe("Node", () => {
             const labelString = node.getLabelString(context);
 
             expect(labels).toEqual(["Film", "Movie"]);
-            expect(labelString).toBe(":`Film`:`Movie`");
+            expect(labelString).toBe(":Film:Movie");
         });
     });
 });

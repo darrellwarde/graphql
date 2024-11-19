@@ -17,64 +17,60 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
 import type { Response } from "supertest";
 import supertest from "supertest";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 import type { TestGraphQLServer } from "../setup/apollo-server";
 import { ApolloTestServer } from "../setup/apollo-server";
-import { TestSubscriptionsPlugin } from "../../utils/TestSubscriptionPlugin";
 import { WebSocketTestClient } from "../setup/ws-client";
-import Neo4j from "../setup/neo4j";
 
 describe("Create Subscription", () => {
-    let neo4j: Neo4j;
-    let driver: Driver;
-
-    const typeMovie = generateUniqueType("Movie");
-
+    const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
-
+    let typeMovie: UniqueType;
+    let typeActor: UniqueType;
     beforeAll(async () => {
+        await testHelper.assertCDCEnabled();
+    });
+
+    beforeEach(async () => {
+        typeMovie = testHelper.createUniqueType("Movie");
+        typeActor = testHelper.createUniqueType("Actor");
+
         const typeDefs = `
-         type ${typeMovie} {
+         type ${typeMovie} @node {
              title: String
+             actors: [${typeActor}]
+         }
+         type ${typeActor} @subscription(events: []) @node {
+            name: String
          }
          `;
 
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-
-        const neoSchema = new Neo4jGraphQL({
+        const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
-            config: {
-                driverConfig: {
-                    database: neo4j.getIntegrationDatabaseName(),
-                },
-            },
-            plugins: {
-                subscriptions: new TestSubscriptionsPlugin(),
+            features: {
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
-
-        server = new ApolloTestServer(neoSchema);
+        // eslint-disable-next-line @typescript-eslint/require-await
+        server = new ApolloTestServer(neoSchema, async ({ req }) => ({
+            sessionConfig: {
+                database: testHelper.database,
+            },
+            token: req.headers.authorization,
+        }));
         await server.start();
-    });
 
-    beforeEach(() => {
         wsClient = new WebSocketTestClient(server.wsPath);
     });
 
     afterEach(async () => {
         await wsClient.close();
-    });
-
-    afterAll(async () => {
         await server.close();
-        await driver.close();
+        await testHelper.close();
     });
 
     test("create subscription", async () => {
@@ -92,6 +88,8 @@ describe("Create Subscription", () => {
 
         await createMovie("movie1");
         await createMovie("movie2");
+
+        await wsClient.waitForEvents(2);
 
         expect(wsClient.errors).toEqual([]);
         expect(wsClient.events).toEqual([
@@ -111,11 +109,10 @@ describe("Create Subscription", () => {
             },
         ]);
     });
-
     test("create subscription with where", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.created}(where: { title: "movie1" }) {
+                ${typeMovie.operations.subscribe.created}(where: { title_EQ: "movie1" }) {
                     ${typeMovie.operations.subscribe.payload.created} {
                         title
                     }
@@ -125,6 +122,8 @@ describe("Create Subscription", () => {
 
         await createMovie("movie1");
         await createMovie("movie2");
+
+        await wsClient.waitForEvents(1);
 
         expect(wsClient.errors).toEqual([]);
         expect(wsClient.events).toEqual([
@@ -136,6 +135,25 @@ describe("Create Subscription", () => {
         ]);
     });
 
+    test("create subscription on excluded type", async () => {
+        const onReturnError = jest.fn();
+        await wsClient.subscribe(
+            `
+            subscription {
+                ${typeActor.operations.subscribe.created}(where: { name_EQ: "Keanu" }) {
+                    ${typeActor.operations.subscribe.payload.created} {
+                        name
+                    }
+                }
+            }
+        `,
+            onReturnError
+        );
+        await createActor("Keanu");
+        expect(onReturnError).toHaveBeenCalled();
+        expect(wsClient.events).toEqual([]);
+    });
+
     async function createMovie(title: string): Promise<Response> {
         const result = await supertest(server.path)
             .post("")
@@ -145,6 +163,24 @@ describe("Create Subscription", () => {
                         ${typeMovie.operations.create}(input: [{ title: "${title}" }]) {
                             ${typeMovie.plural} {
                                 title
+                            }
+                        }
+                    }
+                `,
+            })
+            .expect(200);
+        return result;
+    }
+
+    async function createActor(name: string): Promise<Response> {
+        const result = await supertest(server.path)
+            .post("")
+            .send({
+                query: `
+                    mutation {
+                        ${typeActor.operations.create}(input: [{ name: "${name}" }]) {
+                            ${typeActor.plural} {
+                                name
                             }
                         }
                     }

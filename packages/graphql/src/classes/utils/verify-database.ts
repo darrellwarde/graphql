@@ -18,44 +18,37 @@
  */
 
 import type { Driver } from "neo4j-driver";
-import type { DriverConfig } from "../../types";
+import type { Neo4jDatabaseInfo } from "../Neo4jDatabaseInfo";
 import { verifyFunctions } from "./verify-functions";
-import { verifyProcedures } from "./verify-procedures";
 import { verifyVersion } from "./verify-version";
+import type { Neo4jGraphQLSessionConfig } from "../Executor";
 
-async function checkNeo4jCompat({ driver, driverConfig }: { driver: Driver; driverConfig?: DriverConfig }) {
+async function checkNeo4jCompat({
+    driver,
+    sessionConfig,
+    dbInfo,
+}: {
+    driver: Driver;
+    sessionConfig?: Neo4jGraphQLSessionConfig;
+    dbInfo: Neo4jDatabaseInfo;
+}): Promise<void> {
     await driver.verifyConnectivity();
 
-    const sessionParams: {
-        bookmarks?: string | string[];
-        database?: string;
-    } = {};
-
-    if (driverConfig) {
-        if (driverConfig.database) {
-            sessionParams.database = driverConfig.database;
-        }
-
-        if (driverConfig.bookmarks) {
-            sessionParams.bookmarks = driverConfig.bookmarks;
-        }
-    }
-
-    const sessionFactory = () => driver.session(sessionParams);
+    const sessionFactory = () => driver.session(sessionConfig);
 
     const errors: string[] = [];
 
-    const verificationResults = await Promise.allSettled([
-        verifyVersion(sessionFactory),
-        verifyFunctions(sessionFactory),
-        verifyProcedures(sessionFactory),
-    ]);
+    try {
+        verifyVersion(dbInfo);
+    } catch (e) {
+        errors.push((e as Error).message);
+    }
 
-    verificationResults.forEach((v) => {
-        if (v.status === "rejected") {
-            errors.push((v.reason as Error).message);
-        }
-    });
+    try {
+        await verifyFunctions(sessionFactory);
+    } catch (e) {
+        errors.push((e as Error).message);
+    }
 
     if (errors.length) {
         throw new Error(`Encountered the following DBMS compatiblility issues:\n${errors.join("\n")}`);

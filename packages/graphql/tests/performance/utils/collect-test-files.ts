@@ -19,10 +19,9 @@
 
 import * as fs from "fs/promises";
 import * as path from "path";
+import type * as Performance from "../types";
 
-export async function collectTests(
-    rootPath: string
-): Promise<Array<{ query: string; name: string; filename: string }>> {
+export async function collectTests(rootPath: string): Promise<Array<Performance.TestInfo>> {
     const files = await filesFromDir(rootPath, ".graphql");
     let onlyFilter = false;
     const onlyRegex = /_only$/i;
@@ -31,16 +30,38 @@ export async function collectTests(
         files.map(async (filePath) => {
             const fileData = await fs.readFile(filePath, "utf-8");
             const rawQueries = fileData.split(/^query\s/gm);
+            const rawMutations = fileData.split(/^mutation\s/gm);
             rawQueries.shift();
-            return rawQueries.map((query: string) => {
-                const name = query.split(" {")[0].trim();
+            rawMutations.shift();
+            // TODO: remove duplicate
+            const queries = rawQueries.map((query: string): Performance.TestInfo => {
+                const name = query.split(" {")[0]?.trim();
+                const filename = path.basename(filePath).split(path.extname(filePath))[0];
+                if (!name || !filename) throw new Error("Cannot find name or filename collecting perf. tests");
+
                 if (name.match(onlyRegex)) onlyFilter = true;
                 return {
                     query: `query ${query}`,
                     name,
-                    filename: path.basename(filePath).split(path.extname(filePath))[0],
+                    filename,
+                    type: "query",
                 };
             });
+            const mutations = rawMutations.map((query: string): Performance.TestInfo => {
+                const name = query.split(" {")[0]?.trim();
+                const filename = path.basename(filePath).split(path.extname(filePath))[0];
+
+                if (!name || !filename) throw new Error("Cannot find name or filename collecting mutation perf. tests");
+
+                if (name.match(onlyRegex)) onlyFilter = true;
+                return {
+                    query: `mutation ${query}`,
+                    name,
+                    filename,
+                    type: "mutation",
+                };
+            });
+            return [...queries, ...mutations];
         })
     );
 
@@ -52,9 +73,7 @@ export async function collectTests(
     return tests;
 }
 
-export async function collectCypherTests(
-    rootPath: string
-): Promise<Array<{ query: string; name: string; filename: string }>> {
+export async function collectCypherTests(rootPath: string): Promise<Array<Performance.TestInfo>> {
     const files = await filesFromDir(rootPath, ".cypher");
 
     let onlyFilter = false;
@@ -65,15 +84,19 @@ export async function collectCypherTests(
             const fileData = await fs.readFile(filePath, "utf-8");
             const rawQueries = fileData.split(/^#\s?Test:\s/gim);
             rawQueries.shift();
-            return rawQueries.map((query: string) => {
+            return rawQueries.map((query: string): Performance.TestInfo => {
                 const tokens = query.trim().split("\n");
                 const name = tokens.shift()?.trim() as string;
                 if (name.match(onlyRegex)) onlyFilter = true;
                 const cypher = tokens.join("\n");
+                const filename = path.basename(filePath).split(path.extname(filePath))[0];
+                if (!filename) throw new Error("Filename not found in collectCypherTests");
+
                 return {
                     query: cypher,
                     name,
-                    filename: path.basename(filePath).split(path.extname(filePath))[0],
+                    filename,
+                    type: "cypher",
                 };
             });
         })

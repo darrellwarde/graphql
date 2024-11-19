@@ -18,15 +18,15 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("200", () => {
     test("Preserve schema array non null", async () => {
         const typeDefs = gql`
-            type Category {
-                categoryId: ID! @id
+            type Category @node {
+                categoryId: ID! @id @unique
                 name: String!
                 description: String! @default(value: "")
                 exampleImageLocations: [String!]
@@ -55,10 +55,10 @@ describe("200", () => {
             }
 
             type CategoryAggregateSelection {
-              categoryId: IDAggregateSelectionNonNullable!
+              categoryId: IDAggregateSelection!
               count: Int!
-              description: StringAggregateSelectionNonNullable!
-              name: StringAggregateSelectionNonNullable!
+              description: StringAggregateSelection!
+              name: StringAggregateSelection!
             }
 
             input CategoryCreateInput {
@@ -91,47 +91,40 @@ describe("200", () => {
             }
 
             input CategoryUpdateInput {
-              description: String
-              exampleImageLocations: [String!]
-              name: String
+              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              description_SET: String
+              exampleImageLocations: [String!] @deprecated(reason: \\"Please use the explicit _SET field\\")
+              exampleImageLocations_POP: Int
+              exampleImageLocations_PUSH: [String!]
+              exampleImageLocations_SET: [String!]
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input CategoryWhere {
               AND: [CategoryWhere!]
+              NOT: CategoryWhere
               OR: [CategoryWhere!]
-              categoryId: ID
+              categoryId: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               categoryId_CONTAINS: ID
               categoryId_ENDS_WITH: ID
+              categoryId_EQ: ID
               categoryId_IN: [ID!]
-              categoryId_NOT: ID
-              categoryId_NOT_CONTAINS: ID
-              categoryId_NOT_ENDS_WITH: ID
-              categoryId_NOT_IN: [ID!]
-              categoryId_NOT_STARTS_WITH: ID
               categoryId_STARTS_WITH: ID
-              description: String
+              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
+              description_EQ: String
               description_IN: [String!]
-              description_NOT: String
-              description_NOT_CONTAINS: String
-              description_NOT_ENDS_WITH: String
-              description_NOT_IN: [String!]
-              description_NOT_STARTS_WITH: String
               description_STARTS_WITH: String
-              exampleImageLocations: [String!]
+              exampleImageLocations: [String!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              exampleImageLocations_EQ: [String!]
               exampleImageLocations_INCLUDES: String
-              exampleImageLocations_NOT: [String!]
-              exampleImageLocations_NOT_INCLUDES: String
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String
-              name_NOT_CONTAINS: String
-              name_NOT_ENDS_WITH: String
-              name_NOT_IN: [String!]
-              name_NOT_STARTS_WITH: String
               name_STARTS_WITH: String
             }
 
@@ -140,21 +133,25 @@ describe("200", () => {
               info: CreateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
-            type IDAggregateSelectionNonNullable {
-              longest: ID!
-              shortest: ID!
+            type IDAggregateSelection {
+              longest: ID
+              shortest: ID
             }
 
             type Mutation {
@@ -172,11 +169,12 @@ describe("200", () => {
             }
 
             type Query {
-              categories(options: CategoryOptions, where: CategoryWhere): [Category!]!
+              categories(limit: Int, offset: Int, options: CategoryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [CategorySort!], where: CategoryWhere): [Category!]!
               categoriesAggregate(where: CategoryWhere): CategoryAggregateSelection!
-              categoriesConnection(after: String, first: Int, sort: [CategorySort], where: CategoryWhere): CategoriesConnection!
+              categoriesConnection(after: String, first: Int, sort: [CategorySort!], where: CategoryWhere): CategoriesConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -184,9 +182,9 @@ describe("200", () => {
               DESC
             }
 
-            type StringAggregateSelectionNonNullable {
-              longest: String!
-              shortest: String!
+            type StringAggregateSelection {
+              longest: String
+              shortest: String
             }
 
             type UpdateCategoriesMutationResponse {
@@ -194,8 +192,10 @@ describe("200", () => {
               info: UpdateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

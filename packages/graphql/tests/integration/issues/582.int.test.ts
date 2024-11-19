@@ -17,32 +17,26 @@
  * limitations under the License.
  */
 
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import { Neo4jGraphQL } from "../../../src/classes";
 import type { UniqueType } from "../../utils/graphql-types";
-import { generateUniqueType } from "../../utils/graphql-types";
-import Neo4j from "../neo4j";
+import { TestHelper } from "../../utils/tests-helper";
 
-describe("582", () => {
-    let driver: Driver;
+describe("https://github.com/neo4j/graphql/issues/582", () => {
+    const testHelper = new TestHelper();
     let type: UniqueType;
-    let bookmarks: string[];
     let typeDefs: string;
     let query: string;
-    let neo4j: Neo4j;
 
     beforeAll(async () => {
-        type = generateUniqueType("Entity");
+        type = testHelper.createUniqueType("Entity");
 
         typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
                 children: [${type.name}!]! @relationship(type: "EDGE", properties: "Edge", direction: OUT)
                 parents: [${type.name}!]! @relationship(type: "EDGE", properties: "Edge", direction: IN)
                 type: String!
             }
 
-            interface Edge @relationshipProperties {
+            type Edge @relationshipProperties {
                 type: String!
             }
         `;
@@ -55,60 +49,35 @@ describe("582", () => {
             }
         `;
 
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-        const session = await neo4j.getSession();
-
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (:${type.name} { type: "Cat" })-[:EDGE]->(:${type.name} { type: "Dog" })<-[:EDGE]-(:${type.name} { type: "Bird" })-[:EDGE]->(:${type.name} { type: "Fish" })
             `
-            );
-            bookmarks = session.lastBookmark();
-        } finally {
-            await session.close();
-        }
+        );
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        const session = await neo4j.getSession();
-
-        try {
-            await session.run(
-                `
-                    MATCH (n: ${type.name}) DETACH DELETE n
-            `
-            );
-        } finally {
-            await session.close();
-        }
-
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should get all Cats where there exists at least one child Dog that has a Bird parent", async () => {
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
+        const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: {
                 where: {
-                    type: "Cat",
-                    childrenConnection: {
+                    type_EQ: "Cat",
+                    childrenConnection_SOME: {
                         node: {
-                            type: "Dog",
-                            parentsConnection: {
+                            type_EQ: "Dog",
+                            parentsConnection_SOME: {
                                 node: {
-                                    type: "Bird",
+                                    type_EQ: "Bird",
                                 },
                             },
                         },
                     },
                 },
             },
-            contextValue: neo4j.getContextValuesWithBookmarks(bookmarks),
         });
 
         expect(gqlResult.errors).toBeFalsy();
@@ -119,23 +88,19 @@ describe("582", () => {
     });
 
     test("should get all Cats where there exists at least one child Dog that has a Bird parent which has a Fish child", async () => {
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
+        const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: {
                 where: {
-                    type: "Cat",
-                    childrenConnection: {
+                    type_EQ: "Cat",
+                    childrenConnection_SOME: {
                         node: {
-                            type: "Dog",
-                            parentsConnection: {
+                            type_EQ: "Dog",
+                            parentsConnection_SOME: {
                                 node: {
-                                    type: "Bird",
-                                    childrenConnection: {
+                                    type_EQ: "Bird",
+                                    childrenConnection_SOME: {
                                         node: {
-                                            type: "Fish",
+                                            type_EQ: "Fish",
                                         },
                                     },
                                 },
@@ -144,7 +109,6 @@ describe("582", () => {
                     },
                 },
             },
-            contextValue: neo4j.getContextValuesWithBookmarks(bookmarks),
         });
 
         expect(gqlResult.errors).toBeFalsy();

@@ -17,32 +17,25 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "../../neo4j";
-import { Neo4jGraphQL } from "../../../../src/classes";
+import { TestHelper } from "../../../utils/tests-helper";
 
 describe("aggregations-top_level-bigint", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
     const bigInt = "2147483647";
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeEach(() => {});
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should return the min of node properties", async () => {
-        const session = await neo4j.getSession();
+        const movieType = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-            type Movie {
+            type ${movieType.name} @node {
                 testString: String
                 imdbRatingBigInt: BigInt
             }
@@ -53,24 +46,23 @@ describe("aggregations-top_level-bigint", () => {
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.1})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.2})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.3})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.4})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}1})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}2})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}3})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}4})
                 `,
-                {
-                    testString,
-                }
-            );
+            {
+                testString,
+            }
+        );
 
-            const query = `
+        const query = `
                 {
-                    moviesAggregate(where: {testString: "${testString}"}) {
+                    ${movieType.operations.aggregate}(where: {testString_EQ: "${testString}"}) {
                         imdbRatingBigInt {
                             min
                         }
@@ -78,33 +70,22 @@ describe("aggregations-top_level-bigint", () => {
                 }
             `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
+        expect(gqlResult.errors).toBeUndefined();
 
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).moviesAggregate).toEqual({
-                imdbRatingBigInt: {
-                    min: `${bigInt}.1`,
-                },
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[movieType.operations.aggregate]).toEqual({
+            imdbRatingBigInt: {
+                min: `${bigInt}1`,
+            },
+        });
     });
 
     test("should return the max of node properties", async () => {
-        const session = await neo4j.getSession();
+        const movieType = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-            type Movie {
+            type ${movieType.name} @node {
                 testString: String
                 imdbRatingBigInt: BigInt
             }
@@ -115,24 +96,23 @@ describe("aggregations-top_level-bigint", () => {
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.1})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.2})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.3})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.4})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}1})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}2})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}3})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}4})
                 `,
-                {
-                    testString,
-                }
-            );
+            {
+                testString,
+            }
+        );
 
-            const query = `
+        const query = `
                 {
-                    moviesAggregate(where: {testString: "${testString}"}) {
+                    ${movieType.operations.aggregate}(where: {testString_EQ: "${testString}"}) {
                         imdbRatingBigInt {
                             max
                         }
@@ -140,33 +120,22 @@ describe("aggregations-top_level-bigint", () => {
                 }
             `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
+        expect(gqlResult.errors).toBeUndefined();
 
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).moviesAggregate).toEqual({
-                imdbRatingBigInt: {
-                    max: `${bigInt}.4`,
-                },
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[movieType.operations.aggregate]).toEqual({
+            imdbRatingBigInt: {
+                max: `${bigInt}4`,
+            },
+        });
     });
 
     test("should return the average of node properties", async () => {
-        const session = await neo4j.getSession();
+        const movieType = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-            type Movie {
+            type ${movieType.name}  @node {
                 testString: String
                 imdbRatingBigInt: BigInt
             }
@@ -177,24 +146,23 @@ describe("aggregations-top_level-bigint", () => {
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.1})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.2})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.3})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.4})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}1})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}2})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}3})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}4})
                 `,
-                {
-                    testString,
-                }
-            );
+            {
+                testString,
+            }
+        );
 
-            const query = `
+        const query = `
                 {
-                    moviesAggregate(where: {testString: "${testString}"}) {
+                    ${movieType.operations.aggregate}(where: {testString_EQ: "${testString}"}) {
                         imdbRatingBigInt {
                             average
                         }
@@ -202,33 +170,22 @@ describe("aggregations-top_level-bigint", () => {
                 }
             `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
+        expect(gqlResult.errors).toBeUndefined();
 
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).moviesAggregate).toEqual({
-                imdbRatingBigInt: {
-                    average: `${bigInt}.25`,
-                },
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[movieType.operations.aggregate]).toEqual({
+            imdbRatingBigInt: {
+                average: `${bigInt}2.5`,
+            },
+        });
     });
 
     test("should return the sum of node properties", async () => {
-        const session = await neo4j.getSession();
+        const movieType = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-            type Movie {
+            type ${movieType.name} @node {
                 testString: String
                 imdbRatingBigInt: BigInt
             }
@@ -239,24 +196,23 @@ describe("aggregations-top_level-bigint", () => {
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.1})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.2})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.3})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.4})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}1})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}2})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}3})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}4})
                 `,
-                {
-                    testString,
-                }
-            );
+            {
+                testString,
+            }
+        );
 
-            const query = `
+        const query = `
                 {
-                    moviesAggregate(where: {testString: "${testString}"}) {
+                    ${movieType.operations.aggregate}(where: {testString_EQ: "${testString}"}) {
                         imdbRatingBigInt {
                             sum
                         }
@@ -264,33 +220,22 @@ describe("aggregations-top_level-bigint", () => {
                 }
             `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
+        expect(gqlResult.errors).toBeUndefined();
 
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).moviesAggregate).toEqual({
-                imdbRatingBigInt: {
-                    sum: "8589934589",
-                },
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[movieType.operations.aggregate]).toEqual({
+            imdbRatingBigInt: {
+                sum: "85899345890",
+            },
+        });
     });
 
     test("should return the min, max, sum and average of node properties", async () => {
-        const session = await neo4j.getSession();
+        const movieType = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-            type Movie {
+            type ${movieType.name} @node {
                 testString: String
                 imdbRatingBigInt: BigInt
             }
@@ -301,24 +246,23 @@ describe("aggregations-top_level-bigint", () => {
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.1})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.2})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.3})
-                    CREATE (:Movie {testString: $testString, imdbRatingBigInt: ${bigInt}.4})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}1})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}2})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}3})
+                    CREATE (:${movieType.name} {testString: $testString, imdbRatingBigInt: ${bigInt}4})
                 `,
-                {
-                    testString,
-                }
-            );
+            {
+                testString,
+            }
+        );
 
-            const query = `
+        const query = `
                 {
-                    moviesAggregate(where: {testString: "${testString}"}) {
+                    ${movieType.operations.aggregate}(where: {testString_EQ: "${testString}"}) {
                         imdbRatingBigInt {
                             min
                             max
@@ -329,28 +273,17 @@ describe("aggregations-top_level-bigint", () => {
                 }
             `;
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            if (gqlResult.errors) {
-                console.log(JSON.stringify(gqlResult.errors, null, 2));
-            }
+        expect(gqlResult.errors).toBeUndefined();
 
-            expect(gqlResult.errors).toBeUndefined();
-
-            expect((gqlResult.data as any).moviesAggregate).toEqual({
-                imdbRatingBigInt: {
-                    min: `${bigInt}.1`,
-                    max: `${bigInt}.4`,
-                    average: `${bigInt}.25`,
-                    sum: "8589934589",
-                },
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[movieType.operations.aggregate]).toEqual({
+            imdbRatingBigInt: {
+                min: `${bigInt}1`,
+                max: `${bigInt}4`,
+                average: `${bigInt}2.5`,
+                sum: "85899345890",
+            },
+        });
     });
 });

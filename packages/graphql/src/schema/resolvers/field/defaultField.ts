@@ -17,19 +17,21 @@
  * limitations under the License.
  */
 
-import type { GraphQLResolveInfo } from "graphql";
+import type { FieldNode, GraphQLResolveInfo } from "graphql";
+import type { Neo4jGraphQLContext } from "../../../types/neo4j-graphql-context";
 
 /**
  * Based on the default field resolver used by graphql-js that accounts for aliased fields
  * @link https://github.com/graphql/graphql-js/blob/main/src/execution/execute.ts#L999-L1015
  */
-// eslint-disable-next-line consistent-return
-export function defaultFieldResolver(source: any, args: any, context: unknown, info: GraphQLResolveInfo) {
+export function defaultFieldResolver(source, args, context: Neo4jGraphQLContext, info: GraphQLResolveInfo) {
     if ((typeof source === "object" && source !== null) || typeof source === "function") {
+        const fieldNode = info.fieldNodes[0] as FieldNode;
+
         const property =
-            info.fieldNodes[0].alias && Object.prototype.hasOwnProperty.call(source, info.fieldNodes[0].alias.value)
-                ? source[info.fieldNodes[0].alias.value]
-                : source[info.fieldNodes[0].name.value];
+            fieldNode.alias && Object.prototype.hasOwnProperty.call(source, fieldNode.alias.value)
+                ? source[fieldNode.alias.value]
+                : source[fieldNode.name.value];
         if (typeof property === "function") {
             return property(args, context, info);
         }

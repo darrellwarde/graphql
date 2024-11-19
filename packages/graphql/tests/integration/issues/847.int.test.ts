@@ -17,59 +17,48 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/847", () => {
-    const personType = generateUniqueType("Person");
-    const placeType = generateUniqueType("Place");
-    const interactionType = generateUniqueType("Interaction");
+    let personType: UniqueType;
+    let placeType: UniqueType;
+    let interactionType: UniqueType;
 
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        personType = testHelper.createUniqueType("Person");
+        placeType = testHelper.createUniqueType("Place");
+        interactionType = testHelper.createUniqueType("Interaction");
 
         const typeDefs = `
             interface Entity {
                 id: String!
             }
-            
-            type ${personType.name} implements Entity {
+
+            type ${personType.name} implements Entity @node {
                 id   : String! @unique
                 name : String!
             }
 
-            type ${placeType.name} implements Entity {
+            type ${placeType.name} implements Entity @node {
                 id: String! @unique
                 location: Point!
             }
-            
-            type ${interactionType.name}  {
-                id       : ID! @id
+
+            type ${interactionType.name}  @node {
+                id       : ID! @id @unique
                 kind     : String!
                 subjects : [Entity!]! @relationship(type: "ACTED_IN", direction: IN )
                 objects  : [Entity!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        const session = await neo4j.getSession();
-        await session.run(`MATCH (person:${personType.name}) DETACH DELETE person`);
-        await session.run(`MATCH (place:${placeType.name}) DETACH DELETE place`);
-        await session.run(`MATCH (interaction:${interactionType.name}) DETACH DELETE interaction`);
-
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should be able to query multiple interface relations", async () => {
@@ -99,11 +88,7 @@ describe("https://github.com/neo4j/graphql/issues/847", () => {
             }
         `;
 
-        const mutationRes = await graphql({
-            schema,
-            source: mutation,
-            contextValue: neo4j.getContextValues(),
-        });
+        const mutationRes = await testHelper.executeGraphQL(mutation);
 
         expect(mutationRes.errors).toBeUndefined();
 
@@ -137,11 +122,7 @@ describe("https://github.com/neo4j/graphql/issues/847", () => {
             }
         `;
 
-        const queryRes = await graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
+        const queryRes = await testHelper.executeGraphQL(query);
 
         expect(queryRes.errors).toBeUndefined();
 
@@ -149,7 +130,7 @@ describe("https://github.com/neo4j/graphql/issues/847", () => {
             [interactionType.plural]: [
                 {
                     id: interactionId,
-                    subjects: expect.arrayContaining([
+                    subjects: expect.toIncludeSameMembers([
                         {
                             id: "eve",
                         },
@@ -157,7 +138,7 @@ describe("https://github.com/neo4j/graphql/issues/847", () => {
                             id: "adam",
                         },
                     ]),
-                    objects: expect.arrayContaining([
+                    objects: expect.toIncludeSameMembers([
                         {
                             id: "cain",
                         },

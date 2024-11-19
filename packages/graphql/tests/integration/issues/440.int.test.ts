@@ -17,49 +17,63 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/440", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    const typeDefs = gql`
-        type Video {
-            id: ID! @id(autogenerate: false)
-            categories: [Category!]! @relationship(type: "IS_CATEGORIZED_AS", direction: OUT)
-        }
+    const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
 
-        type Category {
-            id: ID! @id(autogenerate: false)
-            videos: [Video!]! @relationship(type: "IS_CATEGORIZED_AS", direction: IN)
-        }
-    `;
+    let typeDefs: string;
+    let Video: UniqueType;
+    let Category: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        cdcEnabled = await testHelper.assertCDCEnabled();
+        if (!cdcEnabled) {
+            await testHelper.close();
+        }
     });
 
-    afterAll(async () => {
-        await driver.close();
+    beforeEach(() => {
+        Video = testHelper.createUniqueType("Video");
+        Category = testHelper.createUniqueType("Category");
+
+        typeDefs = `
+        type ${Video} @node {
+            id: ID! @unique
+            categories: [${Category}!]! @relationship(type: "IS_CATEGORIZED_AS", direction: OUT)
+        }
+
+        type ${Category} @node {
+            id: ID! @unique
+            videos: [${Video}!]! @relationship(type: "IS_CATEGORIZED_AS", direction: IN)
+        }
+    `;
+    });
+
+    afterEach(async () => {
+        if (cdcEnabled) {
+            await testHelper.close();
+        }
     });
 
     test("should be able to disconnect 2 nodes while creating one in the same mutation", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
+        const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
         const videoID = generate({ charset: "alphabetic" });
         const catIDs = Array(3)
             .fill(0)
             .map(() => generate({ charset: "alphabetic" }));
 
-        await session.run(
-            `CREATE (v:Video {id: $videoID}),
-                (v)-[:IS_CATEGORIZED_AS]->(:Category {id: $c0}),
-                (v)-[:IS_CATEGORIZED_AS]->(:Category {id: $c1})`,
+        await testHelper.executeCypher(
+            `CREATE (v:${Video} {id: $videoID}),
+                (v)-[:IS_CATEGORIZED_AS]->(:${Category} {id: $c0}),
+                (v)-[:IS_CATEGORIZED_AS]->(:${Category} {id: $c1})`,
             { videoID, c0: catIDs[0], c1: catIDs[1] }
         );
 
@@ -82,9 +96,9 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
         };
 
         const mutation = `
-            mutation updateVideos($id: ID!, $fields: VideoUpdateInput!) {
-                updateVideos(where: {id: $id}, update: $fields) {
-                    videos {
+            mutation updateVideos($id: ID!, $fields: ${Video}UpdateInput!) {
+                ${Video.operations.update}(where: {id_EQ: $id}, update: $fields) {
+                    ${Video.plural} {
                         id
                         categories {
                             id
@@ -94,39 +108,37 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
             }
         `;
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const mutationResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                variableValues,
-            });
+        const mutationResult = await testHelper.executeGraphQL(mutation, {
+            variableValues,
+        });
 
-            expect(mutationResult.errors).toBeFalsy();
+        expect(mutationResult.errors).toBeFalsy();
 
-            expect((mutationResult?.data as any)?.updateVideos?.videos).toHaveLength(1);
-            expect((mutationResult?.data as any)?.updateVideos?.videos[0].id).toEqual(videoID);
-            expect((mutationResult?.data as any)?.updateVideos?.videos[0].categories).toHaveLength(1);
-            expect((mutationResult?.data as any)?.updateVideos?.videos[0].categories[0].id).toEqual(catIDs[2]);
-        } finally {
-            await session.close();
-        }
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural]).toHaveLength(1);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].id).toEqual(videoID);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].categories).toHaveLength(1);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].categories[0].id).toEqual(
+            catIDs[2]
+        );
     });
 
     test("should be able to delete 2 nodes while creating one in the same mutation", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
+        const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
         const videoID = generate({ charset: "alphabetic" });
         const catIDs = Array(3)
             .fill(0)
             .map(() => generate({ charset: "alphabetic" }));
 
-        await session.run(
-            `CREATE (v:Video {id: $videoID}),
-                (v)-[:IS_CATEGORIZED_AS]->(:Category {id: $c0}),
-                (v)-[:IS_CATEGORIZED_AS]->(:Category {id: $c1})`,
+        await testHelper.executeCypher(
+            `CREATE (v:${Video} {id: $videoID}),
+                (v)-[:IS_CATEGORIZED_AS]->(:${Category} {id: $c0}),
+                (v)-[:IS_CATEGORIZED_AS]->(:${Category} {id: $c1})`,
             { videoID, c0: catIDs[0], c1: catIDs[1] }
         );
 
@@ -149,9 +161,9 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
         };
 
         const mutation = `
-            mutation updateVideos($id: ID!, $fields: VideoUpdateInput!) {
-                updateVideos(where: {id: $id}, update: $fields) {
-                    videos {
+            mutation updateVideos($id: ID!, $fields: ${Video}UpdateInput!) {
+                ${Video.operations.update}(where: {id_EQ: $id}, update: $fields) {
+                    ${Video.plural} {
                         id
                         categories {
                             id
@@ -161,24 +173,89 @@ describe("https://github.com/neo4j/graphql/issues/440", () => {
             }
         `;
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const mutationResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                variableValues,
-            });
+        const mutationResult = await testHelper.executeGraphQL(mutation, {
+            variableValues,
+        });
 
-            expect(mutationResult.errors).toBeFalsy();
+        expect(mutationResult.errors).toBeFalsy();
 
-            expect((mutationResult?.data as any)?.updateVideos?.videos).toHaveLength(1);
-            expect((mutationResult?.data as any)?.updateVideos?.videos[0].id).toEqual(videoID);
-            expect((mutationResult?.data as any)?.updateVideos?.videos[0].categories).toHaveLength(1);
-            expect((mutationResult?.data as any)?.updateVideos?.videos[0].categories[0].id).toEqual(catIDs[2]);
-        } finally {
-            await session.close();
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural]).toHaveLength(1);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].id).toEqual(videoID);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].categories).toHaveLength(1);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].categories[0].id).toEqual(
+            catIDs[2]
+        );
+    });
+
+    test("should be able to delete 2 nodes while creating one in the same mutation - with subscriptions", async () => {
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
         }
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: {
+                subscriptions: await testHelper.getSubscriptionEngine(),
+            },
+        });
+        const videoID = generate({ charset: "alphabetic" });
+        const catIDs = Array(3)
+            .fill(0)
+            .map(() => generate({ charset: "alphabetic" }));
+
+        await testHelper.executeCypher(
+            `CREATE (v:${Video} {id: $videoID}),
+                (v)-[:IS_CATEGORIZED_AS]->(:${Category} {id: $c0}),
+                (v)-[:IS_CATEGORIZED_AS]->(:${Category} {id: $c1})`,
+            { videoID, c0: catIDs[0], c1: catIDs[1] }
+        );
+
+        const variableValues = {
+            id: videoID,
+            fields: {
+                categories: [
+                    {
+                        delete: [
+                            {
+                                where: {
+                                    node: { id_IN: [catIDs[0], catIDs[1]] },
+                                },
+                            },
+                        ],
+                        create: [{ node: { id: catIDs[2] } }],
+                    },
+                ],
+            },
+        };
+
+        const mutation = `
+            mutation updateVideos($id: ID!, $fields: ${Video}UpdateInput!) {
+                ${Video.operations.update}(where: {id_EQ: $id}, update: $fields) {
+                    ${Video.plural} {
+                        id
+                        categories {
+                            id
+                        }
+                    }
+                }
+            }
+        `;
+
+        await neoSchema.checkNeo4jCompat();
+
+        const mutationResult = await testHelper.executeGraphQL(mutation, {
+            variableValues,
+        });
+
+        expect(mutationResult.errors).toBeFalsy();
+
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural]).toHaveLength(1);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].id).toEqual(videoID);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].categories).toHaveLength(1);
+        expect((mutationResult?.data as any)[Video.operations.update][Video.plural][0].categories[0].id).toEqual(
+            catIDs[2]
+        );
     });
 });

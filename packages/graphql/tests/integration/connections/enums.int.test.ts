@@ -17,59 +17,54 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("Enum Relationship Properties", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let Actor: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
-
-    afterAll(async () => {
-        await driver.close();
-    });
-
-    test("should create a movie and an actor, with an enum as a relationship property", async () => {
-        const session = await neo4j.getSession();
-
+    beforeEach(async () => {
+        Movie = testHelper.createUniqueType("Movie");
+        Actor = testHelper.createUniqueType("Actor");
+        const typeDefs = `
+            type ${Actor} @node {
+                name: String!
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+            }
+    
+            type ${Movie} @node {
+                title: String!
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
+            }
+    
+            enum RoleType {
+                LEADING
+                SUPPORTING
+            }
+    
+            type ActedIn @relationshipProperties {
+                roleType: RoleType!
+            }
+        `;
         const roleTypeResolver = {
             LEADING: "Leading",
             SUPPORTING: "Supporting",
         };
 
-        const typeDefs = `
-            type Actor {
-                name: String!
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
-            }
-
-            type Movie {
-                title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
-            }
-
-            enum RoleType {
-                LEADING
-                SUPPORTING
-            }
-
-            interface ActedIn {
-                roleType: RoleType!
-            }
-        `;
-
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
             resolvers: { RoleType: roleTypeResolver },
         });
+    });
 
+    afterEach(async () => {
+        await testHelper.close();
+    });
+
+    test("should create a movie and an actor, with an enum as a relationship property", async () => {
         const title = generate({
             charset: "alphabetic",
         });
@@ -78,28 +73,20 @@ describe("Enum Relationship Properties", () => {
             charset: "alphabetic",
         });
 
-        const create = `
+        const create = /* GraphQL */ `
             mutation CreateMovies($title: String!, $name: String!) {
-                createMovies(
+                ${Movie.operations.create}(
                     input: [
-                        {
-                            title: $title
-                            actors: {
-                                create: [
-                                    {
-                                        edge: { roleType: LEADING }
-                                        node: { name: $name }
-                                    }
-                                ]
-                            }
-                        }
+                        { title: $title, actors: { create: [{ edge: { roleType: LEADING }, node: { name: $name } }] } }
                     ]
                 ) {
-                    movies {
+                    ${Movie.plural} {
                         title
                         actorsConnection {
                             edges {
-                                roleType
+                                properties {
+                                    roleType
+                                }
                                 node {
                                     name
                                 }
@@ -110,31 +97,29 @@ describe("Enum Relationship Properties", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                variableValues: { title, name },
-            });
+        const gqlResult = await testHelper.executeGraphQL(create, {
+            variableValues: { title, name },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult.data).toEqual({
-                createMovies: {
-                    movies: [{ title, actorsConnection: { edges: [{ roleType: "LEADING", node: { name } }] } }],
-                },
-            });
+        expect(gqlResult.data).toEqual({
+            [Movie.operations.create]: {
+                [Movie.plural]: [
+                    {
+                        title,
+                        actorsConnection: { edges: [{ properties: { roleType: "LEADING" }, node: { name } }] },
+                    },
+                ],
+            },
+        });
 
-            const result = await session.run(`
-                MATCH (m:Movie)<-[ai:ACTED_IN]-(a:Actor)
+        const result = await testHelper.executeCypher(`
+                MATCH (m:${Movie})<-[ai:ACTED_IN]-(a:${Actor})
                 WHERE m.title = "${title}" AND a.name = "${name}"
                 RETURN ai
             `);
 
-            expect((result.records[0].toObject() as any).ai.properties).toEqual({ roleType: "Leading" });
-        } finally {
-            await session.close();
-        }
+        expect((result.records[0]?.toObject() as any).ai.properties).toEqual({ roleType: "Leading" });
     });
 });

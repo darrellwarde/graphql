@@ -17,40 +17,37 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("info", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let Actor: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
+        Actor = testHelper.createUniqueType("Actor");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should return info from a create mutation", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
+            type ${Actor} @node {
                 name: String!
             }
 
-            type Movie {
+            type ${Movie} @node {
                 title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const title = generate({
             charset: "alphabetic",
@@ -61,13 +58,12 @@ describe("info", () => {
 
         const query = `
             mutation($title: String!, $name: String!) {
-                createMovies(input: [{ title: $title, actors: { create: [{ node: { name: $name } }] } }]) {
+                ${Movie.operations.create}(input: [{ title: $title, actors: { create: [{ node: { name: $name } }] } }]) {
                     info {
-                        bookmark
                         nodesCreated
                         relationshipsCreated
                     }
-                    movies {
+                    ${Movie.plural} {
                         title
                         actors {
                             name
@@ -77,35 +73,27 @@ describe("info", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { title, name },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { title, name },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(typeof (gqlResult?.data as any)?.createMovies.info.bookmark).toBe("string");
-            expect((gqlResult?.data as any)?.createMovies.info.nodesCreated).toBe(2);
-            expect((gqlResult?.data as any)?.createMovies.info.relationshipsCreated).toBe(1);
-            expect((gqlResult?.data as any)?.createMovies.movies).toEqual([{ title, actors: [{ name }] }]);
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult?.data as any)?.[Movie.operations.create].info.nodesCreated).toBe(2);
+        expect((gqlResult?.data as any)?.[Movie.operations.create].info.relationshipsCreated).toBe(1);
+        expect((gqlResult?.data as any)?.[Movie.operations.create][Movie.plural]).toEqual([
+            { title, actors: [{ name }] },
+        ]);
     });
 
     test("should return info from a delete mutation", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -113,38 +101,31 @@ describe("info", () => {
 
         const query = `
             mutation($id: ID!) {
-                deleteMovies(where: { id: $id }) {
-                    bookmark
+                ${Movie.operations.delete}(where: { id_EQ: $id }) {
+                    nodesDeleted
+                    relationshipsDeleted
                 }
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { id },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(typeof (gqlResult?.data as any)?.deleteMovies.bookmark).toBe("string");
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult?.data as any)?.[Movie.operations.delete].nodesDeleted).toBe(0);
+        expect((gqlResult?.data as any)?.[Movie.operations.delete].relationshipsDeleted).toBe(0);
     });
 
     test("should return info from an update mutation", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -152,30 +133,22 @@ describe("info", () => {
 
         const query = `
             mutation($id: ID!) {
-                updateMovies(where: { id: $id }) {
-                    info {
-                        bookmark
-                    }
-                    movies {
+                ${Movie.operations.update}(where: { id_EQ: $id }) {
+                    ${Movie.plural} {
                         id
+                    }
+                    info {
+                        nodesCreated
                     }
                 }
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { id },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
-
-            expect(typeof (gqlResult?.data as any)?.updateMovies.info.bookmark).toBe("string");
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult.errors).toBeFalsy();
+        expect((gqlResult?.data as any)?.[Movie.operations.update].info.nodesCreated).toBe(0);
     });
 });

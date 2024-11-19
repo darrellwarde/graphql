@@ -17,179 +17,199 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
+import { GraphQLError } from "graphql";
 import { generate } from "randomstring";
-import { Neo4jGraphQL } from "../../../src/classes";
-import Neo4j from "../neo4j";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("@coalesce directive", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("on non-primitive field should throw an error", async () => {
+        const type = testHelper.createUniqueType("User");
         const typeDefs = `
-            type User {
+            type ${type} @node {
                 name: String!
                 location: Point! @coalesce(value: "default")
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
-        await expect(neoSchema.getSchema()).rejects.toThrow(
-            "@coalesce directive can only be used on primitive type fields"
-        );
+        await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
+            new GraphQLError("@coalesce is not supported by Spatial types."),
+        ]);
     });
 
     test("on DateTime field should throw an error", async () => {
+        const type = testHelper.createUniqueType("User");
         const typeDefs = `
-            type User {
+            type ${type} @node {
                 name: String!
                 createdAt: DateTime! @coalesce(value: "1970-01-01T00:00:00.000Z")
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
-        await expect(neoSchema.getSchema()).rejects.toThrow(
-            "@coalesce is not supported by DateTime fields at this time"
-        );
+        await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
+            new GraphQLError("@coalesce is not supported by Temporal types."),
+        ]);
     });
 
     test("with an argument with a type which doesn't match the field should throw an error", async () => {
+        const type = testHelper.createUniqueType("User");
         const typeDefs = `
-            type User {
+            type ${type} @node {
                 name: String! @coalesce(value: 2)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
-        await expect(neoSchema.getSchema()).rejects.toThrow(
-            "coalesce() value for User.name does not have matching type String"
-        );
+        await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
+            new GraphQLError("@coalesce.value on String fields must be of type String"),
+        ]);
     });
 
     test("allows querying with null properties without affecting the returned result", async () => {
-        const type = generateUniqueType("Movie");
+        const type = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
                 id: ID!
                 classification: String @coalesce(value: "Unrated")
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
         const query = `
             query {
-                ${type.plural}(where: {classification: "Unrated"}){
+                ${type.plural}(where: {classification_EQ: "Unrated"}){
                     id
                     classification
                 }
             }
         `;
 
-        const session = await neo4j.getSession();
-
         const id = generate({
             charset: "alphabetic",
         });
 
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (:${type.name} {id: "${id}"})
             `);
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any)[type.plural][0]).toEqual({
-                id,
-                classification: null,
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[type.plural][0]).toEqual({
+            id,
+            classification: null,
+        });
     });
 
     test("with enum values", async () => {
-        const type = generateUniqueType("Movie");
+        const type = testHelper.createUniqueType("Movie");
 
         const typeDefs = `
             enum Status {
                 ACTIVE
                 INACTIVE
             }
-            type ${type.name} {
+            type ${type.name} @node {
                 id: ID
                 status: Status @coalesce(value: ACTIVE)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
         const query = `
             query {
-                ${type.plural}(where: {status: ACTIVE}){
+                ${type.plural}(where: {status_EQ: ACTIVE}){
                     id
                     status
                 }
             }
         `;
 
-        const session = await neo4j.getSession();
+        const id = generate({
+            charset: "alphabetic",
+        });
+
+        await testHelper.executeCypher(`
+                CREATE (:${type.name} {id: "${id}"})
+            `);
+
+        const gqlResult = await testHelper.executeGraphQL(query);
+
+        expect(gqlResult.errors).toBeFalsy();
+
+        expect((gqlResult.data as any)[type.plural][0]).toEqual({
+            id,
+            status: null,
+        });
+    });
+
+    test("with enum list values", async () => {
+        const type = testHelper.createUniqueType("Movie");
+
+        const typeDefs = `
+            enum Status {
+                ACTIVE
+                INACTIVE
+            }
+
+            type ${type.name} @node {
+                id: ID
+                statuses: [Status!] @coalesce(value: [ACTIVE, INACTIVE])
+            }
+        `;
+
+        await testHelper.initNeo4jGraphQL({
+            typeDefs,
+        });
+
+        const query = `
+            query {
+                ${type.plural}(where: {statuses_EQ: [ACTIVE, INACTIVE]}){
+                    id
+                    statuses
+                }
+            }
+        `;
 
         const id = generate({
             charset: "alphabetic",
         });
 
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (:${type.name} {id: "${id}"})
             `);
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any)[type.plural][0]).toEqual({
-                id,
-                status: null,
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[type.plural][0]).toEqual({
+            id,
+            statuses: null,
+        });
     });
 });

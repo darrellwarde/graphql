@@ -17,9 +17,8 @@
  * limitations under the License.
  */
 
-/* eslint-disable-next-line import/no-extraneous-dependencies */
-import { gql } from "apollo-server-core";
 import type { DirectiveNode, ObjectTypeDefinitionNode } from "graphql";
+import gql from "graphql-tag";
 import getObjFieldMeta from "../get-obj-field-meta";
 import parseFulltextDirective from "./parse-fulltext-directive";
 
@@ -27,13 +26,15 @@ describe("parseFulltextDirective", () => {
     test("should throw error when directive has duplicate name", () => {
         const typeDefs = gql`
             type Movie
-                @fulltext(indexes: [{ name: "MyIndex", fields: ["title"] }, { name: "MyIndex", fields: ["title"] }]) {
+                @fulltext(
+                    indexes: [{ indexName: "MyIndex", fields: ["title"] }, { indexName: "MyIndex", fields: ["title"] }]
+                ) {
                 title: String
                 description: String
             }
         `;
 
-        const definition = (typeDefs.definitions[0] as unknown) as ObjectTypeDefinitionNode;
+        const definition = typeDefs.definitions[0] as unknown as ObjectTypeDefinitionNode;
         const directive = (definition.directives || [])[0] as DirectiveNode;
 
         const nodeFields = getObjFieldMeta({
@@ -56,13 +57,13 @@ describe("parseFulltextDirective", () => {
 
     test("should throw error when directive field is missing", () => {
         const typeDefs = gql`
-            type Movie @fulltext(indexes: [{ name: "MyIndex", fields: ["title"] }]) {
+            type Movie @fulltext(indexes: [{ indexName: "MyIndex", fields: ["title"] }]) @node {
                 description: String
                 imdbRating: Int
             }
         `;
 
-        const definition = (typeDefs.definitions[0] as unknown) as ObjectTypeDefinitionNode;
+        const definition = typeDefs.definitions[0] as unknown as ObjectTypeDefinitionNode;
         const directive = (definition.directives || [])[0] as DirectiveNode;
 
         const nodeFields = getObjFieldMeta({
@@ -80,7 +81,9 @@ describe("parseFulltextDirective", () => {
                 definition,
                 nodeFields,
             })
-        ).toThrow("Node 'Movie' @fulltext index contains invalid index 'MyIndex' cannot use find String field 'title'");
+        ).toThrow(
+            "Node 'Movie' @fulltext index contains invalid index 'MyIndex' cannot use find String or ID field 'title'"
+        );
     });
 
     test("should return valid Fulltext", () => {
@@ -88,8 +91,8 @@ describe("parseFulltextDirective", () => {
             type Movie
                 @fulltext(
                     indexes: [
-                        { name: "MovieTitle", fields: ["title"] }
-                        { name: "MovieDescription", fields: ["description"] }
+                        { indexName: "MovieTitle", fields: ["title"] }
+                        { indexName: "MovieDescription", fields: ["description"] }
                     ]
                 ) {
                 title: String
@@ -97,7 +100,7 @@ describe("parseFulltextDirective", () => {
             }
         `;
 
-        const definition = (typeDefs.definitions[0] as unknown) as ObjectTypeDefinitionNode;
+        const definition = typeDefs.definitions[0] as unknown as ObjectTypeDefinitionNode;
         const directive = (definition.directives || [])[0] as DirectiveNode;
 
         const nodeFields = getObjFieldMeta({
@@ -117,8 +120,8 @@ describe("parseFulltextDirective", () => {
 
         expect(result).toEqual({
             indexes: [
-                { name: "MovieTitle", fields: ["title"] },
-                { name: "MovieDescription", fields: ["description"] },
+                { indexName: "MovieTitle", fields: ["title"] },
+                { indexName: "MovieDescription", fields: ["description"] },
             ],
         });
     });

@@ -17,49 +17,46 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/200", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    let Category: UniqueType;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeAll(() => {
+        Category = testHelper.createUniqueType("Category");
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should successfully execute given mutation", async () => {
         const typeDefs = `
-            type Category {
-                categoryId: ID! @id
+            type ${Category} @node {
+                categoryId: ID! @id @unique
                 name: String!
                 description: String! @default(value: "")
                 exampleImageLocations: [String!]
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const catOne = generate({ charset: "alphabetic" });
         const catTwo = generate({ charset: "alphabetic" });
 
         const query = `
             mutation($catOne: String!, $catTwo: String!, $exampleImageLocations: [String!]) {
-                createCategories(
+                ${Category.operations.create}(
                   input: [
                     { name: $catOne}
                     { name: $catTwo, exampleImageLocations: $exampleImageLocations }
                   ]
                 ) {
-                  categories {
+                  ${Category.plural} {
                     name
                     exampleImageLocations
                   }
@@ -67,16 +64,13 @@ describe("https://github.com/neo4j/graphql/issues/200", () => {
             }
         `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
+        const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { catOne, catTwo, exampleImageLocations: [] },
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(gqlResult.errors).toBeFalsy();
 
-        const cats = (gqlResult?.data as any)?.createCategories.categories as any[];
+        const cats = (gqlResult?.data as any)?.[Category.operations.create][Category.plural] as any[];
 
         const one = cats.find((x) => x.name === catOne);
         expect(one).toEqual({ name: catOne, exampleImageLocations: null });

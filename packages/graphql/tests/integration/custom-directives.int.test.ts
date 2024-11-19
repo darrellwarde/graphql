@@ -17,31 +17,27 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { gql } from "apollo-server";
+import { MapperKind, getDirective, mapSchema } from "@graphql-tools/utils";
 import type { GraphQLSchema } from "graphql";
-import { graphql, defaultFieldResolver } from "graphql";
-import { getDirective, MapperKind, mapSchema } from "@graphql-tools/utils";
+import { defaultFieldResolver, graphql } from "graphql";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import { Neo4jGraphQL } from "../../src/classes";
-import Neo4j from "./neo4j";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("Custom Directives", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeAll(() => {
+        Movie = testHelper.createUniqueType("Movie");
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should define a custom schemaDirective and resolve it", async () => {
-        const session = await neo4j.getSession();
-
         function upperDirective(directiveName: string) {
             return {
                 upperDirectiveTypeDefs: `directive @${directiveName} on FIELD_DEFINITION`,
@@ -51,7 +47,7 @@ describe("Custom Directives", () => {
                             const fieldDirective = getDirective(schema, fieldConfig, directiveName)?.[0];
                             if (fieldDirective) {
                                 const { resolve = defaultFieldResolver } = fieldConfig;
-                                 
+
                                 fieldConfig.resolve = async (source, args, context, info) => {
                                     const result = await resolve(source, args, context, info);
                                     if (typeof result === "string") {
@@ -68,18 +64,17 @@ describe("Custom Directives", () => {
 
         const { upperDirectiveTypeDefs, upperDirectiveTransformer } = upperDirective("uppercase");
 
-        const neoSchema = new Neo4jGraphQL({
+        const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs: [
                 upperDirectiveTypeDefs,
                 gql`
                     directive @uppercase on FIELD_DEFINITION
 
-                    type Movie {
+                    type ${Movie} @node {
                         name: String @uppercase
                     }
                 `,
             ],
-            driver,
         });
 
         const schema = upperDirectiveTransformer(await neoSchema.getSchema());
@@ -90,28 +85,25 @@ describe("Custom Directives", () => {
 
         const create = `
             mutation {
-                createMovies(input:[{name: "${name}"}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{name: "${name}"}]) {
+                    ${Movie.plural} {
                         name
                     }
                 }
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema,
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        // Using graphql directly here as part of the test
+        const gqlResult = await graphql({
+            schema,
+            source: create,
+            contextValue: await testHelper.getContextValue(),
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any).createMovies.movies[0]).toEqual({
-                name: name.toUpperCase(),
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[Movie.operations.create][Movie.plural][0]).toEqual({
+            name: name.toUpperCase(),
+        });
     });
 });

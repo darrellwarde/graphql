@@ -18,8 +18,8 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Comments", () => {
@@ -38,7 +38,7 @@ describe("Comments", () => {
             """
             A type describing a movie.
             """
-            type Movie {
+            type Movie @node {
                 id: ID
                 "The number of actors who acted in the movie."
                 actorCount: Int
@@ -65,8 +65,10 @@ describe("Comments", () => {
               mutation: Mutation
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -79,13 +81,15 @@ describe("Comments", () => {
             \\"\\"\\"A custom scalar.\\"\\"\\"
             scalar CustomScalar
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
-            type FloatAggregateSelectionNullable {
+            type FloatAggregateSelection {
               average: Float
               max: Float
               min: Float
@@ -99,12 +103,12 @@ describe("Comments", () => {
               ROMANCE
             }
 
-            type IDAggregateSelectionNullable {
+            type IDAggregateSelection {
               longest: ID
               shortest: ID
             }
 
-            type IntAggregateSelectionNullable {
+            type IntAggregateSelection {
               average: Float
               max: Int
               min: Int
@@ -129,10 +133,10 @@ describe("Comments", () => {
             }
 
             type MovieAggregateSelection {
-              actorCount: IntAggregateSelectionNullable!
-              averageRating: FloatAggregateSelectionNullable!
+              actorCount: IntAggregateSelection!
+              averageRating: FloatAggregateSelection!
               count: Int!
-              id: IDAggregateSelectionNullable!
+              id: IDAggregateSelection!
             }
 
             input MovieCreateInput {
@@ -171,56 +175,58 @@ describe("Comments", () => {
             }
 
             input MovieUpdateInput {
-              actorCount: Int
+              actorCount: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               actorCount_DECREMENT: Int
               actorCount_INCREMENT: Int
-              averageRating: Float
+              actorCount_SET: Int
+              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
+              averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              customScalar: CustomScalar
-              genre: Genre
-              id: ID
-              isActive: Boolean
+              customScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _SET field\\")
+              customScalar_SET: CustomScalar
+              genre: Genre @deprecated(reason: \\"Please use the explicit _SET field\\")
+              genre_SET: Genre
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              isActive: Boolean @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isActive_SET: Boolean
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
+              NOT: MovieWhere
               OR: [MovieWhere!]
-              actorCount: Int
+              actorCount: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              actorCount_EQ: Int
               actorCount_GT: Int
               actorCount_GTE: Int
               actorCount_IN: [Int]
               actorCount_LT: Int
               actorCount_LTE: Int
-              actorCount_NOT: Int
-              actorCount_NOT_IN: [Int]
-              averageRating: Float
+              averageRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              averageRating_EQ: Float
               averageRating_GT: Float
               averageRating_GTE: Float
               averageRating_IN: [Float]
               averageRating_LT: Float
               averageRating_LTE: Float
-              averageRating_NOT: Float
-              averageRating_NOT_IN: [Float]
-              customScalar: CustomScalar
-              genre: Genre
+              customScalar: CustomScalar @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              customScalar_EQ: CustomScalar
+              customScalar_IN: [CustomScalar]
+              genre: Genre @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              genre_EQ: Genre
               genre_IN: [Genre]
-              genre_NOT: Genre
-              genre_NOT_IN: [Genre]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID
-              id_NOT_CONTAINS: ID
-              id_NOT_ENDS_WITH: ID
-              id_NOT_IN: [ID]
-              id_NOT_STARTS_WITH: ID
               id_STARTS_WITH: ID
-              isActive: Boolean
-              isActive_NOT: Boolean
+              isActive: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              isActive_EQ: Boolean
             }
 
             type MoviesConnection {
@@ -244,11 +250,12 @@ describe("Comments", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -256,8 +263,10 @@ describe("Comments", () => {
               DESC
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -274,11 +283,11 @@ describe("Comments", () => {
     describe("Relationship", () => {
         test("Simple", async () => {
             const typeDefs = gql`
-                type Actor {
+                type Actor @node {
                     name: String
                 }
 
-                type Movie {
+                type Movie @node {
                     id: ID
                     "Actors in Movie"
                     actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
@@ -299,7 +308,7 @@ describe("Comments", () => {
 
                 type ActorAggregateSelection {
                   count: Int!
-                  name: StringAggregateSelectionNullable!
+                  name: StringAggregateSelection!
                 }
 
                 input ActorConnectWhere {
@@ -332,21 +341,19 @@ describe("Comments", () => {
                 }
 
                 input ActorUpdateInput {
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
                   AND: [ActorWhere!]
+                  NOT: ActorWhere
                   OR: [ActorWhere!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
+                  name_EQ: String
                   name_IN: [String]
-                  name_NOT: String
-                  name_NOT_CONTAINS: String
-                  name_NOT_ENDS_WITH: String
-                  name_NOT_IN: [String]
-                  name_NOT_STARTS_WITH: String
                   name_STARTS_WITH: String
                 }
 
@@ -361,8 +368,10 @@ describe("Comments", () => {
                   info: CreateInfo!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships created during a create mutation
+                \\"\\"\\"
                 type CreateInfo {
-                  bookmark: String
                   nodesCreated: Int!
                   relationshipsCreated: Int!
                 }
@@ -372,22 +381,24 @@ describe("Comments", () => {
                   movies: [Movie!]!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships deleted during a delete mutation
+                \\"\\"\\"
                 type DeleteInfo {
-                  bookmark: String
                   nodesDeleted: Int!
                   relationshipsDeleted: Int!
                 }
 
-                type IDAggregateSelectionNullable {
+                type IDAggregateSelection {
                   longest: ID
                   shortest: ID
                 }
 
                 type Movie {
                   \\"\\"\\"Actors in Movie\\"\\"\\"
-                  actors(directed: Boolean = true, options: ActorOptions, where: ActorWhere): [Actor!]!
-                  actorsAggregate(directed: Boolean = true, where: ActorWhere): MovieActorActorsAggregationSelection
-                  actorsConnection(after: String, directed: Boolean = true, first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
+                  actors(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+                  actorsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ActorWhere): MovieActorActorsAggregationSelection
+                  actorsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieActorsConnectionSort!], where: MovieActorsConnectionWhere): MovieActorsConnection!
                   id: ID
                 }
 
@@ -397,13 +408,15 @@ describe("Comments", () => {
                 }
 
                 type MovieActorActorsNodeAggregateSelection {
-                  name: StringAggregateSelectionNullable!
+                  name: StringAggregateSelection!
                 }
 
                 input MovieActorsAggregateInput {
                   AND: [MovieActorsAggregateInput!]
+                  NOT: MovieActorsAggregateInput
                   OR: [MovieActorsAggregateInput!]
-                  count: Int
+                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  count_EQ: Int
                   count_GT: Int
                   count_GTE: Int
                   count_LT: Int
@@ -412,6 +425,10 @@ describe("Comments", () => {
                 }
 
                 input MovieActorsConnectFieldInput {
+                  \\"\\"\\"
+                  Whether or not to overwrite any matching relationship with the new properties.
+                  \\"\\"\\"
+                  overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
                   where: ActorConnectWhere
                 }
 
@@ -427,9 +444,9 @@ describe("Comments", () => {
 
                 input MovieActorsConnectionWhere {
                   AND: [MovieActorsConnectionWhere!]
+                  NOT: MovieActorsConnectionWhere
                   OR: [MovieActorsConnectionWhere!]
                   node: ActorWhere
-                  node_NOT: ActorWhere
                 }
 
                 input MovieActorsCreateFieldInput {
@@ -451,27 +468,23 @@ describe("Comments", () => {
 
                 input MovieActorsNodeAggregationWhereInput {
                   AND: [MovieActorsNodeAggregationWhereInput!]
+                  NOT: MovieActorsNodeAggregationWhereInput
                   OR: [MovieActorsNodeAggregationWhereInput!]
-                  name_AVERAGE_EQUAL: Float
-                  name_AVERAGE_GT: Float
-                  name_AVERAGE_GTE: Float
-                  name_AVERAGE_LT: Float
-                  name_AVERAGE_LTE: Float
-                  name_EQUAL: String
-                  name_GT: Int
-                  name_GTE: Int
-                  name_LONGEST_EQUAL: Int
-                  name_LONGEST_GT: Int
-                  name_LONGEST_GTE: Int
-                  name_LONGEST_LT: Int
-                  name_LONGEST_LTE: Int
-                  name_LT: Int
-                  name_LTE: Int
-                  name_SHORTEST_EQUAL: Int
-                  name_SHORTEST_GT: Int
-                  name_SHORTEST_GTE: Int
-                  name_SHORTEST_LT: Int
-                  name_SHORTEST_LTE: Int
+                  name_AVERAGE_LENGTH_EQUAL: Float
+                  name_AVERAGE_LENGTH_GT: Float
+                  name_AVERAGE_LENGTH_GTE: Float
+                  name_AVERAGE_LENGTH_LT: Float
+                  name_AVERAGE_LENGTH_LTE: Float
+                  name_LONGEST_LENGTH_EQUAL: Int
+                  name_LONGEST_LENGTH_GT: Int
+                  name_LONGEST_LENGTH_GTE: Int
+                  name_LONGEST_LENGTH_LT: Int
+                  name_LONGEST_LENGTH_LTE: Int
+                  name_SHORTEST_LENGTH_EQUAL: Int
+                  name_SHORTEST_LENGTH_GT: Int
+                  name_SHORTEST_LENGTH_GTE: Int
+                  name_SHORTEST_LENGTH_LT: Int
+                  name_SHORTEST_LENGTH_LTE: Int
                 }
 
                 type MovieActorsRelationship {
@@ -494,11 +507,7 @@ describe("Comments", () => {
 
                 type MovieAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelectionNullable!
-                }
-
-                input MovieConnectInput {
-                  actors: [MovieActorsConnectFieldInput!]
+                  id: IDAggregateSelection!
                 }
 
                 input MovieCreateInput {
@@ -508,10 +517,6 @@ describe("Comments", () => {
 
                 input MovieDeleteInput {
                   actors: [MovieActorsDeleteFieldInput!]
-                }
-
-                input MovieDisconnectInput {
-                  actors: [MovieActorsDisconnectFieldInput!]
                 }
 
                 type MovieEdge {
@@ -528,10 +533,6 @@ describe("Comments", () => {
                   sort: [MovieSort!]
                 }
 
-                input MovieRelationInput {
-                  actors: [MovieActorsCreateFieldInput!]
-                }
-
                 \\"\\"\\"
                 Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
                 \\"\\"\\"
@@ -541,38 +542,44 @@ describe("Comments", () => {
 
                 input MovieUpdateInput {
                   actors: [MovieActorsUpdateFieldInput!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input MovieWhere {
                   AND: [MovieWhere!]
+                  NOT: MovieWhere
                   OR: [MovieWhere!]
-                  actors: ActorWhere @deprecated(reason: \\"Use \`actors_SOME\` instead.\\")
                   actorsAggregate: MovieActorsAggregateInput
-                  actorsConnection: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_SOME\` instead.\\")
+                  \\"\\"\\"
+                  Return Movies where all of the related MovieActorsConnections match this filter
+                  \\"\\"\\"
                   actorsConnection_ALL: MovieActorsConnectionWhere
+                  \\"\\"\\"
+                  Return Movies where none of the related MovieActorsConnections match this filter
+                  \\"\\"\\"
                   actorsConnection_NONE: MovieActorsConnectionWhere
-                  actorsConnection_NOT: MovieActorsConnectionWhere @deprecated(reason: \\"Use \`actorsConnection_NONE\` instead.\\")
+                  \\"\\"\\"
+                  Return Movies where one of the related MovieActorsConnections match this filter
+                  \\"\\"\\"
                   actorsConnection_SINGLE: MovieActorsConnectionWhere
+                  \\"\\"\\"
+                  Return Movies where some of the related MovieActorsConnections match this filter
+                  \\"\\"\\"
                   actorsConnection_SOME: MovieActorsConnectionWhere
                   \\"\\"\\"Return Movies where all of the related Actors match this filter\\"\\"\\"
                   actors_ALL: ActorWhere
                   \\"\\"\\"Return Movies where none of the related Actors match this filter\\"\\"\\"
                   actors_NONE: ActorWhere
-                  actors_NOT: ActorWhere @deprecated(reason: \\"Use \`actors_NONE\` instead.\\")
                   \\"\\"\\"Return Movies where one of the related Actors match this filter\\"\\"\\"
                   actors_SINGLE: ActorWhere
                   \\"\\"\\"Return Movies where some of the related Actors match this filter\\"\\"\\"
                   actors_SOME: ActorWhere
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
-                  id_NOT: ID
-                  id_NOT_CONTAINS: ID
-                  id_NOT_ENDS_WITH: ID
-                  id_NOT_IN: [ID]
-                  id_NOT_STARTS_WITH: ID
                   id_STARTS_WITH: ID
                 }
 
@@ -588,7 +595,7 @@ describe("Comments", () => {
                   deleteActors(where: ActorWhere): DeleteInfo!
                   deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
                   updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
-                  updateMovies(connect: MovieConnectInput, create: MovieRelationInput, delete: MovieDeleteInput, disconnect: MovieDisconnectInput, update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                  updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                 }
 
                 \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -600,14 +607,15 @@ describe("Comments", () => {
                 }
 
                 type Query {
-                  actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                  actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                   actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                  actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
                 }
 
+                \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
                 enum SortDirection {
                   \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
                   ASC
@@ -615,7 +623,7 @@ describe("Comments", () => {
                   DESC
                 }
 
-                type StringAggregateSelectionNullable {
+                type StringAggregateSelection {
                   longest: String
                   shortest: String
                 }
@@ -625,8 +633,10 @@ describe("Comments", () => {
                   info: UpdateInfo!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships created and deleted during an update mutation
+                \\"\\"\\"
                 type UpdateInfo {
-                  bookmark: String
                   nodesCreated: Int!
                   nodesDeleted: Int!
                   relationshipsCreated: Int!
@@ -646,21 +656,21 @@ describe("Comments", () => {
                     title: String!
                 }
 
-                type Movie implements Production {
+                type Movie implements Production @node {
                     title: String!
                     runtime: Int!
                 }
 
-                type Series implements Production {
+                type Series implements Production @node {
                     title: String!
                     episodes: Int!
                 }
 
-                interface ActedIn @relationshipProperties {
+                type ActedIn @relationshipProperties {
                     screenTime: Int!
                 }
 
-                type Actor {
+                type Actor @node {
                     name: String!
                     "Acted in Production"
                     actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
@@ -675,8 +685,38 @@ describe("Comments", () => {
                   mutation: Mutation
                 }
 
-                interface ActedIn {
+                \\"\\"\\"
+                The edge properties for the following fields:
+                * Actor.actedIn
+                \\"\\"\\"
+                type ActedIn {
                   screenTime: Int!
+                }
+
+                input ActedInAggregationWhereInput {
+                  AND: [ActedInAggregationWhereInput!]
+                  NOT: ActedInAggregationWhereInput
+                  OR: [ActedInAggregationWhereInput!]
+                  screenTime_AVERAGE_EQUAL: Float
+                  screenTime_AVERAGE_GT: Float
+                  screenTime_AVERAGE_GTE: Float
+                  screenTime_AVERAGE_LT: Float
+                  screenTime_AVERAGE_LTE: Float
+                  screenTime_MAX_EQUAL: Int
+                  screenTime_MAX_GT: Int
+                  screenTime_MAX_GTE: Int
+                  screenTime_MAX_LT: Int
+                  screenTime_MAX_LTE: Int
+                  screenTime_MIN_EQUAL: Int
+                  screenTime_MIN_GT: Int
+                  screenTime_MIN_GTE: Int
+                  screenTime_MIN_LT: Int
+                  screenTime_MIN_LTE: Int
+                  screenTime_SUM_EQUAL: Int
+                  screenTime_SUM_GT: Int
+                  screenTime_SUM_GTE: Int
+                  screenTime_SUM_LT: Int
+                  screenTime_SUM_LTE: Int
                 }
 
                 input ActedInCreateInput {
@@ -688,29 +728,45 @@ describe("Comments", () => {
                 }
 
                 input ActedInUpdateInput {
-                  screenTime: Int
+                  screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   screenTime_DECREMENT: Int
                   screenTime_INCREMENT: Int
+                  screenTime_SET: Int
                 }
 
                 input ActedInWhere {
                   AND: [ActedInWhere!]
+                  NOT: ActedInWhere
                   OR: [ActedInWhere!]
-                  screenTime: Int
+                  screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  screenTime_EQ: Int
                   screenTime_GT: Int
                   screenTime_GTE: Int
                   screenTime_IN: [Int!]
                   screenTime_LT: Int
                   screenTime_LTE: Int
-                  screenTime_NOT: Int
-                  screenTime_NOT_IN: [Int!]
                 }
 
                 type Actor {
                   \\"\\"\\"Acted in Production\\"\\"\\"
-                  actedIn(directed: Boolean = true, options: ProductionOptions, where: ProductionWhere): [Production!]!
-                  actedInConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+                  actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+                  actedInAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: ProductionWhere): ActorProductionActedInAggregationSelection
+                  actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
                   name: String!
+                }
+
+                input ActorActedInAggregateInput {
+                  AND: [ActorActedInAggregateInput!]
+                  NOT: ActorActedInAggregateInput
+                  OR: [ActorActedInAggregateInput!]
+                  count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  count_EQ: Int
+                  count_GT: Int
+                  count_GTE: Int
+                  count_LT: Int
+                  count_LTE: Int
+                  edge: ActedInAggregationWhereInput
+                  node: ActorActedInNodeAggregationWhereInput
                 }
 
                 input ActorActedInConnectFieldInput {
@@ -731,11 +787,10 @@ describe("Comments", () => {
 
                 input ActorActedInConnectionWhere {
                   AND: [ActorActedInConnectionWhere!]
+                  NOT: ActorActedInConnectionWhere
                   OR: [ActorActedInConnectionWhere!]
                   edge: ActedInWhere
-                  edge_NOT: ActedInWhere
                   node: ProductionWhere
-                  node_NOT: ProductionWhere
                 }
 
                 input ActorActedInCreateFieldInput {
@@ -756,10 +811,31 @@ describe("Comments", () => {
                   create: [ActorActedInCreateFieldInput!]
                 }
 
-                type ActorActedInRelationship implements ActedIn {
+                input ActorActedInNodeAggregationWhereInput {
+                  AND: [ActorActedInNodeAggregationWhereInput!]
+                  NOT: ActorActedInNodeAggregationWhereInput
+                  OR: [ActorActedInNodeAggregationWhereInput!]
+                  title_AVERAGE_LENGTH_EQUAL: Float
+                  title_AVERAGE_LENGTH_GT: Float
+                  title_AVERAGE_LENGTH_GTE: Float
+                  title_AVERAGE_LENGTH_LT: Float
+                  title_AVERAGE_LENGTH_LTE: Float
+                  title_LONGEST_LENGTH_EQUAL: Int
+                  title_LONGEST_LENGTH_GT: Int
+                  title_LONGEST_LENGTH_GTE: Int
+                  title_LONGEST_LENGTH_LT: Int
+                  title_LONGEST_LENGTH_LTE: Int
+                  title_SHORTEST_LENGTH_EQUAL: Int
+                  title_SHORTEST_LENGTH_GT: Int
+                  title_SHORTEST_LENGTH_GTE: Int
+                  title_SHORTEST_LENGTH_LT: Int
+                  title_SHORTEST_LENGTH_LTE: Int
+                }
+
+                type ActorActedInRelationship {
                   cursor: String!
                   node: Production!
-                  screenTime: Int!
+                  properties: ActedIn!
                 }
 
                 input ActorActedInUpdateConnectionInput {
@@ -778,11 +854,7 @@ describe("Comments", () => {
 
                 type ActorAggregateSelection {
                   count: Int!
-                  name: StringAggregateSelectionNonNullable!
-                }
-
-                input ActorConnectInput {
-                  actedIn: [ActorActedInConnectFieldInput!]
+                  name: StringAggregateSelection!
                 }
 
                 input ActorCreateInput {
@@ -792,10 +864,6 @@ describe("Comments", () => {
 
                 input ActorDeleteInput {
                   actedIn: [ActorActedInDeleteFieldInput!]
-                }
-
-                input ActorDisconnectInput {
-                  actedIn: [ActorActedInDisconnectFieldInput!]
                 }
 
                 type ActorEdge {
@@ -812,8 +880,18 @@ describe("Comments", () => {
                   sort: [ActorSort!]
                 }
 
-                input ActorRelationInput {
-                  actedIn: [ActorActedInCreateFieldInput!]
+                type ActorProductionActedInAggregationSelection {
+                  count: Int!
+                  edge: ActorProductionActedInEdgeAggregateSelection
+                  node: ActorProductionActedInNodeAggregateSelection
+                }
+
+                type ActorProductionActedInEdgeAggregateSelection {
+                  screenTime: IntAggregateSelection!
+                }
+
+                type ActorProductionActedInNodeAggregateSelection {
+                  title: StringAggregateSelection!
                 }
 
                 \\"\\"\\"
@@ -825,27 +903,44 @@ describe("Comments", () => {
 
                 input ActorUpdateInput {
                   actedIn: [ActorActedInUpdateFieldInput!]
-                  name: String
+                  name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  name_SET: String
                 }
 
                 input ActorWhere {
                   AND: [ActorWhere!]
+                  NOT: ActorWhere
                   OR: [ActorWhere!]
-                  actedInConnection: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_SOME\` instead.\\")
+                  actedInAggregate: ActorActedInAggregateInput
+                  \\"\\"\\"
+                  Return Actors where all of the related ActorActedInConnections match this filter
+                  \\"\\"\\"
                   actedInConnection_ALL: ActorActedInConnectionWhere
+                  \\"\\"\\"
+                  Return Actors where none of the related ActorActedInConnections match this filter
+                  \\"\\"\\"
                   actedInConnection_NONE: ActorActedInConnectionWhere
-                  actedInConnection_NOT: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_NONE\` instead.\\")
+                  \\"\\"\\"
+                  Return Actors where one of the related ActorActedInConnections match this filter
+                  \\"\\"\\"
                   actedInConnection_SINGLE: ActorActedInConnectionWhere
+                  \\"\\"\\"
+                  Return Actors where some of the related ActorActedInConnections match this filter
+                  \\"\\"\\"
                   actedInConnection_SOME: ActorActedInConnectionWhere
-                  name: String
+                  \\"\\"\\"Return Actors where all of the related Productions match this filter\\"\\"\\"
+                  actedIn_ALL: ProductionWhere
+                  \\"\\"\\"Return Actors where none of the related Productions match this filter\\"\\"\\"
+                  actedIn_NONE: ProductionWhere
+                  \\"\\"\\"Return Actors where one of the related Productions match this filter\\"\\"\\"
+                  actedIn_SINGLE: ProductionWhere
+                  \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
+                  actedIn_SOME: ProductionWhere
+                  name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   name_CONTAINS: String
                   name_ENDS_WITH: String
+                  name_EQ: String
                   name_IN: [String!]
-                  name_NOT: String
-                  name_NOT_CONTAINS: String
-                  name_NOT_ENDS_WITH: String
-                  name_NOT_IN: [String!]
-                  name_NOT_STARTS_WITH: String
                   name_STARTS_WITH: String
                 }
 
@@ -860,8 +955,10 @@ describe("Comments", () => {
                   info: CreateInfo!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships created during a create mutation
+                \\"\\"\\"
                 type CreateInfo {
-                  bookmark: String
                   nodesCreated: Int!
                   relationshipsCreated: Int!
                 }
@@ -876,17 +973,19 @@ describe("Comments", () => {
                   series: [Series!]!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships deleted during a delete mutation
+                \\"\\"\\"
                 type DeleteInfo {
-                  bookmark: String
                   nodesDeleted: Int!
                   relationshipsDeleted: Int!
                 }
 
-                type IntAggregateSelectionNonNullable {
-                  average: Float!
-                  max: Int!
-                  min: Int!
-                  sum: Int!
+                type IntAggregateSelection {
+                  average: Float
+                  max: Int
+                  min: Int
+                  sum: Int
                 }
 
                 type Movie implements Production {
@@ -896,8 +995,8 @@ describe("Comments", () => {
 
                 type MovieAggregateSelection {
                   count: Int!
-                  runtime: IntAggregateSelectionNonNullable!
-                  title: StringAggregateSelectionNonNullable!
+                  runtime: IntAggregateSelection!
+                  title: StringAggregateSelection!
                 }
 
                 input MovieCreateInput {
@@ -928,32 +1027,30 @@ describe("Comments", () => {
                 }
 
                 input MovieUpdateInput {
-                  runtime: Int
+                  runtime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   runtime_DECREMENT: Int
                   runtime_INCREMENT: Int
-                  title: String
+                  runtime_SET: Int
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input MovieWhere {
                   AND: [MovieWhere!]
+                  NOT: MovieWhere
                   OR: [MovieWhere!]
-                  runtime: Int
+                  runtime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  runtime_EQ: Int
                   runtime_GT: Int
                   runtime_GTE: Int
                   runtime_IN: [Int!]
                   runtime_LT: Int
                   runtime_LTE: Int
-                  runtime_NOT: Int
-                  runtime_NOT_IN: [Int!]
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
+                  title_EQ: String
                   title_IN: [String!]
-                  title_NOT: String
-                  title_NOT_CONTAINS: String
-                  title_NOT_ENDS_WITH: String
-                  title_NOT_IN: [String!]
-                  title_NOT_STARTS_WITH: String
                   title_STARTS_WITH: String
                 }
 
@@ -970,7 +1067,7 @@ describe("Comments", () => {
                   deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
                   deleteMovies(where: MovieWhere): DeleteInfo!
                   deleteSeries(where: SeriesWhere): DeleteInfo!
-                  updateActors(connect: ActorConnectInput, create: ActorRelationInput, delete: ActorDeleteInput, disconnect: ActorDisconnectInput, update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+                  updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
                   updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                   updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
                 }
@@ -987,6 +1084,11 @@ describe("Comments", () => {
                   title: String!
                 }
 
+                type ProductionAggregateSelection {
+                  count: Int!
+                  title: StringAggregateSelection!
+                }
+
                 input ProductionConnectWhere {
                   node: ProductionWhere!
                 }
@@ -996,14 +1098,14 @@ describe("Comments", () => {
                   Series: SeriesCreateInput
                 }
 
-                input ProductionImplementationsUpdateInput {
-                  Movie: MovieUpdateInput
-                  Series: SeriesUpdateInput
+                type ProductionEdge {
+                  cursor: String!
+                  node: Production!
                 }
 
-                input ProductionImplementationsWhere {
-                  Movie: MovieWhere
-                  Series: SeriesWhere
+                enum ProductionImplementation {
+                  Movie
+                  Series
                 }
 
                 input ProductionOptions {
@@ -1012,7 +1114,7 @@ describe("Comments", () => {
                   \\"\\"\\"
                   Specify one or more ProductionSort objects to sort Productions by. The sorts will be applied in the order in which they are arranged in the array.
                   \\"\\"\\"
-                  sort: [ProductionSort]
+                  sort: [ProductionSort!]
                 }
 
                 \\"\\"\\"
@@ -1023,34 +1125,42 @@ describe("Comments", () => {
                 }
 
                 input ProductionUpdateInput {
-                  _on: ProductionImplementationsUpdateInput
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input ProductionWhere {
-                  _on: ProductionImplementationsWhere
-                  title: String
+                  AND: [ProductionWhere!]
+                  NOT: ProductionWhere
+                  OR: [ProductionWhere!]
+                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
+                  title_EQ: String
                   title_IN: [String!]
-                  title_NOT: String
-                  title_NOT_CONTAINS: String
-                  title_NOT_ENDS_WITH: String
-                  title_NOT_IN: [String!]
-                  title_NOT_STARTS_WITH: String
                   title_STARTS_WITH: String
+                  typename_IN: [ProductionImplementation!]
+                }
+
+                type ProductionsConnection {
+                  edges: [ProductionEdge!]!
+                  pageInfo: PageInfo!
+                  totalCount: Int!
                 }
 
                 type Query {
-                  actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+                  actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
                   actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-                  actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-                  series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                  productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ProductionSort!], where: ProductionWhere): [Production!]!
+                  productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
+                  productionsConnection(after: String, first: Int, sort: [ProductionSort!], where: ProductionWhere): ProductionsConnection!
+                  series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
                   seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-                  seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+                  seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
                 }
 
                 type Series implements Production {
@@ -1060,8 +1170,8 @@ describe("Comments", () => {
 
                 type SeriesAggregateSelection {
                   count: Int!
-                  episodes: IntAggregateSelectionNonNullable!
-                  title: StringAggregateSelectionNonNullable!
+                  episodes: IntAggregateSelection!
+                  title: StringAggregateSelection!
                 }
 
                 type SeriesConnection {
@@ -1098,35 +1208,34 @@ describe("Comments", () => {
                 }
 
                 input SeriesUpdateInput {
-                  episodes: Int
+                  episodes: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
                   episodes_DECREMENT: Int
                   episodes_INCREMENT: Int
-                  title: String
+                  episodes_SET: Int
+                  title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  title_SET: String
                 }
 
                 input SeriesWhere {
                   AND: [SeriesWhere!]
+                  NOT: SeriesWhere
                   OR: [SeriesWhere!]
-                  episodes: Int
+                  episodes: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+                  episodes_EQ: Int
                   episodes_GT: Int
                   episodes_GTE: Int
                   episodes_IN: [Int!]
                   episodes_LT: Int
                   episodes_LTE: Int
-                  episodes_NOT: Int
-                  episodes_NOT_IN: [Int!]
-                  title: String
+                  title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   title_CONTAINS: String
                   title_ENDS_WITH: String
+                  title_EQ: String
                   title_IN: [String!]
-                  title_NOT: String
-                  title_NOT_CONTAINS: String
-                  title_NOT_ENDS_WITH: String
-                  title_NOT_IN: [String!]
-                  title_NOT_STARTS_WITH: String
                   title_STARTS_WITH: String
                 }
 
+                \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
                 enum SortDirection {
                   \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
                   ASC
@@ -1134,9 +1243,9 @@ describe("Comments", () => {
                   DESC
                 }
 
-                type StringAggregateSelectionNonNullable {
-                  longest: String!
-                  shortest: String!
+                type StringAggregateSelection {
+                  longest: String
+                  shortest: String
                 }
 
                 type UpdateActorsMutationResponse {
@@ -1144,8 +1253,10 @@ describe("Comments", () => {
                   info: UpdateInfo!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships created and deleted during an update mutation
+                \\"\\"\\"
                 type UpdateInfo {
-                  bookmark: String
                   nodesCreated: Int!
                   nodesDeleted: Int!
                   relationshipsCreated: Int!
@@ -1168,11 +1279,11 @@ describe("Comments", () => {
             const typeDefs = gql`
                 union Search = Movie | Genre
 
-                type Genre {
+                type Genre @node {
                     id: ID
                 }
 
-                type Movie {
+                type Movie @node {
                     id: ID
                     search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
                     searchNoDirective: Search
@@ -1192,8 +1303,10 @@ describe("Comments", () => {
                   info: CreateInfo!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships created during a create mutation
+                \\"\\"\\"
                 type CreateInfo {
-                  bookmark: String
                   nodesCreated: Int!
                   relationshipsCreated: Int!
                 }
@@ -1203,8 +1316,10 @@ describe("Comments", () => {
                   movies: [Movie!]!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships deleted during a delete mutation
+                \\"\\"\\"
                 type DeleteInfo {
-                  bookmark: String
                   nodesDeleted: Int!
                   relationshipsDeleted: Int!
                 }
@@ -1215,7 +1330,7 @@ describe("Comments", () => {
 
                 type GenreAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelectionNullable!
+                  id: IDAggregateSelection!
                 }
 
                 input GenreConnectWhere {
@@ -1248,21 +1363,19 @@ describe("Comments", () => {
                 }
 
                 input GenreUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                 }
 
                 input GenreWhere {
                   AND: [GenreWhere!]
+                  NOT: GenreWhere
                   OR: [GenreWhere!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
-                  id_NOT: ID
-                  id_NOT_CONTAINS: ID
-                  id_NOT_ENDS_WITH: ID
-                  id_NOT_IN: [ID]
-                  id_NOT_STARTS_WITH: ID
                   id_STARTS_WITH: ID
                 }
 
@@ -1272,21 +1385,21 @@ describe("Comments", () => {
                   totalCount: Int!
                 }
 
-                type IDAggregateSelectionNullable {
+                type IDAggregateSelection {
                   longest: ID
                   shortest: ID
                 }
 
                 type Movie {
                   id: ID
-                  search(directed: Boolean = true, options: QueryOptions, where: SearchWhere): [Search!]!
-                  searchConnection(after: String, directed: Boolean = true, first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
+                  search(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: SearchWhere): [Search!]!
+                  searchConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
                   searchNoDirective: Search
                 }
 
                 type MovieAggregateSelection {
                   count: Int!
-                  id: IDAggregateSelectionNullable!
+                  id: IDAggregateSelection!
                 }
 
                 input MovieConnectInput {
@@ -1324,10 +1437,6 @@ describe("Comments", () => {
                   sort: [MovieSort!]
                 }
 
-                input MovieRelationInput {
-                  search: MovieSearchCreateFieldInput
-                }
-
                 input MovieSearchConnectInput {
                   Genre: [MovieSearchGenreConnectFieldInput!]
                   Movie: [MovieSearchMovieConnectFieldInput!]
@@ -1342,11 +1451,6 @@ describe("Comments", () => {
                 input MovieSearchConnectionWhere {
                   Genre: MovieSearchGenreConnectionWhere
                   Movie: MovieSearchMovieConnectionWhere
-                }
-
-                input MovieSearchCreateFieldInput {
-                  Genre: [MovieSearchGenreCreateFieldInput!]
-                  Movie: [MovieSearchMovieCreateFieldInput!]
                 }
 
                 input MovieSearchCreateInput {
@@ -1370,9 +1474,9 @@ describe("Comments", () => {
 
                 input MovieSearchGenreConnectionWhere {
                   AND: [MovieSearchGenreConnectionWhere!]
+                  NOT: MovieSearchGenreConnectionWhere
                   OR: [MovieSearchGenreConnectionWhere!]
                   node: GenreWhere
-                  node_NOT: GenreWhere
                 }
 
                 input MovieSearchGenreCreateFieldInput {
@@ -1412,9 +1516,9 @@ describe("Comments", () => {
 
                 input MovieSearchMovieConnectionWhere {
                   AND: [MovieSearchMovieConnectionWhere!]
+                  NOT: MovieSearchMovieConnectionWhere
                   OR: [MovieSearchMovieConnectionWhere!]
                   node: MovieWhere
-                  node_NOT: MovieWhere
                 }
 
                 input MovieSearchMovieCreateFieldInput {
@@ -1467,29 +1571,45 @@ describe("Comments", () => {
                 }
 
                 input MovieUpdateInput {
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+                  id_SET: ID
                   search: MovieSearchUpdateInput
                 }
 
                 input MovieWhere {
                   AND: [MovieWhere!]
+                  NOT: MovieWhere
                   OR: [MovieWhere!]
-                  id: ID
+                  id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
                   id_CONTAINS: ID
                   id_ENDS_WITH: ID
+                  id_EQ: ID
                   id_IN: [ID]
-                  id_NOT: ID
-                  id_NOT_CONTAINS: ID
-                  id_NOT_ENDS_WITH: ID
-                  id_NOT_IN: [ID]
-                  id_NOT_STARTS_WITH: ID
                   id_STARTS_WITH: ID
-                  searchConnection: MovieSearchConnectionWhere @deprecated(reason: \\"Use \`searchConnection_SOME\` instead.\\")
+                  \\"\\"\\"
+                  Return Movies where all of the related MovieSearchConnections match this filter
+                  \\"\\"\\"
                   searchConnection_ALL: MovieSearchConnectionWhere
+                  \\"\\"\\"
+                  Return Movies where none of the related MovieSearchConnections match this filter
+                  \\"\\"\\"
                   searchConnection_NONE: MovieSearchConnectionWhere
-                  searchConnection_NOT: MovieSearchConnectionWhere @deprecated(reason: \\"Use \`searchConnection_NONE\` instead.\\")
+                  \\"\\"\\"
+                  Return Movies where one of the related MovieSearchConnections match this filter
+                  \\"\\"\\"
                   searchConnection_SINGLE: MovieSearchConnectionWhere
+                  \\"\\"\\"
+                  Return Movies where some of the related MovieSearchConnections match this filter
+                  \\"\\"\\"
                   searchConnection_SOME: MovieSearchConnectionWhere
+                  \\"\\"\\"Return Movies where all of the related Searches match this filter\\"\\"\\"
+                  search_ALL: SearchWhere
+                  \\"\\"\\"Return Movies where none of the related Searches match this filter\\"\\"\\"
+                  search_NONE: SearchWhere
+                  \\"\\"\\"Return Movies where one of the related Searches match this filter\\"\\"\\"
+                  search_SINGLE: SearchWhere
+                  \\"\\"\\"Return Movies where some of the related Searches match this filter\\"\\"\\"
+                  search_SOME: SearchWhere
                 }
 
                 type MoviesConnection {
@@ -1504,7 +1624,7 @@ describe("Comments", () => {
                   deleteGenres(where: GenreWhere): DeleteInfo!
                   deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
                   updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-                  updateMovies(connect: MovieConnectInput, create: MovieRelationInput, delete: MovieDeleteInput, disconnect: MovieDisconnectInput, update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+                  updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
                 }
 
                 \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -1516,14 +1636,16 @@ describe("Comments", () => {
                 }
 
                 type Query {
-                  genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+                  genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
                   genresAggregate(where: GenreWhere): GenreAggregateSelection!
-                  genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-                  movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+                  genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+                  movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
                   moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-                  moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+                  moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+                  searches(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: SearchWhere): [Search!]!
                 }
 
+                \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
                 input QueryOptions {
                   limit: Int
                   offset: Int
@@ -1536,6 +1658,7 @@ describe("Comments", () => {
                   Movie: MovieWhere
                 }
 
+                \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
                 enum SortDirection {
                   \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
                   ASC
@@ -1548,8 +1671,10 @@ describe("Comments", () => {
                   info: UpdateInfo!
                 }
 
+                \\"\\"\\"
+                Information about the number of nodes and relationships created and deleted during an update mutation
+                \\"\\"\\"
                 type UpdateInfo {
-                  bookmark: String
                   nodesCreated: Int!
                   nodesDeleted: Int!
                   relationshipsCreated: Int!

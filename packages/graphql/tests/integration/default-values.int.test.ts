@@ -17,41 +17,37 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import { Neo4jGraphQL } from "../../src/classes";
-import Neo4j from "./neo4j";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("Default values", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should allow default value on custom @cypher node field", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
               id: ID
               field(skip: Int = 100): Int
                 @cypher(
                     statement: """
-                    return $skip
-                    """
+                    return $skip as s
+                    """,
+                    columnName: "s"
                 )
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -61,40 +57,30 @@ describe("Default values", () => {
 
         const create = `
             {
-                movies(where: {id: "${id}"}){
+                ${Movie.plural}(where: {id_EQ: "${id}"}){
                     id
                     field
                 }
             }
         `;
 
-        try {
-            await session.run(`
-                CREATE (:Movie {id: "${id}"})
+        await testHelper.executeCypher(`
+                CREATE (:${Movie} {id: "${id}"})
             `);
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any).movies[0]).toEqual({
-                id,
-                field: 100,
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[Movie.plural][0]).toEqual({
+            id,
+            field: 100,
+        });
     });
 
     test("should allow default value on custom @cypher custom resolver field", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID
             }
 
@@ -102,13 +88,14 @@ describe("Default values", () => {
                 field(skip: Int = 100): Int
                 @cypher(
                     statement: """
-                    return $skip
-                    """
+                    return $skip as s
+                    """,
+                    columnName: "s"
                 )
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -118,18 +105,10 @@ describe("Default values", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any).field).toBe(100);
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any).field).toBe(100);
     });
 });

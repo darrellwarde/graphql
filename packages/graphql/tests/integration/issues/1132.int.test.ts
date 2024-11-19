@@ -17,119 +17,44 @@
  * limitations under the License.
  */
 
-import { graphql } from "graphql";
-import type { Driver, Session } from "neo4j-driver";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import { gql } from "apollo-server";
-import { Neo4jGraphQLAuthJWTPlugin } from "@neo4j/graphql-plugin-auth";
-import Neo4j from "../neo4j";
-import { getQuerySource } from "../../utils/get-query-source";
-import { generateUniqueType } from "../../utils/graphql-types";
-import { Neo4jGraphQL } from "../../../src";
-import { createJwtRequest } from "../../utils/create-jwt-request";
+import { createBearerToken } from "../../utils/create-bearer-token";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1132", () => {
     const secret = "secret";
 
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     describe("CONNECT", () => {
-        test("should assert that the error is associated with the correct node", async () => {
-            const testSource = generateUniqueType("Source");
-            const testTarget = generateUniqueType("Target");
-
-            const typeDefs = gql`
-                type ${testSource.name} @auth(rules: [{ operations: [CONNECT], allow: { id: "$jwt.sub" } }]) {
-                    id: ID!
-                    targets: [${testTarget.name}!]! @relationship(type: "HAS_TARGET", direction: OUT)
-                }
-            
-                type ${testTarget.name} {
-                    id: ID!
-                }
-            `;
-
-            const neoGraphql = new Neo4jGraphQL({
-                typeDefs,
-                driver,
-                plugins: {
-                    auth: new Neo4jGraphQLAuthJWTPlugin({
-                        secret,
-                    }),
-                },
-            });
-            const schema = await neoGraphql.getSchema();
-
-            const sourceId = generate({
-                charset: "alphabetic",
-            });
-            const sub = generate({
-                charset: "alphabetic",
-            });
-            const query = gql`
-                mutation {
-                    ${testSource.operations.update}(where: { id: "${sourceId}" }, connect: { targets: { where: { node: { id: 1 } } } }) {
-                        ${testSource.plural} {
-                            id
-                        }
-                    }
-                }
-            `;
-
-            await session.run(`
-                CREATE (:${testSource.name} { id: "${sourceId}" })
-            `);
-
-            const req = createJwtRequest(secret, { sub });
-
-            const result = await graphql({
-                schema,
-                source: getQuerySource(query),
-                contextValue: neo4j.getContextValues({ req }),
-            });
-            expect((result.errors as any[])[0].message).toBe("Forbidden");
-        });
-
         test("should allow user to connect when associated with the correct node", async () => {
-            const testSource = generateUniqueType("Source");
-            const testTarget = generateUniqueType("Target");
+            const testSource = testHelper.createUniqueType("Source");
+            const testTarget = testHelper.createUniqueType("Target");
 
             const typeDefs = gql`
-                type ${testSource.name} @auth(rules: [{ operations: [CONNECT], allow: { id: "$jwt.sub" } }]) {
+                type ${testSource.name} @authorization(validate: [{ when: BEFORE, operations: [CREATE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                     id: ID!
                     targets: [${testTarget.name}!]! @relationship(type: "HAS_TARGET", direction: OUT)
                 }
             
-                type ${testTarget.name} {
+                type ${testTarget.name} @node {
                     id: ID!
                 }
             `;
 
-            const neoGraphql = new Neo4jGraphQL({
+            await testHelper.initNeo4jGraphQL({
                 typeDefs,
-                driver,
-                plugins: {
-                    auth: new Neo4jGraphQLAuthJWTPlugin({
-                        secret,
-                    }),
+                features: {
+                    authorization: {
+                        key: secret,
+                    },
                 },
             });
-            const schema = await neoGraphql.getSchema();
 
             const sourceId = generate({
                 charset: "alphabetic",
@@ -137,9 +62,9 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const targetId = generate({
                 charset: "alphabetic",
             });
-            const query = gql`
+            const query = `
                 mutation {
-                    ${testSource.operations.update}(where: { id: "${sourceId}" }, connect: { targets: { where: { node: { id: "${targetId}" } } } }) {
+                    ${testSource.operations.update}(where: { id_EQ: "${sourceId}" }, update: { targets: { connect: { where: { node: { id_EQ: "${targetId}" } } } } }) {
                         ${testSource.plural} {
                             id
                             targets {
@@ -150,18 +75,14 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
                 }
             `;
 
-            await session.run(`
+            await testHelper.executeCypher(`
                 CREATE (:${testSource.name} { id: "${sourceId}" })
                 CREATE (:${testTarget.name} { id: "${targetId}" })
             `);
 
-            const req = createJwtRequest(secret, { sub: sourceId });
+            const token = createBearerToken(secret, { sub: sourceId });
 
-            const result = await graphql({
-                schema,
-                source: getQuerySource(query),
-                contextValue: neo4j.getContextValues({ req }),
-            });
+            const result = await testHelper.executeGraphQLWithToken(query, token);
             expect(result.errors).toBeUndefined();
             expect(result.data as any).toEqual({
                 [testSource.operations.update]: {
@@ -178,30 +99,28 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
 
     describe("DISCONNECT", () => {
         test("should assert that the error is associated with the correct node", async () => {
-            const testSource = generateUniqueType("Source");
-            const testTarget = generateUniqueType("Target");
+            const testSource = testHelper.createUniqueType("Source");
+            const testTarget = testHelper.createUniqueType("Target");
 
             const typeDefs = gql`
-                type ${testSource.name} {
+                type ${testSource.name} @node {
                     id: ID!
                     targets: [${testTarget.name}!]! @relationship(type: "HAS_TARGET", direction: OUT)
                 }
             
-                type ${testTarget.name} @auth(rules: [{ operations: [DISCONNECT], allow: { id: "$jwt.sub" } }]) {
+                type ${testTarget.name} @authorization(validate: [{ when: BEFORE, operations: [DELETE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                     id: ID!
                 }
             `;
 
-            const neoGraphql = new Neo4jGraphQL({
+            await testHelper.initNeo4jGraphQL({
                 typeDefs,
-                driver,
-                plugins: {
-                    auth: new Neo4jGraphQLAuthJWTPlugin({
-                        secret,
-                    }),
+                features: {
+                    authorization: {
+                        key: secret,
+                    },
                 },
             });
-            const schema = await neoGraphql.getSchema();
 
             const sourceId = generate({
                 charset: "alphabetic",
@@ -212,9 +131,9 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const sub = generate({
                 charset: "alphabetic",
             });
-            const query = gql`
+            const query = `
                 mutation {
-                    ${testSource.operations.update}(where: { id: "${sourceId}" }, disconnect: { targets: { where: { node: { id: "${targetId}" } } } }) {
+                    ${testSource.operations.update}(where: { id_EQ: "${sourceId}" }, update: { targets: { disconnect: { where: { node: { id_EQ: "${targetId}" } } } } }) {
                         ${testSource.plural} {
                             id
                         }
@@ -222,45 +141,39 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
                 }
             `;
 
-            await session.run(`
+            await testHelper.executeCypher(`
                 CREATE (:${testSource.name} { id: "${sourceId}" })-[:HAS_TARGET]->(:${testTarget.name} { id: "${targetId}" })
             `);
 
-            const req = createJwtRequest(secret, { sub });
+            const token = createBearerToken(secret, { sub });
 
-            const result = await graphql({
-                schema,
-                source: getQuerySource(query),
-                contextValue: neo4j.getContextValues({ req }),
-            });
+            const result = await testHelper.executeGraphQLWithToken(query, token);
             expect((result.errors as any[])[0].message).toBe("Forbidden");
         });
 
         test("should allow the disconnect when jwt.sub is associated with the correct node", async () => {
-            const testSource = generateUniqueType("Source");
-            const testTarget = generateUniqueType("Target");
+            const testSource = testHelper.createUniqueType("Source");
+            const testTarget = testHelper.createUniqueType("Target");
 
             const typeDefs = gql`
-                type ${testSource.name} {
+                type ${testSource.name} @node {
                     id: ID!
                     targets: [${testTarget.name}!]! @relationship(type: "HAS_TARGET", direction: OUT)
                 }
             
-                type ${testTarget.name} @auth(rules: [{ operations: [DISCONNECT], allow: { id: "$jwt.sub" } }]) {
+                type ${testTarget.name} @authorization(validate: [{ when: BEFORE, operations: [DELETE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                     id: ID!
                 }
             `;
 
-            const neoGraphql = new Neo4jGraphQL({
+            await testHelper.initNeo4jGraphQL({
                 typeDefs,
-                driver,
-                plugins: {
-                    auth: new Neo4jGraphQLAuthJWTPlugin({
-                        secret,
-                    }),
+                features: {
+                    authorization: {
+                        key: secret,
+                    },
                 },
             });
-            const schema = await neoGraphql.getSchema();
 
             const sourceId = generate({
                 charset: "alphabetic",
@@ -268,9 +181,9 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
             const targetId = generate({
                 charset: "alphabetic",
             });
-            const query = gql`
+            const query = `
                 mutation {
-                    ${testSource.operations.update}(where: { id: "${sourceId}" }, disconnect: { targets: { where: { node: { id: "${targetId}" } } } }) {
+                    ${testSource.operations.update}(where: { id_EQ: "${sourceId}" }, update: { targets: { disconnect: { where: { node: { id_EQ: "${targetId}" } } } } }) {
                         ${testSource.plural} {
                             id
                             targets {
@@ -281,17 +194,13 @@ describe("https://github.com/neo4j/graphql/issues/1132", () => {
                 }
             `;
 
-            await session.run(`
+            await testHelper.executeCypher(`
                 CREATE (:${testSource.name} { id: "${sourceId}" })-[:HAS_TARGET]->(:${testTarget.name} { id: "${targetId}" })
             `);
 
-            const req = createJwtRequest(secret, { sub: targetId });
+            const token = createBearerToken(secret, { sub: targetId });
 
-            const result = await graphql({
-                schema,
-                source: getQuerySource(query),
-                contextValue: neo4j.getContextValues({ req }),
-            });
+            const result = await testHelper.executeGraphQLWithToken(query, token);
             expect(result.errors).toBeUndefined();
             expect(result.data as any).toEqual({
                 [testSource.operations.update]: {

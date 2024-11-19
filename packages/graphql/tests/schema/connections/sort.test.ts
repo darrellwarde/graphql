@@ -18,19 +18,19 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Sort", () => {
     test("sort argument is not present when nothing to sort", async () => {
         const typeDefs = gql`
-            type Node1 {
+            type Node1 @node {
                 property: String!
                 relatedTo: [Node2!]! @relationship(type: "RELATED_TO", direction: OUT)
             }
 
-            type Node2 {
+            type Node2 @node {
                 relatedTo: [Node1!]! @relationship(type: "RELATED_TO", direction: OUT)
             }
         `;
@@ -43,8 +43,10 @@ describe("Sort", () => {
               mutation: Mutation
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -59,8 +61,10 @@ describe("Sort", () => {
               node2s: [Node2!]!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -70,20 +74,20 @@ describe("Sort", () => {
               createNode2s(input: [Node2CreateInput!]!): CreateNode2sMutationResponse!
               deleteNode1s(delete: Node1DeleteInput, where: Node1Where): DeleteInfo!
               deleteNode2s(delete: Node2DeleteInput, where: Node2Where): DeleteInfo!
-              updateNode1s(connect: Node1ConnectInput, create: Node1RelationInput, delete: Node1DeleteInput, disconnect: Node1DisconnectInput, update: Node1UpdateInput, where: Node1Where): UpdateNode1sMutationResponse!
-              updateNode2s(connect: Node2ConnectInput, create: Node2RelationInput, delete: Node2DeleteInput, disconnect: Node2DisconnectInput, update: Node2UpdateInput, where: Node2Where): UpdateNode2sMutationResponse!
+              updateNode1s(update: Node1UpdateInput, where: Node1Where): UpdateNode1sMutationResponse!
+              updateNode2s(update: Node2UpdateInput, where: Node2Where): UpdateNode2sMutationResponse!
             }
 
             type Node1 {
               property: String!
-              relatedTo(directed: Boolean = true, options: Node2Options, where: Node2Where): [Node2!]!
-              relatedToAggregate(directed: Boolean = true, where: Node2Where): Node1Node2RelatedToAggregationSelection
-              relatedToConnection(after: String, directed: Boolean = true, first: Int, where: Node1RelatedToConnectionWhere): Node1RelatedToConnection!
+              relatedTo(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Node2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: Node2Where): [Node2!]!
+              relatedToAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Node2Where): Node1Node2RelatedToAggregationSelection
+              relatedToConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: Node1RelatedToConnectionWhere): Node1RelatedToConnection!
             }
 
             type Node1AggregateSelection {
               count: Int!
-              property: StringAggregateSelectionNonNullable!
+              property: StringAggregateSelection!
             }
 
             input Node1ConnectInput {
@@ -127,8 +131,10 @@ describe("Sort", () => {
 
             input Node1RelatedToAggregateInput {
               AND: [Node1RelatedToAggregateInput!]
+              NOT: Node1RelatedToAggregateInput
               OR: [Node1RelatedToAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -137,6 +143,10 @@ describe("Sort", () => {
 
             input Node1RelatedToConnectFieldInput {
               connect: [Node2ConnectInput!]
+              \\"\\"\\"
+              Whether or not to overwrite any matching relationship with the new properties.
+              \\"\\"\\"
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: Node2ConnectWhere
             }
 
@@ -148,9 +158,9 @@ describe("Sort", () => {
 
             input Node1RelatedToConnectionWhere {
               AND: [Node1RelatedToConnectionWhere!]
+              NOT: Node1RelatedToConnectionWhere
               OR: [Node1RelatedToConnectionWhere!]
               node: Node2Where
-              node_NOT: Node2Where
             }
 
             input Node1RelatedToCreateFieldInput {
@@ -190,10 +200,6 @@ describe("Sort", () => {
               where: Node1RelatedToConnectionWhere
             }
 
-            input Node1RelationInput {
-              relatedTo: [Node1RelatedToCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort Node1s by. The order in which sorts are applied is not guaranteed when specifying many fields in one Node1Sort object.
             \\"\\"\\"
@@ -202,36 +208,42 @@ describe("Sort", () => {
             }
 
             input Node1UpdateInput {
-              property: String
+              property: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              property_SET: String
               relatedTo: [Node1RelatedToUpdateFieldInput!]
             }
 
             input Node1Where {
               AND: [Node1Where!]
+              NOT: Node1Where
               OR: [Node1Where!]
-              property: String
+              property: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               property_CONTAINS: String
               property_ENDS_WITH: String
+              property_EQ: String
               property_IN: [String!]
-              property_NOT: String
-              property_NOT_CONTAINS: String
-              property_NOT_ENDS_WITH: String
-              property_NOT_IN: [String!]
-              property_NOT_STARTS_WITH: String
               property_STARTS_WITH: String
-              relatedTo: Node2Where @deprecated(reason: \\"Use \`relatedTo_SOME\` instead.\\")
               relatedToAggregate: Node1RelatedToAggregateInput
-              relatedToConnection: Node1RelatedToConnectionWhere @deprecated(reason: \\"Use \`relatedToConnection_SOME\` instead.\\")
+              \\"\\"\\"
+              Return Node1s where all of the related Node1RelatedToConnections match this filter
+              \\"\\"\\"
               relatedToConnection_ALL: Node1RelatedToConnectionWhere
+              \\"\\"\\"
+              Return Node1s where none of the related Node1RelatedToConnections match this filter
+              \\"\\"\\"
               relatedToConnection_NONE: Node1RelatedToConnectionWhere
-              relatedToConnection_NOT: Node1RelatedToConnectionWhere @deprecated(reason: \\"Use \`relatedToConnection_NONE\` instead.\\")
+              \\"\\"\\"
+              Return Node1s where one of the related Node1RelatedToConnections match this filter
+              \\"\\"\\"
               relatedToConnection_SINGLE: Node1RelatedToConnectionWhere
+              \\"\\"\\"
+              Return Node1s where some of the related Node1RelatedToConnections match this filter
+              \\"\\"\\"
               relatedToConnection_SOME: Node1RelatedToConnectionWhere
               \\"\\"\\"Return Node1s where all of the related Node2s match this filter\\"\\"\\"
               relatedTo_ALL: Node2Where
               \\"\\"\\"Return Node1s where none of the related Node2s match this filter\\"\\"\\"
               relatedTo_NONE: Node2Where
-              relatedTo_NOT: Node2Where @deprecated(reason: \\"Use \`relatedTo_NONE\` instead.\\")
               \\"\\"\\"Return Node1s where one of the related Node2s match this filter\\"\\"\\"
               relatedTo_SINGLE: Node2Where
               \\"\\"\\"Return Node1s where some of the related Node2s match this filter\\"\\"\\"
@@ -245,9 +257,9 @@ describe("Sort", () => {
             }
 
             type Node2 {
-              relatedTo(directed: Boolean = true, options: Node1Options, where: Node1Where): [Node1!]!
-              relatedToAggregate(directed: Boolean = true, where: Node1Where): Node2Node1RelatedToAggregationSelection
-              relatedToConnection(after: String, directed: Boolean = true, first: Int, sort: [Node2RelatedToConnectionSort!], where: Node2RelatedToConnectionWhere): Node2RelatedToConnection!
+              relatedTo(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: Node1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Node1Sort!], where: Node1Where): [Node1!]!
+              relatedToAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: Node1Where): Node2Node1RelatedToAggregationSelection
+              relatedToConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [Node2RelatedToConnectionSort!], where: Node2RelatedToConnectionWhere): Node2RelatedToConnection!
             }
 
             type Node2AggregateSelection {
@@ -285,7 +297,7 @@ describe("Sort", () => {
             }
 
             type Node2Node1RelatedToNodeAggregateSelection {
-              property: StringAggregateSelectionNonNullable!
+              property: StringAggregateSelection!
             }
 
             input Node2Options {
@@ -295,8 +307,10 @@ describe("Sort", () => {
 
             input Node2RelatedToAggregateInput {
               AND: [Node2RelatedToAggregateInput!]
+              NOT: Node2RelatedToAggregateInput
               OR: [Node2RelatedToAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -306,6 +320,10 @@ describe("Sort", () => {
 
             input Node2RelatedToConnectFieldInput {
               connect: [Node1ConnectInput!]
+              \\"\\"\\"
+              Whether or not to overwrite any matching relationship with the new properties.
+              \\"\\"\\"
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: Node1ConnectWhere
             }
 
@@ -321,9 +339,9 @@ describe("Sort", () => {
 
             input Node2RelatedToConnectionWhere {
               AND: [Node2RelatedToConnectionWhere!]
+              NOT: Node2RelatedToConnectionWhere
               OR: [Node2RelatedToConnectionWhere!]
               node: Node1Where
-              node_NOT: Node1Where
             }
 
             input Node2RelatedToCreateFieldInput {
@@ -347,27 +365,23 @@ describe("Sort", () => {
 
             input Node2RelatedToNodeAggregationWhereInput {
               AND: [Node2RelatedToNodeAggregationWhereInput!]
+              NOT: Node2RelatedToNodeAggregationWhereInput
               OR: [Node2RelatedToNodeAggregationWhereInput!]
-              property_AVERAGE_EQUAL: Float
-              property_AVERAGE_GT: Float
-              property_AVERAGE_GTE: Float
-              property_AVERAGE_LT: Float
-              property_AVERAGE_LTE: Float
-              property_EQUAL: String
-              property_GT: Int
-              property_GTE: Int
-              property_LONGEST_EQUAL: Int
-              property_LONGEST_GT: Int
-              property_LONGEST_GTE: Int
-              property_LONGEST_LT: Int
-              property_LONGEST_LTE: Int
-              property_LT: Int
-              property_LTE: Int
-              property_SHORTEST_EQUAL: Int
-              property_SHORTEST_GT: Int
-              property_SHORTEST_GTE: Int
-              property_SHORTEST_LT: Int
-              property_SHORTEST_LTE: Int
+              property_AVERAGE_LENGTH_EQUAL: Float
+              property_AVERAGE_LENGTH_GT: Float
+              property_AVERAGE_LENGTH_GTE: Float
+              property_AVERAGE_LENGTH_LT: Float
+              property_AVERAGE_LENGTH_LTE: Float
+              property_LONGEST_LENGTH_EQUAL: Int
+              property_LONGEST_LENGTH_GT: Int
+              property_LONGEST_LENGTH_GTE: Int
+              property_LONGEST_LENGTH_LT: Int
+              property_LONGEST_LENGTH_LTE: Int
+              property_SHORTEST_LENGTH_EQUAL: Int
+              property_SHORTEST_LENGTH_GT: Int
+              property_SHORTEST_LENGTH_GTE: Int
+              property_SHORTEST_LENGTH_LT: Int
+              property_SHORTEST_LENGTH_LTE: Int
             }
 
             type Node2RelatedToRelationship {
@@ -388,30 +402,35 @@ describe("Sort", () => {
               where: Node2RelatedToConnectionWhere
             }
 
-            input Node2RelationInput {
-              relatedTo: [Node2RelatedToCreateFieldInput!]
-            }
-
             input Node2UpdateInput {
               relatedTo: [Node2RelatedToUpdateFieldInput!]
             }
 
             input Node2Where {
               AND: [Node2Where!]
+              NOT: Node2Where
               OR: [Node2Where!]
-              relatedTo: Node1Where @deprecated(reason: \\"Use \`relatedTo_SOME\` instead.\\")
               relatedToAggregate: Node2RelatedToAggregateInput
-              relatedToConnection: Node2RelatedToConnectionWhere @deprecated(reason: \\"Use \`relatedToConnection_SOME\` instead.\\")
+              \\"\\"\\"
+              Return Node2s where all of the related Node2RelatedToConnections match this filter
+              \\"\\"\\"
               relatedToConnection_ALL: Node2RelatedToConnectionWhere
+              \\"\\"\\"
+              Return Node2s where none of the related Node2RelatedToConnections match this filter
+              \\"\\"\\"
               relatedToConnection_NONE: Node2RelatedToConnectionWhere
-              relatedToConnection_NOT: Node2RelatedToConnectionWhere @deprecated(reason: \\"Use \`relatedToConnection_NONE\` instead.\\")
+              \\"\\"\\"
+              Return Node2s where one of the related Node2RelatedToConnections match this filter
+              \\"\\"\\"
               relatedToConnection_SINGLE: Node2RelatedToConnectionWhere
+              \\"\\"\\"
+              Return Node2s where some of the related Node2RelatedToConnections match this filter
+              \\"\\"\\"
               relatedToConnection_SOME: Node2RelatedToConnectionWhere
               \\"\\"\\"Return Node2s where all of the related Node1s match this filter\\"\\"\\"
               relatedTo_ALL: Node1Where
               \\"\\"\\"Return Node2s where none of the related Node1s match this filter\\"\\"\\"
               relatedTo_NONE: Node1Where
-              relatedTo_NOT: Node1Where @deprecated(reason: \\"Use \`relatedTo_NONE\` instead.\\")
               \\"\\"\\"Return Node2s where one of the related Node1s match this filter\\"\\"\\"
               relatedTo_SINGLE: Node1Where
               \\"\\"\\"Return Node2s where some of the related Node1s match this filter\\"\\"\\"
@@ -433,14 +452,15 @@ describe("Sort", () => {
             }
 
             type Query {
-              node1s(options: Node1Options, where: Node1Where): [Node1!]!
+              node1s(limit: Int, offset: Int, options: Node1Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [Node1Sort!], where: Node1Where): [Node1!]!
               node1sAggregate(where: Node1Where): Node1AggregateSelection!
-              node1sConnection(after: String, first: Int, sort: [Node1Sort], where: Node1Where): Node1sConnection!
-              node2s(options: Node2Options, where: Node2Where): [Node2!]!
+              node1sConnection(after: String, first: Int, sort: [Node1Sort!], where: Node1Where): Node1sConnection!
+              node2s(limit: Int, offset: Int, options: Node2Options @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: Node2Where): [Node2!]!
               node2sAggregate(where: Node2Where): Node2AggregateSelection!
               node2sConnection(after: String, first: Int, where: Node2Where): Node2sConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -448,13 +468,15 @@ describe("Sort", () => {
               DESC
             }
 
-            type StringAggregateSelectionNonNullable {
-              longest: String!
-              shortest: String!
+            type StringAggregateSelection {
+              longest: String
+              shortest: String
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

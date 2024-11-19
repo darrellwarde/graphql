@@ -18,14 +18,14 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Arrays", () => {
     test("Arrays", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 id: ID!
                 ratings: [Float!]!
                 averageRating: Float!
@@ -40,8 +40,10 @@ describe("Arrays", () => {
               mutation: Mutation
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -51,22 +53,24 @@ describe("Arrays", () => {
               movies: [Movie!]!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
-            type FloatAggregateSelectionNonNullable {
-              average: Float!
-              max: Float!
-              min: Float!
-              sum: Float!
+            type FloatAggregateSelection {
+              average: Float
+              max: Float
+              min: Float
+              sum: Float
             }
 
-            type IDAggregateSelectionNonNullable {
-              longest: ID!
-              shortest: ID!
+            type IDAggregateSelection {
+              longest: ID
+              shortest: ID
             }
 
             type Movie {
@@ -76,9 +80,9 @@ describe("Arrays", () => {
             }
 
             type MovieAggregateSelection {
-              averageRating: FloatAggregateSelectionNonNullable!
+              averageRating: FloatAggregateSelection!
               count: Int!
-              id: IDAggregateSelectionNonNullable!
+              id: IDAggregateSelection!
             }
 
             input MovieCreateInput {
@@ -110,40 +114,40 @@ describe("Arrays", () => {
             }
 
             input MovieUpdateInput {
-              averageRating: Float
+              averageRating: Float @deprecated(reason: \\"Please use the explicit _SET field\\")
               averageRating_ADD: Float
               averageRating_DIVIDE: Float
               averageRating_MULTIPLY: Float
+              averageRating_SET: Float
               averageRating_SUBTRACT: Float
-              id: ID
-              ratings: [Float!]
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
+              ratings: [Float!] @deprecated(reason: \\"Please use the explicit _SET field\\")
+              ratings_POP: Int
+              ratings_PUSH: [Float!]
+              ratings_SET: [Float!]
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
+              NOT: MovieWhere
               OR: [MovieWhere!]
-              averageRating: Float
+              averageRating: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              averageRating_EQ: Float
               averageRating_GT: Float
               averageRating_GTE: Float
               averageRating_IN: [Float!]
               averageRating_LT: Float
               averageRating_LTE: Float
-              averageRating_NOT: Float
-              averageRating_NOT_IN: [Float!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID!]
-              id_NOT: ID
-              id_NOT_CONTAINS: ID
-              id_NOT_ENDS_WITH: ID
-              id_NOT_IN: [ID!]
-              id_NOT_STARTS_WITH: ID
               id_STARTS_WITH: ID
-              ratings: [Float!]
+              ratings: [Float!] @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              ratings_EQ: [Float!]
               ratings_INCLUDES: Float
-              ratings_NOT: [Float!]
-              ratings_NOT_INCLUDES: Float
             }
 
             type MoviesConnection {
@@ -167,11 +171,12 @@ describe("Arrays", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -179,8 +184,10 @@ describe("Arrays", () => {
               DESC
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

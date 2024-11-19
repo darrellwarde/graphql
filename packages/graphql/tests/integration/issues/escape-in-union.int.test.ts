@@ -17,69 +17,52 @@
  * limitations under the License.
  */
 
-import { gql } from "apollo-server";
-import { graphql } from "graphql";
-import type { Driver, Session } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("Empty fields on unions due to escaped labels", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
-    let neoSchema: Neo4jGraphQL;
+    const testHelper = new TestHelper();
 
-    const typeBlog = generateUniqueType("Blog");
-    const typePost = generateUniqueType("Post");
-    const typeUser = generateUniqueType("User");
+    let typeBlog: UniqueType;
+    let typePost: UniqueType;
+    let typeUser: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-        const typeDefs = gql`
+        typeBlog = testHelper.createUniqueType("Blog");
+        typePost = testHelper.createUniqueType("Post");
+        typeUser = testHelper.createUniqueType("User");
+
+        const typeDefs = /* GraphQL */ `
             union Content = Blog | Post
 
-            type Blog @node(label: "${typeBlog.name}") {
+            type Blog @node(labels: ["${typeBlog.name}"]) {
                 title: String
                 posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
             }
 
-            type Post @node(label: "${typePost.name}") {
+            type Post @node(labels: ["${typePost.name}"]) {
                 content: String
             }
 
-            type User @node(label: "${typeUser.name}") {
+            type User @node(labels: ["${typeUser.name}"]) {
                 name: String
                 content: [Content!]! @relationship(type: "HAS_CONTENT", direction: OUT)
             }
         `;
 
-        neoSchema = new Neo4jGraphQL({ typeDefs });
-        try {
-            session = await neo4j.getSession();
-            await session.run(`CREATE (u:${typeUser.name} {name: "dan"})
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+
+        await testHelper.executeCypher(`CREATE (u:${typeUser.name} {name: "dan"})
               CREATE (b:${typeBlog.name} {title:"my cool blog"})
               CREATE (p:${typePost.name} {content: "my cool post"})
 
               MERGE(u)-[:HAS_CONTENT]->(b)
               MERGE(b)-[:HAS_POST]->(p)
             `);
-        } finally {
-            await session.close();
-        }
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
-    });
-
-    afterEach(async () => {
-        await session.close();
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should return users and unions", async () => {
@@ -87,7 +70,7 @@ describe("Empty fields on unions due to escaped labels", () => {
             query GetUsersWithAllContent {
                 users {
                     name
-                    content(where: { Blog: { title_NOT: null } }) {
+                    content(where: { Blog: { NOT: { title_EQ: null  } } }) {
                         ... on Blog {
                             title
                         }
@@ -96,11 +79,7 @@ describe("Empty fields on unions due to escaped labels", () => {
             }
         `;
 
-        const gqlResult: any = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult: any = await testHelper.executeGraphQL(query);
         expect(gqlResult.errors).toBeUndefined();
         expect(gqlResult.data).toEqual({
             users: [{ name: "dan", content: [{ title: "my cool blog" }] }],

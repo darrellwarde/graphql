@@ -17,45 +17,41 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/350", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Post: UniqueType;
+    let Comment: UniqueType;
+    let typeDefs: string;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeAll(() => {});
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("Retain attributes when aliasing the same field multiple times in a single query", async () => {
-        const session = await neo4j.getSession();
-        const typeDefs = gql`
-            type Post {
+        Post = testHelper.createUniqueType("Post");
+        typeDefs = `
+            type ${Post} @node {
                 id: ID!
                 title: String!
                 content: String!
-                comments: [Comment!]! @relationship(type: "HAS_COMMENT", direction: OUT)
+                comments: [${Comment}!]! @relationship(type: "HAS_COMMENT", direction: OUT)
             }
-            type Comment {
+            type ${Comment} @node {
                 id: ID!
                 flagged: Boolean!
                 content: String!
-                post: Post! @relationship(type: "HAS_COMMENT", direction: IN)
-                canEdit: Boolean! @cypher(statement: "RETURN false")
+                post: ${Post}! @relationship(type: "HAS_COMMENT", direction: IN)
+                canEdit: Boolean! @cypher(statement: "RETURN false as res", columnName: "res")
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const postId = generate({
             charset: "alphabetic",
@@ -83,12 +79,12 @@ describe("https://github.com/neo4j/graphql/issues/350", () => {
 
         const query = `
             query {
-                posts(where: { id: "${postId}" }) {
-                    flaggedComments: comments(where: { flagged: true }) {
+                ${Post.plural}(where: { id_EQ: "${postId}" }) {
+                    flaggedComments: comments(where: { flagged_EQ: true }) {
                         content
                         flagged
                     }
-                    unflaggedComments: comments(where: {flagged: false}) {
+                    unflaggedComments: comments(where: {flagged_EQ: false}) {
                         content
                         flagged
                     }
@@ -96,43 +92,35 @@ describe("https://github.com/neo4j/graphql/issues/350", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (post:Post {id: $postId, title: $postTitle, content: $postContent})
-                    CREATE (comment1:Comment {id: $comment1Id, content: $comment1Content, flagged: true})
-                    CREATE (comment2:Comment {id: $comment2Id, content: $comment2Content, flagged: false})
+        await testHelper.executeCypher(
+            `
+                    CREATE (post:${Post} {id: $postId, title: $postTitle, content: $postContent})
+                    CREATE (comment1:${Comment} {id: $comment1Id, content: $comment1Content, flagged: true})
+                    CREATE (comment2:${Comment} {id: $comment2Id, content: $comment2Content, flagged: false})
                     MERGE (post)-[:HAS_COMMENT]->(comment1)
                     MERGE (post)-[:HAS_COMMENT]->(comment2)
 
                 `,
-                {
-                    postId,
-                    postTitle,
-                    postContent,
-                    comment1Id,
-                    comment1Content,
-                    comment2Id,
-                    comment2Content,
-                }
-            );
+            {
+                postId,
+                postTitle,
+                postContent,
+                comment1Id,
+                comment1Content,
+                comment2Id,
+                comment2Content,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
-            expect(result.errors).toBeFalsy();
-            expect((result?.data as any)?.posts[0].flaggedComments).toContainEqual({
-                content: comment1Content,
-                flagged: true,
-            });
-            expect((result?.data as any)?.posts[0].unflaggedComments).toContainEqual({
-                content: comment2Content,
-                flagged: false,
-            });
-        } finally {
-            await session.close();
-        }
+        const result = await testHelper.executeGraphQL(query);
+        expect(result.errors).toBeFalsy();
+        expect((result?.data as any)[Post.plural][0].flaggedComments).toContainEqual({
+            content: comment1Content,
+            flagged: true,
+        });
+        expect((result?.data as any)[Post.plural][0].unflaggedComments).toContainEqual({
+            content: comment2Content,
+            flagged: false,
+        });
     });
 });

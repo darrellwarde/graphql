@@ -17,64 +17,50 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1414", () => {
-    const testProduct = generateUniqueType("Product");
-    const testProgrammeItem = generateUniqueType("ProgrammeItem");
+    let testProduct: UniqueType;
+    let testProgrammeItem: UniqueType;
 
     let counter = 0;
 
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
-
-    async function graphqlQuery(query: string) {
-        return graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
-    }
+    const testHelper = new TestHelper();
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        testProduct = testHelper.createUniqueType("Product");
+        testProgrammeItem = testHelper.createUniqueType("ProgrammeItem");
 
         const typeDefs = `
             interface ${testProduct.name} {
-                id: ID! @callback(operations: [CREATE], name: "nanoid")
-                productTitle: String!
-            }
-
-            type ${testProgrammeItem.name} implements ${testProduct.name} {
                 id: ID!
                 productTitle: String!
             }
+
+            type ${testProgrammeItem.name} implements ${testProduct.name} @node {
+                id: ID! @populatedBy(operations: [CREATE], callback: "nanoid")
+                productTitle: String!
+            }
         `;
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
-            config: {
-                callbacks: {
-                    nanoid: () => {
-                        const id = `nanoid${counter}`;
-                        counter += 1;
-                        return id;
+            features: {
+                populatedBy: {
+                    callbacks: {
+                        nanoid: () => {
+                            const id = `nanoid${counter}`;
+                            counter += 1;
+                            return id;
+                        },
                     },
                 },
             },
         });
-        schema = await neoGraphql.getSchema();
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("callbacks should only be called for specified operations", async () => {
@@ -89,9 +75,9 @@ describe("https://github.com/neo4j/graphql/issues/1414", () => {
             }
         `;
 
-        const updateProgrammeItems = `
+        const updateProgrammeItems = /* GraphQL */ `
             mutation {
-                ${testProgrammeItem.operations.update}(where: { id: "nanoid0" }, update: { productTitle: "TestPI2" }) {
+                ${testProgrammeItem.operations.update}(where: { id_EQ: "nanoid0" }, update: { productTitle_SET: "TestPI2" }) {
                     ${testProgrammeItem.plural} {
                         id
                         productTitle
@@ -100,7 +86,7 @@ describe("https://github.com/neo4j/graphql/issues/1414", () => {
             }
         `;
 
-        const createProgrammeItemsResults = await graphqlQuery(createProgrammeItems);
+        const createProgrammeItemsResults = await testHelper.executeGraphQL(createProgrammeItems);
         expect(createProgrammeItemsResults.errors).toBeUndefined();
         expect(createProgrammeItemsResults.data as any).toEqual({
             [testProgrammeItem.operations.create]: {
@@ -113,7 +99,7 @@ describe("https://github.com/neo4j/graphql/issues/1414", () => {
             },
         });
 
-        const updateProgrammeItemsResults = await graphqlQuery(updateProgrammeItems);
+        const updateProgrammeItemsResults = await testHelper.executeGraphQL(updateProgrammeItems);
         expect(updateProgrammeItemsResults.errors).toBeUndefined();
         expect(updateProgrammeItemsResults.data as any).toEqual({
             [testProgrammeItem.operations.update]: {

@@ -17,46 +17,46 @@
  * limitations under the License.
  */
 
-import { gql } from "apollo-server";
 import { validateSchema } from "graphql";
+import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src/classes";
 
 describe("https://github.com/neo4j/graphql/issues/556", () => {
     test("should compile type defs with no errors", async () => {
         const typeDefs = gql`
-            type Journalist {
+            type Journalist @node {
                 articles: [Article!]! @relationship(type: "HAS_ARTICLE", direction: OUT, properties: "HasArticle")
             }
 
-            interface HasArticle @relationshipProperties {
+            type HasArticle @relationshipProperties {
                 createdAt: DateTime! @timestamp
             }
 
-            type Article {
-                id: ID! @id
+            type Article @node {
+                id: ID! @id @unique
                 blocks: [Block!]! @relationship(type: "HAS_BLOCK", direction: OUT, properties: "HasBlock")
                 images: [Image!]! @relationship(type: "HAS_IMAGE", direction: OUT)
             }
 
-            interface HasBlock @relationshipProperties {
+            type HasBlock @relationshipProperties {
                 order: Int!
             }
 
             interface Block {
-                id: ID @id
+                id: ID
             }
 
-            type TextBlock implements Block {
-                id: ID @id
+            type TextBlock implements Block @node {
+                id: ID @id @unique
                 text: String
             }
 
-            type DividerBlock implements Block {
-                id: ID @id
+            type DividerBlock implements Block @node {
+                id: ID @id @unique
             }
 
-            type ImageBlock implements Block {
-                id: ID @id
+            type ImageBlock implements Block @node {
+                id: ID @id @unique
                 images: [Image!]! @relationship(type: "HAS_IMAGE", direction: OUT)
             }
 
@@ -64,7 +64,7 @@ describe("https://github.com/neo4j/graphql/issues/556", () => {
                 featuredIn: [Article!]
             }
 
-            type PDFImage implements Image {
+            type PDFImage implements Image @node {
                 featuredIn: [Article!]! @relationship(type: "HAS_IMAGE", direction: IN)
                 url: String!
             }
@@ -94,7 +94,7 @@ describe("https://github.com/neo4j/graphql/issues/556", () => {
         const typeDefs = `
             input JournalistInput {
             }
-            type Journalist {
+            type Journalist @node {
                 query(input: JournalistInput): Int
             }
 
@@ -109,7 +109,7 @@ describe("https://github.com/neo4j/graphql/issues/556", () => {
             interface Person {
             }
 
-            type Journalist implements Person {
+            type Journalist implements Person @node {
                 test: Int
             }
 

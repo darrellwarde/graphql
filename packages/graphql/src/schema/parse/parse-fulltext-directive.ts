@@ -18,9 +18,9 @@
  */
 
 import type { ArgumentNode, DirectiveNode, ObjectTypeDefinitionNode } from "graphql";
-import type { FullText, FullTextIndex } from "../../types";
+import type { FullText, FulltextContext } from "../../types";
 import type { ObjectFields } from "../get-obj-field-meta";
-import parseValueNode from "../parse-value-node";
+import { parseValueNode } from "../../schema-model/parser/parse-value-node";
 
 function parseFulltextDirective({
     directive,
@@ -32,20 +32,27 @@ function parseFulltextDirective({
     definition: ObjectTypeDefinitionNode;
 }): FullText {
     const indexesArg = directive.arguments?.find((arg) => arg.name.value === "indexes") as ArgumentNode;
-    const value = parseValueNode(indexesArg.value) as FullTextIndex[];
-    const stringFields = nodeFields.primitiveFields.filter((f) => f.typeMeta.name === "String" && !f.typeMeta.array);
+    const value = parseValueNode(indexesArg.value) as FulltextContext[];
+    const compatibleFields = nodeFields.primitiveFields.filter(
+        (f) => ["String", "ID"].includes(f.typeMeta.name) && !f.typeMeta.array
+    );
 
     value.forEach((index) => {
-        const names = value.filter((i) => index.name === i.name);
+        // TODO: remove indexName assignment and undefined check once the name argument has been removed.
+        const indexName = index.indexName || index.name;
+        if (indexName === undefined) {
+            throw new Error("The name of the fulltext index should be defined using the indexName argument.");
+        }
+        const names = value.filter((i) => indexName === i.indexName || indexName === i.name);
         if (names.length > 1) {
-            throw new Error(`Node '${definition.name.value}' @fulltext index contains duplicate name '${index.name}'`);
+            throw new Error(`Node '${definition.name.value}' @fulltext index contains duplicate name '${indexName}'`);
         }
 
         index.fields.forEach((field) => {
-            const foundField = stringFields.find((f) => f.fieldName === field);
+            const foundField = compatibleFields.find((f) => f.fieldName === field);
             if (!foundField) {
                 throw new Error(
-                    `Node '${definition.name.value}' @fulltext index contains invalid index '${index.name}' cannot use find String field '${field}'`
+                    `Node '${definition.name.value}' @fulltext index contains invalid index '${indexName}' cannot use find String or ID field '${field}'`
                 );
             }
         });

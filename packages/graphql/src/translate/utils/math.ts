@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-import mapToDbProperty from "../../utils/map-to-db-property";
 import type { GraphElement } from "../../classes";
+import mapToDbProperty from "../../utils/map-to-db-property";
 
 /** Maps Neo4jGraphQL Math operator to Cypher symbol */
 const CypherOperatorMap = new Map<string, string>([
@@ -27,7 +27,7 @@ const CypherOperatorMap = new Map<string, string>([
     ["_MULTIPLY", "*"],
     ["_DIVIDE", "/"],
     ["_INCREMENT", "+"],
-    ["_DECREMENT", "-"]
+    ["_DECREMENT", "-"],
 ]);
 
 function mathOperatorToSymbol(mathOperator: string): string {
@@ -37,7 +37,13 @@ function mathOperatorToSymbol(mathOperator: string): string {
     throw new Error(`${mathOperator} is not a valid math operator`);
 }
 
-export const MATH_FIELD_REGX = /(?<propertyName>\w*)(?<operatorName>_INCREMENT|_DECREMENT|_ADD|_SUBTRACT|_DIVIDE|_MULTIPLY)\b/;
+const MATH_FIELD_REGEX =
+    /(?<propertyName>\w*)(?<operatorName>_INCREMENT|_DECREMENT|_ADD|_SUBTRACT|_DIVIDE|_MULTIPLY)\b/;
+
+type MatchRegexMatchGroups = {
+    propertyName: string;
+    operatorName: "_INCREMENT" | "_DECREMENT" | "_ADD" | "_SUBTRACT" | "_DIVIDE" | "_MULTIPLY";
+};
 
 interface MathDescriptor {
     dbName: string;
@@ -53,23 +59,23 @@ interface MathMatch {
     operatorName: string;
     propertyName: string;
 }
-// Returns True in case of a valid match and the potential match. 
+// Returns True in case of a valid match and the potential match.
 export function matchMathField(graphQLFieldName: string): MathMatch {
-    const mathFieldMatch = graphQLFieldName.match(MATH_FIELD_REGX);
+    const mathFieldMatch = graphQLFieldName.match(MATH_FIELD_REGEX);
     if (mathFieldMatch && mathFieldMatch.groups) {
-        const { operatorName, propertyName } = mathFieldMatch.groups;
+        const { operatorName, propertyName } = mathFieldMatch.groups as MatchRegexMatchGroups;
         const hasMatched = Boolean(mathFieldMatch && mathFieldMatch.length > 2 && operatorName && propertyName);
         return {
             hasMatched,
             operatorName,
-            propertyName
-        }
-    } 
+            propertyName,
+        };
+    }
     return {
         hasMatched: false,
         operatorName: "",
-        propertyName: ""
-    }
+        propertyName: "",
+    };
 }
 
 export function mathDescriptorBuilder(value: number, entity: GraphElement, fieldMatch: MathMatch): MathDescriptor {
@@ -84,28 +90,58 @@ export function mathDescriptorBuilder(value: number, entity: GraphElement, field
         fieldName,
         operationName: fieldMatch.operatorName,
         operationSymbol: mathOperatorToSymbol(fieldMatch.operatorName),
-        value
+        value,
     };
 }
 
-export function buildMathStatements(mathDescriptor: MathDescriptor, scope: string, withVars: string[], param: string): Array<string> {
+export function buildMathStatements(
+    mathDescriptor: MathDescriptor,
+    scope: string,
+    withVars: string[],
+    param: string
+): Array<string> {
     if (mathDescriptor.operationSymbol === "/" && mathDescriptor.value === 0) {
-        throw new Error('Division by zero is not supported');
+        throw new Error("Division by zero is not supported");
     }
+
+    const validatePredicates: string[] = [];
+
+    // Raise for operations with NAN
+    validatePredicates.push(
+        `apoc.util.validatePredicate(${scope}.${mathDescriptor.dbName} IS NULL, 'Cannot %s %s to Nan', ["${mathDescriptor.operationName}", $${param}])`
+    );
+
+    const bitSize = mathDescriptor.graphQLType === "Int" ? 32 : 64;
+    // Avoid overflows, for 64 bit overflows, a long overflow is raised anyway by Neo4j
+    validatePredicates.push(
+        `apoc.util.validatePredicate(${scope}.${mathDescriptor.dbName} IS NOT NULL AND ${scope}.${
+            mathDescriptor.dbName
+        } ${mathDescriptor.operationSymbol} $${param} > 2^${
+            bitSize - 1
+        }-1, 'Overflow: Value returned from operator %s is larger than %s bit', ["${
+            mathDescriptor.operationName
+        }", "${bitSize}"])`
+    );
+
+    // Avoid type coercion where dividing an integer would result in a float value
+    if (mathDescriptor.operationSymbol === "/" && mathDescriptor.graphQLType.includes("Int")) {
+        validatePredicates.push(
+            `apoc.util.validatePredicate(${scope}.${mathDescriptor.dbName} IS NOT NULL AND (${scope}.${mathDescriptor.dbName} ${mathDescriptor.operationSymbol} $${param}) % 1 <> 0, 'Type Mismatch: Value returned from operator %s does not match: %s', ["${mathDescriptor.operationName}", "${mathDescriptor.graphQLType}"])`
+        );
+    }
+
     const statements: string[] = [];
     const mathScope = Array.from(new Set([scope, ...withVars]));
     statements.push(`WITH ${mathScope.join(", ")}`);
     statements.push(`CALL {`);
+    // Importing WITH
     statements.push(`WITH ${scope}`);
-    // Raise for operations with NAN
-    statements.push(`CALL apoc.util.validate(apoc.meta.type(${scope}.${mathDescriptor.dbName}) = "NULL", 'Cannot %s %s to Nan', ["${mathDescriptor.operationName}", $${param}])`);
-    const bitSize = mathDescriptor.graphQLType === "Int" ? 32 : 64;
-    // Avoid overflows, for 64 bit overflows, a long overflow is raised anyway by Neo4j
-    statements.push(`CALL apoc.util.validate(${scope}.${mathDescriptor.dbName} ${mathDescriptor.operationSymbol} $${param} > 2^${bitSize-1}-1, 'Overflow: Value returned from operator %s is larger than %s bit', ["${mathDescriptor.operationName}", "${bitSize}"])`);
-    const cypherType = mathDescriptor.graphQLType === "Int" || mathDescriptor.graphQLType === "BigInt" ? "INTEGER" : "FLOAT";
-    // Avoid type coercion
-    statements.push(`CALL apoc.util.validate(apoc.meta.type(${scope}.${mathDescriptor.dbName} ${mathDescriptor.operationSymbol} $${param}) <> "${cypherType}", 'Type Mismatch: Value returned from operator %s does not match: %s', ["${mathDescriptor.operationName}", "${mathDescriptor.graphQLType}"])`);
-    statements.push(`SET ${scope}.${mathDescriptor.dbName} = ${scope}.${mathDescriptor.dbName} ${mathDescriptor.operationSymbol} $${param}`);
+    statements.push(`WITH ${scope}`);
+    // Validations
+    statements.push(`WHERE ${validatePredicates.join(" AND ")}`);
+    statements.push(
+        `SET ${scope}.${mathDescriptor.dbName} = ${scope}.${mathDescriptor.dbName} ${mathDescriptor.operationSymbol} $${param}`
+    );
     statements.push(`RETURN ${scope} as ${scope}_${mathDescriptor.dbName}_${mathDescriptor.operationName}`);
     statements.push(`}`);
     return statements;

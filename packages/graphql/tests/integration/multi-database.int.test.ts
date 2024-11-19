@@ -18,61 +18,57 @@
  */
 
 import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
+import type { UniqueType } from "../utils/graphql-types";
 import { isMultiDbUnsupportedError } from "../utils/is-multi-db-unsupported-error";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("multi-database", () => {
     let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
     const id = generate({
         charset: "alphabetic",
     });
     let MULTIDB_SUPPORT = true;
     const dbName = "non-default-db-name";
+    let Movie: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-
         try {
-            // Create DB
-            const createSession = await neo4j.getSession();
-            await createSession.writeTransaction((tx) => tx.run(`CREATE DATABASE \`${dbName}\``));
-            await createSession.close();
-
-            // Write data
-            const writeSession = driver.session({ database: dbName, bookmarks: createSession.lastBookmark() });
-            await writeSession.writeTransaction((tx) => tx.run("CREATE (:Movie {id: $id})", { id }));
-            await writeSession.close();
-
-            // Make sure it's written before we continue
-            const waitSession = driver.session({ database: dbName, bookmarks: writeSession.lastBookmark() });
-            await waitSession.readTransaction((tx) => tx.run("MATCH (m:Movie) RETURN COUNT(m)"));
-            await waitSession.close();
+            await testHelper.createDatabase(dbName);
         } catch (e) {
             if (e instanceof Error) {
                 if (isMultiDbUnsupportedError(e)) {
                     // No multi-db support, so we skip tests
                     MULTIDB_SUPPORT = false;
+                    await testHelper.close();
                 } else {
                     throw e;
                 }
-            } else {
-                throw e;
             }
+        }
+    });
+
+    beforeEach(async () => {
+        if (MULTIDB_SUPPORT) {
+            driver = await testHelper.getDriver();
+            Movie = testHelper.createUniqueType("Movie");
+
+            await testHelper.executeCypher(`CREATE (:${Movie} {id: $id})`, { id });
+        }
+    });
+
+    afterEach(async () => {
+        if (MULTIDB_SUPPORT) {
+            await testHelper.close();
         }
     });
 
     afterAll(async () => {
         if (MULTIDB_SUPPORT) {
-            const dropSession = await neo4j.getSession();
-            await dropSession.writeTransaction((tx) => tx.run(`DROP DATABASE \`${dbName}\``));
-            await dropSession.close();
+            await testHelper.dropDatabase();
+            await testHelper.close();
         }
-        await driver.close();
     });
 
     test("should fail for non-existing database specified via context", async () => {
@@ -83,26 +79,24 @@ describe("multi-database", () => {
         }
 
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             query {
-                movies(where: { id: "${id}" }) {
+                ${Movie.plural}(where: { id_EQ: "${id}" }) {
                     id
                 }
             }
         `;
 
-        const result = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
+        const result = await testHelper.executeGraphQL(query, {
             variableValues: { id },
-            contextValue: { driver, driverConfig: { database: "non-existing-db" } },
+            contextValue: { executionContext: driver, sessionConfig: { database: "non-existing-db" } },
         });
         expect((result.errors as any)[0].message).toBeTruthy();
     });
@@ -114,28 +108,26 @@ describe("multi-database", () => {
         }
 
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             query {
-                movies(where: { id: "${id}" }) {
+                ${Movie.plural}(where: { id_EQ: "${id}" }) {
                     id
                 }
             }
         `;
 
-        const result = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
+        const result = await testHelper.executeGraphQL(query, {
             variableValues: { id },
-            contextValue: { driver, driverConfig: { database: dbName } },
+            contextValue: { executionContext: driver, sessionConfig: { database: dbName } },
         });
-        expect((result.data as any).movies[0].id).toBe(id);
+        expect((result.data as any)[Movie.plural][0].id).toBe(id);
     });
 
     test("should fail for non-existing database specified via neo4j construction", async () => {
@@ -146,30 +138,24 @@ describe("multi-database", () => {
         }
 
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
-            typeDefs,
-            driver,
-            config: { driverConfig: { database: "non-existing-db" } },
-        });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             query {
-                movies(where: { id: "${id}" }) {
+                ${Movie.plural}(where: { id_EQ: "${id}" }) {
                     id
                 }
             }
         `;
 
-        const result = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
+        const result = await testHelper.executeGraphQL(query, {
             variableValues: { id },
-            contextValue: {}, // This is needed, otherwise the context in resolvers will be undefined
+            contextValue: { sessionConfig: { database: "non-existing-db" } }, // This is needed, otherwise the context in resolvers will be undefined
         });
 
         expect([
@@ -185,31 +171,24 @@ describe("multi-database", () => {
         }
 
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
-
-        const neoSchema = new Neo4jGraphQL({
-            typeDefs,
-            driver,
-            config: { driverConfig: { database: dbName } },
-        });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             query {
-                movies(where: { id: "${id}" }) {
+                ${Movie.plural}(where: { id_EQ: "${id}" }) {
                     id
                 }
             }
         `;
 
-        const result = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
+        const result = await testHelper.executeGraphQL(query, {
             variableValues: { id },
-            contextValue: {}, // This is needed, otherwise the context in resolvers will be undefined
+            contextValue: { sessionConfig: { database: dbName } }, // This is needed, otherwise the context in resolvers will be undefined
         });
-        expect((result.data as any).movies[0].id).toBe(id);
+        expect((result.data as any)[Movie.plural][0].id).toBe(id);
     });
 });

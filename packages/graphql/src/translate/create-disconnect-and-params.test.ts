@@ -17,12 +17,17 @@
  * limitations under the License.
  */
 
-import createDisconnectAndParams from "./create-disconnect-and-params";
-import type { Neo4jGraphQL } from "../classes";
-import type { Context } from "../types";
-import { trimmer } from "../utils";
+import { ContextBuilder } from "../../tests/utils/builders/context-builder";
 import { NodeBuilder } from "../../tests/utils/builders/node-builder";
+import { Neo4jDatabaseInfo } from "../classes/Neo4jDatabaseInfo";
 import { RelationshipQueryDirectionOption } from "../constants";
+import { defaultNestedOperations } from "../graphql/directives/relationship";
+import { Neo4jGraphQLSchemaModel } from "../schema-model/Neo4jGraphQLSchemaModel";
+import { Attribute } from "../schema-model/attribute/Attribute";
+import { GraphQLBuiltInScalarType, ScalarType } from "../schema-model/attribute/AttributeType";
+import { ConcreteEntity } from "../schema-model/entity/ConcreteEntity";
+import type { RelationField } from "../types";
+import createDisconnectAndParams from "./create-disconnect-and-params";
 
 describe("createDisconnectAndParams", () => {
     test("should return the correct disconnect", () => {
@@ -31,9 +36,11 @@ describe("createDisconnectAndParams", () => {
             relationFields: [
                 {
                     direction: "OUT",
-                    type: "SIMILAR",
+                    typeUnescaped: "SIMILAR",
+                    type: "`SIMILAR`",
                     fieldName: "similarMovies",
                     queryDirection: RelationshipQueryDirectionOption.DEFAULT_DIRECTED,
+                    aggregate: true,
                     inherited: false,
                     typeMeta: {
                         name: "Movie",
@@ -55,8 +62,21 @@ describe("createDisconnectAndParams", () => {
                             },
                         },
                     },
+                    selectableOptions: {
+                        onRead: true,
+                        onAggregate: false,
+                    },
+                    settableOptions: {
+                        onCreate: true,
+                        onUpdate: true,
+                    },
+                    filterableOptions: {
+                        byValue: true,
+                        byAggregate: true,
+                    },
                     otherDirectives: [],
                     arguments: [],
+                    nestedOperations: defaultNestedOperations,
                 },
             ],
             cypherFields: [],
@@ -72,25 +92,41 @@ describe("createDisconnectAndParams", () => {
             interfaces: [],
         }).instance();
 
-        // @ts-ignore
-        const neoSchema: Neo4jGraphQL = {
+        const context = new ContextBuilder({
             nodes: [node],
             relationships: [],
-        };
-
-        // @ts-ignore
-        const context: Context = { neoSchema, nodes: [node], relationships: [] };
+            neo4jDatabaseInfo: new Neo4jDatabaseInfo("4.4.0"),
+            schemaModel: new Neo4jGraphQLSchemaModel({
+                concreteEntities: [
+                    new ConcreteEntity({
+                        name: "Movie",
+                        labels: ["Movie"],
+                        attributes: [
+                            new Attribute({
+                                name: "title",
+                                type: new ScalarType(GraphQLBuiltInScalarType.String, true),
+                                annotations: {},
+                                args: [],
+                            }),
+                        ],
+                    }),
+                ],
+                compositeEntities: [],
+                operations: {},
+                annotations: {},
+            }),
+        }).instance();
 
         const result = createDisconnectAndParams({
             withVars: ["this"],
             value: [
                 {
-                    where: { node: { title: "abc" } },
-                    disconnect: { similarMovies: [{ where: { node: { title: "cba" } } }] },
+                    where: { node: { title_EQ: "abc" } },
+                    disconnect: { similarMovies: [{ where: { node: { title_EQ: "cba" } } }] },
                 },
             ],
             varName: "this",
-            relationField: node.relationFields[0],
+            relationField: node.relationFields[0] as RelationField,
             parentVar: "this",
             context,
             refNodes: [node],
@@ -98,28 +134,33 @@ describe("createDisconnectAndParams", () => {
             parameterPrefix: "this", // TODO
         });
 
-        expect(trimmer(result[0])).toEqual(
-            trimmer(`
-            WITH this
+        expect(result[0]).toMatchInlineSnapshot(`
+            "WITH this
             CALL {
-                WITH this
-                OPTIONAL MATCH (this)-[this0_rel:SIMILAR]->(this0:Movie)
-                WHERE this0.title = $this[0].where.node.title
-                FOREACH(_ IN CASE this0 WHEN NULL THEN [] ELSE [1] END | DELETE this0_rel )
-
-                WITH this, this0
-                CALL {
-                    WITH this, this0
-                    OPTIONAL MATCH (this0)-[this0_similarMovies0_rel:SIMILAR]->(this0_similarMovies0:Movie)
-                    WHERE this0_similarMovies0.title = $this[0].disconnect.similarMovies[0].where.node.title
-                    FOREACH(_ IN CASE this0_similarMovies0 WHEN NULL THEN [] ELSE [1] END | DELETE this0_similarMovies0_rel )
-                    RETURN count(*) AS _
-                }
-
-                RETURN count(*) AS _
+            WITH this
+            OPTIONAL MATCH (this)-[this0_rel:\`SIMILAR\`]->(this0:Movie)
+            WHERE this0.title = $this0_where_Movie_this0param0
+            CALL {
+            	WITH this0, this0_rel, this
+            	WITH collect(this0) as this0, this0_rel, this
+            	UNWIND this0 as x
+            	DELETE this0_rel
             }
-            `)
-        );
+            CALL {
+            WITH this, this0
+            OPTIONAL MATCH (this0)-[this0_similarMovies0_rel:\`SIMILAR\`]->(this0_similarMovies0:Movie)
+            WHERE this0_similarMovies0.title = $this0_disconnect_similarMovies0_where_Movie_this0_similarMovies0param0
+            CALL {
+            	WITH this0_similarMovies0, this0_similarMovies0_rel, this0
+            	WITH collect(this0_similarMovies0) as this0_similarMovies0, this0_similarMovies0_rel, this0
+            	UNWIND this0_similarMovies0 as x
+            	DELETE this0_similarMovies0_rel
+            }
+            RETURN count(*) AS disconnect_this0_similarMovies_Movie
+            }
+            RETURN count(*) AS disconnect_this_Movie
+            }"
+        `);
 
         expect(result[1]).toMatchObject({});
     });

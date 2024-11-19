@@ -17,74 +17,61 @@
  * limitations under the License.
  */
 
-import type { Driver, Session } from "neo4j-driver";
-import { graphql } from "graphql";
-import Neo4j from "../../../neo4j";
-import { Neo4jGraphQL } from "../../../../../src/classes";
-import { generateUniqueType } from "../../../../utils/graphql-types";
+import type { UniqueType } from "../../../../utils/graphql-types";
+import { TestHelper } from "../../../../utils/tests-helper";
 
 describe("Field Level Aggregations Where", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
+    const testHelper = new TestHelper();
     let typeDefs: string;
 
-    const typeMovie = generateUniqueType("Movie");
-    const typePerson = generateUniqueType("Person");
-
-    let neoSchema: Neo4jGraphQL;
+    let typeMovie: UniqueType;
+    let typePerson: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        typeMovie = testHelper.createUniqueType("Movie");
+        typePerson = testHelper.createUniqueType("Person");
 
-        typeDefs = `
-        type ${typeMovie.name} {
+        typeDefs = /* GraphQL */ `
+        type ${typeMovie.name} @node {
             title: String
             actors: [${typePerson.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties:"ActedIn")
         }
 
-        type ${typePerson.name} {
+        type ${typePerson.name} @node {
             name: String
             age: Int
             born: DateTime
             movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT, properties:"ActedIn")
         }
 
-        interface ActedIn {
+        type ActedIn @relationshipProperties {
             screentime: Int
             character: String
         }
         `;
 
-        neoSchema = new Neo4jGraphQL({ typeDefs });
-        session = await neo4j.getSession();
-        await session.run(`
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+        await testHelper.executeCypher(`
             CREATE (m:${typeMovie.name} { title: "Terminator"})<-[:ACTED_IN { screentime: 60, character: "Terminator" }]-(:${typePerson.name} { name: "Arnold", age: 54, born: datetime('1980-07-02')})
             CREATE (m)<-[:ACTED_IN { screentime: 120, character: "Sarah" }]-(:${typePerson.name} {name: "Linda", age:37, born: datetime('2000-02-02')})`);
     });
 
     afterAll(async () => {
-        await session.close();
-        await driver.close();
+        await testHelper.close();
     });
 
     test("Count nodes where string equals", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
               ${typeMovie.plural} {
-                actorsAggregate(where: {name: "Linda"}) {
+                actorsAggregate(where: {name_EQ: "Linda"}) {
                   count
                 }
               }
             }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeMovie.plural][0].actorsAggregate).toEqual({
@@ -93,21 +80,17 @@ describe("Field Level Aggregations Where", () => {
     });
 
     test("Count nodes with OR query", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
               ${typeMovie.plural} {
-                actorsAggregate(where: {OR: [{name: "Linda"}, {name: "Arnold"}]}) {
+                actorsAggregate(where: {OR: [{name_EQ: "Linda"}, {name_EQ: "Arnold"}]}) {
                   count
                 }
               }
             }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeMovie.plural][0].actorsAggregate).toEqual({
@@ -116,19 +99,15 @@ describe("Field Level Aggregations Where", () => {
     });
 
     test("Count nodes with nested aggregation", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
               ${typeMovie.plural} {
-                actorsAggregate(where: {moviesAggregate: {count:1}}) {
+                actorsAggregate(where: {moviesAggregate: { count_EQ: 1}}) {
                   count
                 }
               }
           }`;
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeMovie.plural][0].actorsAggregate).toEqual({
@@ -138,19 +117,15 @@ describe("Field Level Aggregations Where", () => {
 
     describe("Using connections in where", () => {
         test("Count nodes with where in connection node", async () => {
-            const query = `
+            const query = /* GraphQL */ `
             query {
                 ${typePerson.plural} {
-                    moviesAggregate(where:{actorsConnection: {node: {name: "Linda"}}}){
+                    moviesAggregate(where:{actorsConnection_SOME: { node: { name_EQ: "Linda" } }}){
                         count
                     }
                 }
             }`;
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
             expect(gqlResult.errors).toBeUndefined();
             expect((gqlResult as any).data[typePerson.plural][0].moviesAggregate).toEqual({
@@ -159,19 +134,15 @@ describe("Field Level Aggregations Where", () => {
         });
 
         test("Count nodes with where in connection edge", async () => {
-            const query = `
+            const query = /* GraphQL */ `
             query {
                 ${typePerson.plural} {
-                    moviesAggregate(where:{actorsConnection: {edge: {screentime_GT: 10}}}){
+                    moviesAggregate(where:{actorsConnection_SOME: {edge: {screentime_GT: 10}}}){
                         count
                     }
                 }
             }`;
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
             expect(gqlResult.errors).toBeUndefined();
             expect((gqlResult as any).data[typePerson.plural][0].moviesAggregate).toEqual({
@@ -180,19 +151,15 @@ describe("Field Level Aggregations Where", () => {
         });
 
         test("Count nodes with where in connection node using OR", async () => {
-            const query = `
+            const query = /* GraphQL */ `
             query {
                 ${typePerson.plural} {
-                    moviesAggregate(where:{actorsConnection: {node: {OR: [{name: "Linda"},{name: "Arnold"}]}}}){
+                    moviesAggregate(where:{actorsConnection_SOME: {node: {OR: [{ name_EQ: "Linda" },{ name_EQ: "Arnold" } ]}}}){
                         count
                     }
                 }
             }`;
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
             expect(gqlResult.errors).toBeUndefined();
             expect((gqlResult as any).data[typePerson.plural][0].moviesAggregate).toEqual({
@@ -202,7 +169,7 @@ describe("Field Level Aggregations Where", () => {
     });
 
     test("Count nodes with where using IN strings", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
               ${typeMovie.plural} {
                 actorsAggregate(where: {name_IN: ["Linda", "Arnold"]}) {
@@ -212,11 +179,7 @@ describe("Field Level Aggregations Where", () => {
             }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeMovie.plural][0].actorsAggregate).toEqual({
@@ -225,7 +188,7 @@ describe("Field Level Aggregations Where", () => {
     });
 
     test("Count nodes with where using IN ints", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
               ${typeMovie.plural} {
                 actorsAggregate(where: {age_IN: [40, 60, 37]}) {
@@ -235,11 +198,7 @@ describe("Field Level Aggregations Where", () => {
             }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeMovie.plural][0].actorsAggregate).toEqual({
@@ -248,7 +207,7 @@ describe("Field Level Aggregations Where", () => {
     });
 
     test("Count nodes with datetime filter", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query {
               ${typeMovie.plural} {
                 actorsAggregate(where: {born_GT: "2000-01-01"}) {
@@ -258,11 +217,7 @@ describe("Field Level Aggregations Where", () => {
             }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeMovie.plural][0].actorsAggregate).toEqual({

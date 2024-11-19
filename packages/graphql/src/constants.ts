@@ -21,21 +21,16 @@ const DEBUG_PREFIX = "@neo4j/graphql";
 
 export const AUTH_FORBIDDEN_ERROR = "@neo4j/graphql/FORBIDDEN";
 export const AUTH_UNAUTHENTICATED_ERROR = "@neo4j/graphql/UNAUTHENTICATED";
-export const MIN_VERSIONS = [{ majorMinor: "4.3", neo4j: "4.3.2" }];
-export const REQUIRED_APOC_FUNCTIONS = [
-    "apoc.util.validatePredicate",
-    "apoc.cypher.runFirstColumn",
-    "apoc.coll.sortMulti",
-    "apoc.coll.flatten",
-    "apoc.date.convertFormat",
-    "apoc.map.values",
-];
-export const REQUIRED_APOC_PROCEDURES = ["apoc.util.validate", "apoc.do.when", "apoc.cypher.doIt"];
+export const MIN_NEO4J_VERSION = "5.0";
+export const REQUIRED_APOC_FUNCTIONS = ["apoc.util.validatePredicate", "apoc.date.convertFormat"];
+export const AUTHORIZATION_UNAUTHENTICATED = "Unauthenticated";
 export const DEBUG_ALL = `${DEBUG_PREFIX}:*`;
 export const DEBUG_AUTH = `${DEBUG_PREFIX}:auth`;
-export const DEBUG_GRAPHQL = `${DEBUG_PREFIX}:graphql`;
-export const DEBUG_EXECUTE = `${DEBUG_PREFIX}:execute`;
+export const DEBUG_EXECUTE = `${DEBUG_PREFIX}:execution`;
 export const DEBUG_GENERATE = `${DEBUG_PREFIX}:generate`;
+export const DEBUG_GRAPHQL = `${DEBUG_PREFIX}:graphql`;
+export const DEBUG_TRANSLATE = `${DEBUG_PREFIX}:translate`;
+
 export const RELATIONSHIP_REQUIREMENT_PREFIX = "@neo4j/graphql/RELATIONSHIP-REQUIRED";
 
 export const RESERVED_TYPE_NAMES = [
@@ -59,48 +54,49 @@ export const RESERVED_INTERFACE_FIELDS = [
     ["cursor", "Interface field name 'cursor' reserved to support relay See https://relay.dev/graphql/"],
 ];
 
-export const SCALAR_TYPES = [
-    "Boolean",
-    "ID",
-    "String",
-    "Int",
-    "BigInt",
-    "Float",
-    "DateTime",
-    "LocalDateTime",
-    "Time",
-    "LocalTime",
-    "Date",
-    "Duration",
-];
+export const GRAPHQL_BUILTIN_SCALAR_TYPES = ["Boolean", "ID", "String", "Int", "Float"];
+export const TEMPORAL_SCALAR_TYPES = ["DateTime", "LocalDateTime", "Time", "LocalTime", "Date"];
+export const SCALAR_TYPES = [...GRAPHQL_BUILTIN_SCALAR_TYPES, ...TEMPORAL_SCALAR_TYPES, "BigInt", "Duration"];
+export const SPATIAL_TYPES = ["Point", "CartesianPoint"];
 
-export const WHERE_AGGREGATION_OPERATORS = ["EQUAL", "GT", "GTE", "LT", "LTE"];
+export function isTemporal(typeName: string) {
+    return TEMPORAL_SCALAR_TYPES.includes(typeName);
+}
 
-// Types that you can average
-// https://neo4j.com/docs/cypher-manual/current/functions/aggregating/#functions-avg
-// https://neo4j.com/docs/cypher-manual/current/functions/aggregating/#functions-avg-duration
-// String uses avg(size())
-export const WHERE_AGGREGATION_AVERAGE_TYPES = ["String", "Int", "Float", "BigInt", "Duration"];
+export function isSpatial(typeName: string) {
+    return SPATIAL_TYPES.includes(typeName);
+}
 
-export const WHERE_AGGREGATION_TYPES = [
-    "ID",
-    "String",
-    "Float",
-    "Int",
-    "BigInt",
-    "DateTime",
-    "LocalDateTime",
-    "LocalTime",
-    "Time",
-    "Duration",
-];
+export const LOGICAL_OPERATORS = ["AND", "OR", "NOT"] as const;
+
+// aggregation
+export const AGGREGATION_COMPARISON_OPERATORS = ["EQUAL", "GT", "GTE", "LT", "LTE"] as const;
 
 export enum RelationshipQueryDirectionOption {
     DEFAULT_DIRECTED = "DEFAULT_DIRECTED",
     DEFAULT_UNDIRECTED = "DEFAULT_UNDIRECTED",
     DIRECTED_ONLY = "DIRECTED_ONLY",
     UNDIRECTED_ONLY = "UNDIRECTED_ONLY",
+    DIRECTED = "DIRECTED",
+    UNDIRECTED = "UNDIRECTED",
+}
+
+export enum RelationshipNestedOperationsOption {
+    CREATE = "CREATE",
+    UPDATE = "UPDATE",
+    DELETE = "DELETE",
+    CONNECT = "CONNECT",
+    DISCONNECT = "DISCONNECT",
+    CONNECT_OR_CREATE = "CONNECT_OR_CREATE",
 }
 
 export const META_CYPHER_VARIABLE = "meta";
 export const META_OLD_PROPS_CYPHER_VARIABLE = "oldProps";
+
+export const DBMS_COMPONENTS_QUERY =
+    "CALL dbms.components() YIELD versions, edition UNWIND versions AS version RETURN version, edition";
+
+export const DEPRECATED = "deprecated";
+export const SHAREABLE = "shareable";
+export const PROPAGATED_DIRECTIVES = [SHAREABLE, DEPRECATED] as const;
+export const SCORE_FIELD = "score";

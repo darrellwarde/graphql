@@ -17,61 +17,67 @@
  * limitations under the License.
  */
 
-import type { FieldNode, GraphQLResolveInfo } from "graphql";
-import type { SchemaComposer } from "graphql-compose";
-import { execute } from "../../../utils";
-import { translateUpdate } from "../../../translate";
+import { Kind, type FieldNode, type GraphQLResolveInfo } from "graphql";
+import type {
+    ObjectTypeComposerArgumentConfigAsObjectDefinition,
+    ObjectTypeComposerFieldConfigAsObjectDefinition,
+} from "graphql-compose";
 import type { Node } from "../../../classes";
-import type { Context } from "../../../types";
+import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import { translateUpdate } from "../../../translate";
+import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
+import { execute } from "../../../utils";
 import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
-import { publishEventsToPlugin } from "../../subscriptions/publish-events-to-plugin";
+import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
 
-export function updateResolver({ node, schemaComposer }: { node: Node; schemaComposer: SchemaComposer }) {
-    async function resolve(_root: any, args: any, _context: unknown, info: GraphQLResolveInfo) {
-        const context = _context as Context;
-        context.resolveTree = getNeo4jResolveTree(info, { args });
-        const [cypher, params] = await translateUpdate({ context, node });
+export function updateResolver({
+    node,
+    concreteEntityAdapter,
+}: {
+    node: Node;
+    concreteEntityAdapter: ConcreteEntityAdapter;
+}): ObjectTypeComposerFieldConfigAsObjectDefinition<any, any> {
+    async function resolve(_root: any, args: any, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) {
+        const resolveTree = getNeo4jResolveTree(info, { args });
+
+        (context as Neo4jGraphQLTranslationContext).resolveTree = resolveTree;
+
+        const [cypher, params] = await translateUpdate({ context: context as Neo4jGraphQLTranslationContext, node });
         const executeResult = await execute({
             cypher,
             params,
             defaultAccessMode: "WRITE",
             context,
+            info,
         });
 
-        publishEventsToPlugin(executeResult, context.plugins?.subscriptions);
+        const nodeProjection = info.fieldNodes[0]?.selectionSet?.selections.find(
+            (selection): selection is FieldNode =>
+                selection.kind === Kind.FIELD && selection.name.value === concreteEntityAdapter.plural
+        );
 
-        const nodeProjection = info.fieldNodes[0].selectionSet?.selections.find(
-            (selection) => selection.kind === "Field" && selection.name.value === node.plural
-        ) as FieldNode;
-
-        const nodeKey = nodeProjection?.alias ? nodeProjection.alias.value : nodeProjection?.name?.value;
-
-        return {
+        const resolveResult = {
             info: {
-                bookmark: executeResult.bookmark,
                 ...executeResult.statistics,
             },
-            ...(nodeProjection ? { [nodeKey]: executeResult.records[0]?.data || [] } : {}),
         };
-    }
-    const relationFields: Record<string, string> = node.relationFields.length
-        ? {
-              connect: `${node.name}ConnectInput`,
-              disconnect: `${node.name}DisconnectInput`,
-              create: `${node.name}RelationInput`,
-              delete: `${node.name}DeleteInput`,
-          }
-        : {};
 
-    if (schemaComposer.has(`${node.name}ConnectOrCreateInput`)) {
-        relationFields.connectOrCreate = `${node.name}ConnectOrCreateInput`;
+        if (nodeProjection) {
+            const nodeKey = nodeProjection.alias ? nodeProjection.alias.value : nodeProjection.name.value;
+            resolveResult[nodeKey] = executeResult.records[0]?.data || [];
+        }
+
+        return resolveResult;
     }
+
+    const relationFields: Record<string, string | ObjectTypeComposerArgumentConfigAsObjectDefinition> = {};
+
     return {
-        type: `${node.mutationResponseTypeNames.update}!`,
+        type: `${concreteEntityAdapter.operations.mutationResponseTypeNames.update}!`,
         resolve,
         args: {
-            where: `${node.name}Where`,
-            update: `${node.name}UpdateInput`,
+            where: concreteEntityAdapter.operations.updateMutationArgumentNames.where,
+            update: concreteEntityAdapter.operations.updateMutationArgumentNames.update,
             ...relationFields,
         },
     };

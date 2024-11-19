@@ -18,19 +18,23 @@
  */
 
 import type {
-    PrimitiveField,
-    PointField,
     CustomEnumField,
-    CypherField,
+    CustomResolverField,
     CustomScalarField,
+    CypherField,
+    PointField,
+    PrimitiveField,
     TemporalField,
-    ComputedField,
 } from "../types";
 import { GraphElement } from "./GraphElement";
+import type { MutableField } from "./Node";
 
-export interface RelationshipConstructor {
+interface RelationshipConstructor {
     name: string;
-    type: string;
+    type?: string;
+    source: string; // temporary addition to infer the source using the schema model
+    target: string; // temporary addition to infer the target using the schema model
+    relationshipFieldName: string; // temporary addition to infer the fieldName using the schema model
     description?: string;
     properties?: string;
     cypherFields?: CypherField[];
@@ -39,11 +43,14 @@ export interface RelationshipConstructor {
     enumFields?: CustomEnumField[];
     temporalFields?: TemporalField[];
     pointFields?: PointField[];
-    computedFields?: ComputedField[];
+    customResolverFields?: CustomResolverField[];
 }
 
 class Relationship extends GraphElement {
     public properties?: string;
+    public source: string;
+    public target: string;
+    public relationshipFieldName: string;
 
     constructor(input: RelationshipConstructor) {
         super({
@@ -55,10 +62,23 @@ class Relationship extends GraphElement {
             enumFields: input.enumFields || [],
             temporalFields: input.temporalFields || [],
             pointFields: input.pointFields || [],
-            computedFields: input.computedFields || [],
+            customResolverFields: input.customResolverFields || [],
         });
 
         this.properties = input.properties;
+        this.source = input.source;
+        this.target = input.target;
+        this.relationshipFieldName = input.relationshipFieldName;
+    }
+    // Fields you can set in a create or update mutation
+    public get mutableFields(): MutableField[] {
+        return [
+            ...this.temporalFields,
+            ...this.enumFields,
+            ...this.scalarFields, // these are just custom scalars
+            ...this.primitiveFields, // these are instead built-in scalars
+            ...this.pointFields,
+        ];
     }
 }
 

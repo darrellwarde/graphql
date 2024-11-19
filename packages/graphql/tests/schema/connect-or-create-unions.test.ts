@@ -18,30 +18,30 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Connect Or Create", () => {
     test("With Unions", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 title: String!
                 isan: String! @unique
             }
 
-            type Series {
+            type Series @node {
                 title: String!
                 isan: String! @unique
             }
 
             union Production = Movie | Series
 
-            interface ActedIn @relationshipProperties {
+            type ActedIn @relationshipProperties {
                 screenTime: Int!
             }
 
-            type Actor {
+            type Actor @node {
                 name: String!
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
@@ -55,7 +55,11 @@ describe("Connect Or Create", () => {
               mutation: Mutation
             }
 
-            interface ActedIn {
+            \\"\\"\\"
+            The edge properties for the following fields:
+            * Actor.actedIn
+            \\"\\"\\"
+            type ActedIn {
               screenTime: Int!
             }
 
@@ -68,38 +72,29 @@ describe("Connect Or Create", () => {
             }
 
             input ActedInUpdateInput {
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _SET field\\")
               screenTime_DECREMENT: Int
               screenTime_INCREMENT: Int
+              screenTime_SET: Int
             }
 
             input ActedInWhere {
               AND: [ActedInWhere!]
+              NOT: ActedInWhere
               OR: [ActedInWhere!]
-              screenTime: Int
+              screenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              screenTime_EQ: Int
               screenTime_GT: Int
               screenTime_GTE: Int
               screenTime_IN: [Int!]
               screenTime_LT: Int
               screenTime_LTE: Int
-              screenTime_NOT: Int
-              screenTime_NOT_IN: [Int!]
             }
 
             type Actor {
-              actedIn(directed: Boolean = true, options: QueryOptions, where: ProductionWhere): [Production!]!
-              actedInConnection(after: String, directed: Boolean = true, first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
+              actedIn(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: ProductionWhere): [Production!]!
+              actedInConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [ActorActedInConnectionSort!], where: ActorActedInConnectionWhere): ActorActedInConnection!
               name: String!
-            }
-
-            input ActorActedInConnectInput {
-              Movie: [ActorActedInMovieConnectFieldInput!]
-              Series: [ActorActedInSeriesConnectFieldInput!]
-            }
-
-            input ActorActedInConnectOrCreateInput {
-              Movie: [ActorActedInMovieConnectOrCreateFieldInput!]
-              Series: [ActorActedInSeriesConnectOrCreateFieldInput!]
             }
 
             type ActorActedInConnection {
@@ -117,11 +112,6 @@ describe("Connect Or Create", () => {
               Series: ActorActedInSeriesConnectionWhere
             }
 
-            input ActorActedInCreateFieldInput {
-              Movie: [ActorActedInMovieCreateFieldInput!]
-              Series: [ActorActedInSeriesCreateFieldInput!]
-            }
-
             input ActorActedInCreateInput {
               Movie: ActorActedInMovieFieldInput
               Series: ActorActedInSeriesFieldInput
@@ -130,11 +120,6 @@ describe("Connect Or Create", () => {
             input ActorActedInDeleteInput {
               Movie: [ActorActedInMovieDeleteFieldInput!]
               Series: [ActorActedInSeriesDeleteFieldInput!]
-            }
-
-            input ActorActedInDisconnectInput {
-              Movie: [ActorActedInMovieDisconnectFieldInput!]
-              Series: [ActorActedInSeriesDisconnectFieldInput!]
             }
 
             input ActorActedInMovieConnectFieldInput {
@@ -154,11 +139,10 @@ describe("Connect Or Create", () => {
 
             input ActorActedInMovieConnectionWhere {
               AND: [ActorActedInMovieConnectionWhere!]
+              NOT: ActorActedInMovieConnectionWhere
               OR: [ActorActedInMovieConnectionWhere!]
               edge: ActedInWhere
-              edge_NOT: ActedInWhere
               node: MovieWhere
-              node_NOT: MovieWhere
             }
 
             input ActorActedInMovieCreateFieldInput {
@@ -176,7 +160,7 @@ describe("Connect Or Create", () => {
 
             input ActorActedInMovieFieldInput {
               connect: [ActorActedInMovieConnectFieldInput!]
-              connectOrCreate: [ActorActedInMovieConnectOrCreateFieldInput!]
+              connectOrCreate: [ActorActedInMovieConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorActedInMovieCreateFieldInput!]
             }
 
@@ -195,10 +179,10 @@ describe("Connect Or Create", () => {
               where: ActorActedInMovieConnectionWhere
             }
 
-            type ActorActedInRelationship implements ActedIn {
+            type ActorActedInRelationship {
               cursor: String!
               node: Production!
-              screenTime: Int!
+              properties: ActedIn!
             }
 
             input ActorActedInSeriesConnectFieldInput {
@@ -218,11 +202,10 @@ describe("Connect Or Create", () => {
 
             input ActorActedInSeriesConnectionWhere {
               AND: [ActorActedInSeriesConnectionWhere!]
+              NOT: ActorActedInSeriesConnectionWhere
               OR: [ActorActedInSeriesConnectionWhere!]
               edge: ActedInWhere
-              edge_NOT: ActedInWhere
               node: SeriesWhere
-              node_NOT: SeriesWhere
             }
 
             input ActorActedInSeriesCreateFieldInput {
@@ -240,7 +223,7 @@ describe("Connect Or Create", () => {
 
             input ActorActedInSeriesFieldInput {
               connect: [ActorActedInSeriesConnectFieldInput!]
-              connectOrCreate: [ActorActedInSeriesConnectOrCreateFieldInput!]
+              connectOrCreate: [ActorActedInSeriesConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [ActorActedInSeriesCreateFieldInput!]
             }
 
@@ -266,15 +249,7 @@ describe("Connect Or Create", () => {
 
             type ActorAggregateSelection {
               count: Int!
-              name: StringAggregateSelectionNonNullable!
-            }
-
-            input ActorConnectInput {
-              actedIn: ActorActedInConnectInput
-            }
-
-            input ActorConnectOrCreateInput {
-              actedIn: ActorActedInConnectOrCreateInput
+              name: StringAggregateSelection!
             }
 
             input ActorCreateInput {
@@ -284,10 +259,6 @@ describe("Connect Or Create", () => {
 
             input ActorDeleteInput {
               actedIn: ActorActedInDeleteInput
-            }
-
-            input ActorDisconnectInput {
-              actedIn: ActorActedInDisconnectInput
             }
 
             type ActorEdge {
@@ -304,10 +275,6 @@ describe("Connect Or Create", () => {
               sort: [ActorSort!]
             }
 
-            input ActorRelationInput {
-              actedIn: ActorActedInCreateFieldInput
-            }
-
             \\"\\"\\"
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
@@ -317,27 +284,43 @@ describe("Connect Or Create", () => {
 
             input ActorUpdateInput {
               actedIn: ActorActedInUpdateInput
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input ActorWhere {
               AND: [ActorWhere!]
+              NOT: ActorWhere
               OR: [ActorWhere!]
-              actedInConnection: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_SOME\` instead.\\")
+              \\"\\"\\"
+              Return Actors where all of the related ActorActedInConnections match this filter
+              \\"\\"\\"
               actedInConnection_ALL: ActorActedInConnectionWhere
+              \\"\\"\\"
+              Return Actors where none of the related ActorActedInConnections match this filter
+              \\"\\"\\"
               actedInConnection_NONE: ActorActedInConnectionWhere
-              actedInConnection_NOT: ActorActedInConnectionWhere @deprecated(reason: \\"Use \`actedInConnection_NONE\` instead.\\")
+              \\"\\"\\"
+              Return Actors where one of the related ActorActedInConnections match this filter
+              \\"\\"\\"
               actedInConnection_SINGLE: ActorActedInConnectionWhere
+              \\"\\"\\"
+              Return Actors where some of the related ActorActedInConnections match this filter
+              \\"\\"\\"
               actedInConnection_SOME: ActorActedInConnectionWhere
-              name: String
+              \\"\\"\\"Return Actors where all of the related Productions match this filter\\"\\"\\"
+              actedIn_ALL: ProductionWhere
+              \\"\\"\\"Return Actors where none of the related Productions match this filter\\"\\"\\"
+              actedIn_NONE: ProductionWhere
+              \\"\\"\\"Return Actors where one of the related Productions match this filter\\"\\"\\"
+              actedIn_SINGLE: ProductionWhere
+              \\"\\"\\"Return Actors where some of the related Productions match this filter\\"\\"\\"
+              actedIn_SOME: ProductionWhere
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String
-              name_NOT_CONTAINS: String
-              name_NOT_ENDS_WITH: String
-              name_NOT_IN: [String!]
-              name_NOT_STARTS_WITH: String
               name_STARTS_WITH: String
             }
 
@@ -352,8 +335,10 @@ describe("Connect Or Create", () => {
               info: CreateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -368,8 +353,10 @@ describe("Connect Or Create", () => {
               series: [Series!]!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -381,8 +368,8 @@ describe("Connect Or Create", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              isan: StringAggregateSelectionNonNullable!
-              title: StringAggregateSelectionNonNullable!
+              isan: StringAggregateSelection!
+              title: StringAggregateSelection!
             }
 
             input MovieConnectOrCreateWhere {
@@ -426,36 +413,32 @@ describe("Connect Or Create", () => {
             }
 
             input MovieUniqueWhere {
-              isan: String
+              isan: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              isan_EQ: String
             }
 
             input MovieUpdateInput {
-              isan: String
-              title: String
+              isan: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isan_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
+              NOT: MovieWhere
               OR: [MovieWhere!]
-              isan: String
+              isan: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               isan_CONTAINS: String
               isan_ENDS_WITH: String
+              isan_EQ: String
               isan_IN: [String!]
-              isan_NOT: String
-              isan_NOT_CONTAINS: String
-              isan_NOT_ENDS_WITH: String
-              isan_NOT_IN: [String!]
-              isan_NOT_STARTS_WITH: String
               isan_STARTS_WITH: String
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String
-              title_NOT_CONTAINS: String
-              title_NOT_ENDS_WITH: String
-              title_NOT_IN: [String!]
-              title_NOT_STARTS_WITH: String
               title_STARTS_WITH: String
             }
 
@@ -472,7 +455,7 @@ describe("Connect Or Create", () => {
               deleteActors(delete: ActorDeleteInput, where: ActorWhere): DeleteInfo!
               deleteMovies(where: MovieWhere): DeleteInfo!
               deleteSeries(where: SeriesWhere): DeleteInfo!
-              updateActors(connect: ActorConnectInput, connectOrCreate: ActorConnectOrCreateInput, create: ActorRelationInput, delete: ActorDeleteInput, disconnect: ActorDisconnectInput, update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
+              updateActors(update: ActorUpdateInput, where: ActorWhere): UpdateActorsMutationResponse!
               updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
               updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
             }
@@ -493,17 +476,19 @@ describe("Connect Or Create", () => {
             }
 
             type Query {
-              actors(options: ActorOptions, where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
-              actorsConnection(after: String, first: Int, sort: [ActorSort], where: ActorWhere): ActorsConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
-              series(options: SeriesOptions, where: SeriesWhere): [Series!]!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              productions(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: ProductionWhere): [Production!]!
+              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort], where: SeriesWhere): SeriesConnection!
+              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
             }
 
+            \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
             input QueryOptions {
               limit: Int
               offset: Int
@@ -516,8 +501,8 @@ describe("Connect Or Create", () => {
 
             type SeriesAggregateSelection {
               count: Int!
-              isan: StringAggregateSelectionNonNullable!
-              title: StringAggregateSelectionNonNullable!
+              isan: StringAggregateSelection!
+              title: StringAggregateSelection!
             }
 
             input SeriesConnectOrCreateWhere {
@@ -567,39 +552,36 @@ describe("Connect Or Create", () => {
             }
 
             input SeriesUniqueWhere {
-              isan: String
+              isan: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              isan_EQ: String
             }
 
             input SeriesUpdateInput {
-              isan: String
-              title: String
+              isan: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              isan_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input SeriesWhere {
               AND: [SeriesWhere!]
+              NOT: SeriesWhere
               OR: [SeriesWhere!]
-              isan: String
+              isan: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               isan_CONTAINS: String
               isan_ENDS_WITH: String
+              isan_EQ: String
               isan_IN: [String!]
-              isan_NOT: String
-              isan_NOT_CONTAINS: String
-              isan_NOT_ENDS_WITH: String
-              isan_NOT_IN: [String!]
-              isan_NOT_STARTS_WITH: String
               isan_STARTS_WITH: String
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String
-              title_NOT_CONTAINS: String
-              title_NOT_ENDS_WITH: String
-              title_NOT_IN: [String!]
-              title_NOT_STARTS_WITH: String
               title_STARTS_WITH: String
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -607,9 +589,9 @@ describe("Connect Or Create", () => {
               DESC
             }
 
-            type StringAggregateSelectionNonNullable {
-              longest: String!
-              shortest: String!
+            type StringAggregateSelection {
+              longest: String
+              shortest: String
             }
 
             type UpdateActorsMutationResponse {
@@ -617,8 +599,10 @@ describe("Connect Or Create", () => {
               info: UpdateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

@@ -18,19 +18,19 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("https://github.com/neo4j/graphql/issues/1038", () => {
     test("AWSAccount and DNSZone should be cased correctly", async () => {
         const typeDefs = gql`
-            type AWSAccount {
+            type AWSAccount @node {
                 code: String
                 accountName: String
             }
 
-            type DNSZone {
+            type DNSZone @node {
                 awsId: String
                 zoneType: String
             }
@@ -50,8 +50,8 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             type AWSAccountAggregateSelection {
-              accountName: StringAggregateSelectionNullable!
-              code: StringAggregateSelectionNullable!
+              accountName: StringAggregateSelection!
+              code: StringAggregateSelection!
               count: Int!
             }
 
@@ -83,32 +83,27 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             input AWSAccountUpdateInput {
-              accountName: String
-              code: String
+              accountName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              accountName_SET: String
+              code: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              code_SET: String
             }
 
             input AWSAccountWhere {
               AND: [AWSAccountWhere!]
+              NOT: AWSAccountWhere
               OR: [AWSAccountWhere!]
-              accountName: String
+              accountName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               accountName_CONTAINS: String
               accountName_ENDS_WITH: String
+              accountName_EQ: String
               accountName_IN: [String]
-              accountName_NOT: String
-              accountName_NOT_CONTAINS: String
-              accountName_NOT_ENDS_WITH: String
-              accountName_NOT_IN: [String]
-              accountName_NOT_STARTS_WITH: String
               accountName_STARTS_WITH: String
-              code: String
+              code: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               code_CONTAINS: String
               code_ENDS_WITH: String
+              code_EQ: String
               code_IN: [String]
-              code_NOT: String
-              code_NOT_CONTAINS: String
-              code_NOT_ENDS_WITH: String
-              code_NOT_IN: [String]
-              code_NOT_STARTS_WITH: String
               code_STARTS_WITH: String
             }
 
@@ -128,8 +123,10 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               info: CreateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -140,9 +137,9 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             type DNSZoneAggregateSelection {
-              awsId: StringAggregateSelectionNullable!
+              awsId: StringAggregateSelection!
               count: Int!
-              zoneType: StringAggregateSelectionNullable!
+              zoneType: StringAggregateSelection!
             }
 
             input DNSZoneCreateInput {
@@ -173,37 +170,34 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             input DNSZoneUpdateInput {
-              awsId: String
-              zoneType: String
+              awsId: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              awsId_SET: String
+              zoneType: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              zoneType_SET: String
             }
 
             input DNSZoneWhere {
               AND: [DNSZoneWhere!]
+              NOT: DNSZoneWhere
               OR: [DNSZoneWhere!]
-              awsId: String
+              awsId: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               awsId_CONTAINS: String
               awsId_ENDS_WITH: String
+              awsId_EQ: String
               awsId_IN: [String]
-              awsId_NOT: String
-              awsId_NOT_CONTAINS: String
-              awsId_NOT_ENDS_WITH: String
-              awsId_NOT_IN: [String]
-              awsId_NOT_STARTS_WITH: String
               awsId_STARTS_WITH: String
-              zoneType: String
+              zoneType: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               zoneType_CONTAINS: String
               zoneType_ENDS_WITH: String
+              zoneType_EQ: String
               zoneType_IN: [String]
-              zoneType_NOT: String
-              zoneType_NOT_CONTAINS: String
-              zoneType_NOT_ENDS_WITH: String
-              zoneType_NOT_IN: [String]
-              zoneType_NOT_STARTS_WITH: String
               zoneType_STARTS_WITH: String
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -232,14 +226,15 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             type Query {
-              awsAccounts(options: AWSAccountOptions, where: AWSAccountWhere): [AWSAccount!]!
+              awsAccounts(limit: Int, offset: Int, options: AWSAccountOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AWSAccountSort!], where: AWSAccountWhere): [AWSAccount!]!
               awsAccountsAggregate(where: AWSAccountWhere): AWSAccountAggregateSelection!
-              awsAccountsConnection(after: String, first: Int, sort: [AWSAccountSort], where: AWSAccountWhere): AwsAccountsConnection!
-              dnsZones(options: DNSZoneOptions, where: DNSZoneWhere): [DNSZone!]!
+              awsAccountsConnection(after: String, first: Int, sort: [AWSAccountSort!], where: AWSAccountWhere): AwsAccountsConnection!
+              dnsZones(limit: Int, offset: Int, options: DNSZoneOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [DNSZoneSort!], where: DNSZoneWhere): [DNSZone!]!
               dnsZonesAggregate(where: DNSZoneWhere): DNSZoneAggregateSelection!
-              dnsZonesConnection(after: String, first: Int, sort: [DNSZoneSort], where: DNSZoneWhere): DnsZonesConnection!
+              dnsZonesConnection(after: String, first: Int, sort: [DNSZoneSort!], where: DNSZoneWhere): DnsZonesConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -247,7 +242,7 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               DESC
             }
 
-            type StringAggregateSelectionNullable {
+            type StringAggregateSelection {
               longest: String
               shortest: String
             }
@@ -262,8 +257,10 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               info: UpdateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

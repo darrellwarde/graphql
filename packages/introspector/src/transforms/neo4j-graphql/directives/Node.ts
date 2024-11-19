@@ -20,28 +20,16 @@
 import type { Directive } from "../types";
 
 export class NodeDirective implements Directive {
-    label?: string;
-    additionalLabels: string[] = [];
+    labels: string[] = [];
 
-    addLabel(label: string) {
-        this.label = label;
-    }
-
-    addAdditionalLabels(labels: string[] | string) {
+    addLabels(labels: string[]): void {
         if (!labels.length) {
             return;
         }
-        this.additionalLabels = this.additionalLabels.concat(labels);
+        this.labels = this.labels.concat(labels);
     }
 
-    toString() {
-        const directiveArguments: string[] = [];
-        if (this.label) {
-            directiveArguments.push(`label: "${this.label}"`);
-        }
-        if (this.additionalLabels.length) {
-            directiveArguments.push(`additionalLabels: ["${this.additionalLabels.join('","')}"]`);
-        }
-        return directiveArguments.length ? `@node(${directiveArguments.join(", ")})` : "";
+    toString(): string {
+        return this.labels.length ? `@node(labels: ["${this.labels.join('", "')}"])` : "@node";
     }
 }

@@ -17,30 +17,27 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql, createSourceEventStream, parse } from "graphql";
+import { createSourceEventStream, parse } from "graphql";
+import { driver } from "neo4j-driver";
 import { generate } from "randomstring";
-import { Neo4jGraphQL } from "../../src/classes";
-import Neo4j from "./neo4j";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("Custom Resolvers", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should define a custom field resolver and resolve it", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
               id: ID
               custom: String
             }
@@ -50,9 +47,9 @@ describe("Custom Resolvers", () => {
             return (root.id as string).toUpperCase();
         }
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            resolvers: { Movie: { custom: customResolver } },
+            resolvers: { [Movie.name]: { custom: customResolver } },
         });
 
         const id = generate({
@@ -61,8 +58,8 @@ describe("Custom Resolvers", () => {
 
         const create = `
             mutation {
-                createMovies(input:[{id: "${id}"}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{id: "${id}"}]) {
+                    ${Movie.plural} {
                         id
                         custom
                     }
@@ -70,27 +67,19 @@ describe("Custom Resolvers", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any).createMovies.movies[0]).toEqual({
-                id,
-                custom: id.toUpperCase(),
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[Movie.operations.create][Movie.plural][0]).toEqual({
+            id,
+            custom: id.toUpperCase(),
+        });
     });
 
     test("should define a custom Query resolver and resolve it", async () => {
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
               id: ID
               custom: String
             }
@@ -108,7 +97,7 @@ describe("Custom Resolvers", () => {
             return id;
         }
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
             resolvers: { Query: { id: customResolver } },
         });
@@ -119,11 +108,7 @@ describe("Custom Resolvers", () => {
             }
         `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeFalsy();
 
@@ -132,7 +117,7 @@ describe("Custom Resolvers", () => {
 
     test("should define a custom Mutation resolver and resolve it", async () => {
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
               id: ID
               custom: String
             }
@@ -150,7 +135,7 @@ describe("Custom Resolvers", () => {
             return id;
         }
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
             resolvers: { Mutation: { id: customResolver } },
         });
@@ -161,11 +146,7 @@ describe("Custom Resolvers", () => {
             }
         `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: mutation,
-            contextValue: neo4j.getContextValues(),
-        });
+        const gqlResult = await testHelper.executeGraphQL(mutation);
 
         expect(gqlResult.errors).toBeFalsy();
 
@@ -174,7 +155,7 @@ describe("Custom Resolvers", () => {
 
     test("should define a custom Subscription resolver and resolve it", async () => {
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
               id: ID
               custom: String
             }
@@ -188,7 +169,7 @@ describe("Custom Resolvers", () => {
             charset: "alphabetic",
         });
 
-        const neoSchema = new Neo4jGraphQL({
+        const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
             resolvers: {
                 Subscription: {
@@ -216,10 +197,8 @@ describe("Custom Resolvers", () => {
     });
 
     test("should accept an array of custom resolvers", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
               id: ID
               custom1: String
               custom2: String
@@ -234,9 +213,9 @@ describe("Custom Resolvers", () => {
             return (root.id as string).toLowerCase();
         }
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            resolvers: [{ Movie: { custom1: customResolver1 } }, { Movie: { custom2: customResolver2 } }],
+            resolvers: [{ [Movie.name]: { custom1: customResolver1 } }, { [Movie.name]: { custom2: customResolver2 } }],
         });
 
         const id = generate({
@@ -245,8 +224,8 @@ describe("Custom Resolvers", () => {
 
         const create = `
             mutation {
-                createMovies(input:[{id: "${id}"}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{id: "${id}"}]) {
+                    ${Movie.plural} {
                         id
                         custom1
                         custom2
@@ -255,199 +234,181 @@ describe("Custom Resolvers", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any).createMovies.movies[0]).toEqual({
-                id,
-                custom1: id.toUpperCase(),
-                custom2: id.toLowerCase(),
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[Movie.operations.create][Movie.plural][0]).toEqual({
+            id,
+            custom1: id.toUpperCase(),
+            custom2: id.toLowerCase(),
+        });
     });
 
     describe("@cypher", () => {
-        test("should define custom Query (with cypher directive) and resolve each value", async () => {
-            await Promise.all(
-                ["ID", "Int", "Float", "Boolean", "Object", "Node"].map(async (type) => {
-                    let typeDefs;
-                    let query;
+        test.each(["ID", "Int", "Float", "Boolean", "Object", "Node"] as const)(
+            "should define custom Query (with cypher directive) and resolve each value",
+            async (type) => {
+                let typeDefs;
+                let query;
 
-                    const id = generate({
-                        charset: "alphabetic",
-                    });
+                const id = generate({
+                    charset: "alphabetic",
+                });
 
-                    const int = Math.floor(Math.random() * 100000);
-                    const float = Math.floor(Math.random() * 100000) - 0.5;
-                    const bool = false;
+                const int = Math.floor(Math.random() * 100000);
+                const float = Math.floor(Math.random() * 100000) - 0.5;
+                const bool = false;
 
-                    if (type === "ID") {
-                        typeDefs = `
+                if (type === "ID") {
+                    typeDefs = `
                             type Query {
                                 test: ${type}! @cypher(statement: """
-                                RETURN \\"${id}\\"
-                                """)
+                                RETURN "${id}" as id
+                                """,
+                                columnName: "id")
                             }
                         `;
 
-                        query = `
+                    query = `
                             {
                                 test
                             }
                         `;
-                    }
+                }
 
-                    if (type === "Int") {
-                        typeDefs = `
+                if (type === "Int") {
+                    typeDefs = `
                             type Query {
                                 test: ${type}! @cypher(statement: """
-                                RETURN ${int}
-                                """)
+                                RETURN ${int} as res
+                                """, columnName: "res")
                             }
                         `;
 
-                        query = `
+                    query = `
                             {
                                 test
                             }
                         `;
-                    }
+                }
 
-                    if (type === "Float") {
-                        typeDefs = `
+                if (type === "Float") {
+                    typeDefs = `
                             type Query {
                                 test: ${type}! @cypher(statement: """
-                                RETURN ${float}
-                                """)
+                                RETURN ${float} as res
+                                """, columnName: "res")
                             }
                         `;
 
-                        query = `
+                    query = `
                             {
                                 test
                             }
                         `;
-                    }
+                }
 
-                    if (type === "Boolean") {
-                        typeDefs = `
+                if (type === "Boolean") {
+                    typeDefs = `
                             type Query {
                                 test: ${type}! @cypher(statement: """
-                                RETURN ${bool}
-                                """)
+                                RETURN ${bool} as res
+                                """, columnName: "res")
                             }
                         `;
 
-                        query = `
+                    query = `
                             {
                                 test
                             }
                         `;
-                    }
+                }
 
-                    if (type === "Object") {
-                        typeDefs = `
-                            type Test {
+                if (type === "Object") {
+                    typeDefs = `
+                            type Test @node {
                                 id: ID
                             }
 
                             type Query {
                                 test: Test! @cypher(statement: """
-                                RETURN {id: \\"${id}\\"}
-                                """)
+                                RETURN {id: "${id}"} as res
+                                """, columnName: "res")
                             }
                         `;
 
-                        query = `
+                    query = `
                             {
                                 test {
                                     id
                                 }
                             }
                         `;
-                    }
+                }
 
-                    if (type === "Node") {
-                        typeDefs = `
-                            type Test {
+                if (type === "Node") {
+                    typeDefs = `
+                            type ${Movie} @node {
                                 id: ID
                             }
 
                             type Query {
-                                test(id: ID!): Test! @cypher(statement: """
-                                MATCH (n:Test {id: $id})
+                                test(id: ID!): ${Movie}! @cypher(statement: """
+                                MATCH (n:${Movie} {id: $id})
                                 RETURN n
-                                """)
+                                """, columnName: "n")
                             }
                         `;
 
-                        query = `
+                    query = `
                             {
                                 test(id: "${id}") {
                                     id
                                 }
                             }
                         `;
-                    }
+                }
 
-                    const session = await neo4j.getSession();
+                await testHelper.initNeo4jGraphQL({
+                    typeDefs,
+                });
 
-                    const neoSchema = new Neo4jGraphQL({
-                        typeDefs,
-                    });
-
-                    try {
-                        if (type === "Node") {
-                            await session.run(`
-                                CREATE (n:Test {id: "${id}"})
+                if (type === "Node") {
+                    await testHelper.executeCypher(`
+                                CREATE (n:${Movie} {id: "${id}"})
                             `);
-                        }
+                }
 
-                        const gqlResult = await graphql({
-                            schema: await neoSchema.getSchema(),
-                            source: query,
-                            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                        });
+                const gqlResult = await testHelper.executeGraphQL(query);
 
-                        expect(gqlResult.errors).toBeFalsy();
+                expect(gqlResult.errors).toBeFalsy();
 
-                        let expected: any;
+                let expected: any;
 
-                        if (type === "ID") {
-                            expected = id;
-                        }
+                if (type === "ID") {
+                    expected = id;
+                }
 
-                        if (type === "Object" || type === "Node") {
-                            expected = { id };
-                        }
+                if (type === "Object" || type === "Node") {
+                    expected = { id };
+                }
 
-                        if (type === "Int") {
-                            expected = int;
-                        }
+                if (type === "Int") {
+                    expected = int;
+                }
 
-                        if (type === "Float") {
-                            expected = float;
-                        }
+                if (type === "Float") {
+                    expected = float;
+                }
 
-                        if (type === "Boolean") {
-                            expected = bool;
-                        }
+                if (type === "Boolean") {
+                    expected = bool;
+                }
 
-                        expect((gqlResult.data as any).test).toEqual(expected);
-                    } finally {
-                        await session.close();
-                    }
-                })
-            );
-        });
+                expect((gqlResult.data as any).test).toEqual(expected);
+            }
+        );
 
         test("should define custom Mutation (with cypher directive) and resolve each value", async () => {
             const id = generate({
@@ -461,8 +422,8 @@ describe("Custom Resolvers", () => {
 
                 type Mutation {
                     test(id: ID!): ID! @cypher(statement: """
-                        RETURN \\"${id}\\" + $id
-                    """)
+                        RETURN "${id}" + $id as res
+                    """, columnName: "res")
                 }
             `;
 
@@ -472,25 +433,15 @@ describe("Custom Resolvers", () => {
                 }
             `;
 
-            const session = await neo4j.getSession();
-
-            const neoSchema = new Neo4jGraphQL({
+            await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            try {
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: mutation,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(mutation);
 
-                expect(gqlResult.errors).toBeFalsy();
+            expect(gqlResult.errors).toBeFalsy();
 
-                expect((gqlResult.data as any).test).toBe(`${id}${id}`);
-            } finally {
-                await session.close();
-            }
+            expect((gqlResult.data as any).test).toBe(`${id}${id}`);
         });
 
         test("should return an enum from a cypher directive (top level)", async () => {
@@ -499,11 +450,10 @@ describe("Custom Resolvers", () => {
                     COMPLETED
                 }
 
-
                 type Query {
                     status: Status @cypher(statement: """
-                        RETURN 'COMPLETED'
-                    """)
+                        RETURN 'COMPLETED' as str
+                    """, columnName: "str")
                 }
             `;
 
@@ -513,80 +463,63 @@ describe("Custom Resolvers", () => {
                 }
             `;
 
-            const session = await neo4j.getSession();
-
-            const neoSchema = new Neo4jGraphQL({
+            await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            try {
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                expect(gqlResult.errors).toBeFalsy();
+            expect(gqlResult.errors).toBeFalsy();
 
-                expect((gqlResult.data as any).status).toBe("COMPLETED");
-            } finally {
-                await session.close();
-            }
+            expect((gqlResult.data as any).status).toBe("COMPLETED");
         });
 
         test("should return an enum from a cypher directive (field level)", async () => {
             const id = generate({
                 charset: "alphabetic",
             });
+            const Trade = testHelper.createUniqueType("Trade");
 
             const typeDefs = `
                 enum Status {
                     COMPLETED
                 }
 
-                type Trade {
+                type ${Trade} @node {
                     id: ID
                     status: Status @cypher(statement: """
-                        RETURN 'COMPLETED'
-                    """)
+                        RETURN 'COMPLETED' as res
+                    """, columnName: "res")
                 }
             `;
 
             const query = `
                 query {
-                    trades(where: { id: "${id}" }) {
+                    ${Trade.plural}(where: { id_EQ: "${id}" }) {
                         id
                         status
                     }
                 }
             `;
 
-            const session = await neo4j.getSession();
-
-            const neoSchema = new Neo4jGraphQL({
+            await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            try {
-                await session.run(`
-                    CREATE (:Trade {id: "${id}"})
+            await testHelper.executeCypher(`
+                    CREATE (:${Trade} {id: "${id}"})
                 `);
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                expect(gqlResult.errors).toBeFalsy();
+            expect(gqlResult.errors).toBeFalsy();
 
-                expect((gqlResult.data as any).trades[0]).toEqual({ id, status: "COMPLETED" });
-            } finally {
-                await session.close();
-            }
+            expect((gqlResult.data as any)[Trade.plural][0]).toEqual({ id, status: "COMPLETED" });
         });
 
         test("should return an array of primitive values from a cypher directive (field level)", async () => {
+            const Type = testHelper.createUniqueType("Type");
+
             const id = generate({
                 charset: "alphabetic",
             });
@@ -601,46 +534,37 @@ describe("Custom Resolvers", () => {
             });
 
             const typeDefs = `
-                type Type {
+                type ${Type} @node {
                     id: ID
                     strings: [String] @cypher(statement: """
-                        RETURN ['${string1}', '${string2}', '${string3}']
-                    """)
+                        RETURN ['${string1}', '${string2}', '${string3}'] as arr
+                    """,
+                    columnName: "arr")
                 }
             `;
 
             const query = `
                 query {
-                    types(where: { id: "${id}" }) {
+                    ${Type.plural}(where: { id_EQ: "${id}" }) {
                         id
                         strings
                     }
                 }
             `;
 
-            const session = await neo4j.getSession();
-
-            const neoSchema = new Neo4jGraphQL({
+            await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            try {
-                await session.run(`
-                    CREATE (:Type {id: "${id}"})
+            await testHelper.executeCypher(`
+                    CREATE (:${Type} {id: "${id}"})
                 `);
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                expect(gqlResult.errors).toBeFalsy();
+            expect(gqlResult.errors).toBeFalsy();
 
-                expect((gqlResult.data as any).types[0]).toEqual({ id, strings: [string1, string2, string3] });
-            } finally {
-                await session.close();
-            }
+            expect((gqlResult.data as any)[Type.plural][0]).toEqual({ id, strings: [string1, string2, string3] });
         });
     });
 });

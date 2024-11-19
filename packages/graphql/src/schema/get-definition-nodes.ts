@@ -26,10 +26,10 @@ import type {
     InterfaceTypeDefinitionNode,
     ObjectTypeDefinitionNode,
     ScalarTypeDefinitionNode,
-    UnionTypeDefinitionNode} from "graphql";
-import {
-    Kind
+    SchemaExtensionNode,
+    UnionTypeDefinitionNode,
 } from "graphql";
+import { Kind } from "graphql";
 import { isRootType } from "../utils/is-root-type";
 import { DEBUG_GENERATE } from "../constants";
 
@@ -43,6 +43,8 @@ export type DefinitionNodes = {
     interfaceTypes: InterfaceTypeDefinitionNode[];
     directives: DirectiveDefinitionNode[];
     unionTypes: UnionTypeDefinitionNode[];
+    schemaExtensions: SchemaExtensionNode[];
+    operations: ObjectTypeDefinitionNode[];
 };
 
 export function getDefinitionNodes(document: DocumentNode): DefinitionNodes {
@@ -55,6 +57,8 @@ export function getDefinitionNodes(document: DocumentNode): DefinitionNodes {
                 case Kind.OBJECT_TYPE_DEFINITION:
                     if (!isRootType(definition)) {
                         definitionNodes.objectTypes.push(definition);
+                    } else {
+                        definitionNodes.operations.push(definition);
                     }
                     break;
                 case Kind.ENUM_TYPE_DEFINITION:
@@ -72,6 +76,9 @@ export function getDefinitionNodes(document: DocumentNode): DefinitionNodes {
                 case Kind.UNION_TYPE_DEFINITION:
                     definitionNodes.unionTypes.push(definition);
                     break;
+                case Kind.SCHEMA_EXTENSION:
+                    definitionNodes.schemaExtensions.push(definition);
+                    break;
                 case Kind.SCHEMA_DEFINITION:
                     break;
                 default:
@@ -88,6 +95,8 @@ export function getDefinitionNodes(document: DocumentNode): DefinitionNodes {
             interfaceTypes: [],
             directives: [],
             unionTypes: [],
+            schemaExtensions: [],
+            operations: [],
         }
     );
 }

@@ -17,32 +17,22 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { Neo4jGraphQL } from "../../../src/classes";
-import Neo4j from "../neo4j";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
-describe("360", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+describe("https://github.com/neo4j/graphql/issues/360", () => {
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeEach(() => {});
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should return all nodes when AND is used and members are optional", async () => {
-        const session = await neo4j.getSession();
-
-        const type = generateUniqueType("Event");
+        const type = testHelper.createUniqueType("Event");
 
         const typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
                 id: ID!
                 name: String
                 start: DateTime
@@ -51,47 +41,37 @@ describe("360", () => {
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
         const query = `
             query ($rangeStart: DateTime, $rangeEnd: DateTime, $activity: String) {
-                ${type.plural}(where: { AND: [{ start_GTE: $rangeStart }, { start_LTE: $rangeEnd }, { activity: $activity }] }) {
+                ${type.plural}(where: { AND: [{ start_GTE: $rangeStart }, { start_LTE: $rangeEnd }, { activity_EQ: $activity }] }) {
                     id
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime(), end: datetime()})
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime(), end: datetime()})
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime(), end: datetime()})
                 `
-            );
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeUndefined();
-            expect((gqlResult.data as any)[type.plural]).toHaveLength(3);
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult.errors).toBeUndefined();
+        expect((gqlResult.data as any)[type.plural]).toHaveLength(3);
     });
 
     test("should return all nodes when OR is used and members are optional", async () => {
-        const session = await neo4j.getSession();
-
-        const type = generateUniqueType("Event");
+        const type = testHelper.createUniqueType("Event");
 
         const typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
                 id: ID!
                 name: String
                 start: DateTime
@@ -100,47 +80,37 @@ describe("360", () => {
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
         const query = `
             query ($rangeStart: DateTime, $rangeEnd: DateTime, $activity: String) {
-                ${type.plural}(where: { OR: [{ start_GTE: $rangeStart }, { start_LTE: $rangeEnd }, { activity: $activity }] }) {
+                ${type.plural}(where: { OR: [{ start_GTE: $rangeStart }, { start_LTE: $rangeEnd }, { activity_EQ: $activity }] }) {
                     id
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime(), end: datetime()})
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime(), end: datetime()})
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime(), end: datetime()})
                 `
-            );
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeUndefined();
-            expect((gqlResult.data as any)[type.plural]).toHaveLength(3);
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult.errors).toBeUndefined();
+        expect((gqlResult.data as any)[type.plural]).toHaveLength(3);
     });
 
     test("should recreate given test in issue and return correct results", async () => {
-        const session = await neo4j.getSession();
-
-        const type = generateUniqueType("Event");
+        const type = testHelper.createUniqueType("Event");
 
         const typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
                 id: ID!
                 name: String
                 start: DateTime
@@ -149,7 +119,7 @@ describe("360", () => {
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -158,33 +128,26 @@ describe("360", () => {
 
         const query = `
             query ($rangeStart: DateTime, $rangeEnd: DateTime, $activity: String) {
-                ${type.plural}(where: { OR: [{ start_GTE: $rangeStart }, { start_LTE: $rangeEnd }, { activity: $activity }] }) {
+                ${type.plural}(where: { OR: [{ start_GTE: $rangeStart }, { start_LTE: $rangeEnd }, { activity_EQ: $activity }] }) {
                     id
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime($rangeStart), end: datetime($rangeEnd)})
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime($rangeStart), end: datetime($rangeEnd)})
                     CREATE (:${type.name} {id: randomUUID(), name: randomUUID(), start: datetime(), end: datetime()})
                 `,
-                { rangeStart, rangeEnd }
-            );
+            { rangeStart, rangeEnd }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                variableValues: { rangeStart, rangeEnd },
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { rangeStart, rangeEnd },
+        });
 
-            expect(gqlResult.errors).toBeUndefined();
-            expect((gqlResult.data as any)[type.plural]).toHaveLength(3);
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult.errors).toBeUndefined();
+        expect((gqlResult.data as any)[type.plural]).toHaveLength(3);
     });
 });

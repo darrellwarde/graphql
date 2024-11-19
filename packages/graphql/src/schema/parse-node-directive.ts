@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import type { DirectiveNode} from "graphql";
+import type { DirectiveNode } from "graphql";
 import { valueFromASTUntyped } from "graphql";
 import { NodeDirective } from "../classes/NodeDirective";
 
@@ -27,9 +27,7 @@ function parseNodeDirective(nodeDirective: DirectiveNode | undefined) {
     }
 
     return new NodeDirective({
-        label: getArgumentValue<string>(nodeDirective, "label"),
-        additionalLabels: getArgumentValue<string[]>(nodeDirective, "additionalLabels"),
-        plural: getArgumentValue<string>(nodeDirective, "plural"),
+        labels: getArgumentValue<string[]>(nodeDirective, "labels"),
     });
 }
 

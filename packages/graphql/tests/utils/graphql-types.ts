@@ -17,11 +17,10 @@
  * limitations under the License.
  */
 
-// This file should only be used for tests. As randomstring is a devDependecy
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { generate } from "randomstring";
-import pluralize from "pluralize";
 import camelcase from "camelcase";
+import pluralize from "pluralize";
+import { generate } from "randomstring";
+import { leadingUnderscores } from "../../src/utils/leading-underscore";
 import { upperFirst } from "../../src/utils/upper-first";
 
 type UniqueTypeOperations = {
@@ -42,14 +41,6 @@ type UniqueTypeOperations = {
     };
 };
 
-type UniqueTypeFieldNames = {
-    subscriptions: {
-        created: string;
-        updated: string;
-        deleted: string;
-    };
-};
-
 export class UniqueType {
     public readonly name: string;
 
@@ -63,6 +54,12 @@ export class UniqueType {
 
     public get plural(): string {
         return pluralize(camelcase(this.name));
+    }
+
+    public get singular(): string {
+        const singular = camelcase(this.name);
+
+        return `${leadingUnderscores(this.name)}${singular}`;
     }
 
     public get operations(): UniqueTypeOperations {
@@ -92,8 +89,4 @@ export class UniqueType {
     public toString(): string {
         return this.name;
     }
-}
-
-export function generateUniqueType(baseName: string): UniqueType {
-    return new UniqueType(baseName);
 }

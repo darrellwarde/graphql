@@ -17,37 +17,29 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { gql } from "graphql-tag";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("Revert https://github.com/neo4j/graphql/pull/572", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeEach(() => {});
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should create user without related friend in many-to-many relationship", async () => {
-        const user = generateUniqueType("User");
+        const user = testHelper.createUniqueType("User");
 
         const typeDefs = gql`
-            type ${user.name} {
+            type ${user.name} @node {
                 name: String!
                 friends: [${user.name}!]! @relationship(type: "FRIENDS_WITH", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             mutation {
@@ -59,11 +51,7 @@ describe("Revert https://github.com/neo4j/graphql/pull/572", () => {
             }
         `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeFalsy();
         expect(gqlResult.data).toEqual({

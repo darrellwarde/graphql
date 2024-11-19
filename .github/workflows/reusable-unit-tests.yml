@@ -2,13 +2,12 @@ name: "Unit tests"
 
 on:
   workflow_call:
-    secrets:
-      CODECOV_TOKEN:
+    inputs:
+      disable-coverage-archival:
+        description: "Whether or not to archive the test coverage"
         required: false
-        description: "API token for Codecov, if it is available in the current context"
-
-env:
-  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        default: false
+        type: boolean
 
 jobs:
   unit-tests:
@@ -16,34 +15,24 @@ jobs:
       matrix:
         package:
           - graphql
-          - ogm
           - introspector
-          - plugins/graphql-plugin-auth
-          - plugins/graphql-plugin-subscriptions-amqp
-        graphql-version:
-          - "^15.0.0"
-          - "^16.0.0"
 
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version: lts/*
           cache: yarn
       - name: Install dependencies
         run: yarn --immutable
-      - name: Overwrite GraphQL version
-        run: yarn up --exact graphql@${{ matrix.graphql-version }}
       - name: Run packages/${{ matrix.package }} unit tests
         run: yarn run test:unit --coverage
         working-directory: packages/${{ matrix.package }}
-      - if: ${{ env.CODECOV_TOKEN != '' }}
-        name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - if: ${{ !inputs.disable-coverage-archival && matrix.package == 'graphql' }}
+        name: Archive coverage report
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./packages/${{ matrix.package }}/coverage/
-          flags: ${{ matrix.package }},unit
-          fail_ci_if_error: true
+          name: unit-coverage-${{ matrix.package }}
+          path: packages/${{ matrix.package }}/coverage/

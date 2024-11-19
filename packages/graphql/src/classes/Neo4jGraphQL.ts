@@ -17,74 +17,182 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import type { GraphQLSchema } from "graphql";
-import type { IExecutableSchemaDefinition} from "@graphql-tools/schema";
-import { addResolversToSchema, makeExecutableSchema } from "@graphql-tools/schema";
+import { mergeResolvers, mergeTypeDefs } from "@graphql-tools/merge";
 import { composeResolvers } from "@graphql-tools/resolvers-composition";
-import type { IResolvers } from "@graphql-tools/utils";
-import { forEachField } from "@graphql-tools/utils";
-import { mergeResolvers } from "@graphql-tools/merge";
+import type { IExecutableSchemaDefinition } from "@graphql-tools/schema";
+import { addResolversToSchema, makeExecutableSchema } from "@graphql-tools/schema";
+import { forEachField, getResolversFromSchema } from "@graphql-tools/utils";
 import Debug from "debug";
-import type { DriverConfig, CypherQueryOptions, Neo4jGraphQLPlugins, Neo4jGraphQLCallbacks } from "../types";
+import type { DocumentNode, GraphQLSchema } from "graphql";
+import type { Driver, SessionConfig } from "neo4j-driver";
+import { DEBUG_ALL } from "../constants";
 import { makeAugmentedSchema } from "../schema";
+import type { Neo4jGraphQLSchemaModel } from "../schema-model/Neo4jGraphQLSchemaModel";
+import { generateModel } from "../schema-model/generate-model";
+import { getDefinitionNodes } from "../schema/get-definition-nodes";
+import { makeDocumentToAugment } from "../schema/make-document-to-augment";
+import type { WrapResolverArguments } from "../schema/resolvers/composition/wrap-query-and-mutation";
+import { wrapQueryAndMutation } from "../schema/resolvers/composition/wrap-query-and-mutation";
+import { wrapSubscription, type WrapSubscriptionArgs } from "../schema/resolvers/composition/wrap-subscription";
+import { defaultFieldResolver } from "../schema/resolvers/field/defaultField";
+import { validateDocument } from "../schema/validation";
+import { validateUserDefinition } from "../schema/validation/schema-validation";
+import type { ContextFeatures, Neo4jFeaturesSettings, Neo4jGraphQLSubscriptionsEngine } from "../types";
+import { asArray } from "../utils/utils";
+import type { ExecutorConstructorParam, Neo4jGraphQLSessionConfig } from "./Executor";
+import { Executor } from "./Executor";
+import type { Neo4jDatabaseInfo } from "./Neo4jDatabaseInfo";
+import { getNeo4jDatabaseInfo } from "./Neo4jDatabaseInfo";
 import type Node from "./Node";
 import type Relationship from "./Relationship";
+import { Neo4jGraphQLAuthorization } from "./authorization/Neo4jGraphQLAuthorization";
+import { Neo4jGraphQLSubscriptionsCDCEngine } from "./subscription/Neo4jGraphQLSubscriptionsCDCEngine";
+import { assertIndexesAndConstraints } from "./utils/asserts-indexes-and-constraints";
+import { generateResolverComposition } from "./utils/generate-resolvers-composition";
 import checkNeo4jCompat from "./utils/verify-database";
-import type {
-    AssertIndexesAndConstraintsOptions,
-} from "./utils/asserts-indexes-and-constraints";
-import assertIndexesAndConstraints from "./utils/asserts-indexes-and-constraints";
-import { wrapResolver, wrapSubscription } from "../schema/resolvers/wrapper";
-import { defaultFieldResolver } from "../schema/resolvers/field/defaultField";
-import { asArray } from "../utils/utils";
-import { DEBUG_ALL } from "../constants";
 
-export interface Neo4jGraphQLJWT {
-    jwksEndpoint?: string;
-    secret?: string | Buffer | { key: string | Buffer; passphrase: string };
-    noVerify?: boolean;
-    rolesPath?: string;
-}
+type TypeDefinitions = string | DocumentNode | TypeDefinitions[] | (() => TypeDefinitions);
 
-export interface Neo4jGraphQLConfig {
-    driverConfig?: DriverConfig;
-    enableRegex?: boolean;
-    enableDebug?: boolean;
-    skipValidateTypeDefs?: boolean;
-    queryOptions?: CypherQueryOptions;
-    callbacks?: Neo4jGraphQLCallbacks;
-}
-
-export interface Neo4jGraphQLConstructor extends IExecutableSchemaDefinition {
-    config?: Neo4jGraphQLConfig;
+export interface Neo4jGraphQLConstructor {
+    typeDefs: TypeDefinitions;
+    resolvers?: IExecutableSchemaDefinition["resolvers"];
+    features?: Neo4jFeaturesSettings;
     driver?: Driver;
-    plugins?: Neo4jGraphQLPlugins;
+    debug?: boolean;
+    validate?: boolean;
 }
 
 class Neo4jGraphQL {
-    private config: Neo4jGraphQLConfig;
-    private driver?: Driver;
+    private typeDefs: TypeDefinitions;
+    private resolvers?: IExecutableSchemaDefinition["resolvers"];
 
-    private schemaDefinition: IExecutableSchemaDefinition;
+    private driver?: Driver;
+    private features: ContextFeatures;
 
     private _nodes?: Node[];
     private _relationships?: Relationship[];
-    private plugins?: Neo4jGraphQLPlugins;
-    private schema?: Promise<GraphQLSchema>;
+
+    private jwtFieldsMap?: Map<string, string>;
+
+    private schemaModel?: Neo4jGraphQLSchemaModel;
+
+    private executableSchema?: Promise<GraphQLSchema>;
+    private subgraphSchema?: Promise<GraphQLSchema>;
+
+    // This promise ensures that subscription init only happens once
+    private subscriptionInit?: Promise<void>;
+
+    private dbInfo?: Neo4jDatabaseInfo;
+
+    private authorization?: Neo4jGraphQLAuthorization;
+
+    private debug?: boolean;
+    private validate: boolean;
 
     constructor(input: Neo4jGraphQLConstructor) {
-        const { config = {}, driver, plugins, ...schemaDefinition } = input;
+        const { driver, features, typeDefs, resolvers, debug, validate = true } = input;
 
         this.driver = driver;
-        this.config = config;
-        this.plugins = plugins;
-        this.schemaDefinition = schemaDefinition;
+        this.features = this.parseNeo4jFeatures(features);
+
+        this.typeDefs = typeDefs;
+        this.resolvers = resolvers;
+
+        this.debug = debug;
+        this.validate = validate;
 
         this.checkEnableDebug();
+
+        if (this.features?.authorization) {
+            const authorizationSettings = this.features?.authorization;
+
+            this.authorization = new Neo4jGraphQLAuthorization(authorizationSettings);
+        }
     }
 
-    public get nodes(): Node[] {
+    public async getSchema(): Promise<GraphQLSchema> {
+        return this.getExecutableSchema();
+    }
+
+    public async getExecutableSchema(): Promise<GraphQLSchema> {
+        if (!this.executableSchema) {
+            this.executableSchema = this.generateExecutableSchema();
+
+            await this.subscriptionMechanismSetup();
+        }
+
+        return this.executableSchema;
+    }
+
+    public async getSubgraphSchema(): Promise<GraphQLSchema> {
+        if (!this.subgraphSchema) {
+            this.subgraphSchema = this.generateSubgraphSchema();
+            await this.subgraphSchema;
+            await this.subscriptionMechanismSetup();
+        }
+
+        return this.subgraphSchema;
+    }
+
+    public async checkNeo4jCompat({
+        driver,
+        sessionConfig,
+    }: {
+        driver?: Driver;
+        sessionConfig?: Neo4jGraphQLSessionConfig;
+    } = {}): Promise<void> {
+        const neo4jDriver = driver || this.driver;
+
+        if (!neo4jDriver) {
+            throw new Error("neo4j-driver Driver missing");
+        }
+
+        if (!this.dbInfo) {
+            this.dbInfo = await this.getNeo4jDatabaseInfo(neo4jDriver, sessionConfig);
+        }
+
+        return checkNeo4jCompat({
+            driver: neo4jDriver,
+            sessionConfig,
+            dbInfo: this.dbInfo,
+        });
+    }
+
+    public async assertIndexesAndConstraints({
+        driver,
+        sessionConfig,
+    }: {
+        driver?: Driver;
+        sessionConfig?: Neo4jGraphQLSessionConfig;
+    } = {}): Promise<void> {
+        if (!(this.executableSchema || this.subgraphSchema)) {
+            throw new Error("You must await `.getSchema()` before `.assertIndexesAndConstraints()`");
+        }
+
+        await (this.executableSchema || this.subgraphSchema);
+
+        const neo4jDriver = driver || this.driver;
+
+        if (!neo4jDriver) {
+            throw new Error("neo4j-driver Driver missing");
+        }
+
+        if (!this.dbInfo) {
+            this.dbInfo = await this.getNeo4jDatabaseInfo(neo4jDriver, sessionConfig);
+        }
+
+        if (!this.schemaModel) {
+            throw new Error("Schema Model is not defined");
+        }
+
+        await assertIndexesAndConstraints({
+            driver: neo4jDriver,
+            sessionConfig,
+            schemaModel: this.schemaModel,
+        });
+    }
+
+    private get nodes(): Node[] {
         if (!this._nodes) {
             throw new Error("You must await `.getSchema()` before accessing `nodes`");
         }
@@ -92,7 +200,7 @@ class Neo4jGraphQL {
         return this._nodes;
     }
 
-    public get relationships(): Relationship[] {
+    private get relationships(): Relationship[] {
         if (!this._relationships) {
             throw new Error("You must await `.getSchema()` before accessing `relationships`");
         }
@@ -100,49 +208,42 @@ class Neo4jGraphQL {
         return this._relationships;
     }
 
-    public async getSchema(): Promise<GraphQLSchema> {
-        if (!this.schema) {
-            this.schema = this.generateSchema();
-            await this.pluginsSetup();
-        }
+    /**
+     * Currently just merges all type definitions into a document. Eventual intention described below:
+     *
+     * Normalizes the user's type definitions using the method with the lowest risk of side effects:
+     * - Type definitions of type `string` are parsed using the `parse` function from the reference GraphQL implementation.
+     * - Type definitions of type `DocumentNode` are returned as they are.
+     * - Type definitions in arrays are merged using `mergeTypeDefs` from `@graphql-tools/merge`.
+     * - Callbacks are resolved to a type which can be parsed into a document.
+     *
+     * This method maps to the Type Definition Normalization stage of the Schema Generation lifecycle.
+     *
+     * @param {TypeDefinitions} typeDefinitions - The unnormalized type definitions.
+     * @returns {DocumentNode} The normalized type definitons as a document.
+     */
+    private normalizeTypeDefinitions(typeDefinitions: TypeDefinitions): DocumentNode {
+        // TODO: The dream: minimal modification of the type definitions. However, this does not merge extensions, which we can't currently deal with in translation.
+        // if (typeof typeDefinitions === "function") {
+        //     return this.normalizeTypeDefinitions(typeDefinitions());
+        // }
 
-        return this.schema;
-    }
+        // if (typeof typeDefinitions === "string") {
+        //     return parse(typeDefinitions);
+        // }
 
-    public async checkNeo4jCompat(input: { driver?: Driver; driverConfig?: DriverConfig } = {}): Promise<void> {
-        const driver = input.driver || this.driver;
-        const driverConfig = input.driverConfig || this.config?.driverConfig;
+        // if (Array.isArray(typeDefinitions)) {
+        //     return mergeTypeDefs(typeDefinitions);
+        // }
 
-        if (!driver) {
-            throw new Error("neo4j-driver Driver missing");
-        }
+        // return typeDefinitions;
 
-        return checkNeo4jCompat({ driver, driverConfig });
-    }
-
-    public async assertIndexesAndConstraints(
-        input: { driver?: Driver; driverConfig?: DriverConfig; options?: AssertIndexesAndConstraintsOptions } = {}
-    ): Promise<void> {
-        if (!this.schema) {
-            throw new Error("You must call `.getSchema()` before `.assertIndexesAndConstraints()`");
-        }
-
-        await this.schema;
-
-        const driver = input.driver || this.driver;
-        const driverConfig = input.driverConfig || this.config?.driverConfig;
-
-        if (!driver) {
-            throw new Error("neo4j-driver Driver missing");
-        }
-
-        await assertIndexesAndConstraints({ driver, driverConfig, nodes: this.nodes, options: input.options });
+        return mergeTypeDefs(typeDefinitions);
     }
 
     private addDefaultFieldResolvers(schema: GraphQLSchema): GraphQLSchema {
         forEachField(schema, (field) => {
             if (!field.resolve) {
-                 
                 field.resolve = defaultFieldResolver;
             }
         });
@@ -150,76 +251,252 @@ class Neo4jGraphQL {
         return schema;
     }
 
-    private checkEnableDebug = (): void => {
-        if (this.config.enableDebug === true || this.config.enableDebug === false) {
-            if (this.config.enableDebug) {
+    private checkEnableDebug(): void {
+        if (this.debug === true || this.debug === false) {
+            if (this.debug) {
                 Debug.enable(DEBUG_ALL);
             } else {
                 Debug.disable();
             }
         }
-    };
+    }
 
-    private wrapResolvers(resolvers: IResolvers, { schema }: { schema: GraphQLSchema }) {
-        const wrapResolverArgs = {
+    private async getNeo4jDatabaseInfo(driver: Driver, sessionConfig?: SessionConfig): Promise<Neo4jDatabaseInfo> {
+        const executorConstructorParam: ExecutorConstructorParam = {
+            executionContext: driver,
+            sessionConfig,
+        };
+
+        return getNeo4jDatabaseInfo(new Executor(executorConstructorParam));
+    }
+
+    private wrapResolvers(resolvers: NonNullable<IExecutableSchemaDefinition["resolvers"]>) {
+        if (!this.schemaModel) {
+            throw new Error("Schema Model is not defined");
+        }
+
+        const wrapResolverArgs: WrapResolverArguments = {
             driver: this.driver,
-            config: this.config,
             nodes: this.nodes,
             relationships: this.relationships,
-            schema,
-            plugins: this.plugins,
+            schemaModel: this.schemaModel,
+            features: this.features,
+            authorization: this.authorization,
+            jwtPayloadFieldsMap: this.jwtFieldsMap,
         };
+        const queryAndMutationWrappers = [wrapQueryAndMutation(wrapResolverArgs)];
 
-        const resolversComposition = {
-            "Query.*": [wrapResolver(wrapResolverArgs)],
-            "Mutation.*": [wrapResolver(wrapResolverArgs)],
-            "Subscription.*": [wrapSubscription(wrapResolverArgs)],
+        const isSubscriptionEnabled = !!this.features.subscriptions;
+        const wrapSubscriptionResolverArgs = {
+            subscriptionsEngine: this.features.subscriptionsEngine,
+            schemaModel: this.schemaModel,
+            authorization: this.authorization,
+            jwtPayloadFieldsMap: this.jwtFieldsMap,
         };
+        const subscriptionWrappers = isSubscriptionEnabled
+            ? [wrapSubscription(wrapSubscriptionResolverArgs as WrapSubscriptionArgs)]
+            : [];
+
+        const resolversComposition = generateResolverComposition({
+            schemaModel: this.schemaModel,
+            isSubscriptionEnabled,
+            queryAndMutationWrappers,
+            subscriptionWrappers,
+        });
 
         // Merge generated and custom resolvers
-        const mergedResolvers = mergeResolvers([resolvers, ...asArray(this.schemaDefinition.resolvers)]);
+        // Merging must be done before composing because wrapper won't run otherwise
+        const mergedResolvers = mergeResolvers([...asArray(resolvers), ...asArray(this.resolvers)]);
         return composeResolvers(mergedResolvers, resolversComposition);
     }
 
-    private addWrappedResolversToSchema(resolverlessSchema: GraphQLSchema, resolvers: IResolvers): GraphQLSchema {
-        const schema = addResolversToSchema(resolverlessSchema, resolvers);
+    private composeSchema(schema: GraphQLSchema): GraphQLSchema {
+        // TODO: Keeping this in our back pocket - if we want to add native support for middleware to the library
+        // if (this.middlewares) {
+        //     schema = applyMiddleware(schema, ...this.middlewares);
+        // }
+
+        // Get resolvers from schema - this will include generated _entities and _service for Federation
+        const resolvers = getResolversFromSchema(schema);
+
+        // Wrap the resolvers using resolvers composition
+        const wrappedResolvers = this.wrapResolvers(resolvers);
+
+        // Add the wrapped resolvers back to the schema, context will now be populated
+        addResolversToSchema({ schema, resolvers: wrappedResolvers, updateResolversInPlace: true });
+
         return this.addDefaultFieldResolvers(schema);
     }
 
-    private generateSchema(): Promise<GraphQLSchema> {
-        return new Promise((resolve) => {
-            const { nodes, relationships, typeDefs, resolvers } = makeAugmentedSchema(this.schemaDefinition.typeDefs, {
-                enableRegex: this.config?.enableRegex,
-                skipValidateTypeDefs: this.config?.skipValidateTypeDefs,
-                generateSubscriptions: Boolean(this.plugins?.subscriptions),
-                callbacks: this.config.callbacks,
+    private parseNeo4jFeatures(features: Neo4jFeaturesSettings | undefined): ContextFeatures {
+        let subscriptionPlugin: Neo4jGraphQLSubscriptionsEngine | undefined;
+        if (features?.subscriptions === true) {
+            if (!this.driver) {
+                throw new Error("Driver required for CDC subscriptions");
+            }
+
+            subscriptionPlugin = new Neo4jGraphQLSubscriptionsCDCEngine({
+                driver: this.driver,
             });
+        } else {
+            subscriptionPlugin = features?.subscriptions || undefined;
+        }
+
+        return {
+            ...features,
+            subscriptionsEngine: subscriptionPlugin,
+        };
+    }
+
+    private generateSchemaModel(document: DocumentNode): Neo4jGraphQLSchemaModel {
+        if (!this.schemaModel) {
+            return generateModel(document);
+        }
+        return this.schemaModel;
+    }
+
+    private generateExecutableSchema(): Promise<GraphQLSchema> {
+        return new Promise((resolve) => {
+            const initialDocument = this.normalizeTypeDefinitions(this.typeDefs);
+
+            if (this.validate) {
+                const {
+                    enumTypes: enums,
+                    interfaceTypes: interfaces,
+                    unionTypes: unions,
+                    objectTypes: objects,
+                } = getDefinitionNodes(initialDocument);
+
+                validateDocument({
+                    document: initialDocument,
+                    features: this.features,
+                    additionalDefinitions: { enums, interfaces, unions, objects },
+                    userCustomResolvers: this.resolvers,
+                });
+            }
+
+            const { document, typesExcludedFromGeneration } = makeDocumentToAugment(initialDocument);
+            const { jwt } = typesExcludedFromGeneration;
+            if (jwt) {
+                this.jwtFieldsMap = jwt.jwtFieldsMap;
+            }
+
+            this.schemaModel = this.generateSchemaModel(document);
+
+            const { nodes, relationships, typeDefs, resolvers } = makeAugmentedSchema({
+                document,
+                features: this.features,
+                userCustomResolvers: this.resolvers,
+                schemaModel: this.schemaModel,
+            });
+
+            if (this.validate) {
+                validateUserDefinition({ userDocument: document, augmentedDocument: typeDefs, jwt: jwt?.type });
+            }
 
             this._nodes = nodes;
             this._relationships = relationships;
 
-            const resolverlessSchema = makeExecutableSchema({
-                ...this.schemaDefinition,
+            const schema = makeExecutableSchema({
                 typeDefs,
+                resolvers,
             });
 
-            // Wrap the generated resolvers, which adds a context including the schema to every request
-            const wrappedResolvers = this.wrapResolvers(resolvers, { schema: resolverlessSchema });
-
-            const schema = this.addWrappedResolversToSchema(resolverlessSchema, wrappedResolvers);
-
-            resolve(schema);
+            resolve(this.composeSchema(schema));
         });
     }
 
-    private async pluginsSetup(): Promise<void> {
-        const subscriptionsPlugin = this.plugins?.subscriptions;
-        if (subscriptionsPlugin) {
-            subscriptionsPlugin.events.setMaxListeners(0); // Removes warning regarding leak. >10 listeners are expected
-            if (subscriptionsPlugin.init) {
-                await subscriptionsPlugin.init();
-            }
+    private async generateSubgraphSchema(): Promise<GraphQLSchema> {
+        // Import only when needed to avoid issues if GraphQL 15 being used
+        const { Subgraph } = await import("./Subgraph");
+
+        const initialDocument = this.normalizeTypeDefinitions(this.typeDefs);
+        const subgraph = new Subgraph(this.typeDefs);
+
+        const { directives, types } = subgraph.getValidationDefinitions();
+
+        if (this.validate) {
+            const {
+                enumTypes: enums,
+                interfaceTypes: interfaces,
+                unionTypes: unions,
+                objectTypes: objects,
+            } = getDefinitionNodes(initialDocument);
+
+            validateDocument({
+                document: initialDocument,
+                features: this.features,
+                additionalDefinitions: {
+                    additionalDirectives: directives,
+                    additionalTypes: types,
+                    enums,
+                    interfaces,
+                    unions,
+                    objects,
+                },
+                userCustomResolvers: this.resolvers,
+            });
         }
+
+        const { document, typesExcludedFromGeneration } = makeDocumentToAugment(initialDocument);
+        const { jwt } = typesExcludedFromGeneration;
+        if (jwt) {
+            this.jwtFieldsMap = jwt.jwtFieldsMap;
+        }
+
+        this.schemaModel = this.generateSchemaModel(document);
+
+        const { nodes, relationships, typeDefs, resolvers } = makeAugmentedSchema({
+            document,
+            features: this.features,
+            userCustomResolvers: this.resolvers,
+            subgraph,
+            schemaModel: this.schemaModel,
+        });
+
+        if (this.validate) {
+            validateUserDefinition({
+                userDocument: document,
+                augmentedDocument: typeDefs,
+                additionalDirectives: directives,
+                additionalTypes: types,
+                jwt: jwt?.type,
+            });
+        }
+
+        this._nodes = nodes;
+        this._relationships = relationships;
+
+        // TODO: Move into makeAugmentedSchema, add resolvers alongside other resolvers
+        const referenceResolvers = subgraph.getReferenceResolvers(this.schemaModel);
+
+        const schema = subgraph.buildSchema({
+            typeDefs,
+            resolvers: mergeResolvers([resolvers, referenceResolvers]),
+        });
+
+        return this.composeSchema(schema);
+    }
+
+    private subscriptionMechanismSetup(): Promise<void> {
+        if (this.subscriptionInit) {
+            return this.subscriptionInit;
+        }
+
+        const setup = async () => {
+            const subscriptionsEngine = this.features?.subscriptionsEngine;
+            if (subscriptionsEngine) {
+                subscriptionsEngine.events.setMaxListeners(0); // Removes warning regarding leak. >10 listeners are expected
+                if (subscriptionsEngine.init) {
+                    if (!this.schemaModel) throw new Error("SchemaModel not available on subscription mechanism");
+                    await subscriptionsEngine.init({ schemaModel: this.schemaModel });
+                }
+            }
+        };
+
+        this.subscriptionInit = setup();
+
+        return this.subscriptionInit;
     }
 }
 

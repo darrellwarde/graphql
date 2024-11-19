@@ -17,16 +17,25 @@
  * limitations under the License.
  */
 
-import createConnectAndParams from "./create-connect-and-params";
-import { trimmer } from "../utils";
-import { CallbackBucket } from "../classes/CallbackBucket";
-import { NodeBuilder } from "../../tests/utils/builders/node-builder";
-import { RelationshipQueryDirectionOption } from "../constants";
+import { gql } from "graphql-tag";
+import type { Node } from "../../src/classes";
 import { ContextBuilder } from "../../tests/utils/builders/context-builder";
+import { NodeBuilder } from "../../tests/utils/builders/node-builder";
+import { SchemaModelBuilder } from "../../tests/utils/builders/schema-model-builder";
+import { CallbackBucket } from "../classes/CallbackBucket";
+import { Neo4jDatabaseInfo } from "../classes/Neo4jDatabaseInfo";
+import { RelationshipQueryDirectionOption } from "../constants";
+import { defaultNestedOperations } from "../graphql/directives/relationship";
+import type { RelationField } from "../types";
+import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
+import createConnectAndParams from "./create-connect-and-params";
 
 describe("createConnectAndParams", () => {
-    test("should return the correct connection", () => {
-        const node = new NodeBuilder({
+    let node: Node;
+    let context: Neo4jGraphQLTranslationContext;
+
+    beforeAll(() => {
+        node = new NodeBuilder({
             name: "Movie",
             enumFields: [],
             scalarFields: [],
@@ -34,9 +43,11 @@ describe("createConnectAndParams", () => {
             relationFields: [
                 {
                     direction: "OUT",
-                    type: "SIMILAR",
+                    type: "`SIMILAR`",
+                    typeUnescaped: "SIMILAR",
                     fieldName: "similarMovies",
                     queryDirection: RelationshipQueryDirectionOption.DEFAULT_DIRECTED,
+                    aggregate: true,
                     inherited: false,
                     typeMeta: {
                         name: "Movie",
@@ -58,8 +69,21 @@ describe("createConnectAndParams", () => {
                             },
                         },
                     },
+                    selectableOptions: {
+                        onRead: true,
+                        onAggregate: false,
+                    },
+                    settableOptions: {
+                        onCreate: true,
+                        onUpdate: true,
+                    },
+                    filterableOptions: {
+                        byValue: true,
+                        byAggregate: true,
+                    },
                     otherDirectives: [],
                     arguments: [],
+                    nestedOperations: defaultNestedOperations,
                 },
             ],
             cypherFields: [],
@@ -68,60 +92,80 @@ describe("createConnectAndParams", () => {
             pointFields: [],
             objectFields: [],
         }).instance();
+        const types = gql`
+            type Movie @node {
+                title: String!
+                similarMovies: [Movie!]! @relationship(type: "SIMILAR", direction: OUT)
+            }
+        `;
+        const schemaModel = new SchemaModelBuilder(types).instance();
+        context = new ContextBuilder({
+            nodes: [node],
+            schemaModel,
+            neo4jDatabaseInfo: new Neo4jDatabaseInfo("4.4.0"),
+        }).instance();
+    });
 
-        const context = new ContextBuilder({ nodes: [node] }).instance();
-
+    test("should return the correct connection", () => {
         const result = createConnectAndParams({
             withVars: ["this"],
             value: [
                 {
-                    where: { node: { title: "abc" } },
-                    connect: { similarMovies: [{ where: { node: { title: "cba" } } }] },
+                    where: { node: { title_EQ: "abc" } },
+                    connect: { similarMovies: [{ where: { node: { title_EQ: "cba" } } }] },
                 },
             ],
             varName: "this",
-            relationField: node.relationFields[0],
+            relationField: node.relationFields[0] as RelationField,
             parentVar: "this",
             context,
             refNodes: [node],
             parentNode: node,
             callbackBucket: new CallbackBucket(context),
+            source: "CONNECT",
         });
 
-        expect(trimmer(result[0])).toEqual(
-            trimmer(`
-                WITH this
-                CALL {
-                    WITH this
-                    OPTIONAL MATCH (this0_node:Movie)
-                    WHERE this0_node.title = $this0_node_title
-                    FOREACH(_ IN CASE this WHEN NULL THEN [] ELSE [1] END |
-                        FOREACH(_ IN CASE this0_node WHEN NULL THEN [] ELSE [1] END |
-                            MERGE (this)-[:SIMILAR]->(this0_node)
-                        )
-                    )
-
-                    WITH this, this0_node
-                    CALL {
-                        WITH this, this0_node
-                        OPTIONAL MATCH (this0_node_similarMovies0_node:Movie)
-                        WHERE this0_node_similarMovies0_node.title = $this0_node_similarMovies0_node_title
-                        FOREACH(_ IN CASE this0_node WHEN NULL THEN [] ELSE [1] END |
-                            FOREACH(_ IN CASE this0_node_similarMovies0_node WHEN NULL THEN [] ELSE [1] END |
-                                MERGE (this0_node)-[:SIMILAR]->(this0_node_similarMovies0_node)
-                            )
-                        )
-                        RETURN count(*) AS _
-                    }
-
-                    RETURN count(*) AS _
-                }
-            `)
-        );
+        expect(result[0]).toMatchInlineSnapshot(`
+            "WITH *
+            CALL {
+            	WITH this
+            	OPTIONAL MATCH (this0_node:Movie)
+            	WHERE this0_node.title = $this0_node_param0
+            	CALL {
+            		WITH *
+            		WITH collect(this0_node) as connectedNodes, collect(this) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this
+            			UNWIND connectedNodes as this0_node
+            			MERGE (this)-[:\`SIMILAR\`]->(this0_node)
+            		}
+            	}
+            WITH this, this0_node
+            CALL {
+            	WITH this, this0_node
+            	OPTIONAL MATCH (this0_node_similarMovies0_node:Movie)
+            	WHERE this0_node_similarMovies0_node.title = $this0_node_similarMovies0_node_param0
+            	CALL {
+            		WITH *
+            		WITH this, collect(this0_node_similarMovies0_node) as connectedNodes, collect(this0_node) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this0_node
+            			UNWIND connectedNodes as this0_node_similarMovies0_node
+            			MERGE (this0_node)-[:\`SIMILAR\`]->(this0_node_similarMovies0_node)
+            		}
+            	}
+            WITH this, this0_node, this0_node_similarMovies0_node
+            	RETURN count(*) AS connect_this0_node_similarMovies_Movie0
+            }
+            	RETURN count(*) AS connect_this_Movie0
+            }"
+        `);
 
         expect(result[1]).toMatchObject({
-            this0_node_title: "abc",
-            this0_node_similarMovies0_node_title: "cba",
+            this0_node_param0: "abc",
+            this0_node_similarMovies0_node_param0: "cba",
         });
     });
 });

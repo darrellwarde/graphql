@@ -17,12 +17,15 @@
  * limitations under the License.
  */
 
-import createCreateAndParams from "./create-create-and-params";
-import type { Neo4jGraphQL } from "../classes";
-import { trimmer } from "../utils";
-import { NodeBuilder } from "../../tests/utils/builders/node-builder";
 import { ContextBuilder } from "../../tests/utils/builders/context-builder";
+import { NodeBuilder } from "../../tests/utils/builders/node-builder";
 import { CallbackBucket } from "../classes/CallbackBucket";
+import { Neo4jGraphQLSchemaModel } from "../schema-model/Neo4jGraphQLSchemaModel";
+import { Attribute } from "../schema-model/attribute/Attribute";
+import { GraphQLBuiltInScalarType, ScalarType } from "../schema-model/attribute/AttributeType";
+import { ConcreteEntity } from "../schema-model/entity/ConcreteEntity";
+import { trimmer } from "../utils";
+import createCreateAndParams from "./create-create-and-params";
 
 describe("createCreateAndParams", () => {
     test("should return the correct projection with 1 selection", () => {
@@ -59,6 +62,18 @@ describe("createCreateAndParams", () => {
                             },
                         },
                     },
+                    selectableOptions: {
+                        onRead: true,
+                        onAggregate: false,
+                    },
+                    settableOptions: {
+                        onCreate: true,
+                        onUpdate: true,
+                    },
+                    filterableOptions: {
+                        byValue: true,
+                        byAggregate: true,
+                    },
                     otherDirectives: [],
                     arguments: [],
                 },
@@ -69,12 +84,26 @@ describe("createCreateAndParams", () => {
             pointFields: [],
         }).instance();
 
-        // @ts-ignore
-        const neoSchema: Neo4jGraphQL = {
-            nodes: [node],
-        };
         const context = new ContextBuilder({
-            neoSchema,
+            schemaModel: new Neo4jGraphQLSchemaModel({
+                concreteEntities: [
+                    new ConcreteEntity({
+                        name: "Movie",
+                        labels: ["Movie"],
+                        attributes: [
+                            new Attribute({
+                                name: "title",
+                                type: new ScalarType(GraphQLBuiltInScalarType.String, true),
+                                annotations: {},
+                                args: [],
+                            }),
+                        ],
+                    }),
+                ],
+                compositeEntities: [],
+                operations: {},
+                annotations: {},
+            }),
         }).instance();
 
         const result = createCreateAndParams({
@@ -86,14 +115,14 @@ describe("createCreateAndParams", () => {
             withVars: ["this0"],
         });
 
-        expect(trimmer(result[0])).toEqual(
+        expect(trimmer(result.create)).toEqual(
             trimmer(`
                 CREATE (this0:Movie)
                 SET this0.title = $this0_title
             `)
         );
 
-        expect(result[1]).toMatchObject({
+        expect(result.params).toMatchObject({
             this0_title: "some title",
         });
     });

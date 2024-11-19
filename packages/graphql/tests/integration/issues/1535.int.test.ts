@@ -17,39 +17,27 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1535", () => {
-    const testTenant = generateUniqueType("Tenant");
-    const testBooking = generateUniqueType("Booking");
+    let testTenant: UniqueType;
+    let testBooking: UniqueType;
+    let FooBar: UniqueType;
 
-    let schema: GraphQLSchema;
-    let neo4j: Neo4j;
-    let driver: Driver;
-
-    async function graphqlQuery(query: string) {
-        return graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
-    }
+    const testHelper = new TestHelper();
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        testTenant = testHelper.createUniqueType("Tenant");
+        testBooking = testHelper.createUniqueType("Booking");
+        FooBar = testHelper.createUniqueType("FooBar");
 
         const typeDefs = `
-            type ${testTenant} {
-                id: ID! @id
+            type ${testTenant} @node {
+                id: ID! @id @unique
                 name: String!
                 events: [Event!]! @relationship(type: "HOSTED_BY", direction: IN)
-                fooBars: [FooBar!]! @relationship(type: "HAS_FOOBARS", direction: OUT)
+                fooBars: [${FooBar}!]! @relationship(type: "HAS_FOOBARS", direction: OUT)
             }
             
             interface Event {
@@ -58,37 +46,34 @@ describe("https://github.com/neo4j/graphql/issues/1535", () => {
                 beginsAt: DateTime!
             }
             
-            type Screening implements Event {
-                id: ID! @id
+            type Screening implements Event @node {
+                id: ID! @id @unique
                 title: String
                 beginsAt: DateTime!
             }
             
-            type ${testBooking} implements Event {
+            type ${testBooking} implements Event @node {
                 id: ID!
                 title: String
                 beginsAt: DateTime!
                 duration: Int!
             }
             
-            type FooBar {
-                id: ID! @id
+            type ${FooBar} @node {
+                id: ID! @id @unique
                 name: String!
             }
         `;
 
-        const session = await neo4j.getSession();
-
-        await session.run(`
+        await testHelper.executeCypher(`
             CREATE (:${testTenant} { id: "12", name: "Tenant1" })<-[:HOSTED_BY]-(:${testBooking} { id: "212" })
         `);
 
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should not throw error when using alias in result projection for a field using an interface", async () => {
@@ -104,7 +89,7 @@ describe("https://github.com/neo4j/graphql/issues/1535", () => {
             }
         `;
 
-        const queryResult = await graphqlQuery(query);
+        const queryResult = await testHelper.executeGraphQL(query);
         expect(queryResult.errors).toBeUndefined();
 
         expect(queryResult.data as any).toEqual({

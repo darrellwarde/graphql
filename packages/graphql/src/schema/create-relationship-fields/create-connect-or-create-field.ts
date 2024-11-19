@@ -17,128 +17,51 @@
  * limitations under the License.
  */
 
-import type { SchemaComposer, InputTypeComposer } from "graphql-compose";
-import type { Node } from "../../classes";
-import type { RelationField } from "../../types";
-import { upperFirst } from "../../utils/upper-first";
+import type { DirectiveNode } from "graphql";
+import type { InputTypeComposer, InputTypeComposerFieldConfigMapDefinition, SchemaComposer } from "graphql-compose";
+import type { ConcreteEntityAdapter } from "../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import type { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
+import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import { ensureNonEmptyInput } from "../ensure-non-empty-input";
-import { objectFieldsToCreateInputFields } from "../to-compose";
+import { withCreateInputType } from "../generation/create-input";
+import { concreteEntityToCreateInputFields } from "../to-compose";
 
-export function createConnectOrCreateField({
-    node,
-    relationField,
+export function createOnCreateITC({
     schemaComposer,
-    hasNonGeneratedProperties,
-    hasNonNullNonGeneratedProperties,
-}: {
-    node: Node;
-    relationField: RelationField;
-    schemaComposer: SchemaComposer;
-    hasNonGeneratedProperties: boolean;
-    hasNonNullNonGeneratedProperties: boolean;
-}): string | undefined {
-    if (!node.uniqueFields.length) {
-        return undefined;
-    }
-
-    const parentPrefix = `${relationField.connectionPrefix}${upperFirst(relationField.fieldName)}`;
-
-    const connectOrCreateName = relationField.union
-        ? `${parentPrefix}${node.name}ConnectOrCreateFieldInput`
-        : `${parentPrefix}ConnectOrCreateFieldInput`;
-
-    const onCreateITC = createOnCreateITC({
-        schemaComposer,
-        prefix: connectOrCreateName,
-        node,
-        hasNonGeneratedProperties,
-        hasNonNullNonGeneratedProperties,
-        relationField,
-    });
-    const whereITC = createWhereITC({ schemaComposer, node });
-
-    schemaComposer.getOrCreateITC(connectOrCreateName, (tc) => {
-        tc.addFields({
-            where: `${whereITC.getTypeName()}!`,
-            onCreate: `${onCreateITC.getTypeName()}!`,
-        });
-    });
-    return relationField.typeMeta.array ? `[${connectOrCreateName}!]` : connectOrCreateName;
-}
-
-function createOnCreateITC({
-    schemaComposer,
-    prefix,
-    node,
-    hasNonGeneratedProperties,
-    hasNonNullNonGeneratedProperties,
-    relationField,
+    relationshipAdapter,
+    targetEntityAdapter,
+    userDefinedFieldDirectives,
 }: {
     schemaComposer: SchemaComposer;
-    prefix: string;
-    node: Node;
-    hasNonGeneratedProperties: boolean;
-    hasNonNullNonGeneratedProperties: boolean;
-    relationField: RelationField;
+    relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
+    targetEntityAdapter: ConcreteEntityAdapter;
+    userDefinedFieldDirectives: Map<string, DirectiveNode[]>;
 }): InputTypeComposer {
-    const onCreateName = `${prefix}OnCreate`;
-
-    const onCreateFields = getOnCreateFields({
-        node,
-        hasNonGeneratedProperties,
-        relationField,
-        hasNonNullNonGeneratedProperties,
-        schemaComposer,
-    });
-
-    return schemaComposer.getOrCreateITC(onCreateName, (tc) => {
-        tc.addFields(onCreateFields);
-    });
-}
-
-function createWhereITC({ schemaComposer, node }: { schemaComposer: SchemaComposer; node: Node }): InputTypeComposer {
-    const connectOrCreateWhereName = `${node.name}ConnectOrCreateWhere`;
-
-    return schemaComposer.getOrCreateITC(connectOrCreateWhereName, (tc) => {
-        tc.addFields({
-            node: `${node.name}UniqueWhere!`,
-        });
-    });
-}
-
-function getOnCreateFields({
-    node,
-    hasNonGeneratedProperties,
-    relationField,
-    hasNonNullNonGeneratedProperties,
-    schemaComposer,
-}: {
-    node: Node;
-    hasNonGeneratedProperties: boolean;
-    relationField: RelationField;
-    hasNonNullNonGeneratedProperties: boolean;
-    schemaComposer: SchemaComposer;
-}): { node: string } | { node: string; edge: string } {
-    const nodeCreateInput = schemaComposer.getOrCreateITC(`${node.name}OnCreateInput`, (tc) => {
-        const nodeFields = objectFieldsToCreateInputFields([
-            ...node.primitiveFields,
-            ...node.scalarFields,
-            ...node.pointFields,
-            ...node.temporalFields,
-        ]);
+    const onCreateInput = schemaComposer.getOrCreateITC(targetEntityAdapter.operations.onCreateInputTypeName, (tc) => {
+        const nodeFields = concreteEntityToCreateInputFields(
+            targetEntityAdapter.onCreateInputFields,
+            userDefinedFieldDirectives
+        );
         tc.addFields(nodeFields);
         ensureNonEmptyInput(schemaComposer, tc);
     });
-    const nodeCreateInputFieldName = `${nodeCreateInput.getTypeName()}!`;
 
-    if (hasNonGeneratedProperties) {
-        const edgeField = `${relationField.properties}CreateInput${hasNonNullNonGeneratedProperties ? `!` : ""}`;
-        return {
-            node: nodeCreateInputFieldName,
-            edge: edgeField,
+    const onCreateName =
+        relationshipAdapter.operations.getConnectOrCreateOnCreateFieldInputTypeName(targetEntityAdapter);
+    return schemaComposer.getOrCreateITC(onCreateName, (tc) => {
+        const onCreateFields: InputTypeComposerFieldConfigMapDefinition = {
+            node: onCreateInput.NonNull,
         };
-    }
-    return {
-        node: nodeCreateInputFieldName,
-    };
+        if (relationshipAdapter.hasCreateInputFields) {
+            const edgeFieldType = withCreateInputType({
+                entityAdapter: relationshipAdapter,
+                userDefinedFieldDirectives,
+                composer: schemaComposer,
+            });
+            onCreateFields["edge"] = relationshipAdapter.hasNonNullCreateInputFields
+                ? edgeFieldType.NonNull
+                : edgeFieldType;
+        }
+        tc.addFields(onCreateFields);
+    });
 }

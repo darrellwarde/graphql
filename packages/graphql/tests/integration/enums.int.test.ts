@@ -17,40 +17,35 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("enums", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should create a movie (with a custom enum)", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
             enum Status {
                 ACTIVE
             }
 
-            type Movie {
+            type ${Movie} @node {
               id: ID
               status: Status
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -58,37 +53,27 @@ describe("enums", () => {
 
         const create = `
             mutation {
-                createMovies(input:[{id: "${id}", status: ACTIVE}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{id: "${id}", status: ACTIVE}]) {
+                    ${Movie.plural} {
                         id
                     }
                 }
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            const result = await session.run(`
-                MATCH (m:Movie {id: "${id}"})
+        const result = await testHelper.executeCypher(`
+                MATCH (m:${Movie} {id: "${id}"})
                 RETURN m {.id, .status} as m
             `);
 
-            expect((result.records[0].toObject() as any).m).toEqual({ id, status: "ACTIVE" });
-        } finally {
-            await session.close();
-        }
+        expect(result.records[0]?.toObject().m).toEqual({ id, status: "ACTIVE" });
     });
 
     test("should create a movie (with a default enum)", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
             enum Status {
                 ACTIVE
@@ -96,13 +81,13 @@ describe("enums", () => {
                 EATING
             }
 
-            type Movie {
+            type ${Movie} @node {
               id: ID
               status: Status @default(value: ACTIVE)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -110,37 +95,27 @@ describe("enums", () => {
 
         const create = `
             mutation {
-                createMovies(input:[{id: "${id}"}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{id: "${id}"}]) {
+                    ${Movie.plural} {
                         id
                     }
                 }
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            const result = await session.run(`
-                MATCH (m:Movie {id: "${id}"})
+        const result = await testHelper.executeCypher(`
+                MATCH (m:${Movie} {id: "${id}"})
                 RETURN m {.id, .status} as m
             `);
 
-            expect((result.records[0].toObject() as any).m).toEqual({ id, status: "ACTIVE" });
-        } finally {
-            await session.close();
-        }
+        expect(result.records[0]?.toObject().m).toEqual({ id, status: "ACTIVE" });
     });
 
     test("should create a movie (with custom enum and resolver)", async () => {
-        const session = await neo4j.getSession();
-
         const statusResolver = {
             ACTIVE: "active",
         };
@@ -150,13 +125,13 @@ describe("enums", () => {
                 ACTIVE
             }
 
-            type Movie {
+            type ${Movie} @node {
               id: ID
               status: Status
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs, resolvers: { Status: statusResolver } });
+        await testHelper.initNeo4jGraphQL({ typeDefs, resolvers: { Status: statusResolver } });
 
         const id = generate({
             charset: "alphabetic",
@@ -164,37 +139,27 @@ describe("enums", () => {
 
         const create = `
             mutation {
-                createMovies(input:[{id: "${id}", status: ACTIVE}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{id: "${id}", status: ACTIVE}]) {
+                    ${Movie.plural} {
                         id
                     }
                 }
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            const result = await session.run(`
-                MATCH (m:Movie {id: "${id}"})
+        const result = await testHelper.executeCypher(`
+                MATCH (m:${Movie} {id: "${id}"})
                 RETURN m {.id, .status} as m
             `);
 
-            expect((result.records[0].toObject() as any).m).toEqual({ id, status: "active" });
-        } finally {
-            await session.close();
-        }
+        expect(result.records[0]?.toObject().m).toEqual({ id, status: "active" });
     });
 
     test("should create a movie (with a default enum and custom resolver)", async () => {
-        const session = await neo4j.getSession();
-
         const statusResolver = {
             ACTIVE: "active",
         };
@@ -206,13 +171,13 @@ describe("enums", () => {
                 EATING
             }
 
-            type Movie {
+            type ${Movie} @node {
               id: ID
               status: Status @default(value: ACTIVE)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs, resolvers: { Status: statusResolver } });
+        await testHelper.initNeo4jGraphQL({ typeDefs, resolvers: { Status: statusResolver } });
 
         const id = generate({
             charset: "alphabetic",
@@ -220,31 +185,23 @@ describe("enums", () => {
 
         const create = `
             mutation {
-                createMovies(input:[{id: "${id}"}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{id: "${id}"}]) {
+                    ${Movie.plural} {
                         id
                     }
                 }
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            const result = await session.run(`
-                MATCH (m:Movie {id: "${id}"})
+        const result = await testHelper.executeCypher(`
+                MATCH (m:${Movie} {id: "${id}"})
                 RETURN m {.id, .status} as m
             `);
 
-            expect((result.records[0].toObject() as any).m).toEqual({ id, status: "active" });
-        } finally {
-            await session.close();
-        }
+        expect(result.records[0]?.toObject().m).toEqual({ id, status: "active" });
     });
 });

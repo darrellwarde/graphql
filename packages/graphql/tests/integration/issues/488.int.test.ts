@@ -17,60 +17,50 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/488", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeAll(() => {});
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should return correct data based on issue", async () => {
-        const session = await neo4j.getSession();
-
-        const testJournalist = generateUniqueType("Journalist");
-        const testEmoji = generateUniqueType("Emoji");
-        const testHashtag = generateUniqueType("Hashtag");
-        const testText = generateUniqueType("Text");
+        const testJournalist = testHelper.createUniqueType("Journalist");
+        const testEmoji = testHelper.createUniqueType("Emoji");
+        const testHashtag = testHelper.createUniqueType("Hashtag");
+        const testText = testHelper.createUniqueType("Text");
 
         const typeDefs = gql`
-            type ${testJournalist.name} {
+            type ${testJournalist.name} @node {
                 id: ID!
                 keywords: [Keyword!]! @relationship(type: "HAS_KEYWORD", direction: OUT)
             }
 
             union Keyword = ${testEmoji.name} | ${testHashtag.name} | ${testText.name}
 
-            type ${testEmoji.name} {
-                id: ID! @id
+            type ${testEmoji.name} @node {
+                id: ID! @id @unique
                 type: String!
             }
 
-            type ${testHashtag.name} {
-                id: ID! @id
+            type ${testHashtag.name} @node {
+                id: ID! @id @unique
                 type: String!
             }
 
-            type ${testText.name} {
-                id: ID! @id
+            type ${testText.name} @node {
+                id: ID! @id @unique
                 type: String!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const journalistId = generate({
             charset: "alphabetic",
@@ -98,50 +88,43 @@ describe("https://github.com/neo4j/graphql/issues/488", () => {
 
         const variableValues = {
             journalistsWhere: {
-                id: journalistId,
-                keywordsConnection: {
+                id_EQ: journalistId,
+                keywordsConnection_SOME: {
                     [testEmoji.name]: {
                         node: {
-                            type: emojiType,
+                            type_EQ: emojiType,
                         },
                     },
                 },
             },
         };
 
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (j:${testJournalist.name} { id: "${journalistId}" })-[:HAS_KEYWORD]->(:${testEmoji.name} { id: "${emojiId}", type: "${emojiType}" })
             `);
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValues(),
-                variableValues,
-            });
+        const result = await testHelper.executeGraphQL(query, {
+            variableValues,
+        });
 
-            if (result.errors) {
-                console.log(JSON.stringify(result.errors, null, 2));
-            }
-
-            expect(result.errors).toBeFalsy();
-
-            expect(result.data as any).toEqual({
-                [testJournalist.plural]: [
-                    {
-                        id: journalistId,
-                        keywords: [
-                            {
-                                id: emojiId,
-                                type: emojiType,
-                            },
-                        ],
-                    },
-                ],
-            });
-        } finally {
-            await session.close();
+        if (result.errors) {
+            console.log(JSON.stringify(result.errors, null, 2));
         }
+
+        expect(result.errors).toBeFalsy();
+
+        expect(result.data as any).toEqual({
+            [testJournalist.plural]: [
+                {
+                    id: journalistId,
+                    keywords: [
+                        {
+                            id: emojiId,
+                            type: emojiType,
+                        },
+                    ],
+                },
+            ],
+        });
     });
 });

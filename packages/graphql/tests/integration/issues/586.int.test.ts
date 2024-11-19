@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { gql } from "apollo-server";
+import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src/classes";
 
 describe("https://github.com/neo4j/graphql/issues/586", () => {
@@ -28,7 +28,7 @@ describe("https://github.com/neo4j/graphql/issues/586", () => {
             }
         `;
         expect(() => {
-            new Neo4jGraphQL({ typeDefs }); // eslint-disable-line no-new
+            new Neo4jGraphQL({ typeDefs });
         }).not.toThrow();
     });
 });

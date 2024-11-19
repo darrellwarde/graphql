@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-import * as neo4j from "neo4j-driver";
 import { Neo4jGraphQL } from "@neo4j/graphql";
+import * as neo4j from "neo4j-driver";
 import { toGraphQLTypeDefs } from "../../../src/index";
 import createDriver from "../neo4j";
 
@@ -34,7 +34,7 @@ describe("GraphQL - Infer Schema on graphs", () => {
         driver = await createDriver();
         const cSession = driver.session({ defaultAccessMode: neo4j.session.WRITE });
         try {
-            await cSession.writeTransaction((tx) => tx.run(`CREATE DATABASE ${dbName}`));
+            await cSession.writeTransaction((tx) => tx.run(`CREATE DATABASE ${dbName} WAIT`));
         } catch (e) {
             if (e instanceof Error) {
                 if (
@@ -101,12 +101,12 @@ describe("GraphQL - Infer Schema on graphs", () => {
         const typeDefs = await toGraphQLTypeDefs(sessionFactory(bm));
 
         expect(typeDefs).toMatchInlineSnapshot(`
-            "type Actor {
+            "type Actor @node {
             	actedInMovies: [Movie!]! @relationship(type: \\"ACTED_IN\\", direction: OUT)
             	name: String!
             }
 
-            type Movie {
+            type Movie @node {
             	actorsActedIn: [Actor!]! @relationship(type: \\"ACTED_IN\\", direction: IN)
             	title: String!
             }"
@@ -144,26 +144,26 @@ describe("GraphQL - Infer Schema on graphs", () => {
 
         const typeDefs = await toGraphQLTypeDefs(sessionFactory(bm));
         expect(typeDefs).toMatchInlineSnapshot(`
-            "type Actor @node(additionalLabels: [\\"Person\\"]) {
+            "type Actor @node(labels: [\\"Actor\\", \\"Person\\"]) {
             	actedInMovies: [Movie!]! @relationship(type: \\"ACTED_IN\\", direction: OUT)
             	actedInPlays: [Play!]! @relationship(type: \\"ACTED_IN\\", direction: OUT)
             	directedMovies: [Movie!]! @relationship(type: \\"DIRECTED\\", direction: OUT)
             	name: String!
             }
 
-            type Dog @node(additionalLabels: [\\"K9\\"]) {
+            type Dog @node(labels: [\\"Dog\\", \\"K9\\"]) {
             	actedInMovies: [Movie!]! @relationship(type: \\"ACTED_IN\\", direction: OUT)
             	name: String!
             }
 
-            type Movie {
+            type Movie @node {
             	actorsActedIn: [Actor!]! @relationship(type: \\"ACTED_IN\\", direction: IN)
             	actorsDirected: [Actor!]! @relationship(type: \\"DIRECTED\\", direction: IN)
             	dogsActedIn: [Dog!]! @relationship(type: \\"ACTED_IN\\", direction: IN)
             	title: String!
             }
 
-            type Play @node(additionalLabels: [\\"Theater\\"]) {
+            type Play @node(labels: [\\"Play\\", \\"Theater\\"]) {
             	actorsActedIn: [Actor!]! @relationship(type: \\"ACTED_IN\\", direction: IN)
             	title: String!
             }"
@@ -190,11 +190,12 @@ describe("GraphQL - Infer Schema on graphs", () => {
             pay: 200.5,
             str: "String",
             int: neo4j.int(1),
+            screenTime: new neo4j.Duration(0, 0, 3600, 0),
         };
         const wSession = driver.session({ defaultAccessMode: neo4j.session.WRITE, database: dbName });
         await wSession.writeTransaction((tx) =>
             tx.run(
-                `CREATE (m:Movie {title: $props.title})
+                `CREATE (m:Movie {title: $props.title, screenTime: $props.screenTime})
                 CREATE (a:Actor {name: $props.name})
                 CREATE (a2:Actor {name: $props.name2})
                 MERGE (a)-[:ACTED_IN {roles: $props.roles, pay: $props.pay, amb: $props.str}]->(m)
@@ -210,25 +211,26 @@ describe("GraphQL - Infer Schema on graphs", () => {
 
         const typeDefs = await toGraphQLTypeDefs(sessionFactory(bm));
         expect(typeDefs).toMatchInlineSnapshot(`
-            "interface ActedInProperties @relationshipProperties {
+            "type ActedInProperties @relationshipProperties {
             	pay: Float
             	roles: [String]!
             }
 
-            type Actor {
+            type Actor @node {
             	actedInMovies: [Movie!]! @relationship(type: \\"ACTED_IN\\", direction: OUT, properties: \\"ActedInProperties\\")
             	directedMovies: [Movie!]! @relationship(type: \\"DIRECTED\\", direction: OUT, properties: \\"DirectedProperties\\")
             	moviesWonPrizeFor: [Movie!]! @relationship(type: \\"WON_PRIZE_FOR\\", direction: IN)
             	name: String!
             }
 
-            interface DirectedProperties @relationshipProperties {
+            type DirectedProperties @relationshipProperties {
             	skill: BigInt!
             }
 
-            type Movie {
+            type Movie @node {
             	actorsActedIn: [Actor!]! @relationship(type: \\"ACTED_IN\\", direction: IN, properties: \\"ActedInProperties\\")
             	actorsDirected: [Actor!]! @relationship(type: \\"DIRECTED\\", direction: IN, properties: \\"DirectedProperties\\")
+            	screenTime: Duration!
             	title: String!
             	wonPrizeForActors: [Actor!]! @relationship(type: \\"WON_PRIZE_FOR\\", direction: OUT)
             }"
@@ -266,17 +268,17 @@ describe("GraphQL - Infer Schema on graphs", () => {
 
         const typeDefs = await toGraphQLTypeDefs(sessionFactory(bm));
         expect(typeDefs).toMatchInlineSnapshot(`
-            "interface ActedInProperties @relationshipProperties {
+            "type ActedInProperties @relationshipProperties {
             	roles: [String]!
             }
 
-            type Actor_Label @node(label: \\"Actor-Label\\") {
+            type Actor_Label @node(labels: [\\"Actor-Label\\"]) {
             	actedInMovieLabels: [Movie_Label!]! @relationship(type: \\"ACTED-IN\\", direction: OUT, properties: \\"ActedInProperties\\")
             	movieLabelsWonPrizeFor: [Movie_Label!]! @relationship(type: \\"WON_PRIZE_FOR\\", direction: IN)
             	name: String!
             }
 
-            type Movie_Label @node(label: \\"Movie-Label\\") {
+            type Movie_Label @node(labels: [\\"Movie-Label\\"]) {
             	actorLabelsActedIn: [Actor_Label!]! @relationship(type: \\"ACTED-IN\\", direction: IN, properties: \\"ActedInProperties\\")
             	title: String!
             	wonPrizeForActorLabels: [Actor_Label!]! @relationship(type: \\"WON_PRIZE_FOR\\", direction: OUT)

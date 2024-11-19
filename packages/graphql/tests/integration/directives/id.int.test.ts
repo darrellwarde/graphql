@@ -17,42 +17,76 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import isUUID from "is-uuid";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("@id directive", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let Genre: UniqueType;
+    let Actor: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
+        Genre = testHelper.createUniqueType("Genre");
+        Actor = testHelper.createUniqueType("Actor");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should create a movie with autogenerate id", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
+              id: ID! @id @unique
+              name: String
+            }
+        `;
+
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+
+        const create = `
+            mutation {
+                ${Movie.operations.create}(input:[{name: "dan"}]) {
+                    ${Movie.plural} {
+                        id
+                        name
+                    }
+                }
+            }
+        `;
+
+        const gqlResult = await testHelper.executeGraphQL(create);
+
+        expect(gqlResult.errors).toBeFalsy();
+
+        const { id, name } = (gqlResult.data as any)[Movie.operations.create][Movie.plural][0];
+
+        expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](id))).toBe(true);
+        expect(name).toBe("dan");
+    });
+
+    test("should create a movie with autogenerate id when field inherited from interface", async () => {
+        const typeDefs = `
+            interface MovieInterface {
+                id: ID!
+            }
+
+            type ${Movie} implements MovieInterface @node {
               id: ID! @id
               name: String
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const create = `
             mutation {
-                createMovies(input:[{name: "dan"}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{name: "dan"}]) {
+                    ${Movie.plural} {
                         id
                         name
                     }
@@ -60,90 +94,35 @@ describe("@id directive", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            const { id, name } = (gqlResult.data as any).createMovies.movies[0];
+        const { id, name } = (gqlResult.data as any)[Movie.operations.create][Movie.plural][0];
 
-            expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](id))).toBe(true);
-            expect(name).toBe("dan");
-        } finally {
-            await session.close();
-        }
-    });
-
-    test("should create a movie with autogenerate id when field inherited from interface", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            interface MovieInterface {
-                id: ID! @id
-            }
-
-            type Movie implements MovieInterface {
-              id: ID!
-              name: String
-            }
-        `;
-
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-
-        const create = `
-            mutation {
-                createMovies(input:[{name: "dan"}]) {
-                    movies {
-                        id
-                        name
-                    }
-                }
-            }
-        `;
-
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
-
-            expect(gqlResult.errors).toBeFalsy();
-
-            const { id, name } = (gqlResult.data as any).createMovies.movies[0];
-
-            expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](id))).toBe(true);
-            expect(name).toBe("dan");
-        } finally {
-            await session.close();
-        }
+        expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](id))).toBe(true);
+        expect(name).toBe("dan");
     });
 
     test("should create a movie with autogenerate id and a nested genre with autogenerate id", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Genre {
-                id: ID! @id
+            type ${Genre} @node {
+                id: ID! @id @unique
                 name: String!
             }
 
-            type Movie {
-                id: ID! @id
+            type ${Movie} @node {
+                id: ID! @id @unique
                 name: String!
-                genres: [Genre!]! @relationship(type: "HAS_GENRE", direction: OUT)
+                genres: [${Genre}!]! @relationship(type: "HAS_GENRE", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const create = `
             mutation {
-                createMovies(input:
+                ${Movie.operations.create}(input:
                     [
                         {
                             name: "dan",
@@ -153,7 +132,7 @@ describe("@id directive", () => {
                         }
                     ]
                 ) {
-                    movies {
+                    ${Movie.plural} {
                         id
                         name
                         genres {
@@ -164,47 +143,37 @@ describe("@id directive", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            const { id, name, genres } = (gqlResult.data as any).createMovies.movies[0];
+        const { id, name, genres } = (gqlResult.data as any)[Movie.operations.create][Movie.plural][0];
 
-            expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](id))).toBe(true);
-            expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](genres[0].id))).toBe(true);
-            expect(name).toBe("dan");
-        } finally {
-            await session.close();
-        }
+        expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](id))).toBe(true);
+        expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](genres[0].id))).toBe(true);
+        expect(name).toBe("dan");
     });
 
     test("should autogenerate an ID for a relationship property", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
-                id: ID! @id
+            type ${Actor} @node {
+                id: ID! @id @unique
                 name: String!
             }
 
-            interface ActedIn {
+            type ActedIn @relationshipProperties {
                 id: ID! @id
                 screenTime: Int!
             }
 
-            type Movie {
-                id: ID! @id
+            type ${Movie} @node {
+                id: ID! @id @unique
                 title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const title = generate({
             charset: "alphabetic",
@@ -213,17 +182,19 @@ describe("@id directive", () => {
             charset: "alphabetic",
         });
 
-        const create = `
-            mutation($title: String!, $name: String!) {
-                createMovies(
+        const create = /* GraphQL */ `
+            mutation ($title: String!, $name: String!) {
+                ${Movie.operations.create}(
                     input: [
                         { title: $title, actors: { create: [{ node: { name: $name }, edge: { screenTime: 60 } }] } }
                     ]
                 ) {
-                    movies {
+                    ${Movie.plural} {
                         actorsConnection {
                             edges {
-                                id
+                                properties {
+                                    id
+                                }
                             }
                         }
                     }
@@ -231,21 +202,16 @@ describe("@id directive", () => {
             }
         `;
 
-        try {
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValues(),
-                variableValues: { title, name },
-            });
+        const result = await testHelper.executeGraphQL(create, {
+            variableValues: { title, name },
+        });
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            const { actorsConnection } = (result.data as any).createMovies.movies[0];
+        const { actorsConnection } = (result.data as any)[Movie.operations.create][Movie.plural][0];
 
-            expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](actorsConnection.edges[0].id))).toBe(true);
-        } finally {
-            await session.close();
-        }
+        expect(["v1", "v2", "v3", "v4", "v5"].some((t) => isUUID[t](actorsConnection.edges[0].properties.id))).toBe(
+            true
+        );
     });
 });

@@ -17,13 +17,10 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql, GraphQLScalarType } from "graphql";
+import { GraphQLScalarType } from "graphql";
 import { Kind } from "graphql/language";
 import { generate } from "randomstring";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
-import { generateUniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 const GraphQLUpperCaseString = new GraphQLScalarType({
     name: "UpperCaseString",
@@ -52,31 +49,24 @@ const GraphQLUpperCaseString = new GraphQLScalarType({
 });
 
 describe("scalars", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should create a movie (with a custom scalar)", async () => {
-        const session = await neo4j.getSession();
-
+        const Movie = testHelper.createUniqueType("Movie");
         const typeDefs = `
             scalar UpperCaseString
 
-            type Movie {
+            type ${Movie} @node {
               id: ID
               name: UpperCaseString
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
             resolvers: { UpperCaseString: GraphQLUpperCaseString },
         });
@@ -90,44 +80,35 @@ describe("scalars", () => {
 
         const create = `
             mutation {
-                createMovies(input:[{id: "${id}", name: "${initialName}"}]) {
-                    movies {
+                ${Movie.operations.create}(input:[{id: "${id}", name: "${initialName}"}]) {
+                    ${Movie.plural} {
                         id
                     }
                 }
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: create,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(create);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            const result = await session.run(`
-                MATCH (m:Movie {id: "${id}"})
+        const result = await testHelper.executeCypher(`
+                MATCH (m:${Movie.name} {id: "${id}"})
                 RETURN m {.id, .name} as m
             `);
 
-            expect((result.records[0].toObject() as any).m).toEqual({ id, name: expectedName });
-        } finally {
-            await session.close();
-        }
+        expect((result.records[0]?.toObject() as any).m).toEqual({ id, name: expectedName });
     });
 
     test("should serialize a id correctly", async () => {
-        const session = await neo4j.getSession();
-
+        const Movie = testHelper.createUniqueType("Movie");
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
               id: ID
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -135,42 +116,34 @@ describe("scalars", () => {
 
         const query = `
             {
-                movies(where: {id: ${id}}) {
+                ${Movie.plural}(where: { id_EQ: ${id}}) {
                     id
                 }
             }
         `;
 
-        try {
-            await session.run(`
-                CREATE (m:Movie {id: "${id}"})
+        await testHelper.executeCypher(`
+                CREATE (m:${Movie.name} {id: "${id}"})
                 RETURN m {.id} as m
             `);
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any).movies[0]).toEqual({ id: id.toString() });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any)[Movie.plural][0]).toEqual({ id: id.toString() });
     });
 
     test("should serialize a list of integers correctly", async () => {
-        const type = generateUniqueType("Type");
+        const type = testHelper.createUniqueType("Type");
 
         const typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
               integers: [Int!]!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -186,10 +159,7 @@ describe("scalars", () => {
           }
         `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: mutation,
-            contextValue: neo4j.getContextValues(),
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
             variableValues: {
                 input: [{ integers }],
             },
@@ -201,15 +171,15 @@ describe("scalars", () => {
     });
 
     test("should serialize a list of floats correctly", async () => {
-        const type = generateUniqueType("Type");
+        const type = testHelper.createUniqueType("Type");
 
         const typeDefs = `
-            type ${type.name} {
+            type ${type.name} @node {
               floats: [Float!]!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -225,10 +195,7 @@ describe("scalars", () => {
           }
         `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: mutation,
-            contextValue: neo4j.getContextValues(),
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
             variableValues: {
                 input: [{ floats }],
             },

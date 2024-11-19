@@ -30,5 +30,9 @@ export const cypherDirective = new GraphQLDirective({
                 "The Cypher statement to run which returns a value of the same type composition as the field definition on which the directive is applied.",
             type: new GraphQLNonNull(GraphQLString),
         },
+        columnName: {
+            description: "Name of the returned variable from the Cypher statement.",
+            type: new GraphQLNonNull(GraphQLString),
+        },
     },
 });

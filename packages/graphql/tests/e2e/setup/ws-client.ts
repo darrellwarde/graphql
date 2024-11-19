@@ -16,57 +16,84 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* eslint-disable import/no-extraneous-dependencies */
-import ws from "ws";
-import type { Client} from "graphql-ws";
+
+import { asArray } from "@graphql-tools/utils";
+import type { Client } from "graphql-ws";
 import { createClient } from "graphql-ws";
+import { EventEmitter } from "stream";
+import ws from "ws";
+
+const NEW_EVENT = "NEW_EVENT";
 
 export class WebSocketTestClient {
-    public events: Array<any> = [];
-    public errors: Array<any> = [];
+    public events: Array<unknown> = [];
+    public errors: Array<unknown> = [];
+
+    private eventsEmitter: EventEmitter = new EventEmitter();
+    private counter = 0;
 
     private path: string;
     private client: Client;
 
-    private onEvent: (() => void) | undefined;
-
     constructor(path: string, jwt?: string) {
+        this.eventsEmitter.on(NEW_EVENT, () => this.counter++);
         this.path = path;
         this.client = createClient({
             url: this.path,
             webSocketImpl: ws,
             connectionParams: {
-                authorization: jwt,
+                token: jwt,
             },
         });
     }
 
-    public waitForNextEvent(): Promise<void> {
-        if (this.onEvent) {
-            return Promise.reject(new Error("Cannot wait for multiple events"));
-        }
-        return new Promise<void>((resolve) => {
-            this.onEvent = resolve;
+    public waitForEvents(count = 1): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            if (this.counter >= count) {
+                // checking for events that were emitted before `waitForEvents` got the chance to execute
+                this.counter -= count;
+                return resolve();
+            }
+            const newEventListener = () => {
+                // on new event
+                if (this.counter >= count) {
+                    this.eventsEmitter.removeListener(NEW_EVENT, newEventListener);
+                    clearTimeout(timeout);
+                    this.counter -= count;
+                    resolve();
+                }
+            };
+            const timeout = setTimeout(() => {
+                this.eventsEmitter.removeListener(NEW_EVENT, newEventListener);
+                reject("[waitForEvents] Timed out.");
+            }, 500);
+            this.eventsEmitter.on(NEW_EVENT, newEventListener);
         });
     }
 
-    public async subscribe(query: string): Promise<void> {
+    public async subscribe(query: string, callback?: jest.Mock): Promise<void> {
         await new Promise<void>((resolve, reject) => {
             this.client.subscribe(
                 { query },
                 {
                     next: (value) => {
-                        if (value.errors) this.errors = [...this.errors, ...value.errors];
-                        else if (value.data) this.events.push(value.data);
-                        if (this.onEvent) {
-                            this.onEvent();
-                            this.onEvent = undefined;
+                        this.eventsEmitter.emit(NEW_EVENT, value);
+                        if (value.errors) {
+                            this.errors = [...this.errors, ...value.errors];
+                        } else if (value.data) {
+                            this.events.push(value.data);
                         }
                     },
-                    error(err) {
+                    error: (err: unknown) => {
+                        this.errors.push(...asArray(err));
+                        if (callback) {
+                            // hack to be able to expect errors on bad subscriptions
+                            // bc. resolve() happens before below reject()
+                            callback();
+                        }
                         reject(err);
                     },
-                    complete() {},
+                    complete: () => true,
                 }
             );
 
@@ -75,6 +102,7 @@ export class WebSocketTestClient {
             });
 
             this.client.on("closed", () => {
+                this.eventsEmitter.removeAllListeners();
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 this.client.dispose();
             });
@@ -83,8 +111,8 @@ export class WebSocketTestClient {
 
     public async close(): Promise<void> {
         if (this.client) await this.client?.dispose();
+        this.eventsEmitter.removeAllListeners();
         this.events = [];
         this.errors = [];
     }
 }
-/* eslint-enable import/no-extraneous-dependencies */

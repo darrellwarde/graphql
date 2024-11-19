@@ -17,50 +17,40 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
+import gql from "graphql-tag";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/487", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {});
+
+    afterEach(async () => {
+        await testHelper.close();
     });
 
-    afterAll(async () => {
-        await driver.close();
-    });
-
-    test("should recreate test and return correct data", async () => {
-        const session = await neo4j.getSession();
-
-        const typeAuthor = generateUniqueType("Author");
-        const typeDirector = generateUniqueType("Director");
-        const typeBook = generateUniqueType("Book");
-        const typeMovie = generateUniqueType("Movie");
+    test("related fields should resolve on custom queries (union)", async () => {
+        const typeAuthor = testHelper.createUniqueType("Author");
+        const typeDirector = testHelper.createUniqueType("Director");
+        const typeBook = testHelper.createUniqueType("Book");
+        const typeMovie = testHelper.createUniqueType("Movie");
 
         const typeDefs = gql`
-            type ${typeAuthor.name} {
+            type ${typeAuthor.name} @node {
                 id: ID!
             }
 
-            type ${typeDirector.name} {
+            type ${typeDirector.name} @node {
                 id: ID!
             }
 
-            type ${typeBook.name} {
+            type ${typeBook.name} @node {
                 id: ID!
                 author: ${typeAuthor.name}! @relationship(type: "WROTE", direction: IN)
             }
 
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 id: ID!
                 director: ${typeDirector.name}! @relationship(type: "DIRECTED", direction: IN)
             }
@@ -73,15 +63,16 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
                         statement: """
                         MATCH (node)
                         WHERE
-                            \\"${typeBook.name}\\" IN labels(node) OR
-                            \\"${typeMovie.name}\\" IN labels(node)
+                            "${typeBook.name}" IN labels(node) OR
+                            "${typeMovie.name}" IN labels(node)
                         RETURN node
-                        """
+                        """,
+                        columnName: "node"
                     )
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId = generate({
             charset: "alphabetic",
@@ -121,44 +112,153 @@ describe("https://github.com/neo4j/graphql/issues/487", () => {
             }
         `;
 
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (:${typeMovie.name} { id: "${movieId}" })<-[:DIRECTED]-(:${typeDirector.name} {id: "${directorId}"})
                 CREATE (:${typeBook.name} { id: "${bookId}" })<-[:WROTE]-(:${typeAuthor.name} {id: "${authorId}"})
             `);
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValues(),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            if (result.errors) {
-                console.log(JSON.stringify(result.errors, null, 2));
+        if (result.errors) {
+            console.log(JSON.stringify(result.errors, null, 2));
+        }
+
+        expect(result.errors).toBeFalsy();
+
+        const movie = ((result?.data as any).getThings as any[]).find((x) => x.__typename === typeMovie.name);
+        const book = ((result?.data as any).getThings as any[]).find((x) => x.__typename === typeBook.name);
+
+        expect(movie).toEqual({
+            id: movieId,
+            director: {
+                id: directorId,
+            },
+            __typename: typeMovie.name,
+        });
+
+        expect(book).toEqual({
+            id: bookId,
+            author: {
+                id: authorId,
+            },
+            __typename: typeBook.name,
+        });
+    });
+
+    test("related fields should resolve on custom queries (interface)", async () => {
+        const typeAuthor = testHelper.createUniqueType("Author");
+        const typeDirector = testHelper.createUniqueType("Director");
+        const typeBook = testHelper.createUniqueType("Book");
+        const typeMovie = testHelper.createUniqueType("Movie");
+
+        const typeDefs = gql`
+            type ${typeAuthor.name} @node {
+                id: ID!
             }
 
-            expect(result.errors).toBeFalsy();
+            type ${typeDirector.name} @node {
+                id: ID!
+            }
 
-            const movie = ((result?.data as any).getThings as any[]).find((x) => x.__typename === typeMovie.name);
-            const book = ((result?.data as any).getThings as any[]).find((x) => x.__typename === typeBook.name);
+            type ${typeBook.name} implements Thing @node {
+                id: ID!
+                author: ${typeAuthor.name}! @relationship(type: "WROTE", direction: IN)
+            }
 
-            expect(movie).toEqual({
-                id: movieId,
-                director: {
-                    id: directorId,
-                },
-                __typename: typeMovie.name,
-            });
+            type ${typeMovie.name} implements Thing @node {
+                id: ID!
+                director: ${typeDirector.name}! @relationship(type: "DIRECTED", direction: IN)
+            }
 
-            expect(book).toEqual({
-                id: bookId,
-                author: {
-                    id: authorId,
-                },
-                __typename: typeBook.name,
-            });
-        } finally {
-            await session.close();
+            interface Thing {
+                id: ID!
+            }
+
+            type Query {
+                getThings: [Thing!]
+                    @cypher(
+                        statement: """
+                        MATCH (node)
+                        WHERE
+                            "${typeBook.name}" IN labels(node) OR
+                            "${typeMovie.name}" IN labels(node)
+                        RETURN node
+                        """,
+                        columnName: "node"
+                    )
+            }
+        `;
+
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+
+        const movieId = generate({
+            charset: "alphabetic",
+        });
+
+        const bookId = generate({
+            charset: "alphabetic",
+        });
+
+        const authorId = generate({
+            charset: "alphabetic",
+        });
+
+        const directorId = generate({
+            charset: "alphabetic",
+        });
+
+        const query = `
+            query {
+                getThings {
+                    __typename
+                    ... on ${typeBook.name} {
+                        id
+                        author {
+                            id
+                        }
+                        __typename
+                    }
+                    ... on ${typeMovie.name} {
+                        id
+                        director {
+                            id
+                        }
+                        __typename
+                    }
+                }
+            }
+        `;
+
+        await testHelper.executeCypher(`
+                CREATE (:${typeMovie.name} { id: "${movieId}" })<-[:DIRECTED]-(:${typeDirector.name} {id: "${directorId}"})
+                CREATE (:${typeBook.name} { id: "${bookId}" })<-[:WROTE]-(:${typeAuthor.name} {id: "${authorId}"})
+            `);
+
+        const result = await testHelper.executeGraphQL(query);
+
+        if (result.errors) {
+            console.log(JSON.stringify(result.errors, null, 2));
         }
+
+        expect(result.errors).toBeFalsy();
+
+        const movie = ((result?.data as any).getThings as any[]).find((x) => x.__typename === typeMovie.name);
+        const book = ((result?.data as any).getThings as any[]).find((x) => x.__typename === typeBook.name);
+
+        expect(movie).toEqual({
+            id: movieId,
+            director: {
+                id: directorId,
+            },
+            __typename: typeMovie.name,
+        });
+
+        expect(book).toEqual({
+            id: bookId,
+            author: {
+                id: authorId,
+            },
+            __typename: typeBook.name,
+        });
     });
 });

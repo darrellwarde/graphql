@@ -18,14 +18,14 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Bigint", () => {
     test("BigInt", async () => {
         const typeDefs = gql`
-            type File {
+            type File @node {
                 name: String!
                 size: BigInt!
             }
@@ -44,11 +44,11 @@ describe("Bigint", () => {
             \\"\\"\\"
             scalar BigInt
 
-            type BigIntAggregateSelectionNonNullable {
-              average: BigInt!
-              max: BigInt!
-              min: BigInt!
-              sum: BigInt!
+            type BigIntAggregateSelection {
+              average: BigInt
+              max: BigInt
+              min: BigInt
+              sum: BigInt
             }
 
             type CreateFilesMutationResponse {
@@ -56,14 +56,18 @@ describe("Bigint", () => {
               info: CreateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -75,8 +79,8 @@ describe("Bigint", () => {
 
             type FileAggregateSelection {
               count: Int!
-              name: StringAggregateSelectionNonNullable!
-              size: BigIntAggregateSelectionNonNullable!
+              name: StringAggregateSelection!
+              size: BigIntAggregateSelection!
             }
 
             input FileCreateInput {
@@ -107,33 +111,31 @@ describe("Bigint", () => {
             }
 
             input FileUpdateInput {
-              name: String
-              size: BigInt
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+              size: BigInt @deprecated(reason: \\"Please use the explicit _SET field\\")
               size_DECREMENT: BigInt
               size_INCREMENT: BigInt
+              size_SET: BigInt
             }
 
             input FileWhere {
               AND: [FileWhere!]
+              NOT: FileWhere
               OR: [FileWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String
-              name_NOT_CONTAINS: String
-              name_NOT_ENDS_WITH: String
-              name_NOT_IN: [String!]
-              name_NOT_STARTS_WITH: String
               name_STARTS_WITH: String
-              size: BigInt
+              size: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              size_EQ: BigInt
               size_GT: BigInt
               size_GTE: BigInt
               size_IN: [BigInt!]
               size_LT: BigInt
               size_LTE: BigInt
-              size_NOT: BigInt
-              size_NOT_IN: [BigInt!]
             }
 
             type FilesConnection {
@@ -157,11 +159,12 @@ describe("Bigint", () => {
             }
 
             type Query {
-              files(options: FileOptions, where: FileWhere): [File!]!
+              files(limit: Int, offset: Int, options: FileOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [FileSort!], where: FileWhere): [File!]!
               filesAggregate(where: FileWhere): FileAggregateSelection!
-              filesConnection(after: String, first: Int, sort: [FileSort], where: FileWhere): FilesConnection!
+              filesConnection(after: String, first: Int, sort: [FileSort!], where: FileWhere): FilesConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -169,9 +172,9 @@ describe("Bigint", () => {
               DESC
             }
 
-            type StringAggregateSelectionNonNullable {
-              longest: String!
-              shortest: String!
+            type StringAggregateSelection {
+              longest: String
+              shortest: String
             }
 
             type UpdateFilesMutationResponse {
@@ -179,8 +182,10 @@ describe("Bigint", () => {
               info: UpdateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

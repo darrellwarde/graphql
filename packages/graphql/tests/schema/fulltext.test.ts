@@ -19,13 +19,14 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
+import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("@fulltext schema", () => {
     test("fulltext", async () => {
         const typeDefs = gql`
             type Movie
+                @node
                 @fulltext(
                     indexes: [
                         { name: "MovieTitle", fields: ["title"] }
@@ -46,8 +47,10 @@ describe("@fulltext schema", () => {
               mutation: Mutation
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -57,10 +60,18 @@ describe("@fulltext schema", () => {
               movies: [Movie!]!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
+            }
+
+            \\"\\"\\"The input for filtering a float\\"\\"\\"
+            input FloatWhere {
+              max: Float
+              min: Float
             }
 
             type Movie {
@@ -70,8 +81,8 @@ describe("@fulltext schema", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              description: StringAggregateSelectionNullable!
-              title: StringAggregateSelectionNullable!
+              description: StringAggregateSelection!
+              title: StringAggregateSelection!
             }
 
             input MovieCreateInput {
@@ -87,6 +98,24 @@ describe("@fulltext schema", () => {
             input MovieFulltext {
               MovieDescription: MovieMovieDescriptionFulltext
               MovieTitle: MovieMovieTitleFulltext
+            }
+
+            \\"\\"\\"The result of a fulltext search on an index of Movie\\"\\"\\"
+            type MovieFulltextResult {
+              movie: Movie!
+              score: Float!
+            }
+
+            \\"\\"\\"The input for sorting a fulltext query on an index of Movie\\"\\"\\"
+            input MovieFulltextSort {
+              movie: MovieSort
+              score: SortDirection
+            }
+
+            \\"\\"\\"The input for filtering a fulltext query on an index of Movie\\"\\"\\"
+            input MovieFulltextWhere {
+              movie: MovieWhere
+              score: FloatWhere
             }
 
             input MovieMovieDescriptionFulltext {
@@ -115,32 +144,27 @@ describe("@fulltext schema", () => {
             }
 
             input MovieUpdateInput {
-              description: String
-              title: String
+              description: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              description_SET: String
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
+              NOT: MovieWhere
               OR: [MovieWhere!]
-              description: String
+              description: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               description_CONTAINS: String
               description_ENDS_WITH: String
+              description_EQ: String
               description_IN: [String]
-              description_NOT: String
-              description_NOT_CONTAINS: String
-              description_NOT_ENDS_WITH: String
-              description_NOT_IN: [String]
-              description_NOT_STARTS_WITH: String
               description_STARTS_WITH: String
-              title: String
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String]
-              title_NOT: String
-              title_NOT_CONTAINS: String
-              title_NOT_ENDS_WITH: String
-              title_NOT_IN: [String]
-              title_NOT_STARTS_WITH: String
               title_STARTS_WITH: String
             }
 
@@ -165,11 +189,45 @@ describe("@fulltext schema", () => {
             }
 
             type Query {
-              movies(fulltext: MovieFulltext, options: MovieOptions, where: MovieWhere): [Movie!]!
-              moviesAggregate(fulltext: MovieFulltext, where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, fulltext: MovieFulltext, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              movies(
+                \\"\\"\\"
+                Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.
+                \\"\\"\\"
+                fulltext: MovieFulltext
+                limit: Int
+                offset: Int
+                options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\")
+                sort: [MovieSort!]
+                where: MovieWhere
+              ): [Movie!]!
+              moviesAggregate(
+                \\"\\"\\"
+                Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.
+                \\"\\"\\"
+                fulltext: MovieFulltext
+                where: MovieWhere
+              ): MovieAggregateSelection!
+              moviesConnection(
+                after: String
+                first: Int
+                \\"\\"\\"
+                Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.
+                \\"\\"\\"
+                fulltext: MovieFulltext
+                sort: [MovieSort!]
+                where: MovieWhere
+              ): MoviesConnection!
+              \\"\\"\\"
+              Query a full-text index. This query returns the query score, but does not allow for aggregations. Use the \`fulltext\` argument under other queries for this functionality.
+              \\"\\"\\"
+              moviesFulltextMovieDescription(limit: Int, offset: Int, phrase: String!, sort: [MovieFulltextSort!], where: MovieFulltextWhere): [MovieFulltextResult!]!
+              \\"\\"\\"
+              Query a full-text index. This query returns the query score, but does not allow for aggregations. Use the \`fulltext\` argument under other queries for this functionality.
+              \\"\\"\\"
+              moviesFulltextMovieTitle(limit: Int, offset: Int, phrase: String!, sort: [MovieFulltextSort!], where: MovieFulltextWhere): [MovieFulltextResult!]!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -177,13 +235,15 @@ describe("@fulltext schema", () => {
               DESC
             }
 
-            type StringAggregateSelectionNullable {
+            type StringAggregateSelection {
               longest: String
               shortest: String
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

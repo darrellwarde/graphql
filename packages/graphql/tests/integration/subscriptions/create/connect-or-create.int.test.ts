@@ -17,67 +17,56 @@
  * limitations under the License.
  */
 
-import { gql } from "apollo-server";
-import type { DocumentNode} from "graphql";
-import { graphql } from "graphql";
-import type { Driver, Integer, Session } from "neo4j-driver";
-import Neo4j from "../../neo4j";
-import { Neo4jGraphQL } from "../../../../src";
-import { getQuerySource } from "../../../utils/get-query-source";
-import { generateUniqueType } from "../../../utils/graphql-types";
-import type { Neo4jGraphQLSubscriptionsPlugin } from "../../../../src/types";
-import { TestSubscriptionsPlugin } from "../../../utils/TestSubscriptionPlugin";
+import type { DocumentNode } from "graphql";
+import { gql } from "graphql-tag";
+import type { Integer } from "neo4j-driver";
+import { TestHelper } from "../../../utils/tests-helper";
 
 describe("Create -> ConnectOrCreate", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
+    const testHelper = new TestHelper({ cdc: true });
     let typeDefs: DocumentNode;
-    let plugin: Neo4jGraphQLSubscriptionsPlugin;
+    let cdcEnabled: boolean;
 
-    const typeMovie = generateUniqueType("Movie");
-    const typeActor = generateUniqueType("Actor");
-
-    let neoSchema: Neo4jGraphQL;
+    const typeMovie = testHelper.createUniqueType("Movie");
+    const typeActor = testHelper.createUniqueType("Actor");
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-
+        cdcEnabled = await testHelper.assertCDCEnabled();
         typeDefs = gql`
-        type ${typeMovie.name} {
+        type ${typeMovie.name} @node {
             title: String!
             id: Int! @unique
             ${typeActor.plural}: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties:"ActedIn")
         }
 
-        type ${typeActor.name} {
+        type ${typeActor.name} @node {
             name: String
             ${typeMovie.plural}: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT, properties:"ActedIn")
         }
 
-        interface ActedIn {
+        type ActedIn @relationshipProperties {
             screentime: Int
         }
         `;
     });
 
     beforeEach(async () => {
-        session = await neo4j.getSession();
-        plugin = new TestSubscriptionsPlugin();
-        neoSchema = new Neo4jGraphQL({ typeDefs, plugins: { subscriptions: plugin } });
+        await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { subscriptions: await testHelper.getSubscriptionEngine() },
+        });
     });
 
     afterEach(async () => {
-        await session.close();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("ConnectOrCreate creates new node", async () => {
-        const query = gql`
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.create}(
                 input: [
@@ -85,7 +74,7 @@ describe("Create -> ConnectOrCreate", () => {
                     name: "Tom Hanks"
                     ${typeMovie.plural}: {
                       connectOrCreate: {
-                        where: { node: { id: 5 } }
+                        where: { node: { id_EQ: 5 } }
                         onCreate: { node: { title: "The Terminal", id: 5 } }
                       }
                     }
@@ -99,11 +88,7 @@ describe("Create -> ConnectOrCreate", () => {
             }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: getQuerySource(query),
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeActor.operations.create][`${typeActor.plural}`]).toEqual([
             {
@@ -111,16 +96,16 @@ describe("Create -> ConnectOrCreate", () => {
             },
         ]);
 
-        const movieTitleAndId = await session.run(`
+        const movieTitleAndId = await testHelper.executeCypher(`
           MATCH (m:${typeMovie.name} {id: 5})
           RETURN m.title as title, m.id as id
         `);
 
         expect(movieTitleAndId.records).toHaveLength(1);
-        expect(movieTitleAndId.records[0].toObject().title).toBe("The Terminal");
-        expect((movieTitleAndId.records[0].toObject().id as Integer).toNumber()).toBe(5);
+        expect(movieTitleAndId.records[0]?.toObject().title).toBe("The Terminal");
+        expect((movieTitleAndId.records[0]?.toObject().id as Integer).toNumber()).toBe(5);
 
-        const actedInRelation = await session.run(`
+        const actedInRelation = await testHelper.executeCypher(`
             MATCH (:${typeMovie.name} {id: 5})<-[r:ACTED_IN]-(:${typeActor.name} {name: "Tom Hanks"})
             RETURN r.screentime as screentime
             `);

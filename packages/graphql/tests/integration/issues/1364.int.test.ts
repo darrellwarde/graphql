@@ -17,41 +17,27 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver, Session } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1364", () => {
-    const testActor = generateUniqueType("Actor");
-    const testMovie = generateUniqueType("Movie");
-    const testGenre = generateUniqueType("Genre");
+    let testActor: UniqueType;
+    let testMovie: UniqueType;
+    let testGenre: UniqueType;
 
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
-
-    async function graphqlQuery(query: string) {
-        return graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
-    }
+    const testHelper = new TestHelper();
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        testActor = testHelper.createUniqueType("Actor");
+        testMovie = testHelper.createUniqueType("Movie");
+        testGenre = testHelper.createUniqueType("Genre");
 
         const typeDefs = `
-            type ${testActor.name} {
+            type ${testActor.name} @node {
                 name: String
             }
 
-            type ${testMovie.name} {
+            type ${testMovie.name} @node {
                 title: String
                 actors: [${testActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
                 genres: [${testGenre.name}!]! @relationship(type: "HAS_GENRE", direction: OUT)
@@ -59,41 +45,40 @@ describe("https://github.com/neo4j/graphql/issues/1364", () => {
                     @cypher(
                         statement: """
                         MATCH (this)-[:HAS_GENRE]->(genre:${testGenre.name})
-                        RETURN count(DISTINCT genre)
-                        """
+                        RETURN count(DISTINCT genre) as c
+                        """,
+                        columnName: "c"
                     )
                 totalActors: Int!
                     @cypher(
                         statement: """
                         MATCH (this)<-[:ACTED_IN]-(actor:${testActor.name})
-                        RETURN count(DISTINCT actor)
-                        """
+                        RETURN count(DISTINCT actor) as c
+                        """,
+                        columnName: "c"
                     )
             }
 
-            type ${testGenre.name} {
+            type ${testGenre.name} @node {
                 name: String
             }
         `;
 
-        session = await neo4j.getSession();
-
-        await session.run(`
+        await testHelper.executeCypher(`
             CREATE (m1:${testMovie} { title: "A Movie" })-[:HAS_GENRE]->(:${testGenre} { name: "Genre 1" })
             CREATE (m1)-[:HAS_GENRE]->(:${testGenre} { name: "Genre 2" })
             CREATE (m2:${testMovie} { title: "B Movie" })-[:HAS_GENRE]->(:${testGenre} { name: "Genre 3" })
             CREATE (m3:${testMovie} { title: "C Movie" })
         `);
 
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
-    test("Should project cypher fields after applying the sort when sorting on a non-cypher field on a root connection)", async () => {
+    test("Should project cypher fields after applying the sort when sorting on a non-cypher field on a root connection", async () => {
         const query = `
             {
                 ${testMovie.plural}Connection(sort: [{ title: ASC }]) {
@@ -107,7 +92,7 @@ describe("https://github.com/neo4j/graphql/issues/1364", () => {
             }
         `;
 
-        const queryResult = await graphqlQuery(query);
+        const queryResult = await testHelper.executeGraphQL(query);
         expect(queryResult.errors).toBeUndefined();
 
         expect(queryResult.data as any).toEqual({
@@ -150,7 +135,7 @@ describe("https://github.com/neo4j/graphql/issues/1364", () => {
             }
         `;
 
-        const queryResult = await graphqlQuery(query);
+        const queryResult = await testHelper.executeGraphQL(query);
         expect(queryResult.errors).toBeUndefined();
 
         expect(queryResult.data as any).toEqual({
@@ -194,7 +179,7 @@ describe("https://github.com/neo4j/graphql/issues/1364", () => {
             }
         `;
 
-        const queryResult = await graphqlQuery(query);
+        const queryResult = await testHelper.executeGraphQL(query);
         expect(queryResult.errors).toBeUndefined();
 
         expect(queryResult.data as any).toEqual({
@@ -219,6 +204,49 @@ describe("https://github.com/neo4j/graphql/issues/1364", () => {
                             title: "A Movie",
                             totalGenres: 2,
                             totalActors: 0,
+                        },
+                    },
+                ],
+            },
+        });
+    });
+
+    test("Should project cypher fields after applying the sort when sorting on a  2 cypher fields on a root connection", async () => {
+        const query = `
+            {
+                ${testMovie.plural}Connection(sort: [{ totalActors: DESC }, { totalGenres: DESC }]) {
+                    edges {
+                        node {
+                            title
+                            totalGenres
+                        }
+                    }
+                }
+            }
+        `;
+
+        const queryResult = await testHelper.executeGraphQL(query);
+        expect(queryResult.errors).toBeUndefined();
+
+        expect(queryResult.data as any).toEqual({
+            [`${testMovie.plural}Connection`]: {
+                edges: [
+                    {
+                        node: {
+                            title: "A Movie",
+                            totalGenres: 2,
+                        },
+                    },
+                    {
+                        node: {
+                            title: "B Movie",
+                            totalGenres: 1,
+                        },
+                    },
+                    {
+                        node: {
+                            title: "C Movie",
+                            totalGenres: 0,
                         },
                     },
                 ],

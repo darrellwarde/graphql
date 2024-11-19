@@ -17,117 +17,104 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver, Session } from "neo4j-driver";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { getQuerySource } from "../../utils/get-query-source";
-import { generateUniqueType } from "../../utils/graphql-types";
-import { Neo4jGraphQL } from "../../../src";
+import { gql } from "graphql-tag";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1050", () => {
-    const testUser = generateUniqueType("User");
-    const testInbox = generateUniqueType("Inbox");
-    const testMessage = generateUniqueType("Message");
-    const testAttachment = generateUniqueType("Attachment");
+    let testUser: UniqueType;
+    let testInbox: UniqueType;
+    let testMessage: UniqueType;
+    let testAttachment: UniqueType;
 
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(async () => {
+        testUser = testHelper.createUniqueType("User");
+        testInbox = testHelper.createUniqueType("Inbox");
+        testMessage = testHelper.createUniqueType("Message");
+        testAttachment = testHelper.createUniqueType("Attachment");
 
         const typeDefs = gql`
-            type ${testUser.name} {
+            type ${testUser.name} @node {
                 id: String
                 inboxes: [${testInbox.name}!]! @relationship(type: "OWNS", direction: OUT)
             }
 
-            type ${testInbox.name} {
+            type ${testInbox.name} @node {
                 ownerId: String
                 messages: [${testMessage.name}!]! @relationship(type: "CONTAINS", direction: OUT)
             }
 
-            type ${testMessage.name} {
+            type ${testMessage.name} @node {
                 ownerId: String
                 attachments: [${testAttachment.name}!]! @relationship(type: "ATTACHED_TO", direction: IN)
             }
 
-            type ${testAttachment.name} {
+            type ${testAttachment.name} @node {
                 ownerId: String
                 contents: String
             }
 
-            extend type ${testUser.name} @auth(
-                rules: [
+            extend type ${testUser.name} @authorization(
+                validate: [
                     {
                         operations: [READ],
-                        allow: { id: "$context.user.id" },
+                        when: [BEFORE],
+                        where: { node: { id_EQ: "$context.user.id" } }
                     }
                 ]
             )
 
-            extend type ${testInbox.name} @auth(
-                rules: [
+            extend type ${testInbox.name} @authorization(
+                validate: [
                     {
                         operations: [READ],
-                        allow: { ownerId: "$context.user.id" },
+                        when: [BEFORE],
+                        where: { node: { ownerId_EQ: "$context.user.id" } }
                     }
                 ]
             )
 
-            extend type ${testMessage.name} @auth(
-                rules: [
+            extend type ${testMessage.name} @authorization(
+                validate: [
                     {
                         operations: [READ],
-                        allow: { ownerId: "$context.user.id" },
+                        when: [BEFORE],
+                        where: { node: { ownerId_EQ: "$context.user.id" } }
                     }
                 ]
             )
 
-            extend type ${testAttachment.name} @auth(
-                rules: [
+            extend type ${testAttachment.name} @authorization(
+                validate: [
                     {
                         operations: [READ],
-                        allow: { ownerId: "$context.user.id" },
+                        when: [BEFORE],
+                        where: { node: { ownerId_EQ: "$context.user.id" } }
                     }
                 ]
             )
         `;
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
+        await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
     });
 
     afterEach(async () => {
-        const labelMatches = [testUser, testInbox, testMessage, testAttachment]
-            .map((testNodeType) => `n:${testNodeType.name}`)
-            .join(" OR ");
-        await session.run(`MATCH (n) WHERE ${labelMatches} DETACH DELETE n`);
-
-        await session.close();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should handle auth appropriately for nested connection", async () => {
-        await session.run(`
+        await testHelper.executeCypher(`
           CREATE (c:${testUser.name} {id: 'abc'})
             -[:OWNS]->(i:${testInbox.name} {ownerId: 'abc'})
             -[:CONTAINS]->(m:${testMessage.name} {ownerId: 'abc', subject: 'Hello', body: 'World'})
             <-[:ATTACHED_TO]-(a:${testAttachment.name} {ownerId: 'abc', contents: 'something interesting'})
         `);
 
-        const query = gql`
+        const query = /* GraphQL */ `
             query {
                 ${testUser.plural} {
                     inboxes {
@@ -145,14 +132,13 @@ describe("https://github.com/neo4j/graphql/issues/1050", () => {
             }
         `;
 
-        const result = await graphql({
-            schema,
-            source: getQuerySource(query),
-            contextValue: neo4j.getContextValues({
+        const result = await testHelper.executeGraphQL(query, {
+            contextValue: {
+                token: testHelper.createBearerToken("secret"),
                 user: {
                     id: "abc",
                 },
-            }),
+            },
         });
         expect(result.errors).toBeUndefined();
         expect(result.data as any).toEqual({

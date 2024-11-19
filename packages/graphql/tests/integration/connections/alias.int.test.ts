@@ -17,47 +17,41 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("Connections Alias", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    const typeMovie = generateUniqueType("Movie");
-    const typeActor = generateUniqueType("Actor");
+    let typeMovie: UniqueType;
+    let typeActor: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        typeMovie = testHelper.createUniqueType("Movie");
+        typeActor = testHelper.createUniqueType("Actor");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     // using totalCount as the bear minimal selection
     test("should alias top level connection field and return correct totalCount", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -65,7 +59,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actors: actorsConnection {
                         totalCount
                     }
@@ -73,51 +67,41 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect(result.data as any).toEqual({
-                [typeMovie.plural]: [{ actors: { totalCount: 3 } }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(result.data as any).toEqual({
+            [typeMovie.plural]: [{ actors: { totalCount: 3 } }],
+        });
     });
 
     test("should alias totalCount", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -125,7 +109,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         count: totalCount
                     }
@@ -133,52 +117,42 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect(result.data as any).toEqual({
-                [typeMovie.plural]: [{ actorsConnection: { count: 3 } }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(result.data as any).toEqual({
+            [typeMovie.plural]: [{ actorsConnection: { count: 3 } }],
+        });
     });
 
     // using hasNextPage as the bear minimal selection
     test("should alias pageInfo top level key", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -186,7 +160,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         pi:pageInfo {
                             hasNextPage
@@ -196,51 +170,41 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect(result.data as any).toEqual({
-                [typeMovie.plural]: [{ actorsConnection: { pi: { hasNextPage: false } } }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(result.data as any).toEqual({
+            [typeMovie.plural]: [{ actorsConnection: { pi: { hasNextPage: false } } }],
+        });
     });
 
     test("should alias startCursor", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -248,7 +212,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         pageInfo {
                             sc:startCursor
@@ -258,49 +222,39 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.pageInfo.sc).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.pageInfo.sc).toBeDefined();
     });
 
     test("should alias endCursor", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -308,7 +262,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         pageInfo {
                             ec:endCursor
@@ -318,49 +272,39 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.pageInfo.ec).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.pageInfo.ec).toBeDefined();
     });
 
     test("should alias hasPreviousPage", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -368,7 +312,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection {
                         pageInfo {
                             hPP:hasPreviousPage
@@ -378,49 +322,39 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.pageInfo.hPP).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.pageInfo.hPP).toBeDefined();
     });
 
     test("should alias hasNextPage", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -428,7 +362,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         pageInfo {
                             hNP:hasNextPage
@@ -438,49 +372,39 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.pageInfo.hNP).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.pageInfo.hNP).toBeDefined();
     });
 
     test("should alias the top level edges key", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -488,7 +412,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         e:edges {
                             cursor
@@ -498,49 +422,39 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.e[0].cursor).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.e[0].cursor).toBeDefined();
     });
 
     test("should alias cursor", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -548,7 +462,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         edges {
                             c:cursor
@@ -558,49 +472,39 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].c).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].c).toBeDefined();
     });
 
     test("should alias the top level node key", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -608,7 +512,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         edges {
                             n:node {
@@ -620,49 +524,39 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].n).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].n).toBeDefined();
     });
 
     test("should alias a property on the node", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -670,7 +564,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         edges {
                             node {
@@ -682,53 +576,43 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN]-(:${typeActor.name} {name: randomUUID()})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].node.n).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].node.n).toBeDefined();
     });
 
     test("should alias a property on the relationship", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
 
-            interface ActedIn {
+            type ActedIn @relationshipProperties {
                 roles: [String]!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -736,62 +620,54 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     actorsConnection(first: 1) {
                         edges {
-                            r:roles
+                           r:properties {
+                             r:roles
+                           }
                         }
                     }
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN {roles: [randomUUID()]}]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN {roles: [randomUUID()]}]-(:${typeActor.name} {name: randomUUID()})
                     CREATE (m)<-[:ACTED_IN {roles: [randomUUID()]}]-(:${typeActor.name} {name: randomUUID()})
                 `,
-                {
-                    movieTitle,
-                }
-            );
+            {
+                movieTitle,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].r).toBeDefined();
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].r.r).toBeDefined();
     });
 
     test("should alias many keys on a connection", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties: "ActedIn")
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
             }
 
-            interface ActedIn {
+            type ActedIn @relationshipProperties {
                 roles: [String]!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieTitle = generate({
             charset: "alphabetic",
@@ -807,7 +683,7 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
                     connection:actorsConnection {
                         tC:totalCount
@@ -815,7 +691,9 @@ describe("Connections Alias", () => {
                             n:node {
                                 n:name
                             }
-                            r:roles
+                           p:properties {
+                             r:roles
+                           }
                         }
                         page:pageInfo {
                             hNP:hasNextPage
@@ -825,62 +703,51 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (m:${typeMovie.name} {title: $movieTitle})
                     CREATE (m)<-[:ACTED_IN {roles: $roles}]-(:${typeActor.name} {name: $actorName})
                 `,
+            {
+                movieTitle,
+                actorName,
+                roles,
+            }
+        );
+
+        const result = await testHelper.executeGraphQL(query);
+
+        expect(result.errors).toBeUndefined();
+
+        expect(result.data as any).toEqual({
+            [typeMovie.plural]: [
                 {
-                    movieTitle,
-                    actorName,
-                    roles,
-                }
-            );
-
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
-
-            expect(result.errors).toBeUndefined();
-
-            expect(result.data as any).toEqual({
-                [typeMovie.plural]: [
-                    {
-                        title: movieTitle,
-                        connection: {
-                            tC: 1,
-                            edges: [{ n: { n: actorName }, r: roles }],
-                            page: {
-                                hNP: false,
-                            },
+                    title: movieTitle,
+                    connection: {
+                        tC: 1,
+                        edges: [{ n: { n: actorName }, p: { r: roles } }],
+                        page: {
+                            hNP: false,
                         },
                     },
-                ],
-            });
-        } finally {
-            await session.close();
-        }
+                },
+            ],
+        });
     });
 
     test("should allow multiple aliases on the same connection", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type Post {
+            type Post @node {
                 title: String!
                 comments: [Comment!]! @relationship(type: "HAS_COMMENT", direction: OUT)
             }
-            type Comment {
+            type Comment @node {
                 flag: Boolean!
                 post: Post! @relationship(type: "HAS_COMMENT", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        const schema = await neoSchema.getSchema();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const postTitle = generate({ charset: "alphabetic" });
 
@@ -891,15 +758,15 @@ describe("Connections Alias", () => {
 
         const query = `
             {
-                posts(where: { title: "${postTitle}"}) {
-                    flagged: commentsConnection(where: { node: { flag: true } }) {
+                posts(where: { title_EQ: "${postTitle}"}) {
+                    flagged: commentsConnection(where: { node: { flag_EQ: true } }) {
                         edges {
                             node {
                                 flag
                             }
                         }
                     }
-                    unflagged: commentsConnection(where: { node: { flag: false } }) {
+                    unflagged: commentsConnection(where: { node: { flag_EQ: false } }) {
                         edges {
                             node {
                                 flag
@@ -910,35 +777,27 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
               CREATE (post:Post {title: $postTitle})
               FOREACH(flag in $flags |
                 CREATE (:Comment {flag: flag})<-[:HAS_COMMENT]-(post)
               )
           `,
-                {
-                    postTitle,
-                    flags,
-                }
-            );
+            {
+                postTitle,
+                flags,
+            }
+        );
 
-            const result = await graphql({
-                schema,
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeUndefined();
+        expect(result.errors).toBeUndefined();
 
-            expect((result.data as any).posts[0].flagged.edges).toContainEqual({ node: { flag: true } });
-            expect((result.data as any).posts[0].flagged.edges).toHaveLength(flaggedCount);
-            expect((result.data as any).posts[0].unflagged.edges).toContainEqual({ node: { flag: false } });
-            expect((result.data as any).posts[0].unflagged.edges).toHaveLength(unflaggedCount);
-        } finally {
-            await session.close();
-        }
+        expect((result.data as any).posts[0].flagged.edges).toContainEqual({ node: { flag: true } });
+        expect((result.data as any).posts[0].flagged.edges).toHaveLength(flaggedCount);
+        expect((result.data as any).posts[0].unflagged.edges).toContainEqual({ node: { flag: false } });
+        expect((result.data as any).posts[0].unflagged.edges).toHaveLength(unflaggedCount);
     });
 
     test("should allow alias on nested connections", async () => {
@@ -947,35 +806,35 @@ describe("Connections Alias", () => {
         const screenTime = 120;
 
         const typeDefs = gql`
-            type ${typeMovie.name} {
+            type ${typeMovie.name} @node {
                 title: String!
                 actors: [${typeActor.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
             }
 
-            type ${typeActor.name} {
+            type ${typeActor.name} @node {
                 name: String!
                 movies: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
             }
 
-            interface ActedIn {
+            type ActedIn @relationshipProperties {
                 screenTime: Int!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        const schema = await neoSchema.getSchema();
-        const session = await neo4j.getSession();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             {
-                ${typeMovie.plural}(where: { title: "${movieTitle}" }) {
+                ${typeMovie.plural}(where: { title_EQ: "${movieTitle}" }) {
                     title
-                    actorsConnection(where: { node: { name: "${actorName}" } }) {
+                    actorsConnection(where: { node: { name_EQ: "${actorName}" } }) {
                         edges {
-                            screenTime
+                            properties {
+                                screenTime
+                            }
                             node {
                                 name
-                                b: moviesConnection(where: { node: { title: "${movieTitle}"}}) {
+                                b: moviesConnection(where: { node: { title_EQ: "${movieTitle}"}}) {
                                     edges {
                                         node {
                                             title
@@ -992,43 +851,36 @@ describe("Connections Alias", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
+        await testHelper.executeCypher(
+            `
                     CREATE (movie:${typeMovie.name} {title: $movieTitle})
                     CREATE (actor:${typeActor.name} {name: $actorName})
                     CREATE (actor)-[:ACTED_IN {screenTime: $screenTime}]->(movie)
                 `,
+            {
+                movieTitle,
+                actorName,
+                screenTime,
+            }
+        );
+
+        const result = await testHelper.executeGraphQL(query);
+
+        expect(result.errors).toBeUndefined();
+
+        expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].node.b).toEqual({
+            edges: [
                 {
-                    movieTitle,
-                    actorName,
-                    screenTime,
-                }
-            );
-
-            const result = await graphql({
-                schema,
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
-
-            expect(result.errors).toBeUndefined();
-            expect((result.data as any)[typeMovie.plural][0].actorsConnection.edges[0].node.b).toEqual({
-                edges: [
-                    {
-                        node: {
-                            title: movieTitle,
-                            a: [
-                                {
-                                    name: actorName,
-                                },
-                            ],
-                        },
+                    node: {
+                        title: movieTitle,
+                        a: [
+                            {
+                                name: actorName,
+                            },
+                        ],
                     },
-                ],
-            });
-        } finally {
-            await session.close();
-        }
+                },
+            ],
+        });
     });
 });

@@ -28,7 +28,6 @@ function getName(type: TypeNode): string {
 function getPrettyName(type: TypeNode): string {
     let result: string;
 
-    // eslint-disable-next-line default-case
     switch (type.kind) {
         case Kind.NAMED_TYPE:
             result = type.name.value;
@@ -55,11 +54,6 @@ function getFieldTypeMeta(typeNode: TypeNode): TypeMeta {
     let arrayTypeRequired = false;
     if (array) {
         const listNode = typeNode as ListTypeNode;
-        const isMatrix = listNode.type.kind === Kind.LIST_TYPE && listNode.type.type.kind === Kind.LIST_TYPE;
-
-        if (isMatrix) {
-            throw new Error("Matrix arrays not supported");
-        }
 
         arrayTypePretty = getPrettyName(listNode.type);
         arrayTypeRequired = arrayTypePretty.includes("!");

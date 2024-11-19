@@ -17,50 +17,64 @@
  * limitations under the License.
  */
 
+import Cypher from "@neo4j/cypher-builder";
+import Debug from "debug";
 import type { Node } from "../classes";
-import createProjectionAndParams from "./create-projection-and-params";
-import createCreateAndParams from "./create-create-and-params";
-import type { Context, ConnectionField, RelationField } from "../types";
-import { AUTH_FORBIDDEN_ERROR, META_CYPHER_VARIABLE } from "../constants";
-import createConnectionAndParams from "./connection/create-connection-and-params";
-import createInterfaceProjectionAndParams from "./create-interface-projection-and-params";
-import { filterTruthy } from "../utils/utils";
 import { CallbackBucket } from "../classes/CallbackBucket";
+import { DEBUG_TRANSLATE } from "../constants";
+import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
+import { compileCypherIfExists } from "../utils/compile-cypher";
+import { asArray, filterTruthy } from "../utils/utils";
+import createCreateAndParams from "./create-create-and-params";
+import { QueryASTContext, QueryASTEnv } from "./queryAST/ast/QueryASTContext";
+import { QueryASTFactory } from "./queryAST/factory/QueryASTFactory";
+import { isUnwindCreateSupported } from "./queryAST/factory/parsers/is-unwind-create-supported";
+import unwindCreate from "./unwind-create";
+import { getAuthorizationStatements } from "./utils/get-authorization-statements";
+
+const debug = Debug(DEBUG_TRANSLATE);
 
 export default async function translateCreate({
     context,
     node,
 }: {
-    context: Context;
+    context: Neo4jGraphQLTranslationContext;
     node: Node;
-}): Promise<[string, any]> {
+}): Promise<{ cypher: string; params: Record<string, any> }> {
     const { resolveTree } = context;
-    const connectionStrs: string[] = [];
-    const interfaceStrs: string[] = [];
+    const mutationInputs = resolveTree.args.input as any[];
+    const entityAdapter = context.schemaModel.getConcreteEntityAdapter(node.name);
+    if (!entityAdapter) {
+        throw new Error(`Transpilation error: ${node.name} is not a concrete entity`);
+    }
+    const { isSupported, reason } = isUnwindCreateSupported(entityAdapter, asArray(mutationInputs), context);
+    if (isSupported) {
+        return unwindCreate({ context, entityAdapter });
+    }
+    debug(`Unwind create optimization not supported: ${reason}`);
+
     const projectionWith: string[] = [];
     const callbackBucket: CallbackBucket = new CallbackBucket(context);
 
-    let connectionParams: any;
-    let interfaceParams: any;
-
-    const mutationResponse = resolveTree.fieldsByTypeName[node.mutationResponseTypeNames.create];
-
-    const nodeProjection = Object.values(mutationResponse).find((field) => field.name === node.plural);
     const metaNames: string[] = [];
 
-    const { createStrs, params } = (resolveTree.args.input as any[]).reduce(
-        (res, input, index) => {
-            const varName = `this${index}`;
-            const create = [`CALL {`];
+    // TODO: after the createCreateAndParams refactor, remove varNameStrs and only use Cypher Variables
+    const varNameStrs = mutationInputs.map((_, i) => `this${i}`);
+    const varNameVariables = varNameStrs.map((varName) => new Cypher.NamedNode(varName));
 
+    const { createStrs, params } = mutationInputs.reduce(
+        (res, input, index) => {
+            const varName = varNameStrs[index] as string;
+            const create = [`CALL {`];
             const withVars = [varName];
             projectionWith.push(varName);
-            if (context.subscriptionsEnabled) {
-                create.push(`WITH [] AS ${META_CYPHER_VARIABLE}`);
-                withVars.push(META_CYPHER_VARIABLE);
-            }
 
-            const createAndParams = createCreateAndParams({
+            const {
+                create: nestedCreate,
+                params,
+                authorizationPredicates,
+                authorizationSubqueries,
+            } = createCreateAndParams({
                 input,
                 node,
                 context,
@@ -70,21 +84,15 @@ export default async function translateCreate({
                 topLevelNodeVariable: varName,
                 callbackBucket,
             });
+            create.push(nestedCreate);
 
-            create.push(`${createAndParams[0]}`);
-            if (context.subscriptionsEnabled) {
-                const metaVariable = `${varName}_${META_CYPHER_VARIABLE}`;
-                create.push(`RETURN ${varName}, ${META_CYPHER_VARIABLE} AS ${metaVariable}`);
-                metaNames.push(metaVariable);
-            } else {
-                create.push(`RETURN ${varName}`);
-            }
+            create.push(...getAuthorizationStatements(authorizationPredicates, authorizationSubqueries));
+
+            create.push(`RETURN ${varName}`);
 
             create.push(`}`);
-
             res.createStrs.push(create.join("\n"));
-            res.params = { ...res.params, ...createAndParams[1] };
-
+            res.params = { ...res.params, ...params };
             return res;
         },
         { createStrs: [], params: {}, withVars: [] }
@@ -93,174 +101,81 @@ export default async function translateCreate({
         params: any;
     };
 
-    let replacedProjectionParams: Record<string, unknown> = {};
-    let projectionStr: string | undefined;
-    let authCalls: string | undefined;
-
     if (metaNames.length > 0) {
         projectionWith.push(`${metaNames.join(" + ")} AS meta`);
     }
 
-    if (nodeProjection) {
-        let projAuth = "";
-        const projection = createProjectionAndParams({
-            node,
-            context,
-            resolveTree: nodeProjection,
-            varName: "REPLACE_ME",
-        });
-        if (projection[2]?.authValidateStrs?.length) {
-            projAuth = `CALL apoc.util.validate(NOT (${projection[2].authValidateStrs.join(
-                " AND "
-            )}), "${AUTH_FORBIDDEN_ERROR}", [0])`;
-        }
+    const queryAST = new QueryASTFactory(context.schemaModel).createQueryAST({
+        resolveTree,
+        entityAdapter,
+        context,
+    });
+    const queryASTEnv = new QueryASTEnv();
+    const projectedVariables: Cypher.Node[] = [];
+    /**
+     * Currently, the create projections are resolved separately for each input,
+     * the following block reuses the same ReadOperation for each of the variable names generated during the create operations.
+     **/
+    const projectionClause = Cypher.utils.concat(
+        ...filterTruthy(
+            varNameVariables.map((varName): Cypher.Clause | undefined => {
+                const queryASTContext = new QueryASTContext({
+                    target: varName,
+                    env: queryASTEnv,
+                    neo4jGraphQLContext: context,
+                });
+                debug(queryAST.print());
+                const queryASTResult = queryAST.transpile(queryASTContext);
+                if (queryASTResult.clauses.length) {
+                    projectedVariables.push(queryASTResult.projectionExpr as Cypher.Node);
+                    const clause = Cypher.utils.concat(...queryASTResult.clauses);
+                    return new Cypher.Call(clause).importWith(varName);
+                }
+            })
+        )
+    );
 
-        replacedProjectionParams = Object.entries(projection[1]).reduce((res, [key, value]) => {
-            return { ...res, [key.replace("REPLACE_ME", "projection")]: value };
-        }, {});
-
-        projectionStr = createStrs
-            .map(
-                (_, i) =>
-                    `\nthis${i} ${projection[0]
-                        // First look to see if projection param is being reassigned
-                        // e.g. in an apoc.cypher.runFirstColumn function call used in createProjection->connectionField
-                        .replace(/REPLACE_ME(?=\w+: \$REPLACE_ME)/g, "projection")
-                        .replace(/\$REPLACE_ME/g, "$projection")
-                        .replace(/REPLACE_ME/g, `this${i}`)}`
-            )
-            .join(", ");
-
-        authCalls = createStrs
-            .map((_, i) => projAuth.replace(/\$REPLACE_ME/g, "$projection").replace(/REPLACE_ME/g, `this${i}`))
+    const returnStatement = getReturnStatement(projectedVariables);
+    const createQuery = new Cypher.Raw((env) => {
+        const cypher = filterTruthy([
+            `${createStrs.join("\n")}`,
+            compileCypherIfExists(projectionClause, env),
+            compileCypherIfExists(returnStatement, env),
+        ])
+            .filter(Boolean)
             .join("\n");
+        return [
+            cypher,
+            {
+                ...params,
+            },
+        ];
+    });
 
-        const withVars = context.subscriptionsEnabled ? [META_CYPHER_VARIABLE] : [];
-        if (projection[2]?.connectionFields?.length) {
-            projection[2].connectionFields.forEach((connectionResolveTree) => {
-                const connectionField = node.connectionFields.find(
-                    (x) => x.fieldName === connectionResolveTree.name
-                ) as ConnectionField;
-                const connection = createConnectionAndParams({
-                    resolveTree: connectionResolveTree,
-                    field: connectionField,
-                    context,
-                    nodeVariable: "REPLACE_ME",
-                    withVars,
-                });
-                connectionStrs.push(connection[0]);
-                if (!connectionParams) connectionParams = {};
-                connectionParams = { ...connectionParams, ...connection[1] };
-            });
-        }
+    const createQueryCypher = createQuery.build({ prefix: "create_" });
+    const { cypher, params: resolvedCallbacks } = await callbackBucket.resolveCallbacksAndFilterCypher({
+        cypher: createQueryCypher.cypher,
+    });
 
-        if (projection[2]?.interfaceFields?.length) {
-            const prevRelationshipFields: string[] = [];
-            projection[2].interfaceFields.forEach((interfaceResolveTree) => {
-                const relationshipField = node.relationFields.find(
-                    (x) => x.fieldName === interfaceResolveTree.name
-                ) as RelationField;
-                const interfaceProjection = createInterfaceProjectionAndParams({
-                    resolveTree: interfaceResolveTree,
-                    field: relationshipField,
-                    context,
-                    nodeVariable: "REPLACE_ME",
-                    withVars: [...withVars, ...prevRelationshipFields],
-                });
-                prevRelationshipFields.push(relationshipField.dbPropertyName || relationshipField.fieldName);
-                interfaceStrs.push(interfaceProjection.cypher);
-                if (!interfaceParams) interfaceParams = {};
-                interfaceParams = { ...interfaceParams, ...interfaceProjection.params };
-            });
-        }
-    }
-
-    const replacedConnectionStrs = connectionStrs.length
-        ? createStrs.map((_, i) => {
-              return connectionStrs
-                  .map((connectionStr) => {
-                      return connectionStr.replace(/REPLACE_ME/g, `this${i}`);
-                  })
-                  .join("\n");
-          })
-        : [];
-
-    const replacedInterfaceStrs = interfaceStrs.length
-        ? createStrs.map((_, i) => {
-              return interfaceStrs
-                  .map((interfaceStr) => {
-                      return interfaceStr.replace(/REPLACE_ME/g, `this${i}`);
-                  })
-                  .join("\n");
-          })
-        : [];
-
-    const replacedConnectionParams = connectionParams
-        ? createStrs.reduce((res1, _, i) => {
-              return {
-                  ...res1,
-                  ...Object.entries(connectionParams).reduce((res2, [key, value]) => {
-                      return { ...res2, [key.replace("REPLACE_ME", `this${i}`)]: value };
-                  }, {}),
-              };
-          }, {})
-        : {};
-
-    const replacedInterfaceParams = interfaceParams
-        ? createStrs.reduce((res1, _, i) => {
-              return {
-                  ...res1,
-                  ...Object.entries(interfaceParams).reduce((res2, [key, value]) => {
-                      return { ...res2, [key.replace("REPLACE_ME", `this${i}`)]: value };
-                  }, {}),
-              };
-          }, {})
-        : {};
-
-    const returnStatement = generateCreateReturnStatement(projectionStr, context.subscriptionsEnabled);
-    const projectionWithStr = context.subscriptionsEnabled ? `WITH ${projectionWith.join(", ")}` : "";
-
-    let cypher = filterTruthy([
-        `${createStrs.join("\n")}`,
-        projectionWithStr,
-        authCalls,
-        ...replacedConnectionStrs,
-        ...replacedInterfaceStrs,
-        returnStatement,
-    ])
-        .filter(Boolean)
-        .join("\n");
-
-    let resolvedCallbacks = {};
-
-    ({ cypher, params: resolvedCallbacks } = await callbackBucket.resolveCallbacksAndFilterCypher({ cypher }));
-
-    return [
+    const result = {
         cypher,
-        {
-            ...params,
-            ...replacedProjectionParams,
-            ...replacedConnectionParams,
-            ...replacedInterfaceParams,
+        params: {
+            ...createQueryCypher.params,
             resolvedCallbacks,
         },
-    ];
+    };
+
+    return result;
 }
 
-function generateCreateReturnStatement(projectionStr: string | undefined, subscriptionsEnabled: boolean): string {
-    const statements: string[] = [];
-
-    if (projectionStr) {
-        statements.push(`[${projectionStr}] AS data`);
+function getReturnStatement(projectedVariables: Cypher.Variable[]): Cypher.Return {
+    const ret = new Cypher.Return();
+    if (projectedVariables.length) {
+        ret.addColumns([new Cypher.List(projectedVariables), new Cypher.NamedVariable("data")]);
     }
 
-    if (subscriptionsEnabled) {
-        statements.push(META_CYPHER_VARIABLE);
+    if (!projectedVariables.length) {
+        ret.addColumns(new Cypher.Literal("Query cannot conclude with CALL"));
     }
-
-    if (statements.length === 0) {
-        statements.push("'Query cannot conclude with CALL'");
-    }
-
-    return `RETURN ${statements.join(", ")}`;
+    return ret;
 }

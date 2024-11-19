@@ -19,150 +19,54 @@
 
 import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { Neo4jDatabaseInfo } from "../../../src/classes/Neo4jDatabaseInfo";
 import { isMultiDbUnsupportedError } from "../../utils/is-multi-db-unsupported-error";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("assertIndexesAndConstraints/unique", () => {
+    const testHelper = new TestHelper();
     let driver: Driver;
-    let neo4j: Neo4j;
     let databaseName: string;
     let MULTIDB_SUPPORT = true;
+    let dbInfo: Neo4jDatabaseInfo;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        dbInfo = await testHelper.getDatabaseInfo();
 
         databaseName = generate({ readable: true, charset: "alphabetic" });
 
-        const cypher = `CREATE DATABASE ${databaseName}`;
-        const session = driver.session();
         try {
-            await session.run(cypher);
+            await testHelper.createDatabase(databaseName);
         } catch (e) {
             if (e instanceof Error) {
                 if (isMultiDbUnsupportedError(e)) {
                     // No multi-db support, so we skip tests
                     MULTIDB_SUPPORT = false;
+                    await testHelper.close();
                 } else {
                     throw e;
                 }
             }
-        } finally {
-            await session.close();
         }
-        // eslint-disable-next-line no-promise-executor-return
-        await new Promise((x) => setTimeout(x, 5000));
+    });
+
+    beforeEach(async () => {
+        if (MULTIDB_SUPPORT) {
+            driver = await testHelper.getDriver();
+        }
+    });
+
+    afterEach(async () => {
+        if (MULTIDB_SUPPORT) {
+            await testHelper.close();
+        }
     });
 
     afterAll(async () => {
         if (MULTIDB_SUPPORT) {
-            const cypher = `DROP DATABASE ${databaseName}`;
-
-            const session = await neo4j.getSession();
-            try {
-                await session.run(cypher);
-            } finally {
-                await session.close();
-            }
+            await testHelper.dropDatabase();
+            await testHelper.close();
         }
-        await driver.close();
-    });
-
-    test("should create a constraint if it doesn't exist and specified in options, and then throw an error in the event of constraint validation", async () => {
-        // Skip if multi-db not supported
-        if (!MULTIDB_SUPPORT) {
-            console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-            return;
-        }
-
-        const isbn = generate({ readable: true });
-        const title = generate({ readable: true });
-
-        const typeDefs = gql`
-            type Book {
-                isbn: String! @unique
-                title: String!
-            }
-        `;
-
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        const schema = await neoSchema.getSchema();
-
-        await expect(
-            neoSchema.assertIndexesAndConstraints({
-                driver,
-                driverConfig: { database: databaseName },
-                options: { create: true },
-            })
-        ).resolves.not.toThrow();
-
-        const session = driver.session({ database: databaseName });
-
-        const cypher = "SHOW UNIQUE CONSTRAINTS";
-
-        try {
-            const result = await session.run(cypher);
-
-            expect(
-                result.records
-                    .map((record) => {
-                        return record.toObject();
-                    })
-                    .filter((record) => record.labelsOrTypes.includes("Book"))
-            ).toHaveLength(1);
-        } finally {
-            await session.close();
-        }
-
-        const mutation = `
-            mutation CreateBooks($isbn: String!, $title: String!) {
-                createBooks(input: [{ isbn: $isbn, title: $title }]) {
-                    books {
-                        isbn
-                        title
-                    }
-                }
-            }
-        `;
-
-        const createResult = await graphql({
-            schema,
-            source: mutation,
-            contextValue: {
-                driver,
-                driverConfig: { database: databaseName },
-            },
-            variableValues: {
-                isbn,
-                title,
-            },
-        });
-
-        expect(createResult.errors).toBeFalsy();
-
-        expect(createResult.data).toEqual({
-            createBooks: { books: [{ isbn, title }] },
-        });
-
-        const errorResult = await graphql({
-            schema,
-            source: mutation,
-            contextValue: {
-                driver,
-                driverConfig: { database: databaseName },
-            },
-            variableValues: {
-                isbn,
-                title,
-            },
-        });
-
-        expect(errorResult.errors).toHaveLength(1);
-        expect(errorResult.errors?.[0].message).toBe("Constraint validation failed");
     });
 
     describe("@unique", () => {
@@ -173,20 +77,20 @@ describe("assertIndexesAndConstraints/unique", () => {
                 return;
             }
 
-            const type = generateUniqueType("Book");
+            const type = testHelper.createUniqueType("Book");
 
             const typeDefs = `
-                type ${type.name} {
+                type ${type.name} @node {
                     isbn: String! @unique
                     title: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
             await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
+                neoSchema.assertIndexesAndConstraints({ driver, sessionConfig: { database: databaseName } })
             ).rejects.toThrow(`Missing constraint for ${type.name}.isbn`);
         });
 
@@ -197,20 +101,20 @@ describe("assertIndexesAndConstraints/unique", () => {
                 return;
             }
 
-            const type = generateUniqueType("Book");
+            const type = testHelper.createUniqueType("Book");
 
             const typeDefs = `
-                type ${type.name} {
+                type ${type.name} @node {
                     isbn: String! @unique @alias(property: "internationalStandardBookNumber")
                     title: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
             await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
+                neoSchema.assertIndexesAndConstraints({ driver, sessionConfig: { database: databaseName } })
             ).rejects.toThrow(`Missing constraint for ${type.name}.internationalStandardBookNumber`);
         });
 
@@ -221,30 +125,26 @@ describe("assertIndexesAndConstraints/unique", () => {
                 return;
             }
 
-            const type = generateUniqueType("Book");
+            const type = testHelper.createUniqueType("Book");
 
             const typeDefs = `
-                type ${type.name} {
+                type ${type.name} @node {
                     isbn: String! @unique
                     title: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
-            const session = driver.session({ database: databaseName });
+            const cypher = `CREATE CONSTRAINT ${type.name}_isbn ${dbInfo.gte("4.4") ? "FOR" : "ON"} (n:${type.name}) ${
+                dbInfo.gte("4.4") ? "REQUIRE" : "ASSERT"
+            } n.isbn IS UNIQUE`;
 
-            const cypher = `CREATE CONSTRAINT ${type.name}_isbn ON (n:${type.name}) ASSERT n.isbn IS UNIQUE`;
-
-            try {
-                await session.run(cypher);
-            } finally {
-                await session.close();
-            }
+            await testHelper.executeCypher(cypher);
 
             await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
+                neoSchema.assertIndexesAndConstraints({ driver, sessionConfig: { database: databaseName } })
             ).resolves.not.toThrow();
         });
 
@@ -255,127 +155,215 @@ describe("assertIndexesAndConstraints/unique", () => {
                 return;
             }
 
-            const type = generateUniqueType("Book");
+            const type = testHelper.createUniqueType("Book");
 
             const typeDefs = `
-                type ${type.name} {
+                type ${type.name} @node {
                     isbn: String! @unique @alias(property: "internationalStandardBookNumber")
                     title: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
-            const session = driver.session({ database: databaseName });
+            const cypher = `CREATE CONSTRAINT ${type.name}_isbn ${dbInfo.gte("4.4") ? "FOR" : "ON"} (n:${type.name}) ${
+                dbInfo.gte("4.4") ? "REQUIRE" : "ASSERT"
+            } n.internationalStandardBookNumber IS UNIQUE`;
 
-            const cypher = `CREATE CONSTRAINT ${type.name}_isbn ON (n:${type.name}) ASSERT n.internationalStandardBookNumber IS UNIQUE`;
-
-            try {
-                await session.run(cypher);
-            } finally {
-                await session.close();
-            }
+            await testHelper.executeCypher(cypher);
 
             await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
+                neoSchema.assertIndexesAndConstraints({ driver, sessionConfig: { database: databaseName } })
             ).resolves.not.toThrow();
         });
 
-        test("should create a constraint if it doesn't exist and specified in options", async () => {
+        test("should not throw if constraint exists on an additional label", async () => {
             // Skip if multi-db not supported
             if (!MULTIDB_SUPPORT) {
                 console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
                 return;
             }
 
-            const type = generateUniqueType("Book");
+            const baseType = testHelper.createUniqueType("Base");
+            const additionalType = testHelper.createUniqueType("Additional");
 
             const typeDefs = `
-                type ${type.name} {
-                    isbn: String! @unique
-                    title: String!
+                type ${baseType.name} @node(labels: ["${baseType.name}", "${additionalType.name}"]) {
+                    someIntProperty: Int!
+                    title: String! @unique
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const createConstraintCypher = `
+                CREATE CONSTRAINT ${baseType.name}_unique_title ${dbInfo.gte("4.4") ? "FOR" : "ON"} (r:${
+                additionalType.name
+            })
+                ${dbInfo.gte("4.4") ? "REQUIRE" : "ASSERT"} r.title IS UNIQUE;
+            `;
+
+            await testHelper.executeCypher(createConstraintCypher);
+
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
             await expect(
                 neoSchema.assertIndexesAndConstraints({
                     driver,
-                    driverConfig: { database: databaseName },
-                    options: { create: true },
+                    sessionConfig: { database: databaseName },
                 })
             ).resolves.not.toThrow();
-
-            const session = driver.session({ database: databaseName });
-
-            const cypher = "SHOW UNIQUE CONSTRAINTS";
-
-            try {
-                const result = await session.run(cypher);
-
-                expect(
-                    result.records
-                        .map((record) => {
-                            return record.toObject();
-                        })
-                        .filter((record) => record.labelsOrTypes.includes(type.name))
-                ).toHaveLength(1);
-            } finally {
-                await session.close();
-            }
         });
 
-        test("should create a constraint if it doesn't exist and specified in options when used with @alias", async () => {
+        test("should not allow creating duplicate @unique properties when constraint is on an additional label", async () => {
             // Skip if multi-db not supported
             if (!MULTIDB_SUPPORT) {
                 console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
                 return;
             }
 
-            const type = generateUniqueType("Book");
-
+            const baseType = testHelper.createUniqueType("Base");
+            const additionalType = testHelper.createUniqueType("Additional");
             const typeDefs = `
-                type ${type.name} {
-                    isbn: String! @unique @alias(property: "internationalStandardBookNumber")
+                type ${baseType.name} @node(labels: ["${baseType.name}", "${additionalType.name}"]) {
+                    someStringProperty: String! @unique @alias(property: "someAlias")
                     title: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
+            const createConstraintCypher = `
+                CREATE CONSTRAINT ${baseType.name}_unique_someAlias ${dbInfo.gte("4.4") ? "FOR" : "ON"} (r:${
+                additionalType.name
+            })
+                ${dbInfo.gte("4.4") ? "REQUIRE" : "ASSERT"} r.someAlias IS UNIQUE;
+            `;
 
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    driverConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
+            await testHelper.executeCypher(createConstraintCypher);
 
-            const session = driver.session({ database: databaseName });
+            await testHelper.initNeo4jGraphQL({ typeDefs });
 
-            const cypher = "SHOW UNIQUE CONSTRAINTS";
+            const mutation = `
+                    mutation {
+                        ${baseType.operations.create}(input: [
+                            {
+                                someStringProperty: "notUnique",
+                                title: "someTitle"
+                            },
+                            {
+                                someStringProperty: "notUnique",
+                                title: "someTitle2"
+                            },
+                        ]) {
+                            ${baseType.plural} {
+                                someStringProperty
+                            }
+                        }
+                    }
+                `;
 
-            try {
-                const result = await session.run(cypher);
+            const query = `
+                    query {
+                        ${baseType.plural} {
+                            someStringProperty
+                        }
+                    }
+                `;
 
-                expect(
-                    result.records
-                        .map((record) => {
-                            return record.toObject();
-                        })
-                        .filter(
-                            (record) =>
-                                record.labelsOrTypes.includes(type.name) &&
-                                record.properties.includes("internationalStandardBookNumber")
-                        )
-                ).toHaveLength(1);
-            } finally {
-                await session.close();
+            const mutationGqlResult = await testHelper.executeGraphQL(mutation);
+
+            const queryGqlResult = await testHelper.executeGraphQL(query);
+
+            expect((mutationGqlResult?.errors as any[])[0].message).toBe("Constraint validation failed");
+
+            expect(queryGqlResult.errors).toBeFalsy();
+            expect(queryGqlResult.data?.[baseType.plural]).toBeArrayOfSize(0);
+        });
+
+        test("should not allow updating to duplicate @unique properties when constraint is on an additional label", async () => {
+            // Skip if multi-db not supported
+            if (!MULTIDB_SUPPORT) {
+                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
+                return;
             }
+
+            const baseType = testHelper.createUniqueType("Base");
+            const additionalType = testHelper.createUniqueType("Additional");
+            const typeDefs = `
+                type ${baseType.name} @node(labels: ["${baseType.name}", "${additionalType.name}"]) {
+                    someStringProperty: String! @unique @alias(property: "someAlias")
+                    title: String!
+                }
+            `;
+
+            const createConstraintCypher = `
+                CREATE CONSTRAINT ${baseType.name}_unique_someAlias ${dbInfo.gte("4.4") ? "FOR" : "ON"} (r:${
+                additionalType.name
+            })
+                ${dbInfo.gte("4.4") ? "REQUIRE" : "ASSERT"} r.someAlias IS UNIQUE;
+            `;
+
+            await testHelper.executeCypher(createConstraintCypher);
+
+            await testHelper.initNeo4jGraphQL({ typeDefs });
+
+            const uniqueVal1 = "someVal1";
+            const uniqueVal2 = "someUniqueVal2";
+
+            const createMutation = `
+                    mutation {
+                        ${baseType.operations.create}(input: [
+                            {
+                                someStringProperty: "${uniqueVal1}",
+                                title: "someTitle"
+                            },
+                            {
+                                someStringProperty: "${uniqueVal2}",
+                                title: "someTitle2"
+                            },
+                        ]) {
+                            ${baseType.plural} {
+                                someStringProperty
+                            }
+                        }
+                    }
+                `;
+
+            const updateMutation = /* GraphQL */ `
+                    mutation {
+                        ${baseType.operations.update}(update: {
+                                someStringProperty_SET: "notUnique"
+                        }) {
+                            ${baseType.plural} {
+                                someStringProperty
+                            }
+                        }
+                    }
+                `;
+
+            const query = `
+                    query {
+                        ${baseType.plural} {
+                            someStringProperty
+                        }
+                    }
+                `;
+
+            const createGqlResult = await testHelper.executeGraphQL(createMutation);
+            const updateGqlResult = await testHelper.executeGraphQL(updateMutation);
+            const queryGqlResult = await testHelper.executeGraphQL(query);
+
+            expect(createGqlResult?.errors).toBeFalsy();
+            expect((updateGqlResult?.errors as any[])[0].message).toBe("Constraint validation failed");
+
+            expect(queryGqlResult.errors).toBeFalsy();
+            expect(queryGqlResult.data?.[baseType.plural]).toIncludeSameMembers([
+                {
+                    someStringProperty: uniqueVal1,
+                },
+                {
+                    someStringProperty: uniqueVal2,
+                },
+            ]);
         });
     });
 
@@ -387,20 +375,20 @@ describe("assertIndexesAndConstraints/unique", () => {
                 return;
             }
 
-            const type = generateUniqueType("User");
+            const type = testHelper.createUniqueType("User");
 
             const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id
+                type ${type.name} @node {
+                    id: ID! @id @unique
                     name: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
             await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
+                neoSchema.assertIndexesAndConstraints({ driver, sessionConfig: { database: databaseName } })
             ).rejects.toThrow(`Missing constraint for ${type.name}.id`);
         });
 
@@ -411,69 +399,21 @@ describe("assertIndexesAndConstraints/unique", () => {
                 return;
             }
 
-            const type = generateUniqueType("User");
+            const type = testHelper.createUniqueType("User");
 
             const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id @alias(property: "identifier")
+                type ${type.name} @node {
+                    id: ID! @id @unique @alias(property: "identifier")
                     name: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
             await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
+                neoSchema.assertIndexesAndConstraints({ driver, sessionConfig: { database: databaseName } })
             ).rejects.toThrow(`Missing constraint for ${type.name}.identifier`);
-        });
-
-        test("should not throw an error when unique argument is set to false", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const type = generateUniqueType("User");
-
-            const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id(unique: false)
-                    name: String!
-                }
-            `;
-
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
-            ).resolves.not.toThrow();
-        });
-
-        test("should not throw an error when unique argument is set to false when used with @alias", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const type = generateUniqueType("User");
-
-            const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id(unique: false) @alias(property: "identifier")
-                    name: String!
-                }
-            `;
-
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
-            ).resolves.not.toThrow();
         });
 
         test("should not throw an error when all necessary constraints exist", async () => {
@@ -483,30 +423,26 @@ describe("assertIndexesAndConstraints/unique", () => {
                 return;
             }
 
-            const type = generateUniqueType("User");
+            const type = testHelper.createUniqueType("User");
 
             const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id
+                type ${type.name} @node {
+                    id: ID! @id @unique
                     name: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
-            const session = driver.session({ database: databaseName });
+            const cypher = `CREATE CONSTRAINT ${type.name}_id ${dbInfo.gte("4.4") ? "FOR" : "ON"} (n:${type.name}) ${
+                dbInfo.gte("4.4") ? "REQUIRE" : "ASSERT"
+            } n.id IS UNIQUE`;
 
-            const cypher = `CREATE CONSTRAINT ${type.name}_id ON (n:${type.name}) ASSERT n.id IS UNIQUE`;
-
-            try {
-                await session.run(cypher);
-            } finally {
-                await session.close();
-            }
+            await testHelper.executeCypher(cypher);
 
             await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
+                neoSchema.assertIndexesAndConstraints({ driver, sessionConfig: { database: databaseName } })
             ).resolves.not.toThrow();
         });
 
@@ -517,221 +453,63 @@ describe("assertIndexesAndConstraints/unique", () => {
                 return;
             }
 
-            const type = generateUniqueType("User");
+            const type = testHelper.createUniqueType("User");
 
             const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id @alias(property: "identifier")
+                type ${type.name} @node {
+                    id: ID! @id @unique @alias(property: "identifier")
                     name: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
-            const session = driver.session({ database: databaseName });
+            const cypher = `CREATE CONSTRAINT ${type.name}_id ${dbInfo.gte("4.4") ? "FOR" : "ON"} (n:${type.name}) ${
+                dbInfo.gte("4.4") ? "REQUIRE" : "ASSERT"
+            } n.identifier IS UNIQUE`;
 
-            const cypher = `CREATE CONSTRAINT ${type.name}_id ON (n:${type.name}) ASSERT n.identifier IS UNIQUE`;
-
-            try {
-                await session.run(cypher);
-            } finally {
-                await session.close();
-            }
+            await testHelper.executeCypher(cypher);
 
             await expect(
-                neoSchema.assertIndexesAndConstraints({ driver, driverConfig: { database: databaseName } })
+                neoSchema.assertIndexesAndConstraints({ driver, sessionConfig: { database: databaseName } })
             ).resolves.not.toThrow();
         });
 
-        test("should create a constraint if it doesn't exist and specified in options", async () => {
+        test("should not throw if constraint exists on an additional label", async () => {
             // Skip if multi-db not supported
             if (!MULTIDB_SUPPORT) {
                 console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
                 return;
             }
 
-            const type = generateUniqueType("User");
-
+            const baseType = testHelper.createUniqueType("Base");
+            const additionalType = testHelper.createUniqueType("Additional");
             const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id
-                    name: String!
+                type ${baseType.name} @node(labels: ["${baseType.name}", "${additionalType.name}"]) @mutation(operations: []) {
+                    someIdProperty: ID! @id @unique @alias(property: "someAlias")
+                    title: String!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            const createConstraintCypher = `
+                CREATE CONSTRAINT ${baseType.name}_unique_someAlias ${dbInfo.gte("4.4") ? "FOR" : "ON"} (r:${
+                additionalType.name
+            })
+                ${dbInfo.gte("4.4") ? "REQUIRE" : "ASSERT"} r.someAlias IS UNIQUE;
+            `;
+
+            await testHelper.executeCypher(createConstraintCypher);
+
+            const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
             await neoSchema.getSchema();
 
             await expect(
                 neoSchema.assertIndexesAndConstraints({
                     driver,
-                    driverConfig: { database: databaseName },
-                    options: { create: true },
+                    sessionConfig: { database: databaseName },
                 })
             ).resolves.not.toThrow();
-
-            const session = driver.session({ database: databaseName });
-
-            const cypher = "SHOW UNIQUE CONSTRAINTS";
-
-            try {
-                const result = await session.run(cypher);
-
-                expect(
-                    result.records
-                        .map((record) => {
-                            return record.toObject();
-                        })
-                        .filter((record) => record.labelsOrTypes.includes(type.name))
-                ).toHaveLength(1);
-            } finally {
-                await session.close();
-            }
-        });
-
-        test("should create a constraint if it doesn't exist and specified in options when used with @alias", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const type = generateUniqueType("User");
-
-            const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id @alias(property: "identifier")
-                    name: String!
-                }
-            `;
-
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    driverConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const session = driver.session({ database: databaseName });
-
-            const cypher = "SHOW UNIQUE CONSTRAINTS";
-
-            try {
-                const result = await session.run(cypher);
-
-                expect(
-                    result.records
-                        .map((record) => {
-                            return record.toObject();
-                        })
-                        .filter(
-                            (record) =>
-                                record.labelsOrTypes.includes(type.name) && record.properties.includes("identifier")
-                        )
-                ).toHaveLength(1);
-            } finally {
-                await session.close();
-            }
-        });
-
-        test("should not create a constraint if it doesn't exist and unique option is set to false", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const type = generateUniqueType("User");
-
-            const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id(unique: false)
-                    name: String!
-                }
-            `;
-
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    driverConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const session = driver.session({ database: databaseName });
-
-            const cypher = "SHOW UNIQUE CONSTRAINTS";
-
-            try {
-                const result = await session.run(cypher);
-
-                expect(
-                    result.records
-                        .map((record) => {
-                            return record.toObject();
-                        })
-                        .filter((record) => record.labelsOrTypes.includes(type.name))
-                ).toHaveLength(0);
-            } finally {
-                await session.close();
-            }
-        });
-
-        test("should not create a constraint if it doesn't exist and unique option is set to false when used with @alias", async () => {
-            // Skip if multi-db not supported
-            if (!MULTIDB_SUPPORT) {
-                console.log("MULTIDB_SUPPORT NOT AVAILABLE - SKIPPING");
-                return;
-            }
-
-            const type = generateUniqueType("User");
-
-            const typeDefs = `
-                type ${type.name} {
-                    id: ID! @id(unique: false) @alias(property: "identifier")
-                    name: String!
-                }
-            `;
-
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
-            await neoSchema.getSchema();
-
-            await expect(
-                neoSchema.assertIndexesAndConstraints({
-                    driver,
-                    driverConfig: { database: databaseName },
-                    options: { create: true },
-                })
-            ).resolves.not.toThrow();
-
-            const session = driver.session({ database: databaseName });
-
-            const cypher = "SHOW UNIQUE CONSTRAINTS";
-
-            try {
-                const result = await session.run(cypher);
-
-                expect(
-                    result.records
-                        .map((record) => {
-                            return record.toObject();
-                        })
-                        .filter(
-                            (record) =>
-                                record.labelsOrTypes.includes(type.name) && record.properties.includes("identifier")
-                        )
-                ).toHaveLength(0);
-            } finally {
-                await session.close();
-            }
         });
     });
 });

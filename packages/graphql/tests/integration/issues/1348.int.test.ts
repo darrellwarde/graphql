@@ -17,87 +17,60 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver, Session } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1348", () => {
-    const testSeries = generateUniqueType("Series");
-    const testSeason = generateUniqueType("Season");
-    const testProgrammeItem = generateUniqueType("ProgrammeItem");
+    let Series: UniqueType;
+    let Season: UniqueType;
+    let ProgrammeItem: UniqueType;
 
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
+    const testHelper = new TestHelper();
 
-    async function graphqlQuery(query: string) {
-        return graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
-    }
+    beforeEach(async () => {
+        Series = testHelper.createUniqueType("Series");
+        Season = testHelper.createUniqueType("Season");
+        ProgrammeItem = testHelper.createUniqueType("ProgrammeItem");
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             interface Product {
                 productTitle: String!
-                releatsTo: [Product!]!
+                relatedTo: [Product!]!
             }
-            
-            type ${testSeries} implements Product {
+
+            type ${Series} implements Product @node {
                 productTitle: String!
-                releatsTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
-            
-                seasons: [${testSeason}!]!
+                relatedTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
+
+                seasons: [${Season}!]!
             }
-            
-            type ${testSeason} implements Product {
+
+            type ${Season} implements Product @node {
                 productTitle: String!
-                releatsTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
-            
+                relatedTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
+
                 seasonNumber: Int
-                episodes: [${testProgrammeItem}!]!
+                episodes: [${ProgrammeItem}!]!
             }
-            
-            type ${testProgrammeItem} implements Product {
+
+            type ${ProgrammeItem} implements Product @node {
                 productTitle: String!
-                releatsTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
-            
+                relatedTo: [Product!]!  @relationship(type: "RELATES_TO", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
+
                 episodeNumber: Int
             }
         `;
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterEach(async () => {
-        await session.run(`MATCH (s:${testSeries}) DETACH DELETE s`);
-        await session.run(`MATCH (s:${testSeason}) DETACH DELETE s`);
-        await session.run(`MATCH (p:${testProgrammeItem}) DETACH DELETE p`);
-
-        await session.close();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should also return node with no relationship in result set", async () => {
-        const createProgrammeItems = `
+        const createProgrammeItems = /* GraphQL */ `
             mutation {
-                ${testProgrammeItem.operations.create}(input: [
+                ${ProgrammeItem.operations.create}(input: [
                     {
                         productTitle: "TestEpisode1",
                         episodeNumber: 1
@@ -110,23 +83,30 @@ describe("https://github.com/neo4j/graphql/issues/1348", () => {
                         productTitle: "TestFilm1"
                     }
                 ]) {
-                    ${testProgrammeItem.plural} {
+                    ${ProgrammeItem.plural} {
                         productTitle
                         episodeNumber
                     }
                 }
             }
         `;
-        const updateProgrammeItems = `
+
+        const updateProgrammeItems = /* GraphQL */ `
             mutation {
-                ${testProgrammeItem.operations.update}(
-                    where: { productTitle: "TestFilm1" }
-                    connect: { releatsTo: { where: { node: { productTitle: "TestEpisode1" } } } }
+                ${ProgrammeItem.operations.update}(
+                    where: { productTitle_EQ: "TestFilm1" }
+                    update: {
+                        relatedTo: {
+                            connect: {
+                                 where: { node: { productTitle_EQ: "TestEpisode1" } } 
+                            }
+                        }
+                    }
                 ) {
-                    ${testProgrammeItem.plural} {
+                    ${ProgrammeItem.plural} {
                         productTitle
                         episodeNumber
-                        releatsTo {
+                        relatedTo {
                             __typename
                             productTitle
                         }
@@ -134,39 +114,40 @@ describe("https://github.com/neo4j/graphql/issues/1348", () => {
                 }
             }
         `;
-        const createProgrammeItemsResults = await graphqlQuery(createProgrammeItems);
+
+        const createProgrammeItemsResults = await testHelper.executeGraphQL(createProgrammeItems);
         expect(createProgrammeItemsResults.errors).toBeUndefined();
 
-        const updateProgrammeItemsResults = await graphqlQuery(updateProgrammeItems);
+        const updateProgrammeItemsResults = await testHelper.executeGraphQL(updateProgrammeItems);
         expect(updateProgrammeItemsResults.errors).toBeUndefined();
 
-        const query = `
+        const query = /* GraphQL */ `
             query {
-                ${testProgrammeItem.plural} {
+                ${ProgrammeItem.plural} {
                     productTitle
                     episodeNumber
-                    releatsTo {
+                    relatedTo {
                         __typename
                         productTitle
                     }
                 }
             }
         `;
-        const queryResults = await graphqlQuery(query);
+        const queryResults = await testHelper.executeGraphQL(query);
         expect(queryResults.errors).toBeUndefined();
-        expect(queryResults.data as any).toEqual({
-            [testProgrammeItem.plural]: [
+        expect(queryResults.data).toEqual({
+            [ProgrammeItem.plural]: expect.toIncludeSameMembers([
                 {
                     productTitle: "TestEpisode2",
                     episodeNumber: 2,
-                    releatsTo: [],
+                    relatedTo: [],
                 },
                 {
                     productTitle: "TestEpisode1",
                     episodeNumber: 1,
-                    releatsTo: [
+                    relatedTo: [
                         {
-                            __typename: testProgrammeItem.name,
+                            __typename: ProgrammeItem.name,
                             productTitle: "TestFilm1",
                         },
                     ],
@@ -174,14 +155,14 @@ describe("https://github.com/neo4j/graphql/issues/1348", () => {
                 {
                     productTitle: "TestFilm1",
                     episodeNumber: null,
-                    releatsTo: [
+                    relatedTo: [
                         {
-                            __typename: testProgrammeItem.name,
+                            __typename: ProgrammeItem.name,
                             productTitle: "TestEpisode1",
                         },
                     ],
                 },
-            ],
+            ]),
         });
     });
 });

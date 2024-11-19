@@ -17,39 +17,25 @@
  * limitations under the License.
  */
 
-import { Point } from "./graphql/objects/Point";
+import { Neo4jGraphQL, Neo4jGraphQLConstructor } from "./classes";
+import { Neo4jGraphQLSubscriptionsCDCEngine } from "./classes/subscription/Neo4jGraphQLSubscriptionsCDCEngine";
+import * as directives from "./graphql/directives";
 import { CartesianPoint } from "./graphql/objects/CartesianPoint";
+import { Point } from "./graphql/objects/Point";
+import * as scalars from "./graphql/scalars";
+import { Neo4jGraphQLCallback } from "./types";
+import { Neo4jGraphQLContext } from "./types/neo4j-graphql-context";
 
-export {
-    DriverConfig,
-    GraphQLOptionsArg,
-    GraphQLWhereArg,
-    DeleteInfo,
-    GraphQLSortArg,
-    CypherConnectComponentsPlanner,
-    CypherExpressionEngine,
-    CypherInterpretedPipesFallback,
-    CypherOperatorEngine,
-    CypherPlanner,
-    CypherReplanning,
-    CypherRuntime,
-    Neo4jGraphQLAuthPlugin,
-    CypherUpdateStrategy,
-    Node,
-    Neo4jGraphQLSubscriptionsPlugin,
-    EventMeta,
-    SubscriptionsEvent,
-} from "./types";
-export {
-    Neo4jGraphQL,
-    Neo4jGraphQLConstructor,
-    Neo4jGraphQLAuthenticationError,
-    Neo4jGraphQLForbiddenError,
-} from "./classes";
+const objects = { Point, CartesianPoint };
 
-export { Neo4jGraphQLSubscriptionsSingleInstancePlugin } from "./classes/Neo4jGraphQLSubscriptionsSingleInstancePlugin";
+/**
+ * Core library functionality.
+ */
+export { Neo4jGraphQL, Neo4jGraphQLCallback, Neo4jGraphQLConstructor, Neo4jGraphQLContext };
 
-export * as directives from "./graphql/directives";
-export * as scalars from "./graphql/scalars";
+/**
+ * Library built-in GraphQL types.
+ */
+export { directives, objects, scalars };
 
-export const objects = { Point, CartesianPoint };
+export { Neo4jGraphQLSubscriptionsCDCEngine };

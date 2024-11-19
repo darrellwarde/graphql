@@ -18,14 +18,14 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("Datetime", () => {
     test("DateTime", async () => {
         const typeDefs = gql`
-            type Movie {
+            type Movie @node {
                 id: ID
                 datetime: DateTime
             }
@@ -39,8 +39,10 @@ describe("Datetime", () => {
               mutation: Mutation
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -53,18 +55,20 @@ describe("Datetime", () => {
             \\"\\"\\"A date and time, represented as an ISO-8601 string\\"\\"\\"
             scalar DateTime
 
-            type DateTimeAggregateSelectionNullable {
+            type DateTimeAggregateSelection {
               max: DateTime
               min: DateTime
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
-            type IDAggregateSelectionNullable {
+            type IDAggregateSelection {
               longest: ID
               shortest: ID
             }
@@ -76,8 +80,8 @@ describe("Datetime", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              datetime: DateTimeAggregateSelectionNullable!
-              id: IDAggregateSelectionNullable!
+              datetime: DateTimeAggregateSelection!
+              id: IDAggregateSelection!
             }
 
             input MovieCreateInput {
@@ -108,30 +112,28 @@ describe("Datetime", () => {
             }
 
             input MovieUpdateInput {
-              datetime: DateTime
-              id: ID
+              datetime: DateTime @deprecated(reason: \\"Please use the explicit _SET field\\")
+              datetime_SET: DateTime
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
+              NOT: MovieWhere
               OR: [MovieWhere!]
-              datetime: DateTime
+              datetime: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              datetime_EQ: DateTime
               datetime_GT: DateTime
               datetime_GTE: DateTime
               datetime_IN: [DateTime]
               datetime_LT: DateTime
               datetime_LTE: DateTime
-              datetime_NOT: DateTime
-              datetime_NOT_IN: [DateTime]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID
-              id_NOT_CONTAINS: ID
-              id_NOT_ENDS_WITH: ID
-              id_NOT_IN: [ID]
-              id_NOT_STARTS_WITH: ID
               id_STARTS_WITH: ID
             }
 
@@ -156,11 +158,12 @@ describe("Datetime", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -168,8 +171,10 @@ describe("Datetime", () => {
               DESC
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

@@ -17,86 +17,64 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import { faker } from "@faker-js/faker";
-import { gql } from "apollo-server";
-import { generate } from "randomstring";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
-
-const testLabel = generate({ charset: "alphabetic" });
+import { TestHelper } from "../utils/tests-helper";
 
 describe("fragments", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let schema: GraphQLSchema;
+    const testHelper = new TestHelper();
+    const Movie = testHelper.createUniqueType("Movie");
+    const Series = testHelper.createUniqueType("Series");
+    const Actor = testHelper.createUniqueType("Actor");
 
-    const typeDefs = gql`
+    const typeDefs = /* GraphQL */ `
         interface Production {
             title: String!
             runtime: Int!
         }
 
-        type Movie implements Production {
+        type ${Movie} implements Production @node {
             title: String!
             runtime: Int!
         }
 
-        type Series implements Production {
+        type ${Series} implements Production @node {
             title: String!
             runtime: Int!
             episodes: Int!
         }
 
-        interface ActedIn @relationshipProperties {
+        type ActedIn @relationshipProperties {
             screenTime: Int!
         }
 
         interface InterfaceA {
-            actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+            actedIn: [Production!]! @declareRelationship
         }
 
-        type Actor implements InterfaceA {
+        type ${Actor} implements InterfaceA @node {
             name: String!
             actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
         }
     `;
 
-    const actorName = generate({
-        readable: true,
-        charset: "alphabetic",
-    });
+    const actorName = "Marvin";
 
-    const movieTitle = generate({
-        readable: true,
-        charset: "alphabetic",
-    });
-    const movieRuntime = faker.datatype.number();
-    const movieScreenTime = faker.datatype.number();
+    const movieTitle = "The Hitchhiker's Guide to the Galaxy";
+    const movieRuntime = 1230;
+    const movieScreenTime = 3210;
 
-    const seriesTitle = generate({
-        readable: true,
-        charset: "alphabetic",
-    });
-    const seriesRuntime = faker.datatype.number();
-    const seriesEpisodes = faker.datatype.number();
-    const seriesScreenTime = faker.datatype.number();
+    const seriesTitle = "So Long, and Thanks for All the Fish";
+    const seriesRuntime = 112;
+    const seriesEpisodes = 113;
+    const seriesScreenTime = 114;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-        const session = await neo4j.getSession();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        schema = await neoSchema.getSchema();
-
-        await session.run(
+        await testHelper.executeCypher(
             `
-            CREATE (a:Actor:${testLabel} { name: $actorName })
-            CREATE (a)-[:ACTED_IN { screenTime: $movieScreenTime }]->(:Movie:${testLabel} { title: $movieTitle, runtime:$movieRuntime })
-            CREATE (a)-[:ACTED_IN { screenTime: $seriesScreenTime }]->(:Series:${testLabel} { title: $seriesTitle, runtime:$seriesRuntime, episodes: $seriesEpisodes })
+            CREATE (a:${Actor} { name: $actorName })
+            CREATE (a)-[:ACTED_IN { screenTime: $movieScreenTime }]->(:${Movie} { title: $movieTitle, runtime:$movieRuntime })
+            CREATE (a)-[:ACTED_IN { screenTime: $seriesScreenTime }]->(:${Series} { title: $seriesTitle, runtime:$seriesRuntime, episodes: $seriesEpisodes })
         `,
             {
                 actorName,
@@ -109,46 +87,40 @@ describe("fragments", () => {
                 seriesScreenTime,
             }
         );
-        await session.close();
     });
 
     afterAll(async () => {
-        const session = await neo4j.getSession();
-        await session.run(`MATCH (node:${testLabel}) DETACH DELETE node`);
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should be able project fragment on type", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($actorName: String!) {
-                actors(where: { name: $actorName }) {
+                ${Actor.plural}(where: { name_EQ: $actorName }) {
                     ...FragmentOnType
                 }
             }
 
-            fragment FragmentOnType on Actor {
+            fragment FragmentOnType on ${Actor} {
                 name
             }
         `;
-        const graphqlResult = await graphql({
-            schema,
-            source: query.loc!.source,
-            contextValue: neo4j.getContextValues(),
+        const graphqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { actorName },
         });
 
         expect(graphqlResult.errors).toBeFalsy();
 
-        const graphqlActor: Array<{ name: string }> = (graphqlResult.data as any)?.actors;
+        const graphqlActor: Array<{ name: string }> = (graphqlResult.data as any)?.[Actor.plural];
 
         expect(graphqlActor).toHaveLength(1);
-        expect(graphqlActor[0].name).toBe(actorName);
+        expect(graphqlActor[0]?.name).toBe(actorName);
     });
 
     test("should be able project fragment on interface", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($actorName: String!) {
-                actors(where: { name: $actorName }) {
+                ${Actor.plural}(where: { name_EQ: $actorName }) {
                     name
                     actedIn {
                         ...FragmentOnInterface
@@ -161,30 +133,27 @@ describe("fragments", () => {
             }
         `;
 
-        const graphqlResult = await graphql({
-            schema,
-            source: query.loc!.source,
-            contextValue: neo4j.getContextValues(),
+        const graphqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { actorName },
         });
 
         expect(graphqlResult.errors).toBeFalsy();
 
-        const graphqlActors: Array<{ name: string; actedIn: Array<{ title: string }> }> = (graphqlResult.data as any)
-            ?.actors;
+        const graphqlActors: Array<{ name: string; actedIn: Array<{ title: string }> }> = (graphqlResult.data as any)?.[
+            Actor.plural
+        ];
 
         expect(graphqlActors).toHaveLength(1);
-        expect(graphqlActors[0].name).toBe(actorName);
-        expect(graphqlActors[0].actedIn).toHaveLength(2);
-        expect(graphqlActors[0].actedIn).toEqual(
-            expect.arrayContaining([{ title: movieTitle }, { title: seriesTitle }])
+        expect(graphqlActors[0]?.name).toBe(actorName);
+        expect(graphqlActors[0]?.actedIn).toEqual(
+            expect.toIncludeSameMembers([{ title: movieTitle }, { title: seriesTitle }])
         );
     });
 
     test("should be able to project nested fragments", async () => {
-        const query = gql`
+        const query = `
             query ($actorName: String!) {
-                actors(where: { name: $actorName }) {
+                ${Actor.plural}(where: { name_EQ: $actorName }) {
                     name
                     actedIn {
                         ...FragmentA
@@ -204,10 +173,7 @@ describe("fragments", () => {
             }
         `;
 
-        const graphqlResult = await graphql({
-            schema,
-            source: query.loc!.source,
-            contextValue: neo4j.getContextValues(),
+        const graphqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { actorName },
         });
 
@@ -215,13 +181,12 @@ describe("fragments", () => {
 
         const graphqlActors: Array<{ name: string; actedIn: Array<{ title: string; runtime: number }> }> = (
             graphqlResult.data as any
-        )?.actors;
+        )?.[Actor.plural];
 
         expect(graphqlActors).toHaveLength(1);
-        expect(graphqlActors[0].name).toBe(actorName);
-        expect(graphqlActors[0].actedIn).toHaveLength(2);
-        expect(graphqlActors[0].actedIn).toEqual(
-            expect.arrayContaining([
+        expect(graphqlActors[0]?.name).toBe(actorName);
+        expect(graphqlActors[0]?.actedIn).toEqual(
+            expect.toIncludeSameMembers([
                 { title: movieTitle, runtime: movieRuntime },
                 { title: seriesTitle, runtime: seriesRuntime },
             ])

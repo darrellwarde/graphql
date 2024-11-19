@@ -22,7 +22,9 @@ import type { Integer } from "neo4j-driver";
 import { integer, isInt } from "neo4j-driver";
 import { defaultFieldResolver } from "./defaultField";
 
-function isIntegerable(value: unknown): value is number | string | Integer | { low: number; high: number } | bigint {
+export function isIntegerable(
+    value: unknown
+): value is number | string | Integer | { low: number; high: number } | bigint {
     if (!value) {
         return false;
     }
@@ -37,7 +39,7 @@ function isIntegerable(value: unknown): value is number | string | Integer | { l
 
     if (typeof value === "object") {
         // FIXME: necessary for neo-push tests to pass
-        const castedValue = value as object;
+        const castedValue = value;
 
         if (
             Object.keys(castedValue).length === 2 &&

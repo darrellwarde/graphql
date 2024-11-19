@@ -17,64 +17,64 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/388", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    const typeDefs = gql`
-        union Content = Post
+    const testHelper = new TestHelper();
 
-        type Post {
-            content: String!
-            modifiedDate: DateTime! @timestamp(operations: [CREATE, UPDATE])
-        }
+    let Post: UniqueType;
+    let User: UniqueType;
+    let typeDefs: string;
 
-        type User {
-            id: ID!
-            friends: [User!]! @relationship(type: "HAS_FRIEND", direction: OUT)
-            posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT)
-        }
+    beforeAll(() => {
+        Post = testHelper.createUniqueType("Post");
+        User = testHelper.createUniqueType("User");
 
-        type Query {
-            getContent(userID: ID): [Content]
-                @cypher(
-                    statement: """
-                    MATCH (myUser:User {id: $userID})
-                    OPTIONAL MATCH (myUser)-[:HAS_FRIEND]->(myFriends:User)
-                    CALL {
-                        WITH myUser, myFriends
-                        MATCH (myUser)-[:HAS_POST]->(post:Post)
-                        RETURN post
-                        UNION
-                        WITH myUser, myFriends
-                        MATCH (myFriends)-[:HAS_POST]->(post:Post)
-                        RETURN post
-                    }
-                    RETURN DISTINCT post AS result ORDER BY result.modifiedDate DESC
-                    """
-                )
-        }
-    `;
-
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        typeDefs = `
+            union Content = ${Post}
+    
+            type ${Post} @node {
+                content: String!
+                modifiedDate: DateTime! @timestamp(operations: [CREATE, UPDATE])
+            }
+    
+            type ${User} @node {
+                id: ID!
+                friends: [${User}!]! @relationship(type: "HAS_FRIEND", direction: OUT)
+                posts: [${Post}!]! @relationship(type: "HAS_POST", direction: OUT)
+            }
+    
+            type Query {
+                getContent(userID: ID): [Content]
+                    @cypher(
+                        statement: """
+                        MATCH (myUser:${User} {id: $userID})
+                        OPTIONAL MATCH (myUser)-[:HAS_FRIEND]->(myFriends:${User})
+                        CALL {
+                            WITH myUser, myFriends
+                            MATCH (myUser)-[:HAS_POST]->(post:${Post})
+                            RETURN post
+                            UNION
+                            WITH myUser, myFriends
+                            MATCH (myFriends)-[:HAS_POST]->(post:${Post})
+                            RETURN post
+                        }
+                        RETURN DISTINCT post AS result ORDER BY result.modifiedDate DESC
+                        """
+                        columnName: "result"
+                    )
+            }
+        `;
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should be able to alias union fields of custom cypher", async () => {
-        const session = await neo4j.getSession();
-
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const userID = generate({ charset: "alphabetic" });
 
@@ -180,9 +180,9 @@ describe("https://github.com/neo4j/graphql/issues/388", () => {
         ];
 
         const mutation = `
-            mutation CreateUsers($input: [UserCreateInput!]!) {
-                createUsers(input: $input) {
-                    users {
+            mutation CreateUsers($input: [${User}CreateInput!]!) {
+                ${User.operations.create}(input: $input) {
+                    ${User.plural} {
                         id
                         friends {
                             id
@@ -202,50 +202,40 @@ describe("https://github.com/neo4j/graphql/issues/388", () => {
             query GetContent($userID: ID) {
                 getContent(userID: $userID) {
                     __typename
-                    ... on Post {
+                    ... on ${Post} {
                         postContent: content
                     }
                 }
             }
         `;
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const mutationResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                variableValues: { input },
-            });
+        const mutationResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { input },
+        });
 
-            expect(mutationResult.errors).toBeFalsy();
+        expect(mutationResult.errors).toBeFalsy();
 
-            expect((mutationResult?.data as any)?.createUsers?.users[0].id).toEqual(userID);
-            expect((mutationResult?.data as any)?.createUsers?.users[0].friends).toHaveLength(3);
-            expect((mutationResult?.data as any)?.createUsers?.users[0].posts).toHaveLength(3);
+        expect((mutationResult?.data as any)[User.operations.create][User.plural][0].id).toEqual(userID);
+        expect((mutationResult?.data as any)[User.operations.create][User.plural][0].friends).toHaveLength(3);
+        expect((mutationResult?.data as any)[User.operations.create][User.plural][0].posts).toHaveLength(3);
 
-            (mutationResult?.data as any)?.createUsers?.users[0].friends.forEach((friend) => {
-                expect(friend.posts).toHaveLength(3);
-            });
+        (mutationResult?.data as any)[User.operations.create][User.plural][0].friends.forEach((friend) => {
+            expect(friend.posts).toHaveLength(3);
+        });
 
-            const queryResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                variableValues: {
-                    userID,
-                },
-            });
+        const queryResult = await testHelper.executeGraphQL(query, {
+            variableValues: {
+                userID,
+            },
+        });
 
-            expect(queryResult.errors).toBeFalsy();
+        expect(queryResult.errors).toBeFalsy();
 
-            expect(queryResult?.data?.getContent).toHaveLength(12);
-            (queryResult?.data as any)?.getContent.forEach((content) => {
-                expect(content.postContent).toBeTruthy();
-            });
-        } finally {
-            await session.close();
-        }
+        expect(queryResult?.data?.getContent).toHaveLength(12);
+        (queryResult?.data as any)?.getContent.forEach((content) => {
+            expect(content.postContent).toBeTruthy();
+        });
     });
 });

@@ -17,53 +17,40 @@
  * limitations under the License.
  */
 
-import { Neo4jGraphQLError } from "../classes/Error";
 import { RelationshipQueryDirectionOption } from "../constants";
 import type { RelationField } from "../types";
 
-export type DirectionString = "-" | "->" | "<-";
+type QueryRelationshipDirection = "IN" | "OUT" | "undirected";
+type CypherRelationshipDirection = "left" | "right" | "undirected";
 
-type DirectionResult = {
-    inStr: DirectionString;
-    outStr: DirectionString;
-};
+export function getCypherRelationshipDirection(
+    relationField: RelationField,
+    fieldArgs: { directed?: boolean } = {}
+): CypherRelationshipDirection {
+    const direction = getRelationshipDirection(relationField, fieldArgs);
+    switch (direction) {
+        case "IN":
+            return "left";
+        case "OUT":
+            return "right";
+        case "undirected":
+            return "undirected";
+    }
+}
 
-export function getRelationshipDirection(
+function getRelationshipDirection(
     relationField: RelationField,
     fieldArgs: { directed?: boolean }
-): DirectionResult {
-    const directedArgs = {
-        inStr: relationField.direction === "IN" ? "<-" : "-",
-        outStr: relationField.direction === "OUT" ? "->" : "-",
-    } as DirectionResult;
-
-    const undirectedArgs = {
-        inStr: "-",
-        outStr: "-",
-    } as DirectionResult;
-
-    switch (relationField.queryDirection) {
-        case RelationshipQueryDirectionOption.DEFAULT_DIRECTED:
-            if (fieldArgs.directed === false) {
-                return undirectedArgs;
-            }
-            return directedArgs;
-        case RelationshipQueryDirectionOption.DEFAULT_UNDIRECTED:
-            if (fieldArgs.directed === true) {
-                return directedArgs;
-            }
-            return undirectedArgs;
-        case RelationshipQueryDirectionOption.DIRECTED_ONLY:
-            if (fieldArgs.directed === false) {
-                throw new Error("Invalid direction in 'DIRECTED_ONLY' relationship");
-            }
-            return directedArgs;
-        case RelationshipQueryDirectionOption.UNDIRECTED_ONLY:
-            if (fieldArgs.directed === true) {
-                throw new Error("Invalid direction in 'UNDIRECTED_ONLY' relationship");
-            }
-            return undirectedArgs;
-        default:
-            throw new Neo4jGraphQLError(`Invalid queryDirection argument ${relationField.queryDirection}`);
+): QueryRelationshipDirection {
+    /**
+     * Duplicate of the schema-model `getCypherDirection` method;
+     **/
+    if (
+        fieldArgs.directed === false ||
+        relationField.queryDirection === RelationshipQueryDirectionOption.UNDIRECTED_ONLY ||
+        relationField.queryDirection === RelationshipQueryDirectionOption.UNDIRECTED
+    ) {
+        return "undirected";
     }
+    return relationField.direction;
 }

@@ -17,143 +17,31 @@
  * limitations under the License.
  */
 
-import type { Node } from "../classes";
-import { AUTH_FORBIDDEN_ERROR } from "../constants";
-import type { BaseField, Context, PrimitiveField, TemporalField } from "../types";
-import createAuthAndParams from "./create-auth-and-params";
-import { createDatetimeElement } from "./projection/elements/create-datetime-element";
-import translateTopLevelMatch from "./translate-top-level-match";
+import type Cypher from "@neo4j/cypher-builder";
+import Debug from "debug";
+import { DEBUG_TRANSLATE } from "../constants";
+import type { EntityAdapter } from "../schema-model/entity/EntityAdapter";
+import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
+import { QueryASTFactory } from "./queryAST/factory/QueryASTFactory";
 
-function translateAggregate({ node, context }: { node: Node; context: Context }): [string, any] {
-    const { fieldsByTypeName } = context.resolveTree;
-    const varName = "this";
-    let cypherParams: { [k: string]: any } = {};
-    const cypherStrs: string[] = [];
+const debug = Debug(DEBUG_TRANSLATE);
 
-    const topLevelMatch = translateTopLevelMatch({ node, context, varName, operation: "READ" });
-    cypherStrs.push(topLevelMatch[0]);
-    cypherParams = { ...cypherParams, ...topLevelMatch[1] };
+export function translateAggregate({
+    context,
+    entityAdapter,
+}: {
+    context: Neo4jGraphQLTranslationContext;
+    entityAdapter: EntityAdapter;
+}): Cypher.CypherResult {
+    const { resolveTree } = context;
+    // TODO: Rename QueryAST to OperationsTree
+    const queryASTFactory = new QueryASTFactory(context.schemaModel);
 
-    const allowAuth = createAuthAndParams({
-        operations: "READ",
-        entity: node,
-        context,
-        allow: {
-            parentNode: node,
-            varName,
-        },
-    });
-    if (allowAuth[0]) {
-        cypherStrs.push(`CALL apoc.util.validate(NOT (${allowAuth[0]}), "${AUTH_FORBIDDEN_ERROR}", [0])`);
-        cypherParams = { ...cypherParams, ...allowAuth[1] };
+    if (!entityAdapter) {
+        throw new Error("Entity not found");
     }
-
-    const selections = fieldsByTypeName[node.aggregateTypeNames.selection];
-    const projections: string[] = [];
-    const authStrs: string[] = [];
-
-    // Do auth first so we can throw out before aggregating
-    Object.entries(selections).forEach((selection) => {
-        const authField = node.authableFields.find((x) => x.fieldName === selection[0]);
-        if (authField) {
-            if (authField.auth) {
-                const allowAndParams = createAuthAndParams({
-                    entity: authField,
-                    operations: "READ",
-                    context,
-                    allow: { parentNode: node, varName, chainStr: authField.fieldName },
-                });
-                if (allowAndParams[0]) {
-                    authStrs.push(allowAndParams[0]);
-                    cypherParams = { ...cypherParams, ...allowAndParams[1] };
-                }
-            }
-        }
-    });
-
-    if (authStrs.length) {
-        cypherStrs.push(`CALL apoc.util.validate(NOT (${authStrs.join(" AND ")}), "${AUTH_FORBIDDEN_ERROR}", [0])`);
-    }
-
-    Object.entries(selections).forEach((selection) => {
-        if (selection[1].name === "count") {
-            projections.push(`${selection[1].alias || selection[1].name}: count(${varName})`);
-        }
-
-        const primitiveField = node.primitiveFields.find((x) => x.fieldName === selection[1].name);
-        const temporalField = node.temporalFields.find((x) => x.fieldName === selection[1].name);
-        const field: BaseField = (primitiveField as PrimitiveField) || (temporalField as TemporalField);
-        let isDateTime = false;
-        const isString = primitiveField && primitiveField.typeMeta.name === "String";
-
-        if (!primitiveField && temporalField && temporalField.typeMeta.name === "DateTime") {
-            isDateTime = true;
-        }
-
-        if (field) {
-            const thisProjections: string[] = [];
-            const aggregateFields =
-                selection[1].fieldsByTypeName[`${field.typeMeta.name}AggregateSelectionNullable`] ||
-                selection[1].fieldsByTypeName[`${field.typeMeta.name}AggregateSelectionNonNullable`];
-
-            Object.entries(aggregateFields).forEach((entry) => {
-                // "min" | "max" | "average" | "sum" | "shortest" | "longest"
-                let operator = entry[1].name;
-
-                if (operator === "average") {
-                    operator = "avg";
-                }
-
-                if (operator === "shortest") {
-                    operator = "min";
-                }
-
-                if (operator === "longest") {
-                    operator = "max";
-                }
-
-                const fieldName = field.dbPropertyName || field.fieldName;
-
-                if (isDateTime) {
-                    thisProjections.push(
-                        createDatetimeElement({
-                            resolveTree: entry[1],
-                            field: field as TemporalField,
-                            variable: varName,
-                            valueOverride: `${operator}(this.${fieldName})`,
-                        })
-                    );
-
-                    return;
-                }
-
-                if (isString) {
-                    const lessOrGreaterThan = entry[1].name === "shortest" ? "<" : ">";
-
-                    const reduce = `
-                            reduce(aggVar = collect(this.${fieldName})[0], current IN collect(this.${fieldName}) | 
-                                CASE size(current) ${lessOrGreaterThan} size(aggVar)
-                                WHEN true THEN current
-                                ELSE aggVar
-                                END
-                            )
-                        `;
-
-                    thisProjections.push(`${entry[1].alias || entry[1].name}: ${reduce}`);
-
-                    return;
-                }
-
-                thisProjections.push(`${entry[1].alias || entry[1].name}: ${operator}(this.${fieldName})`);
-            });
-
-            projections.push(`${selection[1].alias || selection[1].name}: { ${thisProjections.join(", ")} }`);
-        }
-    });
-
-    cypherStrs.push(`RETURN { ${projections.join(", ")} }`);
-
-    return [cypherStrs.filter(Boolean).join("\n"), cypherParams];
+    const queryAST = queryASTFactory.createQueryAST({ resolveTree, entityAdapter, context });
+    debug(queryAST.print());
+    const clause = queryAST.buildNew(context);
+    return clause.build();
 }
-
-export default translateAggregate;

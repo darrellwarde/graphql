@@ -17,50 +17,40 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("integration/rfcs/query-limits", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeEach(() => {});
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     describe("Top Level Query Limits", () => {
         test("should limit the top level query", async () => {
-            const session = await neo4j.getSession();
-            const randomType = generateUniqueType("Movie");
+            const randomType = testHelper.createUniqueType("Movie");
 
             const typeDefs = `
-                type ${randomType.name} @queryOptions(limit: {default:2}) {
+                type ${randomType.name} @limit(default: 2) @node {
                     id: ID!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            await testHelper.initNeo4jGraphQL({ typeDefs });
 
-            try {
-                await session.run(
-                    `
+            await testHelper.executeCypher(
+                `
                         WITH [1,2,3,4,5] AS iterate
                         UNWIND iterate AS i
                         CREATE (:${randomType.name} {id: randomUUID()})
                     `,
-                    {}
-                );
+                {}
+            );
 
-                const query = `
+            const query = `
                         {
                             ${randomType.plural} {
                                 id
@@ -68,58 +58,49 @@ describe("integration/rfcs/query-limits", () => {
                         }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-                expect((gqlResult.data as any)[randomType.plural]).toHaveLength(2);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+            expect((gqlResult.data as any)[randomType.plural]).toHaveLength(2);
         });
     });
 
     describe("Field Level Query Limits", () => {
         test("should limit the normal field level query", async () => {
-            const session = await neo4j.getSession();
-            const randomType1 = generateUniqueType("Movie");
-            const randomType2 = generateUniqueType("Person");
+            const randomType1 = testHelper.createUniqueType("Movie");
+            const randomType2 = testHelper.createUniqueType("Person");
             const movieId = generate({
                 charset: "alphabetic",
             });
 
             const typeDefs = `
-                type ${randomType1.name}  {
+                type ${randomType1.name}  @node {
                     id: ID!
                     actors: [${randomType2.name}!]! @relationship(type: "ACTED_IN", direction: IN)
                 }
 
-                type ${randomType2.name} @queryOptions(limit:{default: 3}) {
+                type ${randomType2.name} @limit(default: 3) @node {
                     id: ID!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            await testHelper.initNeo4jGraphQL({ typeDefs });
 
-            try {
-                await session.run(
-                    `
+            await testHelper.executeCypher(
+                `
                         CREATE (movie:${randomType1.name} {id: "${movieId}"})
                         WITH movie, [1,2,3,4,5] AS iterate
                         UNWIND iterate AS i
                         MERGE (movie)<-[:ACTED_IN]-(:${randomType2.name} {id: randomUUID()})
                     `,
-                    {}
-                );
+                {}
+            );
 
-                const query = `
+            const query = `
                         {
                             ${randomType1.plural} {
                                 id
@@ -130,56 +111,47 @@ describe("integration/rfcs/query-limits", () => {
                         }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-                expect((gqlResult.data as any)[randomType1.plural][0].actors).toHaveLength(3);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+            expect((gqlResult.data as any)[randomType1.plural][0].actors).toHaveLength(3);
         });
 
         test("should limit the connection field level query", async () => {
-            const session = await neo4j.getSession();
-            const randomType1 = generateUniqueType("Movie");
-            const randomType2 = generateUniqueType("Person");
+            const randomType1 = testHelper.createUniqueType("Movie");
+            const randomType2 = testHelper.createUniqueType("Person");
             const movieId = generate({
                 charset: "alphabetic",
             });
 
             const typeDefs = `
-                type ${randomType1.name}  {
+                type ${randomType1.name}  @node {
                     id: ID!
                     actors: [${randomType2.name}!]! @relationship(type: "ACTED_IN", direction: IN)
                 }
 
-                type ${randomType2.name} @queryOptions(limit:{default: 4}) {
+                type ${randomType2.name} @limit(default: 4) @node {
                     id: ID!
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({ typeDefs });
+            await testHelper.initNeo4jGraphQL({ typeDefs });
 
-            try {
-                await session.run(
-                    `
+            await testHelper.executeCypher(
+                `
                         CREATE (movie:${randomType1.name} {id: "${movieId}"})
                         WITH movie, [1,2,3,4,5] AS iterate
                         UNWIND iterate AS i
                         MERGE (movie)<-[:ACTED_IN]-(:${randomType2.name} {id: randomUUID()})
                     `,
-                    {}
-                );
+                {}
+            );
 
-                const query = `
+            const query = `
                         {
                             ${randomType1.plural} {
                                 id
@@ -194,21 +166,14 @@ describe("integration/rfcs/query-limits", () => {
                         }
                 `;
 
-                const gqlResult = await graphql({
-                    schema: await neoSchema.getSchema(),
-                    source: query,
-                    contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-                });
+            const gqlResult = await testHelper.executeGraphQL(query);
 
-                if (gqlResult.errors) {
-                    console.log(JSON.stringify(gqlResult.errors, null, 2));
-                }
-
-                expect(gqlResult.errors).toBeUndefined();
-                expect((gqlResult.data as any)[randomType1.plural][0].actorsConnection.edges).toHaveLength(4);
-            } finally {
-                await session.close();
+            if (gqlResult.errors) {
+                console.log(JSON.stringify(gqlResult.errors, null, 2));
             }
+
+            expect(gqlResult.errors).toBeUndefined();
+            expect((gqlResult.data as any)[randomType1.plural][0].actorsConnection.edges).toHaveLength(4);
         });
     });
 });

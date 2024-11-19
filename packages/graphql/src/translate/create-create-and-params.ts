@@ -19,27 +19,37 @@
 
 import type { Node, Relationship } from "../classes";
 import type { CallbackBucket } from "../classes/CallbackBucket";
-import type { Context } from "../types";
-import createConnectAndParams from "./create-connect-and-params";
-import createAuthAndParams from "./create-auth-and-params";
-import { AUTH_FORBIDDEN_ERROR } from "../constants";
-import createSetRelationshipPropertiesAndParams from "./create-set-relationship-properties-and-params";
+import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import mapToDbProperty from "../utils/map-to-db-property";
+import { checkAuthentication } from "./authorization/check-authentication";
+import {
+    createAuthorizationAfterAndParams,
+    createAuthorizationAfterAndParamsField,
+} from "./authorization/compatibility/create-authorization-after-and-params";
+import createConnectAndParams from "./create-connect-and-params";
 import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
-import createRelationshipValidationStr from "./create-relationship-validation-string";
-import { createEventMeta } from "./subscriptions/create-event-meta";
-import { filterMetaVariable } from "./subscriptions/filter-meta-variable";
+import { createRelationshipValidationString } from "./create-relationship-validation-string";
+import { createSetRelationshipProperties } from "./create-set-relationship-properties";
+import { assertNonAmbiguousUpdate } from "./utils/assert-non-ambiguous-update";
 import { addCallbackAndSetParam } from "./utils/callback-utils";
 
 interface Res {
     creates: string[];
     params: any;
-    meta?: CreateMeta;
+    meta: CreateMeta;
 }
 
 interface CreateMeta {
-    authStrs: string[];
+    authorizationPredicates: string[];
+    authorizationSubqueries: string[];
 }
+
+type CreateAndParams = {
+    create: string;
+    params: Record<string, unknown>;
+    authorizationPredicates: string[];
+    authorizationSubqueries: string[];
+};
 
 function createCreateAndParams({
     input,
@@ -48,26 +58,34 @@ function createCreateAndParams({
     context,
     callbackBucket,
     withVars,
-    insideDoWhen,
     includeRelationshipValidation,
     topLevelNodeVariable,
+    authorizationPrefix = [0],
 }: {
     input: any;
     varName: string;
     node: Node;
-    context: Context;
+    context: Neo4jGraphQLTranslationContext;
     callbackBucket: CallbackBucket;
     withVars: string[];
-    insideDoWhen?: boolean;
     includeRelationshipValidation?: boolean;
     topLevelNodeVariable?: string;
-}): [string, any] {
-    function reducer(res: Res, [key, value]: [string, any]): Res {
+    //used to build authorization variable in auth subqueries
+    authorizationPrefix?: number[];
+}): CreateAndParams {
+    assertNonAmbiguousUpdate(node, input);
+    checkAuthentication({ context, node, targetOperations: ["CREATE"] });
+
+    function reducer(res: Res, [key, value]: [string, any], reducerIndex): Res {
         const varNameKey = `${varName}_${key}`;
         const relationField = node.relationFields.find((x) => key === x.fieldName);
         const primitiveField = node.primitiveFields.find((x) => key === x.fieldName);
         const pointField = node.pointFields.find((x) => key === x.fieldName);
         const dbFieldName = mapToDbProperty(node, key);
+
+        if (primitiveField) {
+            checkAuthentication({ context, node, targetOperations: ["CREATE"], field: primitiveField.fieldName });
+        }
 
         if (relationField) {
             const refNodes: Node[] = [];
@@ -84,7 +102,7 @@ function createCreateAndParams({
                 refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
             }
 
-            refNodes.forEach((refNode) => {
+            refNodes.forEach((refNode, refNodeIndex) => {
                 const v = relationField.union ? value[refNode.name] : value;
                 const unionTypeName = relationField.union || relationField.interface ? refNode.name : "";
 
@@ -104,20 +122,23 @@ function createCreateAndParams({
                     }
 
                     const creates = relationField.typeMeta.array ? v.create : [v.create];
-                    creates.forEach((create, index) => {
+                    creates.forEach((create, createIndex) => {
                         if (relationField.interface && !create.node[refNode.name]) {
                             return;
                         }
 
-                        if (!context.subscriptionsEnabled) {
-                            res.creates.push(`\nWITH ${withVars.join(", ")}`);
-                        }
+                        res.creates.push(`\nWITH *`);
 
-                        const baseName = `${varNameKey}${relationField.union ? "_" : ""}${unionTypeName}${index}`;
+                        const baseName = `${varNameKey}${relationField.union ? "_" : ""}${unionTypeName}${createIndex}`;
                         const nodeName = `${baseName}_node`;
                         const propertiesName = `${baseName}_relationship`;
 
-                        const recurse = createCreateAndParams({
+                        const {
+                            create: nestedCreate,
+                            params,
+                            authorizationPredicates,
+                            authorizationSubqueries,
+                        } = createCreateAndParams({
                             input: relationField.interface ? create.node[refNode.name] : create.node,
                             context,
                             callbackBucket,
@@ -126,13 +147,15 @@ function createCreateAndParams({
                             withVars: [...withVars, nodeName],
                             includeRelationshipValidation: false,
                             topLevelNodeVariable,
+                            authorizationPrefix: [...authorizationPrefix, reducerIndex, createIndex, refNodeIndex],
                         });
-                        res.creates.push(recurse[0]);
-                        res.params = { ...res.params, ...recurse[1] };
+                        res.creates.push(nestedCreate);
+                        res.params = { ...res.params, ...params };
 
                         const inStr = relationField.direction === "IN" ? "<-" : "-";
                         const outStr = relationField.direction === "OUT" ? "->" : "-";
-                        const relTypeStr = `[${relationField.properties ? propertiesName : ""}:${relationField.type}]`;
+                        const relationVarName = relationField.properties ? propertiesName : "";
+                        const relTypeStr = `[${relationVarName}:${relationField.type}]`;
                         res.creates.push(`MERGE (${varName})${inStr}${relTypeStr}${outStr}(${nodeName})`);
 
                         if (relationField.properties) {
@@ -140,24 +163,36 @@ function createCreateAndParams({
                                 (x) => x.properties === relationField.properties
                             ) as unknown as Relationship;
 
-                            const setA = createSetRelationshipPropertiesAndParams({
+                            const setA = createSetRelationshipProperties({
                                 properties: create.edge ?? {},
                                 varName: propertiesName,
+                                withVars,
                                 relationship,
                                 operation: "CREATE",
                                 callbackBucket,
+                                parameterPrefix: propertiesName,
+                                parameterNotation: "_",
                             });
-                            res.creates.push(setA[0]);
-                            res.params = { ...res.params, ...setA[1] };
+                            if (setA) {
+                                res.creates.push(setA[0]);
+                                res.params = { ...res.params, ...setA[1] };
+                            }
                         }
 
-                        const relationshipValidationStr = createRelationshipValidationStr({
+                        if (authorizationPredicates.length) {
+                            if (authorizationSubqueries.length) {
+                                res.meta.authorizationSubqueries.push(...authorizationSubqueries);
+                            }
+                            res.meta.authorizationPredicates.push(...authorizationPredicates);
+                        }
+
+                        const relationshipValidationStr = createRelationshipValidationString({
                             node: refNode,
                             context,
                             varName: nodeName,
                         });
                         if (relationshipValidationStr) {
-                            res.creates.push(`WITH ${[...withVars, nodeName].join(", ")}`);
+                            res.creates.push(`WITH *`);
                             res.creates.push(relationshipValidationStr);
                         }
                     });
@@ -175,7 +210,8 @@ function createCreateAndParams({
                         refNodes: [refNode],
                         labelOverride: unionTypeName,
                         parentNode: node,
-                        fromCreate: true,
+                        source: "CREATE",
+                        indexPrefix: makeAuthorizationParamsPrefix(authorizationPrefix),
                     });
                     res.creates.push(connectAndParams[0]);
                     res.params = { ...res.params, ...connectAndParams[1] };
@@ -188,8 +224,10 @@ function createCreateAndParams({
                         parentVar: varName,
                         relationField,
                         refNode,
+                        node,
                         context,
                         withVars,
+                        callbackBucket,
                     });
                     res.creates.push(cypher);
                     res.params = { ...res.params, ...params };
@@ -208,7 +246,7 @@ function createCreateAndParams({
                     refNodes,
                     labelOverride: "",
                     parentNode: node,
-                    fromCreate: true,
+                    source: "CREATE",
                 });
                 res.creates.push(connectAndParams[0]);
                 res.params = { ...res.params, ...connectAndParams[1] };
@@ -217,22 +255,27 @@ function createCreateAndParams({
             return res;
         }
 
-        if (primitiveField?.auth) {
-            const authAndParams = createAuthAndParams({
-                entity: primitiveField,
-                operations: "CREATE",
-                context,
-                bind: { parentNode: node, varName, chainStr: varNameKey },
-                escapeQuotes: Boolean(insideDoWhen),
-            });
-            if (authAndParams[0]) {
-                if (!res.meta) {
-                    res.meta = { authStrs: [] };
-                }
+        const authorizationAndParams = createAuthorizationAfterAndParamsField({
+            context,
+            nodes: [
+                {
+                    variable: varName,
+                    node,
+                    fieldName: primitiveField?.fieldName,
+                },
+            ],
+            operations: ["CREATE"],
+            indexPrefix: makeAuthorizationParamsPrefix(authorizationPrefix),
+        });
 
-                res.meta.authStrs.push(authAndParams[0]);
-                res.params = { ...res.params, ...authAndParams[1] };
+        if (authorizationAndParams) {
+            const { cypher, params: authParams, subqueries } = authorizationAndParams;
+
+            if (subqueries) {
+                res.meta.authorizationSubqueries.push(subqueries);
             }
+            res.meta.authorizationPredicates.push(cypher);
+            res.params = { ...res.params, ...authParams };
         }
 
         if (pointField) {
@@ -264,7 +307,7 @@ function createCreateAndParams({
         initial.push(`SET ${varName}.${field.dbPropertyName} = ${field.typeMeta.name.toLowerCase()}()`);
     });
 
-    node.primitiveFields.forEach((field) =>
+    [...node.primitiveFields, ...node.temporalFields].forEach((field) =>
         addCallbackAndSetParam(field, varName, input, callbackBucket, initial, "CREATE")
     );
 
@@ -277,46 +320,48 @@ function createCreateAndParams({
     let { creates, params, meta } = Object.entries(input).reduce(reducer, {
         creates: initial,
         params: {},
+        meta: {
+            authorizationPredicates: [],
+            authorizationSubqueries: [],
+        },
     });
 
-    if (context.subscriptionsEnabled) {
-        const eventWithMetaStr = createEventMeta({ event: "create", nodeVariable: varName, typename: node.name });
-        const withStrs = [eventWithMetaStr];
-        creates.push(`WITH ${withStrs.join(", ")}, ${filterMetaVariable(withVars).join(", ")}`);
-    }
+    const { authorizationPredicates, authorizationSubqueries } = meta;
+    const authorizationAndParams = createAuthorizationAfterAndParams({
+        context,
+        nodes: [
+            {
+                variable: varName,
+                node,
+            },
+        ],
+        operations: ["CREATE"],
+        indexPrefix: makeAuthorizationParamsPrefix(authorizationPrefix),
+    });
 
-    const forbiddenString = insideDoWhen ? `\\"${AUTH_FORBIDDEN_ERROR}\\"` : `"${AUTH_FORBIDDEN_ERROR}"`;
-
-    if (node.auth) {
-        const bindAndParams = createAuthAndParams({
-            entity: node,
-            operations: "CREATE",
-            context,
-            bind: { parentNode: node, varName },
-            escapeQuotes: Boolean(insideDoWhen),
-        });
-        if (bindAndParams[0]) {
-            creates.push(`WITH ${withVars.join(", ")}`);
-            creates.push(`CALL apoc.util.validate(NOT (${bindAndParams[0]}), ${forbiddenString}, [0])`);
-            params = { ...params, ...bindAndParams[1] };
+    if (authorizationAndParams) {
+        const { cypher, params: authParams, subqueries } = authorizationAndParams;
+        if (subqueries) {
+            authorizationSubqueries.push(subqueries);
         }
-    }
-
-    if (meta?.authStrs.length) {
-        creates.push(`WITH ${withVars.join(", ")}`);
-        creates.push(`CALL apoc.util.validate(NOT (${meta.authStrs.join(" AND ")}), ${forbiddenString}, [0])`);
+        authorizationPredicates.push(cypher);
+        params = { ...params, ...authParams };
     }
 
     if (includeRelationshipValidation) {
-        const str = createRelationshipValidationStr({ node, context, varName });
+        const str = createRelationshipValidationString({ node, context, varName });
 
         if (str) {
-            creates.push(`WITH ${withVars.join(", ")}`);
+            creates.push(`WITH *`);
             creates.push(str);
         }
     }
 
-    return [creates.join("\n"), params];
+    return { create: creates.join("\n"), params, authorizationPredicates, authorizationSubqueries };
+}
+
+function makeAuthorizationParamsPrefix(authorizationPrefix: number[]): string {
+    return `${authorizationPrefix.join("_")}_`;
 }
 
 export default createCreateAndParams;

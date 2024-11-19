@@ -17,35 +17,33 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
-describe("402", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+describe("https://github.com/neo4j/graphql/issues/402", () => {
+    const testHelper = new TestHelper();
+    let Event: UniqueType;
+    let Area: UniqueType;
+    let typeDefs: string;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeAll(() => {
+        Event = testHelper.createUniqueType("Event");
+        Area = testHelper.createUniqueType("Area");
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should recreate test and return correct data", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Event {
+        typeDefs = `
+            type ${Event} @node {
                 id: ID!
-                area: Area! @relationship(type: "HAPPENS_IN", direction: OUT)
+                area: ${Area}! @relationship(type: "HAPPENS_IN", direction: OUT)
             }
 
-            type Area {
+            type ${Area} @node {
                 id: ID!
             }
         `;
@@ -58,14 +56,14 @@ describe("402", () => {
             charset: "alphabetic",
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         // testing the missing non non-null array
         const query = `
             query ($area: [ID!]) {
-               events (
+               ${Event.plural} (
                  where: {
-                   id: "${eventId}"
+                   id_EQ: "${eventId}"
                    area: {
                      id_IN: $area
                    }
@@ -80,32 +78,24 @@ describe("402", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Event {id: $eventId})-[:HAPPENS_IN]->(:Area {id: $areaId})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${Event} {id: $eventId})-[:HAPPENS_IN]->(:${Area} {id: $areaId})
                 `,
-                { eventId, areaId }
-            );
+            { eventId, areaId }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeUndefined();
+        expect(gqlResult.errors).toBeUndefined();
 
-            expect(gqlResult.data as any).toEqual({
-                events: [
-                    {
-                        id: eventId,
-                        area: { id: areaId },
-                    },
-                ],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult.data as any).toEqual({
+            [Event.plural]: [
+                {
+                    id: eventId,
+                    area: { id: areaId },
+                },
+            ],
+        });
     });
 });

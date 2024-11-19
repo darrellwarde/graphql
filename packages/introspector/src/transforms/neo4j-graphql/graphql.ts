@@ -18,16 +18,15 @@
  */
 
 import type { Neo4jStruct, NodeMap, RelationshipMap } from "../../types";
-import createNodeFields from "./utils/create-node-fields";
-import uniqueString from "../../utils/unique-string";
-import { NodeDirective } from "./directives/Node";
-import { GraphQLNode } from "./GraphQLNode";
-import generateRelationshipPropsName from "./utils/generate-relationship-props-name";
-import { RelationshipPropertiesDirective } from "./directives/RelationshipProperties";
-import createRelationshipFields from "./utils/create-relationship-fields";
-import { ExcludeDirective } from "./directives/Exclude";
-import generateGraphQLSafeName from "./utils/generate-graphql-safe-name";
 import nodeKey from "../../utils/node-key";
+import uniqueString from "../../utils/unique-string";
+import { GraphQLNode } from "./GraphQLNode";
+import { NodeDirective } from "./directives/Node";
+import { RelationshipPropertiesDirective } from "./directives/RelationshipProperties";
+import createNodeFields from "./utils/create-node-fields";
+import createRelationshipFields from "./utils/create-relationship-fields";
+import generateGraphQLSafeName from "./utils/generate-graphql-safe-name";
+import generateRelationshipPropsName from "./utils/generate-relationship-props-name";
 
 type GraphQLNodeMap = {
     [key: string]: GraphQLNode;
@@ -35,15 +34,19 @@ type GraphQLNodeMap = {
 
 export default function graphqlFormatter(neo4jStruct: Neo4jStruct, readonly = false): string {
     const { nodes, relationships } = neo4jStruct;
-    const bareNodes = transformNodes(nodes, readonly);
+    const bareNodes = transformNodes(nodes);
     const withRelationships = hydrateWithRelationships(bareNodes, relationships);
     const sorted = Object.keys(withRelationships).sort((a, b) => {
         return withRelationships[a].typeName > withRelationships[b].typeName ? 1 : -1;
     });
-    return sorted.map((typeName) => withRelationships[typeName].toString()).join("\n\n");
+    const sortedWithRelationships = sorted.map((typeName) => withRelationships[typeName].toString());
+    if (readonly) {
+        sortedWithRelationships.push("extend schema @mutation(operations: [])");
+    }
+    return sortedWithRelationships.join("\n\n");
 }
 
-function transformNodes(nodes: NodeMap, readonly: boolean): GraphQLNodeMap {
+function transformNodes(nodes: NodeMap): GraphQLNodeMap {
     const out = {};
     const takenTypeNames: string[] = [];
     Object.keys(nodes).forEach((nodeType) => {
@@ -58,23 +61,13 @@ function transformNodes(nodes: NodeMap, readonly: boolean): GraphQLNodeMap {
 
         const uniqueTypeName = uniqueString(typeName, takenTypeNames);
         takenTypeNames.push(uniqueTypeName);
-
         const node = new GraphQLNode("type", uniqueTypeName);
         const nodeDirective = new NodeDirective();
-        if (mainLabel !== uniqueTypeName) {
-            nodeDirective.addLabel(mainLabel);
+
+        if (neo4jNode.labels.length > 1 || mainLabel !== uniqueTypeName) {
+            nodeDirective.addLabels(neo4jNode.labels);
         }
-        nodeDirective.addAdditionalLabels(neo4jNode.labels.slice(1));
-        if (nodeDirective.toString().length) {
-            node.addDirective(nodeDirective);
-        }
-        if (readonly) {
-            const excludeDirective = new ExcludeDirective();
-            excludeDirective.addOperation("CREATE");
-            excludeDirective.addOperation("DELETE");
-            excludeDirective.addOperation("UPDATE");
-            node.addDirective(excludeDirective);
-        }
+        node.addDirective(nodeDirective);
 
         const fields = createNodeFields(neo4jNode.properties, node.typeName);
         fields.forEach((f) => node.addField(f));
@@ -85,18 +78,18 @@ function transformNodes(nodes: NodeMap, readonly: boolean): GraphQLNodeMap {
 
 function hydrateWithRelationships(nodes: GraphQLNodeMap, rels: RelationshipMap): GraphQLNodeMap {
     Object.entries(rels).forEach(([relType, rel]) => {
-        let relInterfaceName;
+        let relInterfaceName: string;
 
         if (rel.properties.length) {
             relInterfaceName = uniqueString(
                 generateGraphQLSafeName(generateRelationshipPropsName(relType)),
                 Object.values(nodes).map((n) => n.typeName)
             );
-            const relInterfaceNode = new GraphQLNode("interface", relInterfaceName);
-            relInterfaceNode.addDirective(new RelationshipPropertiesDirective());
+            const relTypeNode = new GraphQLNode("type", relInterfaceName);
+            relTypeNode.addDirective(new RelationshipPropertiesDirective());
             const relTypePropertiesFields = createNodeFields(rel.properties, relType);
-            relTypePropertiesFields.forEach((f) => relInterfaceNode.addField(f));
-            nodes[relInterfaceName] = relInterfaceNode;
+            relTypePropertiesFields.forEach((f) => relTypeNode.addField(f));
+            nodes[relInterfaceName] = relTypeNode;
         }
         rel.paths.forEach((path) => {
             const { fromField, toField } = createRelationshipFields(

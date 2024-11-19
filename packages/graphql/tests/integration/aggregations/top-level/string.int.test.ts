@@ -17,19 +17,13 @@
  * limitations under the License.
  */
 
-import type { Driver, Session } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "../../neo4j";
-import { Neo4jGraphQL } from "../../../../src/classes";
 import type { UniqueType } from "../../../utils/graphql-types";
-import { generateUniqueType } from "../../../utils/graphql-types";
+import { TestHelper } from "../../../utils/tests-helper";
 
 describe("aggregations-top_level-string", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
     let typeMovie: UniqueType;
-    let session: Session;
 
     const titles = [10, 11, 12, 13, 14].map((length) =>
         generate({
@@ -39,27 +33,17 @@ describe("aggregations-top_level-string", () => {
         })
     );
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
-
-    beforeEach(async () => {
-        typeMovie = generateUniqueType("Movie");
-        session = await neo4j.getSession();
+    beforeEach(() => {
+        typeMovie = testHelper.createUniqueType("Movie");
     });
 
     afterEach(async () => {
-        await session.close();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should return the shortest of node properties", async () => {
         const typeDefs = `
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 testId: ID
                 title: String
             }
@@ -70,9 +54,9 @@ describe("aggregations-top_level-string", () => {
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        await session.run(
+        await testHelper.executeCypher(
             `
                     CREATE (:${typeMovie} {testId: $id, title: "${titles[0]}"})
                     CREATE (:${typeMovie} {testId: $id, title: "${titles[1]}"})
@@ -86,7 +70,7 @@ describe("aggregations-top_level-string", () => {
 
         const query = `
                 {
-                    ${typeMovie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${typeMovie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         title {
                             shortest
                         }
@@ -94,11 +78,7 @@ describe("aggregations-top_level-string", () => {
                 }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         if (gqlResult.errors) {
             console.log(JSON.stringify(gqlResult.errors, null, 2));
@@ -115,7 +95,7 @@ describe("aggregations-top_level-string", () => {
 
     test("should return the longest of node properties", async () => {
         const typeDefs = `
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 testId: ID
                 title: String
             }
@@ -126,9 +106,9 @@ describe("aggregations-top_level-string", () => {
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        await session.run(
+        await testHelper.executeCypher(
             `
                 CREATE (:${typeMovie} {testId: $id, title: "${titles[0]}"})
                 CREATE (:${typeMovie} {testId: $id, title: "${titles[1]}"})
@@ -142,7 +122,7 @@ describe("aggregations-top_level-string", () => {
 
         const query = `
                 {
-                    ${typeMovie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${typeMovie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         title {
                             longest
                         }
@@ -150,11 +130,7 @@ describe("aggregations-top_level-string", () => {
                 }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         if (gqlResult.errors) {
             console.log(JSON.stringify(gqlResult.errors, null, 2));
@@ -171,7 +147,7 @@ describe("aggregations-top_level-string", () => {
 
     test("should return the shortest and longest of node properties", async () => {
         const typeDefs = `
-            type ${typeMovie} {
+            type ${typeMovie} @node {
                 testId: ID
                 title: String
             }
@@ -182,9 +158,9 @@ describe("aggregations-top_level-string", () => {
             readable: true,
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        await session.run(
+        await testHelper.executeCypher(
             `
                     CREATE (:${typeMovie} {testId: $id, title: "${titles[0]}"})
                     CREATE (:${typeMovie} {testId: $id, title: "${titles[1]}"})
@@ -198,7 +174,7 @@ describe("aggregations-top_level-string", () => {
 
         const query = `
                 {
-                    ${typeMovie.operations.aggregate}(where: {testId: "${id}"}) {
+                    ${typeMovie.operations.aggregate}(where: {testId_EQ: "${id}"}) {
                         title {
                             shortest
                             longest
@@ -207,11 +183,7 @@ describe("aggregations-top_level-string", () => {
                 }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
         if (gqlResult.errors) {
             console.log(JSON.stringify(gqlResult.errors, null, 2));

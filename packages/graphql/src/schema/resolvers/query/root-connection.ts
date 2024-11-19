@@ -17,29 +17,44 @@
  * limitations under the License.
  */
 
-import type { GraphQLResolveInfo } from "graphql";
-import type { InputTypeComposer, SchemaComposer} from "graphql-compose";
-import { upperFirst } from "graphql-compose";
-import type { PageInfo } from "graphql-relay";
-import { execute } from "../../../utils";
+import {
+    GraphQLInt,
+    GraphQLNonNull,
+    GraphQLString,
+    type DirectiveNode,
+    type GraphQLResolveInfo,
+    type SelectionSetNode,
+} from "graphql";
+import type { InputTypeComposer, SchemaComposer } from "graphql-compose";
+import { PageInfo } from "../../../graphql/objects/PageInfo";
+import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import type { InterfaceEntityAdapter } from "../../../schema-model/entity/model-adapters/InterfaceEntityAdapter";
 import { translateRead } from "../../../translate";
-import type { Node } from "../../../classes";
-import type { Context } from "../../../types";
+import { execute } from "../../../utils";
 import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
 import { isNeoInt } from "../../../utils/utils";
 import { createConnectionWithEdgeProperties } from "../../pagination";
+import { graphqlDirectivesToCompose } from "../../to-compose";
+import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
+import { emptyConnection } from "./empty-connection";
 
-export function rootConnectionResolver({ node, composer }: { node: Node; composer: SchemaComposer }) {
-    async function resolve(_root: any, args: any, _context: unknown, info: GraphQLResolveInfo) {
-        const context = _context as Context;
-        const resolveTree = getNeo4jResolveTree(info);
+export function rootConnectionResolver({
+    composer,
+    entityAdapter,
+    propagatedDirectives,
+}: {
+    composer: SchemaComposer;
+    entityAdapter: InterfaceEntityAdapter | ConcreteEntityAdapter;
+    propagatedDirectives: DirectiveNode[];
+}) {
+    async function resolve(_root: any, args: any, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) {
+        const resolveTree = getNeo4jResolveTree(info, { args });
 
-        const edgeTree = resolveTree.fieldsByTypeName[`${upperFirst(node.plural)}Connection`].edges;
-        const nodeTree = edgeTree.fieldsByTypeName[`${node.name}Edge`].node;
-
-        context.resolveTree = { ...nodeTree, args: resolveTree.args };
-
-        const [cypher, params] = translateRead({ context, node, isRootConnectionField: true });
+        const { cypher, params } = translateRead({
+            context: { ...context, resolveTree },
+            entityAdapter: entityAdapter,
+            varName: "this",
+        });
 
         const executeResult = await execute({
             cypher,
@@ -48,70 +63,69 @@ export function rootConnectionResolver({ node, composer }: { node: Node; compose
             context,
         });
 
-        let totalCount = 0;
-        let edges: any[] = [];
-        let pageInfo: PageInfo = {
-            hasNextPage: false,
-            hasPreviousPage: false,
-            startCursor: null,
-            endCursor: null,
-        };
-
-        if (executeResult.records[0]) {
-            const record = executeResult.records[0].this;
-
-            totalCount = isNeoInt(record.totalCount) ? record.totalCount.toNumber() : record.totalCount;
-
-            const connection = createConnectionWithEdgeProperties({
-                selectionSet: resolveTree,
-                source: { edges: record.edges },
-                args: { first: args.first, after: args.after },
-                totalCount,
-            });
-
-            edges = connection.edges as any[];
-            pageInfo = connection.pageInfo as PageInfo;
+        if (!executeResult.records[0]) {
+            return emptyConnection;
         }
+
+        const record = executeResult.records[0].this;
+        const totalCount = isNeoInt(record.totalCount) ? record.totalCount.toNumber() : record.totalCount;
+
+        const connection = createConnectionWithEdgeProperties({
+            selectionSet: resolveTree as unknown as SelectionSetNode,
+            source: { edges: record.edges },
+            args: { first: args.first, after: args.after },
+            totalCount,
+        });
 
         return {
             totalCount,
-            edges,
-            pageInfo,
+            edges: connection.edges,
+            pageInfo: connection.pageInfo,
         };
     }
 
     const rootEdge = composer.createObjectTC({
-        name: `${node.name}Edge`,
+        name: `${entityAdapter.name}Edge`,
         fields: {
-            cursor: "String!",
-            node: `${node.name}!`,
+            cursor: new GraphQLNonNull(GraphQLString),
+            node: `${entityAdapter.name}!`,
         },
+        directives: graphqlDirectivesToCompose(propagatedDirectives),
     });
 
     const rootConnection = composer.createObjectTC({
-        name: `${upperFirst(node.plural)}Connection`,
+        name: `${entityAdapter.upperFirstPlural}Connection`,
         fields: {
-            totalCount: "Int!",
-            pageInfo: "PageInfo!",
+            totalCount: new GraphQLNonNull(GraphQLInt),
+            pageInfo: new GraphQLNonNull(PageInfo),
             edges: rootEdge.NonNull.List.NonNull,
         },
+        directives: graphqlDirectivesToCompose(propagatedDirectives),
     });
 
     // since sort is not created when there is nothing to sort, we check for its existence
-    let sortArg: InputTypeComposer<any> | undefined;
-    if (composer.has(`${node.name}Sort`)) {
-        sortArg = composer.getITC(`${node.name}Sort`);
+    let sortArg: InputTypeComposer | undefined;
+    if (composer.has(entityAdapter.operations.sortInputTypeName)) {
+        sortArg = composer.getITC(entityAdapter.operations.sortInputTypeName);
     }
 
     return {
         type: rootConnection.NonNull,
         resolve,
         args: {
-            first: "Int",
-            after: "String",
-            where: `${node.name}Where`,
-            ...(sortArg ? { sort: sortArg.List } : {}),
-            ...(node.fulltextDirective ? { fulltext: `${node.name}Fulltext` } : {}),
+            first: GraphQLInt,
+            after: GraphQLString,
+            where: entityAdapter.operations.whereInputTypeName,
+            ...(sortArg ? { sort: sortArg.NonNull.List } : {}),
+            ...(entityAdapter.annotations.fulltext
+                ? {
+                      fulltext: {
+                          type: entityAdapter.operations.fullTextInputTypeName,
+                          description:
+                              "Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.",
+                      },
+                  }
+                : {}),
         },
     };
 }

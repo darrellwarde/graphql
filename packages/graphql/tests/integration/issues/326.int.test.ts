@@ -17,58 +17,58 @@
  * limitations under the License.
  */
 
-import { Neo4jGraphQLAuthJWTPlugin } from "@neo4j/graphql-plugin-auth";
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { createJwtRequest } from "../../utils/create-jwt-request";
+import { createBearerToken } from "../../utils/create-bearer-token";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
-describe("326", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+describe("https://github.com/neo4j/graphql/issues/326", () => {
+    const testHelper = new TestHelper();
     const secret = "secret";
+    let User: UniqueType;
+    let id: string;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(async () => {
+        User = testHelper.createUniqueType("User");
+        id = generate({
+            charset: "alphabetic",
+        });
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${User.name} {id: $id, email: randomUUID()})
+                `,
+            { id }
+        );
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should throw forbidden when user does not have correct allow on projection field(using Query)", async () => {
-        const session = await neo4j.getSession();
-
-        const id = generate({
-            charset: "alphabetic",
-        });
-
         const typeDefs = `
             type Query {
-                getSelf: [User]!
+                getSelf: [${User.name}]!
                   @cypher(
                     statement: """
-                        MATCH (user:User { id: \\"${id}\\" })
+                        MATCH (user:${User.name} { id: "${id}" })
                         RETURN user
-                    """
+                    """, columnName: "user"
                   )
             }
 
-            type User {
+            type ${User.name} @node {
                 id: ID
-                email: String! @auth(rules: [{ operations: [READ], allow: { id: "$jwt.sub" } }])
+                email: String! @authorization(validate: [{ when: [BEFORE], operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            plugins: {
-                auth: new Neo4jGraphQLAuthJWTPlugin({
-                    secret: "secret",
-                }),
+            features: {
+                authorization: {
+                    key: secret,
+                },
             },
         });
 
@@ -80,59 +80,39 @@ describe("326", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (:User {id: $id, email: randomUUID()})
-                `,
-                { id }
-            );
+        const token = testHelper.createBearerToken(secret, { sub: "invalid" });
 
-            const req = createJwtRequest(secret, { sub: "invalid" });
+        const gqlResult = await testHelper.executeGraphQLWithToken(query, token, {
+            variableValues: { id },
+        });
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark(), { req }),
-            });
-
-            expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
     });
 
     test("should throw forbidden when user does not have correct allow on projection field(using Mutation)", async () => {
-        const session = await neo4j.getSession();
-
-        const id = generate({
-            charset: "alphabetic",
-        });
-
         const typeDefs = `
             type Mutation {
-                getSelf: [User]!
+                getSelf: [${User.name}]!
                   @cypher(
                     statement: """
-                        MATCH (user:User { id: \\"${id}\\" })
+                        MATCH (user:${User.name} { id: "${id}" })
                         RETURN user
-                    """
+                    """, columnName: "user"
                   )
             }
 
-            type User {
+            type ${User.name} @node {
                 id: ID
-                email: String! @auth(rules: [{ operations: [READ], allow: { id: "$jwt.sub" } }])
+                email: String! @authorization(validate: [{ when: [BEFORE], operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            plugins: {
-                auth: new Neo4jGraphQLAuthJWTPlugin({
-                    secret: "secret",
-                }),
+            features: {
+                authorization: {
+                    key: secret,
+                },
             },
         });
 
@@ -144,26 +124,10 @@ describe("326", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (:User {id: $id, email: randomUUID()})
-                `,
-                { id }
-            );
+        const token = createBearerToken(secret, { sub: "invalid" });
 
-            const req = createJwtRequest(secret, { sub: "invalid" });
+        const gqlResult = await testHelper.executeGraphQLWithToken(query, token);
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark(), { req }),
-            });
-
-            expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
     });
 });

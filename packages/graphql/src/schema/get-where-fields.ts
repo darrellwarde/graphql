@@ -17,101 +17,153 @@
  * limitations under the License.
  */
 
-import type { CustomEnumField, CustomScalarField, PointField, PrimitiveField, TemporalField } from "../types";
+import type { DirectiveNode } from "graphql";
+import type { Directive } from "graphql-compose";
+import { DEPRECATED } from "../constants";
+import type { AttributeAdapter } from "../schema-model/attribute/model-adapters/AttributeAdapter";
+import { ConcreteEntityAdapter } from "../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import type { Neo4jFeaturesSettings } from "../types";
+import { DEPRECATE_IMPLICIT_EQUAL_FILTERS } from "./constants";
+import { shouldAddDeprecatedFields } from "./generation/utils";
+import { graphqlDirectivesToCompose } from "./to-compose";
 
-interface Fields {
-    scalarFields: CustomScalarField[];
-    enumFields: CustomEnumField[];
-    primitiveFields: PrimitiveField[];
-    temporalFields: TemporalField[];
-    pointFields: PointField[];
-}
-
-function getWhereFields({
-    typeName,
-    fields,
-    enableRegex,
-    isInterface,
+// TODO: refactoring needed!
+// isWhereField, isFilterable, ... extracted out into attributes category
+export function getWhereFieldsForAttributes({
+    attributes,
+    userDefinedFieldDirectives,
+    features,
+    ignoreCypherFieldFilters,
 }: {
-    typeName: string;
-    fields: Fields;
-    enableRegex?: boolean;
-    isInterface?: boolean;
-}): { [k: string]: string } {
-    return {
-        ...(isInterface ? {} : { OR: `[${typeName}Where!]`, AND: `[${typeName}Where!]` }),
-        // Custom scalar fields only support basic equality
-        ...fields.scalarFields.reduce((res, f) => {
-            res[f.fieldName] = f.typeMeta.array ? `[${f.typeMeta.name}]` : f.typeMeta.name;
-            return res;
-        }, {}),
-        ...[...fields.primitiveFields, ...fields.temporalFields, ...fields.enumFields, ...fields.pointFields].reduce(
-            (res, f) => {
-                res[f.fieldName] = f.typeMeta.input.where.pretty;
-                res[`${f.fieldName}_NOT`] = f.typeMeta.input.where.pretty;
+    attributes: AttributeAdapter[];
+    userDefinedFieldDirectives?: Map<string, DirectiveNode[]>;
+    features: Neo4jFeaturesSettings | undefined;
+    ignoreCypherFieldFilters: boolean;
+}): Record<
+    string,
+    {
+        type: string;
+        directives: Directive[];
+    }
+> {
+    const result: Record<
+        string,
+        {
+            type: string;
+            directives: Directive[];
+        }
+    > = {};
+    // Add the where fields for each attribute
+    for (const field of attributes) {
+        const userDefinedDirectivesOnField = userDefinedFieldDirectives?.get(field.name);
+        const deprecatedDirectives = graphqlDirectivesToCompose(
+            (userDefinedDirectivesOnField ?? []).filter((directive) => directive.name.value === DEPRECATED)
+        );
 
-                if (f.typeMeta.name === "Boolean") {
-                    return res;
-                }
+        if (field.annotations.cypher) {
+            // If the field is a cypher field and ignoreCypherFieldFilters is true, skip it
+            if (ignoreCypherFieldFilters === true) {
+                continue;
+            }
 
-                if (f.typeMeta.array) {
-                    res[`${f.fieldName}_INCLUDES`] = f.typeMeta.input.where.type;
-                    res[`${f.fieldName}_NOT_INCLUDES`] = f.typeMeta.input.where.type;
-                    return res;
-                }
+            // If the field is a cypher field with arguments, skip it
+            if (field.args.length > 0) {
+                continue;
+            }
 
-                res[`${f.fieldName}_IN`] = `[${f.typeMeta.input.where.pretty}${f.typeMeta.required ? "!" : ""}]`;
-                res[`${f.fieldName}_NOT_IN`] = `[${f.typeMeta.input.where.pretty}${f.typeMeta.required ? "!" : ""}]`;
+            if (field.annotations.cypher.targetEntity) {
+                const targetEntityAdapter = new ConcreteEntityAdapter(field.annotations.cypher.targetEntity);
+                result[field.name] = {
+                    type: targetEntityAdapter.operations.whereInputTypeName,
+                    directives: deprecatedDirectives,
+                };
+                continue;
+            }
+        }
 
-                if (
-                    [
-                        "Float",
-                        "Int",
-                        "BigInt",
-                        "DateTime",
-                        "Date",
-                        "LocalDateTime",
-                        "Time",
-                        "LocalTime",
-                        "Duration",
-                    ].includes(f.typeMeta.name)
-                ) {
-                    ["_LT", "_LTE", "_GT", "_GTE"].forEach((comparator) => {
-                        res[`${f.fieldName}${comparator}`] = f.typeMeta.name;
-                    });
-                    return res;
-                }
+        if (shouldAddDeprecatedFields(features, "implicitEqualFilters")) {
+            result[field.name] = {
+                type: field.getInputTypeNames().where.pretty,
+                directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_IMPLICIT_EQUAL_FILTERS],
+            };
+        }
+        result[`${field.name}_EQ`] = {
+            type: field.getInputTypeNames().where.pretty,
+            directives: deprecatedDirectives,
+        };
 
-                if (["Point", "CartesianPoint"].includes(f.typeMeta.name)) {
-                    ["_DISTANCE", "_LT", "_LTE", "_GT", "_GTE"].forEach((comparator) => {
-                        res[`${f.fieldName}${comparator}`] = `${f.typeMeta.name}Distance`;
-                    });
-                    return res;
-                }
+        // If the field is a boolean, skip it
+        // This is done here because the previous additions are still added for boolean fields
+        if (field.typeHelper.isBoolean()) {
+            continue;
+        }
 
-                if (["String", "ID"].includes(f.typeMeta.name)) {
-                    if (enableRegex) {
-                        res[`${f.fieldName}_MATCHES`] = "String";
+        // If the field is an array, add the includes and not includes fields
+        // if (field.isArray()) {
+        if (field.typeHelper.isList()) {
+            result[`${field.name}_INCLUDES`] = {
+                type: field.getInputTypeNames().where.type,
+                directives: deprecatedDirectives,
+            };
+
+            continue;
+        }
+
+        // If the field is not an array, add the in and not in fields
+        result[`${field.name}_IN`] = {
+            type: field.getFilterableInputTypeName(),
+            directives: deprecatedDirectives,
+        };
+
+        // If the field is a number or temporal, add the comparison operators
+        if (field.isNumericalOrTemporal()) {
+            ["_LT", "_LTE", "_GT", "_GTE"].forEach((comparator) => {
+                result[`${field.name}${comparator}`] = {
+                    type: field.getInputTypeNames().where.type,
+                    directives: deprecatedDirectives,
+                };
+            });
+            continue;
+        }
+
+        // If the field is spatial, add the point comparison operators
+        if (field.typeHelper.isSpatial()) {
+            ["_DISTANCE", "_LT", "_LTE", "_GT", "_GTE"].forEach((comparator) => {
+                result[`${field.name}${comparator}`] = {
+                    type: `${field.getTypeName()}Distance`,
+                    directives: deprecatedDirectives,
+                };
+            });
+            continue;
+        }
+
+        // If the field is a string, add the string comparison operators
+        if (field.typeHelper.isString() || field.typeHelper.isID()) {
+            const stringWhereOperators: Array<{ comparator: string; typeName: string }> = [
+                { comparator: "_CONTAINS", typeName: field.getInputTypeNames().where.type },
+                { comparator: "_STARTS_WITH", typeName: field.getInputTypeNames().where.type },
+                { comparator: "_ENDS_WITH", typeName: field.getInputTypeNames().where.type },
+            ];
+
+            Object.entries(features?.filters?.[field.getInputTypeNames().where.type] || {}).forEach(
+                ([filter, enabled]) => {
+                    if (enabled) {
+                        if (filter === "MATCHES") {
+                            stringWhereOperators.push({ comparator: `_${filter}`, typeName: "String" });
+                        } else {
+                            stringWhereOperators.push({
+                                comparator: `_${filter}`,
+                                typeName: field.getInputTypeNames().where.type,
+                            });
+                        }
                     }
-
-                    [
-                        "_CONTAINS",
-                        "_NOT_CONTAINS",
-                        "_STARTS_WITH",
-                        "_NOT_STARTS_WITH",
-                        "_ENDS_WITH",
-                        "_NOT_ENDS_WITH",
-                    ].forEach((comparator) => {
-                        res[`${f.fieldName}${comparator}`] = f.typeMeta.name;
-                    });
-                    return res;
                 }
+            );
+            stringWhereOperators.forEach(({ comparator, typeName }) => {
+                result[`${field.name}${comparator}`] = { type: typeName, directives: deprecatedDirectives };
+            });
+        }
+    }
 
-                return res;
-            },
-            {}
-        ),
-    };
+    return result;
 }
-
-export default getWhereFields;

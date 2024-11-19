@@ -17,42 +17,41 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("find", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let Actor: UniqueType;
+    let User: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
+        Actor = testHelper.createUniqueType("Actor");
+        User = testHelper.createUniqueType("User");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should find Movie by id", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -60,98 +59,82 @@ describe("find", () => {
 
         const query = `
             query($id: ID){
-                movies(where: {id: $id}){
+                ${Movie.plural}(where: {id_EQ: $id}){
                     id
                 }
             }
         `;
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            await session.run(`CREATE (:Movie {id: $id}), (:Movie {id: $id}), (:Movie {id: $id})`, { id });
+        await testHelper.executeCypher(`CREATE (:${Movie} {id: $id}), (:${Movie} {id: $id}), (:${Movie} {id: $id})`, {
+            id,
+        });
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query, {
+            variableValues: { id },
+        });
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            expect(result?.data?.movies).toEqual([{ id }, { id }, { id }]);
-        } finally {
-            await session.close();
-        }
+        expect(result?.data?.[Movie.plural]).toEqual([{ id }, { id }, { id }]);
     });
 
     test("should find Move by id and limit", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             query($id: ID){
-                movies(where: {id: $id}, options: {limit: 2}){
+                ${Movie.plural}(where: {id_EQ: $id}, limit: 2 ){
                     id
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
-              CREATE (:Movie {id: $id}), (:Movie {id: $id}), (:Movie {id: $id})
+        await testHelper.executeCypher(
+            `
+              CREATE (:${Movie} {id: $id}), (:${Movie} {id: $id}), (:${Movie} {id: $id})
             `,
-                { id }
-            );
+            { id }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query, {
+            variableValues: { id },
+        });
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            expect(result?.data?.movies).toEqual([{ id }, { id }]);
-        } finally {
-            await session.close();
-        }
+        expect(result?.data?.[Movie.plural]).toEqual([{ id }, { id }]);
     });
 
     test("should find Movie IN ids", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
@@ -165,58 +148,49 @@ describe("find", () => {
             charset: "alphabetic",
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             query($ids: [ID!]){
-                movies(where: {id_IN: $ids}){
+                ${Movie.plural}(where: {id_IN: $ids}){
                     id
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
-              CREATE (:Movie {id: $id1}), (:Movie {id: $id2}), (:Movie {id: $id3})
+        await testHelper.executeCypher(
+            `
+              CREATE (:${Movie} {id: $id1}), (:${Movie} {id: $id2}), (:${Movie} {id: $id3})
             `,
-                { id1, id2, id3 }
-            );
+            { id1, id2, id3 }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { ids: [id1, id2, id3] },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query, {
+            variableValues: { ids: [id1, id2, id3] },
+        });
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            (result?.data as any)?.movies.forEach((e: { id: string }) => {
-                expect([id1, id2, id3].includes(e.id)).toBeTruthy();
-            });
-        } finally {
-            await session.close();
-        }
+        (result?.data as any)?.[Movie.plural].forEach((e: { id: string }) => {
+            expect([id1, id2, id3].includes(e.id)).toBeTruthy();
+        });
     });
 
     test("should find Movie IN ids with one other param", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id1 = generate({
             charset: "alphabetic",
@@ -233,55 +207,46 @@ describe("find", () => {
 
         const query = `
             query($ids: [ID!], $title: String){
-                movies(where: {id_IN: $ids, title: $title}){
+                ${Movie.plural}(where: {id_IN: $ids, title_EQ: $title}){
                     id
                     title
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:User {id: $id1, title: $title}), (:User {id: $id2, title: $title}), (:User {id: $id3, title: $title})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${User} {id: $id1, title: $title}), (:${User} {id: $id2, title: $title}), (:${User} {id: $id3, title: $title})
                 `,
-                { id1, id2, id3, title }
-            );
+            { id1, id2, id3, title }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { ids: [id1, id2, id3], title },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query, {
+            variableValues: { ids: [id1, id2, id3], title },
+        });
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            (result?.data as any)?.movies.forEach((e: { id: string; title: string }) => {
-                expect([id1, id2, id3].includes(e.id)).toBeTruthy();
-                expect(e.title).toEqual(title);
-            });
-        } finally {
-            await session.close();
-        }
+        (result?.data as any)?.[Movie.plural].forEach((e: { id: string; title: string }) => {
+            expect([id1, id2, id3].includes(e.id)).toBeTruthy();
+            expect(e.title).toEqual(title);
+        });
     });
 
     test("should find Movie IN id and many Movie.actor IN id", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
+            type ${Actor} @node {
                 id: ID!
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId1 = generate({
             charset: "alphabetic",
@@ -305,7 +270,7 @@ describe("find", () => {
 
         const query = `
             query($movieIds: [ID!], $actorIds: [ID!]){
-                movies(where: {id_IN: $movieIds}){
+                ${Movie.plural}(where: {id_IN: $movieIds}){
                     id
                     actors(where: {id_IN: $actorIds}){
                         id
@@ -320,36 +285,33 @@ describe("find", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $movieId1})-[:ACTED_IN]->(:Actor {id: $actorId1}),
-                       (:Movie {id: $movieId2})-[:ACTED_IN]->(:Actor {id: $actorId2}),
-                       (:Movie {id: $movieId3})-[:ACTED_IN]->(:Actor {id: $actorId3})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $movieId1})-[:ACTED_IN]->(:${Actor} {id: $actorId1}),
+                       (:${Movie} {id: $movieId2})-[:ACTED_IN]->(:${Actor} {id: $actorId2}),
+                       (:${Movie} {id: $movieId3})-[:ACTED_IN]->(:${Actor} {id: $actorId3})
                 `,
-                {
-                    movieId1,
-                    movieId2,
-                    movieId3,
-                    actorId1,
-                    actorId2,
-                    actorId3,
-                }
-            );
+            {
+                movieId1,
+                movieId2,
+                movieId3,
+                actorId1,
+                actorId2,
+                actorId3,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {
-                    movieIds: [movieId1, movieId2, movieId3],
-                    actorIds: [actorId1, actorId2, actorId3],
-                },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query, {
+            variableValues: {
+                movieIds: [movieId1, movieId2, movieId3],
+                actorIds: [actorId1, actorId2, actorId3],
+            },
+        });
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            (result?.data as any)?.movies.forEach((movie: { id: string; title: string; actors: { id: string }[] }) => {
+        (result?.data as any)?.[Movie.plural].forEach(
+            (movie: { id: string; title: string; actors: { id: string }[] }) => {
                 expect([movieId1, movieId2, movieId3].includes(movie.id)).toBeTruthy();
 
                 let expected: any;
@@ -399,33 +361,30 @@ describe("find", () => {
                 }
 
                 expect(movie.actors).toEqual(expected);
-            });
-        } finally {
-            await session.close();
-        }
+            }
+        );
     });
 
     test("should find Movie and populate nested cypher query", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
+            type ${Actor} @node {
                 id: ID
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
-                actors(actorIds: [ID!]): [Actor!]! @cypher(
+                actors(actorIds: [ID!]): [${Actor}!]! @cypher(
                    statement:  """
-                   MATCH (a:Actor)
+                   MATCH (a:${Actor})
                    WHERE a.id IN $actorIds
                    RETURN a
-                   """
+                   """,
+                   columnName: "a"
                 )
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId1 = generate({
             charset: "alphabetic",
@@ -449,7 +408,7 @@ describe("find", () => {
 
         const query = `
             query($movieIds: [ID!], $actorIds: [ID!]){
-                movies(where: {id_IN: $movieIds}){
+                ${Movie.plural}(where: {id_IN: $movieIds}){
                     id
                     actors(actorIds: $actorIds) {
                         id
@@ -458,65 +417,56 @@ describe("find", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $movieId1}),
-                       (:Movie {id: $movieId2}),
-                       (:Movie {id: $movieId3}),
-                       (:Actor {id: $actorId1}),
-                       (:Actor {id: $actorId2}),
-                       (:Actor {id: $actorId3})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $movieId1}),
+                       (:${Movie} {id: $movieId2}),
+                       (:${Movie} {id: $movieId3}),
+                       (:${Actor} {id: $actorId1}),
+                       (:${Actor} {id: $actorId2}),
+                       (:${Actor} {id: $actorId3})
             `,
-                {
-                    movieId1,
-                    movieId2,
-                    movieId3,
-                    actorId1,
-                    actorId2,
-                    actorId3,
-                }
-            );
+            {
+                movieId1,
+                movieId2,
+                movieId3,
+                actorId1,
+                actorId2,
+                actorId3,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { movieIds: [movieId1, movieId2, movieId3], actorIds: [actorId1, actorId2, actorId3] },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
+        const result = await testHelper.executeGraphQL(query, {
+            variableValues: { movieIds: [movieId1, movieId2, movieId3], actorIds: [actorId1, actorId2, actorId3] },
+        });
+
+        expect(result.errors).toBeFalsy();
+
+        (result?.data as any)?.[Movie.plural].forEach((movie: { id: string; actors: { id: string }[] }) => {
+            expect([movieId1, movieId2, movieId3].includes(movie.id)).toBeTruthy();
+
+            movie.actors.forEach((actor) => {
+                expect([actorId1, actorId2, actorId3].includes(actor.id)).toBeTruthy();
             });
-
-            expect(result.errors).toBeFalsy();
-
-            (result?.data as any)?.movies.forEach((movie: { id: string; actors: { id: string }[] }) => {
-                expect([movieId1, movieId2, movieId3].includes(movie.id)).toBeTruthy();
-
-                movie.actors.forEach((actor) => {
-                    expect([actorId1, actorId2, actorId3].includes(actor.id)).toBeTruthy();
-                });
-            });
-        } finally {
-            await session.close();
-        }
+        });
     });
 
     test("should use OR and find Movie by id or title", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Actor {
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
                 title: String!
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT)
-                mainActor: Actor! @relationship(type: "MAIN_ACTOR", direction: OUT)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: OUT)
+                mainActor: ${Actor}! @relationship(type: "MAIN_ACTOR", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -527,34 +477,27 @@ describe("find", () => {
         });
 
         const query = `
-            query($movieWhere: MovieWhere){
-                movies(where: $movieWhere){
+            query($movieWhere: ${Movie}Where){
+                ${Movie.plural}(where: $movieWhere){
                     id
                     title
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
-              CREATE (:Movie {id: $id, title: $title})
+        await testHelper.executeCypher(
+            `
+              CREATE (:${Movie} {id: $id, title: $title})
             `,
-                { id, title }
-            );
+            { id, title }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { movieWhere: { OR: [{ title, id }] } },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query, {
+            variableValues: { movieWhere: { OR: [{ title_EQ: title, id_EQ: id }] } },
+        });
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            expect(result?.data?.movies).toEqual([{ id, title }]);
-        } finally {
-            await session.close();
-        }
+        expect(result?.data?.[Movie.plural]).toEqual([{ id, title }]);
     });
 });

@@ -18,57 +18,34 @@
  */
 
 import { Neo4jGraphQLError } from "./Error";
-import type { Context } from "../types";
-import ContextParser from "../utils/context-parser";
+import Cypher from "@neo4j/cypher-builder";
+import type { Neo4jGraphQLContext } from "../types/neo4j-graphql-context";
+import { mapLabelsWithContext } from "../schema-model/utils/map-labels-with-context";
 
 export interface NodeDirectiveConstructor {
-    label?: string;
-    additionalLabels?: string[];
-    plural?: string;
+    labels?: string[];
 }
 
 export class NodeDirective {
-    public readonly label: string | undefined;
-    public readonly additionalLabels: string[];
-    public readonly plural: string | undefined;
+    public readonly labels: string[];
 
     constructor(input: NodeDirectiveConstructor) {
-        this.label = input.label;
-        this.additionalLabels = input.additionalLabels || [];
-        this.plural = input.plural;
+        this.labels = input.labels || [];
     }
 
-    public getLabelsString(typeName: string, context: Context): string {
+    public getLabelsString(typeName: string, context: Neo4jGraphQLContext): string {
         if (!typeName) {
             throw new Neo4jGraphQLError("Could not generate label string in @node directive due to empty typeName");
         }
-        const labels = this.getLabels(typeName, context).map((l) => this.escapeLabel(l));
+        const labels = this.getLabels(typeName, context).map((label) => Cypher.utils.escapeLabel(label));
         return `:${labels.join(":")}`;
     }
-
-    public getLabels(typeName: string, context: Context): string[] {
-        const mainLabel = this.label || typeName;
-        const labels = [mainLabel, ...this.additionalLabels];
-        return this.mapLabelsWithContext(labels, context);
-    }
-
-    private mapLabelsWithContext(labels: string[], context: Context): string[] {
-        return labels.map((label: string) => {
-            const jwtPath = ContextParser.parseTag(label, "jwt");
-            let ctxPath = ContextParser.parseTag(label, "context");
-            if (jwtPath) ctxPath = `jwt.${jwtPath}`;
-
-            if (ctxPath) {
-                const mappedLabel = ContextParser.getProperty(ctxPath, context);
-                if (!mappedLabel) throw new Error(`Type value required.`);
-                return mappedLabel;
-            }
-            return label;
-        });
-    }
-
-    private escapeLabel(label: string): string {
-        const escapedLabel = label.replace(/`/g, "``");
-        return `\`${escapedLabel}\``;
+    /**
+     * Returns the list containing labels mapped with the values contained in the Context.
+     * Be careful when using this method, labels returned are unescaped.
+     **/
+    public getLabels(typeName: string, context: Neo4jGraphQLContext): string[] {
+        const labels = !this.labels.length ? [typeName] : this.labels;
+        return mapLabelsWithContext(labels, context);
     }
 }

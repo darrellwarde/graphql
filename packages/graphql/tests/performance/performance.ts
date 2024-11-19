@@ -19,46 +19,23 @@
 
 import type { Driver } from "neo4j-driver";
 import path from "path";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { gql } from "apollo-server";
-import neo4j from "./utils/neo4j";
-import { setupDatabase, cleanDatabase } from "./utils/setup-database";
+
 import { Neo4jGraphQL } from "../../src";
-import { collectTests, collectCypherTests } from "./utils/collect-test-files";
+import { TestRunner } from "./databaseQuery/TestRunner";
+import neo4j from "./databaseQuery/neo4j";
+import { cleanDatabase, setupDatabase } from "./databaseQuery/setup-database";
+import { schemaPerformance } from "./schema/schema-performance";
+import { subgraphSchemaPerformance } from "./schema/subgraph-schema-performance";
+import { runTranslationPerformance } from "./translation/translation-performance";
+import { typeDefs } from "./typedefs";
+import type * as Performance from "./types";
 import { ResultsWriter } from "./utils/ResultsWriter";
-import { ResultsDisplay } from "./utils/ResultsDisplay";
-import { TestRunner } from "./utils/TestRunner";
+import { collectCypherTests, collectTests } from "./utils/collect-test-files";
+import { MarkdownFormatter } from "./utils/formatters/MarkdownFormatter";
+import { TTYFormatter } from "./utils/formatters/TTYFormatter";
+import { getArgumentValue } from "./utils/get-argument-value";
 
 let driver: Driver;
-
-const typeDefs = gql`
-    union Likable = Person | Movie
-
-    type Person {
-        name: String!
-        born: Int!
-        movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
-        directed: [Movie!]! @relationship(type: "DIRECTED", direction: OUT)
-        reviewed: [Movie!]! @relationship(type: "REVIEWED", direction: OUT)
-        produced: [Movie!]! @relationship(type: "PRODUCED", direction: OUT)
-    }
-
-    type Movie {
-        id: ID!
-        title: String!
-        tagline: String
-        released: Int
-        actors: [Person!]! @relationship(type: "ACTED_IN", direction: IN)
-        directors: [Person!]! @relationship(type: "DIRECTED", direction: IN)
-        reviewers: [Person!]! @relationship(type: "REVIEWED", direction: IN)
-        producers: [Person!]! @relationship(type: "PRODUCED", direction: IN)
-    }
-
-    type User {
-        name: String!
-        liked: [Likable!]! @relationship(type: "LIKES", direction: OUT)
-    }
-`;
 
 let neoSchema: Neo4jGraphQL;
 
@@ -67,7 +44,17 @@ async function beforeAll() {
     neoSchema = new Neo4jGraphQL({
         typeDefs,
     });
-    await dbReset();
+    await resetDb();
+}
+
+function beforeEach(): Promise<void> {
+    return Promise.resolve();
+}
+
+async function afterEach(testInfo: Performance.TestInfo): Promise<void> {
+    if (testInfo.type === "mutation") {
+        await resetDb();
+    }
 }
 
 async function afterAll() {
@@ -81,6 +68,33 @@ async function afterAll() {
 }
 
 async function main() {
+    if (process.argv.includes("--schema")) {
+        await schemaPerformance();
+    } else if (process.argv.includes("--subgraph-schema")) {
+        await subgraphSchemaPerformance();
+    } else if (process.argv.includes("--translation")) {
+        await translationPerformance();
+    } else {
+        await queryPerformance();
+    }
+}
+
+async function translationPerformance() {
+    let runs = 100;
+    const runsArg = getArgumentValue("--runs");
+    if (runsArg) {
+        const parsedRuns = Math.trunc(Number(runsArg));
+        if (!parsedRuns || parsedRuns < 0) throw new Error("--runs require a positive number");
+        runs = parsedRuns;
+    }
+
+    if (process.argv.includes("--single")) {
+        runs = 1;
+    }
+    await runTranslationPerformance(runs);
+}
+
+async function queryPerformance() {
     try {
         await beforeAll();
         const resultsWriter = new ResultsWriter(path.join(__dirname, "/performance.json"));
@@ -90,12 +104,18 @@ async function main() {
 
         const results = await runTests(withCypher);
 
-        const resultsDisplay = new ResultsDisplay();
-        await resultsDisplay.display(results, oldResults);
+        if (process.argv.includes("--markdown")) {
+            const resultsDisplay = new MarkdownFormatter();
+            console.log(resultsDisplay.format(results, oldResults));
+        } else {
+            const resultsDisplay = new TTYFormatter();
+            console.table(resultsDisplay.format(results, oldResults));
+        }
 
         const updateSnapshot = process.argv.includes("-u");
         if (updateSnapshot) {
             await resultsWriter.writeResult(results);
+            console.log(`Performance snapshot written at ${resultsWriter.path}`);
         }
     } finally {
         await afterAll();
@@ -109,17 +129,20 @@ async function runTests(cypher: boolean) {
     const gqltests = await collectTests(path.join(__dirname, "graphql"));
     const runner = new TestRunner(driver, neoSchema);
 
-    const gqlTestsResuts = await runner.runTests(gqltests);
+    const gqlTestsResuts = await runner.runTests(gqltests, { beforeEach, afterEach });
     if (cypher) {
-        const cypherTests = await collectCypherTests(path.join(__dirname, "cypher"));
-        const cypherTestsResults = await runner.runCypherTests(cypherTests);
+        const cypherTests = await collectCypherTests(path.join(__dirname, "databaseQuery", "cypher"));
+        const cypherTestsResults = await runner.runCypherTests(cypherTests, {
+            beforeEach,
+            afterEach,
+        });
         return [...gqlTestsResuts, ...cypherTestsResults];
     }
 
     return gqlTestsResuts;
 }
 
-async function dbReset() {
+async function resetDb() {
     const session = driver.session();
     try {
         await setupDatabase(session);

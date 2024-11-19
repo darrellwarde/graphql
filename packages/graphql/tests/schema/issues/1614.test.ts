@@ -17,8 +17,9 @@
  * limitations under the License.
  */
 
-import { gql } from "apollo-server";
-import { validateSchema } from "graphql";
+import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { lexicographicSortSchema } from "graphql";
+import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src/classes";
 
 describe("https://github.com/neo4j/graphql/issues/1614", () => {
@@ -30,35 +31,382 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
                 KeyGrip
             }
 
-            interface CrewPosition {
+            type CrewPosition @relationshipProperties {
                 position: CrewPositionType
             }
 
-            type Movie {
+            type Movie @node {
                 name: String!
             }
 
-            type CrewMember {
+            type CrewMember @node {
                 movies: Movie! @relationship(type: "WORKED_ON", direction: OUT, properties: "CrewPosition")
             }
         `;
 
         const neoSchema = new Neo4jGraphQL({ typeDefs });
+        const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
 
-        const schema = await neoSchema.getSchema();
-        expect(schema).toBeDefined();
+        expect(printedSchema).toMatchInlineSnapshot(`
+            "schema {
+              query: Query
+              mutation: Mutation
+            }
 
-        const errors = validateSchema(schema);
-        expect(errors).toEqual([]);
+            type CreateCrewMembersMutationResponse {
+              crewMembers: [CrewMember!]!
+              info: CreateInfo!
+            }
 
-        const relationship = neoSchema.relationships.find(r => r.name === "CrewMemberMoviesRelationship");
-        expect(relationship).toBeDefined();
-        expect(relationship?.enumFields?.length).toBe(1);
-        expect(relationship?.properties).toBe("CrewPosition");
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
+            type CreateInfo {
+              nodesCreated: Int!
+              relationshipsCreated: Int!
+            }
 
-        const enumField = relationship?.enumFields[0];
-        expect(enumField?.kind).toBe("Enum");
-        expect(enumField?.fieldName).toBe("position");
-        expect(enumField?.typeMeta?.name).toBe("CrewPositionType");
+            type CreateMoviesMutationResponse {
+              info: CreateInfo!
+              movies: [Movie!]!
+            }
+
+            type CrewMember {
+              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): Movie!
+              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): CrewMemberMovieMoviesAggregationSelection
+              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [CrewMemberMoviesConnectionSort!], where: CrewMemberMoviesConnectionWhere): CrewMemberMoviesConnection!
+            }
+
+            type CrewMemberAggregateSelection {
+              count: Int!
+            }
+
+            input CrewMemberCreateInput {
+              movies: CrewMemberMoviesFieldInput
+            }
+
+            input CrewMemberDeleteInput {
+              movies: CrewMemberMoviesDeleteFieldInput
+            }
+
+            type CrewMemberEdge {
+              cursor: String!
+              node: CrewMember!
+            }
+
+            type CrewMemberMovieMoviesAggregationSelection {
+              count: Int!
+              node: CrewMemberMovieMoviesNodeAggregateSelection
+            }
+
+            type CrewMemberMovieMoviesNodeAggregateSelection {
+              name: StringAggregateSelection!
+            }
+
+            input CrewMemberMoviesAggregateInput {
+              AND: [CrewMemberMoviesAggregateInput!]
+              NOT: CrewMemberMoviesAggregateInput
+              OR: [CrewMemberMoviesAggregateInput!]
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
+              count_GT: Int
+              count_GTE: Int
+              count_LT: Int
+              count_LTE: Int
+              node: CrewMemberMoviesNodeAggregationWhereInput
+            }
+
+            input CrewMemberMoviesConnectFieldInput {
+              edge: CrewPositionCreateInput
+              \\"\\"\\"
+              Whether or not to overwrite any matching relationship with the new properties.
+              \\"\\"\\"
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
+              where: MovieConnectWhere
+            }
+
+            type CrewMemberMoviesConnection {
+              edges: [CrewMemberMoviesRelationship!]!
+              pageInfo: PageInfo!
+              totalCount: Int!
+            }
+
+            input CrewMemberMoviesConnectionSort {
+              edge: CrewPositionSort
+              node: MovieSort
+            }
+
+            input CrewMemberMoviesConnectionWhere {
+              AND: [CrewMemberMoviesConnectionWhere!]
+              NOT: CrewMemberMoviesConnectionWhere
+              OR: [CrewMemberMoviesConnectionWhere!]
+              edge: CrewPositionWhere
+              node: MovieWhere
+            }
+
+            input CrewMemberMoviesCreateFieldInput {
+              edge: CrewPositionCreateInput
+              node: MovieCreateInput!
+            }
+
+            input CrewMemberMoviesDeleteFieldInput {
+              where: CrewMemberMoviesConnectionWhere
+            }
+
+            input CrewMemberMoviesDisconnectFieldInput {
+              where: CrewMemberMoviesConnectionWhere
+            }
+
+            input CrewMemberMoviesFieldInput {
+              connect: CrewMemberMoviesConnectFieldInput
+              create: CrewMemberMoviesCreateFieldInput
+            }
+
+            input CrewMemberMoviesNodeAggregationWhereInput {
+              AND: [CrewMemberMoviesNodeAggregationWhereInput!]
+              NOT: CrewMemberMoviesNodeAggregationWhereInput
+              OR: [CrewMemberMoviesNodeAggregationWhereInput!]
+              name_AVERAGE_LENGTH_EQUAL: Float
+              name_AVERAGE_LENGTH_GT: Float
+              name_AVERAGE_LENGTH_GTE: Float
+              name_AVERAGE_LENGTH_LT: Float
+              name_AVERAGE_LENGTH_LTE: Float
+              name_LONGEST_LENGTH_EQUAL: Int
+              name_LONGEST_LENGTH_GT: Int
+              name_LONGEST_LENGTH_GTE: Int
+              name_LONGEST_LENGTH_LT: Int
+              name_LONGEST_LENGTH_LTE: Int
+              name_SHORTEST_LENGTH_EQUAL: Int
+              name_SHORTEST_LENGTH_GT: Int
+              name_SHORTEST_LENGTH_GTE: Int
+              name_SHORTEST_LENGTH_LT: Int
+              name_SHORTEST_LENGTH_LTE: Int
+            }
+
+            type CrewMemberMoviesRelationship {
+              cursor: String!
+              node: Movie!
+              properties: CrewPosition!
+            }
+
+            input CrewMemberMoviesUpdateConnectionInput {
+              edge: CrewPositionUpdateInput
+              node: MovieUpdateInput
+            }
+
+            input CrewMemberMoviesUpdateFieldInput {
+              connect: CrewMemberMoviesConnectFieldInput
+              create: CrewMemberMoviesCreateFieldInput
+              delete: CrewMemberMoviesDeleteFieldInput
+              disconnect: CrewMemberMoviesDisconnectFieldInput
+              update: CrewMemberMoviesUpdateConnectionInput
+              where: CrewMemberMoviesConnectionWhere
+            }
+
+            input CrewMemberOptions {
+              limit: Int
+              offset: Int
+            }
+
+            input CrewMemberUpdateInput {
+              movies: CrewMemberMoviesUpdateFieldInput
+            }
+
+            input CrewMemberWhere {
+              AND: [CrewMemberWhere!]
+              NOT: CrewMemberWhere
+              OR: [CrewMemberWhere!]
+              movies: MovieWhere
+              moviesAggregate: CrewMemberMoviesAggregateInput
+              moviesConnection: CrewMemberMoviesConnectionWhere
+            }
+
+            type CrewMembersConnection {
+              edges: [CrewMemberEdge!]!
+              pageInfo: PageInfo!
+              totalCount: Int!
+            }
+
+            \\"\\"\\"
+            The edge properties for the following fields:
+            * CrewMember.movies
+            \\"\\"\\"
+            type CrewPosition {
+              position: CrewPositionType
+            }
+
+            input CrewPositionCreateInput {
+              position: CrewPositionType
+            }
+
+            input CrewPositionSort {
+              position: SortDirection
+            }
+
+            enum CrewPositionType {
+              BoomOperator
+              Gaffer
+              KeyGrip
+            }
+
+            input CrewPositionUpdateInput {
+              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _SET field\\")
+              position_SET: CrewPositionType
+            }
+
+            input CrewPositionWhere {
+              AND: [CrewPositionWhere!]
+              NOT: CrewPositionWhere
+              OR: [CrewPositionWhere!]
+              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              position_EQ: CrewPositionType
+              position_IN: [CrewPositionType]
+            }
+
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
+            type DeleteInfo {
+              nodesDeleted: Int!
+              relationshipsDeleted: Int!
+            }
+
+            type Movie {
+              name: String!
+            }
+
+            type MovieAggregateSelection {
+              count: Int!
+              name: StringAggregateSelection!
+            }
+
+            input MovieConnectWhere {
+              node: MovieWhere!
+            }
+
+            input MovieCreateInput {
+              name: String!
+            }
+
+            type MovieEdge {
+              cursor: String!
+              node: Movie!
+            }
+
+            input MovieOptions {
+              limit: Int
+              offset: Int
+              \\"\\"\\"
+              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
+              \\"\\"\\"
+              sort: [MovieSort!]
+            }
+
+            \\"\\"\\"
+            Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
+            \\"\\"\\"
+            input MovieSort {
+              name: SortDirection
+            }
+
+            input MovieUpdateInput {
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
+            }
+
+            input MovieWhere {
+              AND: [MovieWhere!]
+              NOT: MovieWhere
+              OR: [MovieWhere!]
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              name_CONTAINS: String
+              name_ENDS_WITH: String
+              name_EQ: String
+              name_IN: [String!]
+              name_STARTS_WITH: String
+            }
+
+            type MoviesConnection {
+              edges: [MovieEdge!]!
+              pageInfo: PageInfo!
+              totalCount: Int!
+            }
+
+            type Mutation {
+              createCrewMembers(input: [CrewMemberCreateInput!]!): CreateCrewMembersMutationResponse!
+              createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
+              deleteCrewMembers(delete: CrewMemberDeleteInput, where: CrewMemberWhere): DeleteInfo!
+              deleteMovies(where: MovieWhere): DeleteInfo!
+              updateCrewMembers(update: CrewMemberUpdateInput, where: CrewMemberWhere): UpdateCrewMembersMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+            }
+
+            \\"\\"\\"Pagination information (Relay)\\"\\"\\"
+            type PageInfo {
+              endCursor: String
+              hasNextPage: Boolean!
+              hasPreviousPage: Boolean!
+              startCursor: String
+            }
+
+            type Query {
+              crewMembers(limit: Int, offset: Int, options: CrewMemberOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: CrewMemberWhere): [CrewMember!]!
+              crewMembersAggregate(where: CrewMemberWhere): CrewMemberAggregateSelection!
+              crewMembersConnection(after: String, first: Int, where: CrewMemberWhere): CrewMembersConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              moviesAggregate(where: MovieWhere): MovieAggregateSelection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+            }
+
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
+            enum SortDirection {
+              \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
+              ASC
+              \\"\\"\\"Sort by field values in descending order.\\"\\"\\"
+              DESC
+            }
+
+            type StringAggregateSelection {
+              longest: String
+              shortest: String
+            }
+
+            type UpdateCrewMembersMutationResponse {
+              crewMembers: [CrewMember!]!
+              info: UpdateInfo!
+            }
+
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
+            type UpdateInfo {
+              nodesCreated: Int!
+              nodesDeleted: Int!
+              relationshipsCreated: Int!
+              relationshipsDeleted: Int!
+            }
+
+            type UpdateMoviesMutationResponse {
+              info: UpdateInfo!
+              movies: [Movie!]!
+            }"
+        `);
+
+        // NOTE: are these checks relevant if the schema remains the same?
+        // const schema = await neoSchema.getSchema();
+        // expect(schema).toBeDefined();
+
+        // const errors = validateSchema(schema);
+        // expect(errors).toEqual([]);
+
+        // const relationship = neoSchema["relationships"].find((r) => r.name === "CrewMemberMoviesRelationship");
+        // expect(relationship).toBeDefined();
+        // expect(relationship?.enumFields?.length).toBe(1);
+        // expect(relationship?.properties).toBe("CrewPosition");
+
+        // const enumField = relationship?.enumFields[0];
+        // expect(enumField?.kind).toBe("Enum");
+        // expect(enumField?.fieldName).toBe("position");
+        // expect(enumField?.typeMeta?.name).toBe("CrewPositionType");
     });
 });

@@ -17,29 +17,35 @@
  * limitations under the License.
  */
 
+import Cypher from "@neo4j/cypher-builder";
+import Debug from "debug";
 import type { Node, Relationship } from "../classes";
-import type { Context, RelationField, ConnectionField } from "../types";
-import createProjectionAndParams from "./create-projection-and-params";
-import createCreateAndParams from "./create-create-and-params";
-import createUpdateAndParams from "./create-update-and-params";
-import createConnectAndParams from "./create-connect-and-params";
-import createDisconnectAndParams from "./create-disconnect-and-params";
-import { AUTH_FORBIDDEN_ERROR, META_CYPHER_VARIABLE } from "../constants";
-import createDeleteAndParams from "./create-delete-and-params";
-import createConnectionAndParams from "./connection/create-connection-and-params";
-import createSetRelationshipPropertiesAndParams from "./create-set-relationship-properties-and-params";
-import createInterfaceProjectionAndParams from "./create-interface-projection-and-params";
-import translateTopLevelMatch from "./translate-top-level-match";
-import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
-import createRelationshipValidationStr from "./create-relationship-validation-string";
 import { CallbackBucket } from "../classes/CallbackBucket";
+import { DEBUG_TRANSLATE } from "../constants";
+import type { GraphQLWhereArg, RelationField } from "../types";
+import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
+import { compileCypher } from "../utils/compile-cypher";
+import createConnectAndParams from "./create-connect-and-params";
+import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
+import createCreateAndParams from "./create-create-and-params";
+import createDeleteAndParams from "./create-delete-and-params";
+import createDisconnectAndParams from "./create-disconnect-and-params";
+import { createRelationshipValidationString } from "./create-relationship-validation-string";
+import { createSetRelationshipProperties } from "./create-set-relationship-properties";
+import createUpdateAndParams from "./create-update-and-params";
+import { QueryASTContext, QueryASTEnv } from "./queryAST/ast/QueryASTContext";
+import { QueryASTFactory } from "./queryAST/factory/QueryASTFactory";
+import { translateTopLevelMatch } from "./translate-top-level-match";
+import { getAuthorizationStatements } from "./utils/get-authorization-statements";
+
+const debug = Debug(DEBUG_TRANSLATE);
 
 export default async function translateUpdate({
     node,
     context,
 }: {
     node: Node;
-    context: Context;
+    context: Neo4jGraphQLTranslationContext;
 }): Promise<[string, any]> {
     const { resolveTree } = context;
     const updateInput = resolveTree.args.update;
@@ -50,12 +56,7 @@ export default async function translateUpdate({
     const connectOrCreateInput = resolveTree.args.connectOrCreate;
     const varName = "this";
     const callbackBucket: CallbackBucket = new CallbackBucket(context);
-
     const withVars = [varName];
-
-    if (context.subscriptionsEnabled) {
-        withVars.push(META_CYPHER_VARIABLE);
-    }
 
     let matchAndWhereStr = "";
     let updateStr = "";
@@ -63,43 +64,43 @@ export default async function translateUpdate({
     const disconnectStrs: string[] = [];
     const createStrs: string[] = [];
     let deleteStr = "";
-    let projAuth = "";
-    let projStr = "";
-    let cypherParams: { [k: string]: any } = {};
     const assumeReconnecting = Boolean(connectInput) && Boolean(disconnectInput);
-
-    const topLevelMatch = translateTopLevelMatch({ node, context, varName, operation: "UPDATE" });
-    matchAndWhereStr = topLevelMatch[0];
-    cypherParams = { ...cypherParams, ...topLevelMatch[1] };
+    const matchNode = new Cypher.NamedNode(varName);
+    const where = resolveTree.args.where as GraphQLWhereArg | undefined;
+    const matchPattern = new Cypher.Pattern(matchNode, { labels: node.getLabels(context) });
+    const topLevelMatch = translateTopLevelMatch({
+        matchNode,
+        matchPattern,
+        node,
+        context,
+        operation: "UPDATE",
+        where,
+    });
+    matchAndWhereStr = topLevelMatch.cypher;
+    let cypherParams = topLevelMatch.params;
 
     const connectionStrs: string[] = [];
     const interfaceStrs: string[] = [];
     let updateArgs = {};
 
-    const mutationResponse = resolveTree.fieldsByTypeName[node.mutationResponseTypeNames.update];
-
-    const nodeProjection = Object.values(mutationResponse).find((field) => field.name === node.plural);
-
-    if (updateInput) {
-        const updateAndParams = createUpdateAndParams({
+    if (deleteInput) {
+        const deleteAndParams = createDeleteAndParams({
             context,
-            callbackBucket,
             node,
-            updateInput,
-            varName,
+            deleteInput,
+            varName: `${varName}_delete`,
             parentVar: varName,
             withVars,
-            parameterPrefix: `${resolveTree.name}.args.update`,
-            includeRelationshipValidation: true,
+            parameterPrefix: `${resolveTree.name}.args.delete`,
         });
-        [updateStr] = updateAndParams;
+        [deleteStr] = deleteAndParams;
         cypherParams = {
             ...cypherParams,
-            ...updateAndParams[1],
+            ...deleteAndParams[1],
         };
         updateArgs = {
             ...updateArgs,
-            ...(updateStr.includes(resolveTree.name) ? { update: updateInput } : {}),
+            ...(deleteStr.includes(resolveTree.name) ? { delete: deleteInput } : {}),
         };
     }
 
@@ -163,6 +164,29 @@ export default async function translateUpdate({
         };
     }
 
+    if (updateInput) {
+        const updateAndParams = createUpdateAndParams({
+            context,
+            callbackBucket,
+            node,
+            updateInput,
+            varName,
+            parentVar: varName,
+            withVars,
+            parameterPrefix: `${resolveTree.name}.args.update`,
+            includeRelationshipValidation: false,
+        });
+        [updateStr] = updateAndParams;
+        cypherParams = {
+            ...cypherParams,
+            ...updateAndParams[1],
+        };
+        updateArgs = {
+            ...updateArgs,
+            ...(updateStr.includes(resolveTree.name) ? { update: updateInput } : {}),
+        };
+    }
+
     if (connectInput) {
         Object.entries(connectInput).forEach((entry) => {
             const relationField = node.relationFields.find((x) => entry[0] === x.fieldName) as RelationField;
@@ -185,10 +209,23 @@ export default async function translateUpdate({
                 if (!relationField.typeMeta.array) {
                     const inStr = relationField.direction === "IN" ? "<-" : "-";
                     const outStr = relationField.direction === "OUT" ? "->" : "-";
+
+                    const validatePredicates: string[] = [];
                     refNodes.forEach((refNode) => {
-                        const validateRelationshipExistance = `CALL apoc.util.validate(EXISTS((${varName})${inStr}[:${relationField.type}]${outStr}(:${refNode.name})),'Relationship field "%s.%s" cannot have more than one node linked',["${relationField.connectionPrefix}","${relationField.fieldName}"])`;
-                        connectStrs.push(validateRelationshipExistance);
+                        const validateRelationshipExistence = `EXISTS((${varName})${inStr}[:${relationField.type}]${outStr}(:${refNode.name}))`;
+                        validatePredicates.push(validateRelationshipExistence);
                     });
+
+                    if (validatePredicates.length) {
+                        connectStrs.push("WITH *");
+                        connectStrs.push(
+                            `WHERE apoc.util.validatePredicate(${validatePredicates.join(
+                                " OR "
+                            )},'Relationship field "%s.%s" cannot have more than one node linked',["${
+                                relationField.connectionPrefix
+                            }","${relationField.fieldName}"])`
+                        );
+                    }
                 }
 
                 const connectAndParams = createConnectAndParams({
@@ -203,6 +240,7 @@ export default async function translateUpdate({
                     parentNode: node,
                     labelOverride: "",
                     includeRelationshipValidation: !!assumeReconnecting,
+                    source: "UPDATE",
                 });
                 connectStrs.push(connectAndParams[0]);
                 cypherParams = { ...cypherParams, ...connectAndParams[1] };
@@ -219,11 +257,48 @@ export default async function translateUpdate({
                         withVars,
                         parentNode: node,
                         labelOverride: relationField.union ? refNode.name : "",
+                        source: "UPDATE",
                     });
                     connectStrs.push(connectAndParams[0]);
                     cypherParams = { ...cypherParams, ...connectAndParams[1] };
                 });
             }
+        });
+    }
+
+    if (connectOrCreateInput) {
+        Object.entries(connectOrCreateInput).forEach(([key, input]) => {
+            const relationField = node.relationFields.find((x) => key === x.fieldName) as RelationField;
+
+            const refNodes: Node[] = [];
+
+            if (relationField.union) {
+                Object.keys(input).forEach((unionTypeName) => {
+                    refNodes.push(context.nodes.find((x) => x.name === unionTypeName) as Node);
+                });
+            } else if (relationField.interface) {
+                relationField.interface?.implementations?.forEach((implementationName) => {
+                    refNodes.push(context.nodes.find((x) => x.name === implementationName) as Node);
+                });
+            } else {
+                refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
+            }
+
+            refNodes.forEach((refNode) => {
+                const { cypher, params } = createConnectOrCreateAndParams({
+                    input: input[refNode.name] || input, // Deals with different input from update -> connectOrCreate
+                    varName: `${varName}_connectOrCreate_${key}${relationField.union ? `_${refNode.name}` : ""}`,
+                    parentVar: varName,
+                    relationField,
+                    refNode,
+                    node,
+                    context,
+                    withVars,
+                    callbackBucket,
+                });
+                connectStrs.push(cypher);
+                cypherParams = { ...cypherParams, ...params };
+            });
         });
     }
 
@@ -275,14 +350,40 @@ export default async function translateUpdate({
                     }${index}`;
                     const nodeName = `${baseName}_node${relationField.interface ? `_${refNode.name}` : ""}`;
                     const propertiesName = `${baseName}_relationship`;
-                    const relTypeStr = `[${relationField.properties ? propertiesName : ""}:${relationField.type}]`;
+                    const relationVarName = relationField.properties ? propertiesName : "";
+                    const relTypeStr = `[${relationVarName}:${relationField.type}]`;
 
                     if (!relationField.typeMeta.array) {
-                        const validateRelationshipExistance = `CALL apoc.util.validate(EXISTS((${varName})${inStr}[:${relationField.type}]${outStr}(:${refNode.name})),'Relationship field "%s.%s" cannot have more than one node linked',["${relationField.connectionPrefix}","${relationField.fieldName}"])`;
-                        createStrs.push(validateRelationshipExistance);
+                        createStrs.push("WITH *");
+
+                        const validatePredicateTemplate = (condition: string) =>
+                            `WHERE apoc.util.validatePredicate(${condition},'Relationship field "%s.%s" cannot have more than one node linked',["${relationField.connectionPrefix}","${relationField.fieldName}"])`;
+
+                        const singleCardinalityValidationTemplate = (nodeName) =>
+                            `EXISTS((${varName})${inStr}[:${relationField.type}]${outStr}(:${nodeName}))`;
+
+                        if (relationField.union && relationField.union.nodes) {
+                            const validateRelationshipExistence = relationField.union.nodes.map(
+                                singleCardinalityValidationTemplate
+                            );
+                            createStrs.push(validatePredicateTemplate(validateRelationshipExistence.join(" OR ")));
+                        } else if (relationField.interface && relationField.interface.implementations) {
+                            const validateRelationshipExistence = relationField.interface.implementations.map(
+                                singleCardinalityValidationTemplate
+                            );
+                            createStrs.push(validatePredicateTemplate(validateRelationshipExistence.join(" OR ")));
+                        } else {
+                            const validateRelationshipExistence = singleCardinalityValidationTemplate(refNode.name);
+                            createStrs.push(validatePredicateTemplate(validateRelationshipExistence));
+                        }
                     }
 
-                    const createAndParams = createCreateAndParams({
+                    const {
+                        create: nestedCreate,
+                        params,
+                        authorizationPredicates,
+                        authorizationSubqueries,
+                    } = createCreateAndParams({
                         context,
                         callbackBucket,
                         node: refNode,
@@ -291,8 +392,8 @@ export default async function translateUpdate({
                         withVars: [...withVars, nodeName],
                         includeRelationshipValidation: false,
                     });
-                    createStrs.push(createAndParams[0]);
-                    cypherParams = { ...cypherParams, ...createAndParams[1] };
+                    createStrs.push(nestedCreate);
+                    cypherParams = { ...cypherParams, ...params };
                     createStrs.push(`MERGE (${varName})${inStr}${relTypeStr}${outStr}(${nodeName})`);
 
                     if (relationField.properties) {
@@ -300,183 +401,110 @@ export default async function translateUpdate({
                             (x) => x.properties === relationField.properties
                         ) as unknown as Relationship;
 
-                        const setA = createSetRelationshipPropertiesAndParams({
+                        const setA = createSetRelationshipProperties({
                             properties: create.edge ?? {},
                             varName: propertiesName,
+                            withVars,
                             relationship,
                             operation: "CREATE",
                             callbackBucket,
+                            parameterPrefix: "",
+                            parameterNotation: ".",
                         });
-                        createStrs.push(setA[0]);
-                        cypherParams = { ...cypherParams, ...setA[1] };
+                        if (setA) {
+                            createStrs.push(setA[0]);
+                            cypherParams = { ...cypherParams, ...setA[1] };
+                        }
                     }
+
+                    creates.push(...getAuthorizationStatements(authorizationPredicates, authorizationSubqueries));
                 });
             });
         });
     }
-
-    if (deleteInput) {
-        const deleteAndParams = createDeleteAndParams({
-            context,
-            node,
-            deleteInput,
-            varName: `${varName}_delete`,
-            parentVar: varName,
-            withVars,
-            parameterPrefix: `${resolveTree.name}.args.delete`,
-        });
-        [deleteStr] = deleteAndParams;
-        cypherParams = {
-            ...cypherParams,
-            ...deleteAndParams[1],
-        };
-        updateArgs = {
-            ...updateArgs,
-            ...(deleteStr.includes(resolveTree.name) ? { delete: deleteInput } : {}),
-        };
+    const entityAdapter = context.schemaModel.getConcreteEntityAdapter(node.name);
+    if (!entityAdapter) {
+        throw new Error(`Transpilation error: ${node.name} is not a concrete entity`);
     }
 
-    if (connectOrCreateInput) {
-        Object.entries(connectOrCreateInput).forEach(([key, input]) => {
-            const relationField = node.relationFields.find((x) => key === x.fieldName) as RelationField;
+    const queryAST = new QueryASTFactory(context.schemaModel).createQueryAST({
+        resolveTree,
+        entityAdapter,
+        context,
+    });
+    const queryASTEnv = new QueryASTEnv();
 
-            const refNodes: Node[] = [];
+    const queryASTContext = new QueryASTContext({
+        target: new Cypher.NamedNode(varName),
+        env: queryASTEnv,
+        neo4jGraphQLContext: context,
+        returnVariable: new Cypher.NamedVariable("data"),
+        shouldCollect: true,
+        shouldDistinct: true,
+    });
+    debug(queryAST.print());
+    const queryASTResult = queryAST.transpile(queryASTContext);
 
-            if (relationField.union) {
-                Object.keys(input).forEach((unionTypeName) => {
-                    refNodes.push(context.nodes.find((x) => x.name === unionTypeName) as Node);
-                });
-            } else if (relationField.interface) {
-                relationField.interface?.implementations?.forEach((implementationName) => {
-                    refNodes.push(context.nodes.find((x) => x.name === implementationName) as Node);
-                });
-            } else {
-                refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
-            }
+    const projectionStatements = queryASTResult.clauses.length
+        ? Cypher.utils.concat(...queryASTResult.clauses)
+        : new Cypher.Return(new Cypher.Literal("Query cannot conclude with CALL"));
 
-            refNodes.forEach((refNode) => {
-                const { cypher, params } = createConnectOrCreateAndParams({
-                    input: input[refNode.name] || input, // Deals with different input from update -> connectOrCreate
-                    varName: `${varName}_connectOrCreate_${key}${relationField.union ? `_${refNode.name}` : ""}`,
-                    parentVar: varName,
-                    relationField,
-                    refNode,
-                    context,
-                    withVars,
-                });
-                connectStrs.push(cypher);
-                cypherParams = { ...cypherParams, ...params };
-            });
-        });
-    }
+    const relationshipValidationStr = createRelationshipValidationString({ node, context, varName });
 
-    if (nodeProjection?.fieldsByTypeName) {
-        const projection = createProjectionAndParams({
-            node,
-            context,
-            resolveTree: nodeProjection,
-            varName,
-        });
-        [projStr] = projection;
-        cypherParams = { ...cypherParams, ...projection[1] };
-        if (projection[2]?.authValidateStrs?.length) {
-            projAuth = `CALL apoc.util.validate(NOT (${projection[2].authValidateStrs.join(
-                " AND "
-            )}), "${AUTH_FORBIDDEN_ERROR}", [0])`;
-        }
+    const updateQuery = new Cypher.Raw((env) => {
+        const cypher = [
+            matchAndWhereStr,
+            deleteStr,
+            disconnectStrs.join("\n"),
+            updateStr,
+            connectStrs.join("\n"),
+            createStrs.join("\n"),
+            ...(deleteStr.length ||
+            connectStrs.length ||
+            disconnectStrs.length ||
+            createStrs.length ||
+            connectionStrs.length ||
+            isFollowedByASubquery(projectionStatements)
+                ? [`WITH *`]
+                : []), // When FOREACH is the last line of update 'Neo4jError: WITH is required between FOREACH and CALL'
 
-        if (projection[2]?.connectionFields?.length) {
-            projection[2].connectionFields.forEach((connectionResolveTree) => {
-                const connectionField = node.connectionFields.find(
-                    (x) => x.fieldName === connectionResolveTree.name
-                ) as ConnectionField;
-                const connection = createConnectionAndParams({
-                    resolveTree: connectionResolveTree,
-                    field: connectionField,
-                    context,
-                    nodeVariable: varName,
-                    withVars,
-                });
-                connectionStrs.push(connection[0]);
-                cypherParams = { ...cypherParams, ...connection[1] };
-            });
-        }
+            ...(relationshipValidationStr ? [`WITH *`, relationshipValidationStr] : []),
+            ...connectionStrs,
+            ...interfaceStrs,
+            compileCypher(projectionStatements, env),
+        ]
+            .filter(Boolean)
+            .join("\n");
 
-        if (projection[2]?.interfaceFields?.length) {
-            const prevRelationshipFields: string[] = [];
-            projection[2].interfaceFields.forEach((interfaceResolveTree) => {
-                const relationshipField = node.relationFields.find(
-                    (x) => x.fieldName === interfaceResolveTree.name
-                ) as RelationField;
-                const interfaceProjection = createInterfaceProjectionAndParams({
-                    resolveTree: interfaceResolveTree,
-                    field: relationshipField,
-                    context,
-                    nodeVariable: varName,
-                    withVars: [...withVars, ...prevRelationshipFields],
-                });
-                prevRelationshipFields.push(relationshipField.dbPropertyName || relationshipField.fieldName);
-                interfaceStrs.push(interfaceProjection.cypher);
-                cypherParams = { ...cypherParams, ...interfaceProjection.params };
-            });
-        }
-    }
+        return [
+            cypher,
+            {
+                ...cypherParams,
+                ...(Object.keys(updateArgs).length ? { [resolveTree.name]: { args: updateArgs } } : {}),
+            },
+        ];
+    });
 
-    const returnStatement = generateUpdateReturnStatement(varName, projStr, context.subscriptionsEnabled);
-
-    const relationshipValidationStr = !updateInput ? createRelationshipValidationStr({ node, context, varName }) : "";
-
-    let cypher = [
-        ...(context.subscriptionsEnabled ? [`WITH [] AS ${META_CYPHER_VARIABLE}`] : []),
-        matchAndWhereStr,
-        updateStr,
-        connectStrs.join("\n"),
-        disconnectStrs.join("\n"),
-        createStrs.join("\n"),
-        deleteStr,
-        ...(connectionStrs.length || projAuth ? [`WITH ${withVars.join(", ")}`] : []), // When FOREACH is the last line of update 'Neo4jError: WITH is required between FOREACH and CALL'
-        ...(projAuth ? [projAuth] : []),
-        ...(relationshipValidationStr ? [`WITH ${withVars.join(", ")}`, relationshipValidationStr] : []),
-        ...connectionStrs,
-        ...interfaceStrs,
-        ...(context.subscriptionsEnabled ? [`WITH ${withVars.join(", ")}`, `UNWIND ${META_CYPHER_VARIABLE} AS m`] : []),
-        returnStatement,
-    ]
-        .filter(Boolean)
-        .join("\n");
-
-    let resolvedCallbacks = {};
-
-    ({ cypher, params: resolvedCallbacks } = await callbackBucket.resolveCallbacksAndFilterCypher({ cypher }));
-
-    return [
-        cypher,
-        {
-            ...cypherParams,
-            ...(Object.keys(updateArgs).length ? { [resolveTree.name]: { args: updateArgs } } : {}),
-            resolvedCallbacks,
-        },
-    ];
+    const cypherResult = updateQuery.build({ prefix: "update_" });
+    const { cypher, params: resolvedCallbacks } = await callbackBucket.resolveCallbacksAndFilterCypher({
+        cypher: cypherResult.cypher,
+    });
+    const result: [string, Record<string, any>] = [cypher, { ...cypherResult.params, resolvedCallbacks }];
+    return result;
 }
 
-function generateUpdateReturnStatement(
-    varName: string | undefined,
-    projStr: string | undefined,
-    subscriptionsEnabled: boolean
-): string {
-    const statements: string[] = [];
-
-    if (varName && projStr) {
-        statements.push(`collect(DISTINCT ${varName} ${projStr}) AS data`);
+/**
+ * Temporary helper to keep consistency with the old code where if a subquery was present, it would be followed by a WITH *.
+ * The recursion is needed because the subquery can be wrapped inside a Cypher.Composite.
+ **/
+function isFollowedByASubquery(clause): boolean {
+    if (clause.children?.length) {
+        if (clause.children[0] instanceof Cypher.Call) {
+            return true;
+        }
+        if (clause.children[0]?.children?.length) {
+            return isFollowedByASubquery(clause.children[0]);
+        }
     }
-
-    if (subscriptionsEnabled) {
-        statements.push(`collect(DISTINCT m) as ${META_CYPHER_VARIABLE}`);
-    }
-
-    if (statements.length === 0) {
-        statements.push("'Query cannot conclude with CALL'");
-    }
-
-    return `RETURN ${statements.join(", ")}`;
+    return false;
 }

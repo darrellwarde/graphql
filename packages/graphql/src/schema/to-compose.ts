@@ -17,24 +17,37 @@
  * limitations under the License.
  */
 
-import type { InputValueDefinitionNode, DirectiveNode } from "graphql";
-import type { DirectiveArgs, ObjectTypeComposerFieldConfigAsObjectDefinition, Directive } from "graphql-compose";
-import getFieldTypeMeta from "./get-field-type-meta";
-import parseValueNode from "./parse-value-node";
-import type { BaseField, InputField, PrimitiveField, TemporalField } from "../types";
-import { numericalResolver } from "./resolvers/field/numerical";
+import type { DirectiveNode } from "graphql";
+import { GraphQLInt } from "graphql";
+import type {
+    Directive,
+    DirectiveArgs,
+    InputTypeComposerFieldConfigMapDefinition,
+    ObjectTypeComposerFieldConfigAsObjectDefinition,
+} from "graphql-compose";
+import { DEPRECATED } from "../constants";
+import type { Argument } from "../schema-model/argument/Argument";
+import { ArgumentAdapter } from "../schema-model/argument/model-adapters/ArgumentAdapter";
+import type { AttributeAdapter } from "../schema-model/attribute/model-adapters/AttributeAdapter";
+import { parseValueNode } from "../schema-model/parser/parse-value-node";
+import type { InputField, Neo4jFeaturesSettings } from "../types";
+import { DEPRECATE_IMPLICIT_SET } from "./constants";
+import { shouldAddDeprecatedFields } from "./generation/utils";
 import { idResolver } from "./resolvers/field/id";
+import { numericalResolver } from "./resolvers/field/numerical";
 
-export function graphqlArgsToCompose(args: InputValueDefinitionNode[]) {
+export function graphqlArgsToCompose(args: Argument[]) {
     return args.reduce((res, arg) => {
-        const meta = getFieldTypeMeta(arg.type);
+        const inputValueAdapter = new ArgumentAdapter(arg);
 
         return {
             ...res,
-            [arg.name.value]: {
-                type: meta.pretty,
-                description: arg.description,
-                ...(arg.defaultValue ? { defaultValue: parseValueNode(arg.defaultValue) } : {}),
+            [arg.name]: {
+                type: inputValueAdapter.getTypePrettyName(),
+                description: inputValueAdapter.description,
+                ...(inputValueAdapter.defaultValue !== undefined
+                    ? { defaultValue: inputValueAdapter.defaultValue }
+                    : {}),
             },
         };
     }, {});
@@ -45,86 +58,141 @@ export function graphqlDirectivesToCompose(directives: DirectiveNode[]): Directi
         args: (directive.arguments || [])?.reduce(
             (r: DirectiveArgs, d) => ({ ...r, [d.name.value]: parseValueNode(d.value) }),
             {}
-        ) as DirectiveArgs,
+        ),
         name: directive.name.value,
     }));
 }
 
-export function objectFieldsToComposeFields(fields: BaseField[]): {
-    [k: string]: ObjectTypeComposerFieldConfigAsObjectDefinition<any, any>;
-} {
-    return fields.reduce((res, field) => {
-        if (field.writeonly) {
-            return res;
+export function attributeAdapterToComposeFields(
+    objectFields: AttributeAdapter[],
+    userDefinedFieldDirectives: Map<string, DirectiveNode[]>
+): Record<string, ObjectTypeComposerFieldConfigAsObjectDefinition<any, any>> {
+    const composeFields: Record<string, ObjectTypeComposerFieldConfigAsObjectDefinition<any, any>> = {};
+    for (const field of objectFields) {
+        if (field.isReadable() === false) {
+            continue;
         }
 
-        const newField = {
-            type: field.typeMeta.pretty,
+        const newField: ObjectTypeComposerFieldConfigAsObjectDefinition<any, any> = {
+            type: field.getTypePrettyName(),
             args: {},
             description: field.description,
-        } as ObjectTypeComposerFieldConfigAsObjectDefinition<any, any>;
+        };
 
-        if (field.otherDirectives.length) {
-            newField.directives = graphqlDirectivesToCompose(field.otherDirectives);
+        const userDefinedDirectivesOnField = userDefinedFieldDirectives.get(field.name);
+        if (userDefinedDirectivesOnField) {
+            newField.directives = graphqlDirectivesToCompose(userDefinedDirectivesOnField);
         }
 
-        if (["Int", "Float"].includes(field.typeMeta.name)) {
+        if (field.typeHelper.isInt() || field.typeHelper.isFloat()) {
             newField.resolve = numericalResolver;
         }
 
-        if (field.typeMeta.name === "ID") {
+        if (field.typeHelper.isID()) {
             newField.resolve = idResolver;
         }
 
-        if (field.arguments) {
-            newField.args = graphqlArgsToCompose(field.arguments);
+        if (field.args) {
+            newField.args = graphqlArgsToCompose(field.args);
         }
 
-        return { ...res, [field.fieldName]: newField };
-    }, {});
+        composeFields[field.name] = newField;
+    }
+
+    return composeFields;
 }
 
-export function objectFieldsToCreateInputFields(fields: BaseField[]): Record<string, InputField> {
-    return fields
-        .filter((f) => !(f as PrimitiveField)?.autogenerate && !(f as TemporalField)?.timestamps)
-        .reduce((res, f) => {
-            const fieldType = f.typeMeta.input.create.pretty;
-            const defaultValue = (f as PrimitiveField)?.defaultValue;
+export function concreteEntityToCreateInputFields(
+    objectFields: AttributeAdapter[],
+    userDefinedFieldDirectives: Map<string, DirectiveNode[]>
+) {
+    const createInputFields: Record<string, InputField> = {};
+    for (const field of objectFields) {
+        const newInputField: InputField = {
+            type: field.getInputTypeNames().create.pretty,
+            defaultValue: field.getDefaultValue(),
+            directives: [],
+        };
 
-            if (defaultValue !== undefined) {
-                res[f.fieldName] = {
-                    type: fieldType,
-                    defaultValue,
-                };
-            } else {
-                res[f.fieldName] = fieldType;
+        const userDefinedDirectivesOnField = userDefinedFieldDirectives.get(field.name);
+        if (userDefinedDirectivesOnField) {
+            newInputField.directives = graphqlDirectivesToCompose(
+                userDefinedDirectivesOnField.filter((directive) => directive.name.value === DEPRECATED)
+            );
+        }
+
+        createInputFields[field.name] = newInputField;
+    }
+
+    return createInputFields;
+}
+
+export function concreteEntityToUpdateInputFields({
+    objectFields,
+    userDefinedFieldDirectives,
+    additionalFieldsCallbacks = [],
+    features,
+}: {
+    objectFields: AttributeAdapter[];
+    userDefinedFieldDirectives: Map<string, DirectiveNode[]>;
+    additionalFieldsCallbacks: AdditionalFieldsCallback[];
+    features?: Neo4jFeaturesSettings;
+}) {
+    let updateInputFields: InputTypeComposerFieldConfigMapDefinition = {};
+    for (const field of objectFields) {
+        const newInputField: InputField = {
+            type: field.getInputTypeNames().update.pretty,
+            directives: [],
+        };
+
+        const userDefinedDirectivesOnField = userDefinedFieldDirectives.get(field.name);
+        if (userDefinedDirectivesOnField) {
+            newInputField.directives = graphqlDirectivesToCompose(
+                userDefinedDirectivesOnField.filter((directive) => directive.name.value === DEPRECATED)
+            );
+        }
+        if (shouldAddDeprecatedFields(features, "implicitSet")) {
+            updateInputFields[field.name] = {
+                type: newInputField.type,
+                directives: newInputField.directives?.length ? newInputField.directives : [DEPRECATE_IMPLICIT_SET],
+            };
+        }
+
+        updateInputFields[`${field.name}_SET`] = newInputField;
+
+        for (const cb of additionalFieldsCallbacks) {
+            const additionalFields = cb(field, newInputField);
+            updateInputFields = { ...updateInputFields, ...additionalFields };
+        }
+    }
+
+    return updateInputFields;
+}
+
+export function withMathOperators(): AdditionalFieldsCallback {
+    return (attribute: AttributeAdapter, fieldDefinition: InputField): Record<string, InputField> => {
+        const fields: Record<string, InputField> = {};
+        if (attribute.mathModel) {
+            for (const operation of attribute.mathModel.getMathOperations()) {
+                fields[operation] = fieldDefinition;
             }
-
-            return res;
-        }, {} as Record<string, InputField>);
-}
-
-export function objectFieldsToSubscriptionsWhereInputFields(fields: BaseField[]): Record<string, InputField> {
-    return fields.reduce((res, f) => {
-        const fieldType = f.typeMeta.input.update.pretty;
-
-        res[f.fieldName] = fieldType;
-
-        return res;
-    }, {});
-}
-
-export function objectFieldsToUpdateInputFields(fields: BaseField[]): Record<string, InputField> {
-    return fields.reduce((res, f) => {
-        const staticField = f.readonly || (f as PrimitiveField)?.autogenerate;
-        if (staticField) {
-            return res;
         }
-
-        const fieldType = f.typeMeta.input.update.pretty;
-
-        res[f.fieldName] = fieldType;
-
-        return res;
-    }, {});
+        return fields;
+    };
 }
+
+export function withArrayOperators(): AdditionalFieldsCallback {
+    return (attribute: AttributeAdapter): InputTypeComposerFieldConfigMapDefinition => {
+        const fields: InputTypeComposerFieldConfigMapDefinition = {};
+        if (attribute.listModel) {
+            fields[attribute.listModel.getPop()] = GraphQLInt;
+            fields[attribute.listModel.getPush()] = attribute.getInputTypeNames().update.pretty;
+        }
+        return fields;
+    };
+}
+
+type AdditionalFieldsCallback = (
+    attribute: AttributeAdapter,
+    fieldDefinition: InputField
+) => Record<string, InputField> | InputTypeComposerFieldConfigMapDefinition;

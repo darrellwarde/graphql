@@ -18,28 +18,30 @@
  */
 
 import { GraphQLFloat, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLString } from "graphql";
+import { numericalResolver } from "../../schema/resolvers/field/numerical";
+import { sridToCrs } from "./utils/srid-to-crs";
 
 export const CartesianPoint = new GraphQLObjectType({
     name: "CartesianPoint",
+    description:
+        "A point in a two- or three-dimensional Cartesian coordinate system or in a three-dimensional cylindrical coordinate system. For more information, see https://neo4j.com/docs/graphql/4/type-definitions/types/spatial/#cartesian-point",
     fields: {
         x: {
             type: new GraphQLNonNull(GraphQLFloat),
-            resolve: (source) => source.point.x,
         },
         y: {
             type: new GraphQLNonNull(GraphQLFloat),
-            resolve: (source) => source.point.y,
         },
         z: {
             type: GraphQLFloat,
-            resolve: (source) => source.point.z,
         },
         crs: {
             type: new GraphQLNonNull(GraphQLString),
+            resolve: (source) => sridToCrs(source.srid),
         },
         srid: {
             type: new GraphQLNonNull(GraphQLInt),
-            resolve: (source) => source.point.srid,
+            resolve: (source, args, context, info) => numericalResolver(source, args, context, info),
         },
     },
 });

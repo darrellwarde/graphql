@@ -17,45 +17,35 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/354", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeAll(() => {});
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should throw when creating a node without a mandatory relationship", async () => {
-        const session = await neo4j.getSession();
-
-        const testComment = generateUniqueType("Comment");
-        const testPost = generateUniqueType("Post");
+        const testComment = testHelper.createUniqueType("Comment");
+        const testPost = testHelper.createUniqueType("Post");
 
         const typeDefs = gql`
-            type ${testComment.name} {
+            type ${testComment.name} @node {
                 comment_id: ID!
                 post: ${testPost.name}! @relationship(type: "HAS_POST", direction: OUT)
             }
 
-            type ${testPost.name} {
+            type ${testPost.name} @node {
                 post_id: ID!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const missingNodeId = generate({
             charset: "alphabetic",
@@ -72,7 +62,7 @@ describe("https://github.com/neo4j/graphql/issues/354", () => {
                         comment_id: "${commentId}",
                         post: {
                             connect: {
-                                where: { node: { post_id: "${missingNodeId}" } }
+                                where: { node: { post_id_EQ: "${missingNodeId}" } }
                             }
                         }
                     }]
@@ -84,17 +74,9 @@ describe("https://github.com/neo4j/graphql/issues/354", () => {
             }
         `;
 
-        try {
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValues(),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeTruthy();
-            expect((result.errors as any[])[0].message).toBe(`${testComment.name}.post required`);
-        } finally {
-            await session.close();
-        }
+        expect(result.errors).toBeTruthy();
+        expect((result.errors as any[])[0].message).toBe(`${testComment.name}.post required exactly once`);
     });
 });

@@ -1,8 +1,14 @@
 {
-    "extends": ["config:js-lib"],
-    "baseBranches": ["dev"],
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:best-practices"],
+    "baseBranches": ["dev", "lts"],
     "rebaseWhen": "auto",
     "automerge": true,
+    "major": {
+        "automerge": false
+    },
+    "timezone": "Europe/London",
+    "schedule": ["after 10pm every weekday", "before 5am every weekday", "every weekend"],
     "ignorePaths": [
         "**/node_modules/**",
         "**/bower_components/**",
@@ -12,40 +18,23 @@
         "**/tests/**",
         "**/__fixtures__/**"
     ],
+    "ignoreDeps": ["neo4j", "typescript"],
+    "separateMajorMinor": true,
     "packageRules": [
         {
-            "groupName": "neo4j-ndl",
-            "matchPackagePatterns": ["^@neo4j-ndl/"]
-        },
-        {
-            "matchDepTypes": ["dependencies"],
-            "matchFiles": ["packages/graphql/package.json"],
-            "labels": ["dependency upgrade", "graphql"]
-        },
-        {
-            "matchDepTypes": ["dependencies"],
-            "matchFiles": ["packages/introspector/package.json"],
-            "labels": ["dependency upgrade", "introspector"]
-        },
-        {
-            "matchDepTypes": ["dependencies"],
-            "matchFiles": ["packages/ogm/package.json"],
-            "labels": ["dependency upgrade", "ogm"]
-        },
-        {
-            "matchDepTypes": ["dependencies"],
-            "matchFiles": ["packages/graphql-plugin-auth/package.json"],
-            "labels": ["dependency upgrade", "graphql-plugin-auth"]
-        },
-        {
-            "matchDepTypes": ["dependencies"],
             "matchUpdateTypes": ["major"],
+            "groupName": null,
             "automerge": false
         },
         {
-            "matchPackagePatterns": ["graphql"],
-            "matchFiles": ["packages/package-tests/graphql-15/package.json"],
-            "allowedVersions": "15"
+            "matchUpdateTypes": ["minor", "patch"],
+            "groupName": "minor-and-patch",
+            "automerge": true
+        },
+        {
+            "matchFileNames": ["packages/package-tests/graphql-15/package.json"],
+            "allowedVersions": "15",
+            "matchPackageNames": ["/graphql/"]
         }
     ]
 }

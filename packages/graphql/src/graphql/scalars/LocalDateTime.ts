@@ -19,13 +19,33 @@
 
 import type { ValueNode } from "graphql";
 import { GraphQLError, GraphQLScalarType, Kind } from "graphql";
-import neo4j from "neo4j-driver";
+import neo4j, { isLocalDateTime } from "neo4j-driver";
 
 // Matching YYYY-MM-DDTHH:MM:SS(.sss+)
 const LOCAL_DATE_TIME_REGEX =
     /^(?<year>\d{4})-(?<month>[0]\d|1[0-2])-(?<day>[0-2]\d|3[01])T(?<hour>[01]\d|2[0-3]):(?<minute>[0-5]\d):(?<second>[0-5]\d)(\.(?<fraction>\d+))?$/;
 
-export const parseLocalDateTime = (value: any) => {
+type LocalDateTimeMatchGroups = {
+    year: string;
+    month: string;
+    day: string;
+    hour: string;
+    minute: string;
+    second: string;
+    fraction: string | undefined;
+};
+
+export const parseLocalDateTime = (
+    value: unknown
+): {
+    year: number;
+    month: number;
+    day: number;
+    hour: number;
+    minute: number;
+    second: number;
+    nanosecond: number;
+} => {
     if (typeof value !== "string") {
         throw new TypeError(`Value must be of type string: ${value}`);
     }
@@ -36,11 +56,10 @@ export const parseLocalDateTime = (value: any) => {
         throw new TypeError(`Value must be formatted as LocalDateTime: ${value}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { year, month, day, hour, minute, second, fraction = 0 } = match.groups!;
+    const { year, month, day, hour, minute, second, fraction = "0" } = match.groups as LocalDateTimeMatchGroups;
 
     // Take first nine digits if received more
-    let nanosecond = `${fraction}`.substring(0, 9);
+    let nanosecond = fraction.substring(0, 9);
     // Pad with zeros to reach nine digits if received less
     while (nanosecond.toString().length < 9) {
         nanosecond = `${nanosecond}0`;
@@ -57,7 +76,11 @@ export const parseLocalDateTime = (value: any) => {
     };
 };
 
-const parse = (value: any) => {
+const parse = (value: unknown) => {
+    if (isLocalDateTime(value)) {
+        return value;
+    }
+
     const { year, month, day, hour, minute, second, nanosecond } = parseLocalDateTime(value);
 
     return new neo4j.types.LocalDateTime(year, month, day, hour, minute, second, nanosecond);

@@ -17,46 +17,45 @@
  * limitations under the License.
  */
 
-import { Neo4jGraphQLAuthJWTPlugin } from "@neo4j/graphql-plugin-auth";
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { createJwtRequest } from "../../utils/create-jwt-request";
+import { createBearerToken } from "../../utils/create-bearer-token";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
-describe("413", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+describe("https://github.com/neo4j/graphql/issues/413", () => {
+    const testHelper = new TestHelper();
+    let JobPlan: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeAll(() => {
+        JobPlan = testHelper.createUniqueType("JobPlan");
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     // NOTE: this test was updated to use aggregate instead of count
     test("should recreate issue and return correct count as an aggregation", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type JobPlan {
-                id: ID! @id
+            type JWTPayload @jwt {
+                tenant_id: String!
+            }
+
+            type ${JobPlan} @node {
+                id: ID! @id @unique
                 tenantID: ID!
                 name: String!
             }
 
-            extend type JobPlan
-                @auth(
-                    rules: [
-                        { operations: [CREATE, UPDATE], bind: { tenantID: "$context.jwt.tenant_id" } }
+            extend type ${JobPlan}
+                @authorization(
+                    validate: [
+                        { when: [AFTER], operations: [CREATE, UPDATE], where: { node: { tenantID_EQ: "$jwt.tenant_id" } } }
                         {
-                            operations: [READ, UPDATE, CONNECT, DISCONNECT, DELETE]
-                            allow: { tenantID: "$context.jwt.tenant_id" }
+                            when: [BEFORE]
+                            operations: [READ, UPDATE, CREATE_RELATIONSHIP, DELETE_RELATIONSHIP, DELETE]
+                            where: { node: { tenantID_EQ: "$jwt.tenant_id" } }
                         }
                     ]
                 )
@@ -68,43 +67,35 @@ describe("413", () => {
 
         const secret = "secret";
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs, plugins: { auth: new Neo4jGraphQLAuthJWTPlugin({ secret }) } });
+        await testHelper.initNeo4jGraphQL({ typeDefs, features: { authorization: { key: secret } } });
 
         const query = `
             query {
-                jobPlansAggregate(where: {tenantID: "${tenantID}"}) {
+                ${JobPlan.operations.aggregate}(where: {tenantID_EQ: "${tenantID}"}) {
                   count
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (:JobPlan {tenantID: $tenantID})
-                    CREATE (:JobPlan {tenantID: $tenantID})
-                    CREATE (:JobPlan {tenantID: $tenantID})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${JobPlan} {tenantID: $tenantID})
+                    CREATE (:${JobPlan} {tenantID: $tenantID})
+                    CREATE (:${JobPlan} {tenantID: $tenantID})
                 `,
-                { tenantID }
-            );
+            { tenantID }
+        );
 
-            const req = createJwtRequest(secret, {
-                tenant_id: tenantID,
-            });
+        const token = createBearerToken(secret, {
+            tenant_id: tenantID,
+        });
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark(), { req }),
-            });
+        const result = await testHelper.executeGraphQLWithToken(query, token);
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            expect(result.data as any).toEqual({
-                jobPlansAggregate: { count: 3 },
-            });
-        } finally {
-            await session.close();
-        }
+        expect(result.data as any).toEqual({
+            [JobPlan.operations.aggregate]: { count: 3 },
+        });
     });
 });

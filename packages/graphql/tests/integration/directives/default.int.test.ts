@@ -17,82 +17,79 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { Neo4jGraphQL } from "../../../src/classes";
-import Neo4j from "../neo4j";
+import { GraphQLError } from "graphql";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("@default directive", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     describe("with primitive fields", () => {
         test("on non-primitive field should throw an error", async () => {
+            const userType = testHelper.createUniqueType("User");
             const typeDefs = `
-                type User {
+                type ${userType} @node {
                     name: String!
                     location: Point! @default(value: "default")
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({
+            const neoSchema = await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            await expect(neoSchema.getSchema()).rejects.toThrow(
-                "@default directive can only be used on primitive type fields"
-            );
+            await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
+                new GraphQLError("@default is not supported by Spatial types."),
+            ]);
         });
 
         test("with an argument with a type which doesn't match the field should throw an error", async () => {
+            const userType = testHelper.createUniqueType("User");
             const typeDefs = `
-                type User {
+                type ${userType} @node {
                     name: String! @default(value: 2)
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({
+            const neoSchema = await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            await expect(neoSchema.getSchema()).rejects.toThrow(
-                "Default value for User.name does not have matching type String"
-            );
+            await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
+                new GraphQLError("@default.value on String fields must be of type String"),
+            ]);
         });
 
         test("on a DateTime with an invalid value should throw an error", async () => {
+            const userType = testHelper.createUniqueType("User");
             const typeDefs = `
-                type User {
+                type ${userType} @node {
                     verifiedAt: DateTime! @default(value: "Not a date")
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({
+            const neoSchema = await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            await expect(neoSchema.getSchema()).rejects.toThrow(
-                "Default value for User.verifiedAt is not a valid DateTime"
-            );
+            await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
+                new GraphQLError("@default.value is not a valid DateTime"),
+            ]);
         });
 
         test("on primitive field should not throw an error", async () => {
+            const userType = testHelper.createUniqueType("User");
             const typeDefs = `
-                type User {
+                type ${userType} @node {
                     name: String!
                     location: String! @default(value: "somewhere")
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({
+            const neoSchema = await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
@@ -102,8 +99,9 @@ describe("@default directive", () => {
 
     describe("with enum fields", () => {
         test("on enum field with incorrect value should throw an error", async () => {
+            const userType = testHelper.createUniqueType("User");
             const typeDefs = `
-                type User {
+                type ${userType} @node {
                     name: String!
                     location: Location! @default(value: DIFFERENT)
                 }
@@ -115,16 +113,19 @@ describe("@default directive", () => {
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({
+            const neoSchema = await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            await expect(neoSchema.getSchema()).rejects.toThrow('Enum "Location" cannot represent value: "DIFFERENT"');
+            await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
+                new GraphQLError("@default.value on Location fields must be of type Location"),
+            ]);
         });
 
         test("on enum field with incorrect type should throw an error", async () => {
+            const userType = testHelper.createUniqueType("User");
             const typeDefs = `
-                type User {
+                type ${userType} @node {
                     name: String!
                     location: Location! @default(value: 2)
                 }
@@ -136,16 +137,19 @@ describe("@default directive", () => {
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({
+            const neoSchema = await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 
-            await expect(neoSchema.getSchema()).rejects.toThrow("@default value on enum fields must be an enum value");
+            await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
+                new GraphQLError("@default.value on Location fields must be of type Location"),
+            ]);
         });
 
         test("on enum field should not throw an error", async () => {
+            const userType = testHelper.createUniqueType("User");
             const typeDefs = `
-                type User {
+                type ${userType} @node {
                     name: String!
                     location: Location! @default(value: HERE)
                 }
@@ -157,7 +161,7 @@ describe("@default directive", () => {
                 }
             `;
 
-            const neoSchema = new Neo4jGraphQL({
+            const neoSchema = await testHelper.initNeo4jGraphQL({
                 typeDefs,
             });
 

@@ -1,6 +1,12 @@
 query SimpleQuery {
     movies {
         title
+    }
+}
+
+query SimpleQueryWithRelationship {
+    movies {
+        title
         actors {
             name
         }
@@ -23,7 +29,7 @@ query SimpleQueryWithNestedWhere {
     }
 }
 
-query DeeplyNested {
+query DeeplyNested_skip {
     movies {
         actors {
             name
@@ -40,6 +46,34 @@ query DeeplyNested {
                             name
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+query Nested {
+    movies {
+        actors {
+            name
+            movies {
+                title
+                actors {
+                    name
+                }
+            }
+        }
+    }
+}
+
+query NestedWithFilter {
+    movies {
+        actors(where: { born_GT: 1000 }) {
+            name
+            movies(where: { title_CONTAINS: "Shark" }) {
+                title
+                actors {
+                    name
                 }
             }
         }
@@ -106,5 +140,94 @@ query NestedConnectionWhere {
         }
     ) {
         title
+    }
+}
+
+query DeeplyNestedConnectionWhere {
+    movies(
+        where: {
+            actorsConnection_SOME: {
+                node: {
+                    name: "Hugo Weaving"
+                    moviesConnection_NONE: {
+                        node: { title: "The Matrix", directorsConnection_SOME: { node: { name_CONTAINS: "Lana" } } }
+                    }
+                }
+            }
+        }
+    ) {
+        title
+    }
+}
+
+query DeeplyNestedWithRelationshipFilters {
+    people(
+        where: {
+            name_STARTS_WITH: "T"
+            movies_SOME: {
+                title_CONTAINS: "i"
+                actors_SOME: {
+                    name_CONTAINS: "i"
+                    movies_SOME: {
+                        NOT: { title: "non-existent" }
+                        actors_SOME: { name_CONTAINS: "i", movies_NONE: { title: "The Matrix" } }
+                    }
+                }
+            }
+        }
+    ) {
+        name
+    }
+}
+
+query NestedWithRelationshipSingleFilters {
+    people(
+        where: { name_STARTS_WITH: "T", movies_SINGLE: { title_CONTAINS: "i", actors_SINGLE: { name_CONTAINS: "i" } } }
+    ) {
+        name
+    }
+}
+
+# Skipped due to cypher bug causing poor performance of deeply nested SINGLE filters on Neo4j 5
+query DeeplyNestedWithRelationshipSingleFilters_skip {
+    people(
+        where: {
+            name_STARTS_WITH: "T"
+            movies_SINGLE: {
+                title_CONTAINS: "i"
+                actors_SINGLE: {
+                    name_CONTAINS: "i"
+                    movies_SINGLE: {
+                        NOT: { title: "non-existant" }
+                        actors_SINGLE: { name_CONTAINS: "i", movies_SINGLE: { title: "The Matrix" } }
+                    }
+                }
+            }
+        }
+    ) {
+        name
+    }
+}
+
+query Fulltext {
+    movieTaglineFulltextQuery(phrase: "the real world") {
+        movie {
+            title
+            tagline
+        }
+        score
+    }
+}
+
+query FulltextWithNestedQuery {
+    movieTaglineFulltextQuery(phrase: "the real world") {
+        movie {
+            title
+            tagline
+            actors {
+                name
+            }
+        }
+        score
     }
 }

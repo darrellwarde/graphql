@@ -17,8 +17,10 @@
  * limitations under the License.
  */
 
+import Cypher from "@neo4j/cypher-builder";
 import type { CallbackBucket } from "../../classes/CallbackBucket";
 import type { PrimitiveField } from "../../types";
+import { compileCypher } from "../../utils/compile-cypher";
 
 export const addCallbackAndSetParam = (
     field: PrimitiveField,
@@ -27,18 +29,49 @@ export const addCallbackAndSetParam = (
     callbackBucket: CallbackBucket,
     strs: string[],
     operation: "CREATE" | "UPDATE"
-) => {
+): void => {
     if (!field.callback || !field.callback.operations.includes(operation)) {
         return;
     }
 
-    const paramName = `${varName}_${field.fieldName}_${field.callback?.name}`;
+    const paramName = `${varName}_${field.fieldName}_${field.callback?.callbackName}`;
 
     callbackBucket.addCallback({
-        functionName: field.callback?.name,
+        functionName: field.callback?.callbackName,
         paramName,
         parent,
+        type: field.typeMeta,
     });
 
     strs.push(`SET ${varName}.${field.dbPropertyName} = $resolvedCallbacks.${paramName}`);
+};
+
+export const addCallbackAndSetParamCypher = (
+    field: PrimitiveField,
+    variable: Cypher.Variable,
+    parent: any,
+    callbackBucket: CallbackBucket,
+    operation: "CREATE" | "UPDATE",
+    node: Cypher.Node
+): [Cypher.Property, Cypher.Raw] | [] => {
+    if (!field.callback || !field.callback.operations.includes(operation)) {
+        return [];
+    }
+
+    const propRef = node.property(field.dbPropertyName as string);
+    const rawCypherStatement = new Cypher.Raw((env) => {
+        const variableCypher = compileCypher(variable, env);
+        const paramName = `${variableCypher}_${field.fieldName}_${field.callback?.callbackName}`;
+
+        callbackBucket.addCallback({
+            functionName: field.callback?.callbackName as string,
+            paramName,
+            parent,
+            type: field.typeMeta,
+        });
+
+        return [`$resolvedCallbacks.${paramName}`, {}];
+    });
+
+    return [propRef, rawCypherStatement];
 };

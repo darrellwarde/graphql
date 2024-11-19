@@ -18,15 +18,16 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
-import { gql } from "apollo-server";
 import { lexicographicSortSchema } from "graphql";
+import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Node Interface Types", () => {
     test("nodes should implement the Node Interface and generate a top-level node query", async () => {
         const typeDefs = gql`
-            type Movie {
-                title: String! @id(autogenerate: false, global: true)
+            type Movie @node {
+                title: String!
+                imdb: ID! @relayId
             }
         `;
         const neoSchema = new Neo4jGraphQL({ typeDefs });
@@ -38,8 +39,10 @@ describe("Node Interface Types", () => {
               mutation: Mutation
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -49,23 +52,33 @@ describe("Node Interface Types", () => {
               movies: [Movie!]!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
 
+            type IDAggregateSelection {
+              longest: ID
+              shortest: ID
+            }
+
             type Movie implements Node {
               id: ID!
+              imdb: ID!
               title: String!
             }
 
             type MovieAggregateSelection {
               count: Int!
-              title: StringAggregateSelectionNonNullable!
+              imdb: IDAggregateSelection!
+              title: StringAggregateSelection!
             }
 
             input MovieCreateInput {
+              imdb: ID!
               title: String!
             }
 
@@ -87,26 +100,33 @@ describe("Node Interface Types", () => {
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
             input MovieSort {
+              imdb: SortDirection
               title: SortDirection
             }
 
             input MovieUpdateInput {
-              title: String
+              imdb: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              imdb_SET: ID
+              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              title_SET: String
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
+              NOT: MovieWhere
               OR: [MovieWhere!]
               id: ID
-              title: String
+              imdb: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              imdb_CONTAINS: ID
+              imdb_ENDS_WITH: ID
+              imdb_EQ: ID
+              imdb_IN: [ID!]
+              imdb_STARTS_WITH: ID
+              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               title_CONTAINS: String
               title_ENDS_WITH: String
+              title_EQ: String
               title_IN: [String!]
-              title_NOT: String
-              title_NOT_CONTAINS: String
-              title_NOT_ENDS_WITH: String
-              title_NOT_IN: [String!]
-              title_NOT_STARTS_WITH: String
               title_STARTS_WITH: String
             }
 
@@ -137,9 +157,9 @@ describe("Node Interface Types", () => {
             }
 
             type Query {
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
               \\"\\"\\"Fetches an object given its ID\\"\\"\\"
               node(
                 \\"\\"\\"The ID of an object\\"\\"\\"
@@ -147,6 +167,7 @@ describe("Node Interface Types", () => {
               ): Node
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -154,13 +175,15 @@ describe("Node Interface Types", () => {
               DESC
             }
 
-            type StringAggregateSelectionNonNullable {
-              longest: String!
-              shortest: String!
+            type StringAggregateSelection {
+              longest: String
+              shortest: String
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

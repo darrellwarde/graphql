@@ -17,121 +17,152 @@
  * limitations under the License.
  */
 
+import type { DirectiveNode } from "graphql";
 import { GraphQLFloat, GraphQLNonNull } from "graphql";
-import type { SchemaComposer } from "graphql-compose";
-import type { Node } from "../../classes";
+import type { ObjectTypeComposer, SchemaComposer } from "graphql-compose";
+import type { SubscriptionEvents } from "../../classes/Node";
 import { EventType } from "../../graphql/enums/EventType";
-import { generateSubscriptionWhereType } from "./generate-subscription-where-type";
-import { generateEventPayloadType } from "./generate-event-payload-type";
+import type { Neo4jGraphQLSchemaModel } from "../../schema-model/Neo4jGraphQLSchemaModel";
+import { ConcreteEntityAdapter } from "../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import type { Neo4jFeaturesSettings, NodeSubscriptionsEvent, SubscriptionsEvent } from "../../types";
+import { withWhereInputType } from "../generation/where-input";
 import { generateSubscribeMethod, subscriptionResolve } from "../resolvers/subscriptions/subscribe";
-import type { SubscriptionsEvent } from "../../types";
+import { attributeAdapterToComposeFields } from "../to-compose";
 
 export function generateSubscriptionTypes({
     schemaComposer,
-    nodes,
+    schemaModel,
+    userDefinedFieldDirectivesForNode,
+    features,
 }: {
     schemaComposer: SchemaComposer;
-    nodes: Node[];
-}) {
+    schemaModel: Neo4jGraphQLSchemaModel;
+    userDefinedFieldDirectivesForNode: Map<string, Map<string, DirectiveNode[]>>;
+    features: Neo4jFeaturesSettings | undefined;
+}): void {
     const subscriptionComposer = schemaComposer.Subscription;
 
     const eventTypeEnum = schemaComposer.createEnumTC(EventType);
 
-    nodes.forEach((node) => {
-        const eventPayload = generateEventPayloadType(node, schemaComposer);
-        const where = generateSubscriptionWhereType(node, schemaComposer);
-        const subscribeOperation = node.rootTypeFieldNames.subscribe;
-        const subscriptionEventTypeNames = node.subscriptionEventTypeNames;
-        const subscriptionEventPayloadFieldNames = node.subscriptionEventPayloadFieldNames;
+    const allNodes = schemaModel.concreteEntities.map((e) => new ConcreteEntityAdapter(e));
 
-        const nodeCreatedEvent = schemaComposer.createObjectTC({
-            name: subscriptionEventTypeNames.create,
-            fields: {
-                event: {
-                    type: eventTypeEnum.NonNull,
-                    resolve: () => EventType.getValue("CREATE")?.value,
-                },
-                timestamp: {
-                    type: new GraphQLNonNull(GraphQLFloat),
-                    resolve: (source: SubscriptionsEvent) => source.timestamp,
-                },
-            },
+    const nodeNameToEventPayloadTypes: Record<string, ObjectTypeComposer> = allNodes.reduce((acc, entityAdapter) => {
+        const userDefinedFieldDirectives = userDefinedFieldDirectivesForNode.get(entityAdapter.name);
+        if (!userDefinedFieldDirectives) {
+            throw new Error("fix user directives for object types in subscriptions.");
+        }
+        acc[entityAdapter.name] = schemaComposer.createObjectTC({
+            name: entityAdapter.operations.subscriptionEventPayloadTypeName,
+            fields: attributeAdapterToComposeFields(
+                entityAdapter.subscriptionEventPayloadFields,
+                userDefinedFieldDirectives
+            ),
         });
+        return acc;
+    }, {});
 
-        const nodeUpdatedEvent = schemaComposer.createObjectTC({
-            name: subscriptionEventTypeNames.update,
-            fields: {
-                event: {
-                    type: eventTypeEnum.NonNull,
-                    resolve: () => EventType.getValue("UPDATE")?.value,
-                },
-                timestamp: {
-                    type: new GraphQLNonNull(GraphQLFloat),
-                    resolve: (source: SubscriptionsEvent) => source.timestamp,
-                },
-            },
+    function generateSubscriptionWhere(entityAdapter: ConcreteEntityAdapter) {
+        return withWhereInputType({
+            entityAdapter,
+            composer: schemaComposer,
+            typeName: entityAdapter.operations.subscriptionWhereInputTypeName,
+            features,
+            userDefinedFieldDirectives: userDefinedFieldDirectivesForNode[entityAdapter.name],
+            returnUndefinedIfEmpty: true,
+            alwaysAllowNesting: true,
+            ignoreCypherFieldFilters: true,
         });
+    }
 
-        const nodeDeletedEvent = schemaComposer.createObjectTC({
-            name: subscriptionEventTypeNames.delete,
-            fields: {
-                event: {
-                    type: eventTypeEnum.NonNull,
-                    resolve: () => EventType.getValue("DELETE")?.value,
-                },
-                timestamp: {
-                    type: new GraphQLNonNull(GraphQLFloat),
-                    resolve: (source: SubscriptionsEvent) => source.timestamp,
-                },
-            },
-        });
+    allNodes.forEach((entityAdapter) => generateSubscriptionWhere(entityAdapter));
 
-        if (Object.keys(eventPayload.getFields()).length) {
+    const nodesWithSubscriptionOperation = allNodes.filter((e) => e.isSubscribable);
+    nodesWithSubscriptionOperation.forEach((entityAdapter) => {
+        const eventPayload = nodeNameToEventPayloadTypes[entityAdapter.name] as ObjectTypeComposer;
+        const where = generateSubscriptionWhere(entityAdapter);
+
+        const createField = <T extends SubscriptionsEvent>(type: keyof SubscriptionEvents) =>
+            schemaComposer.createObjectTC({
+                name: entityAdapter.operations.subscriptionEventTypeNames[type],
+                fields: {
+                    event: {
+                        type: eventTypeEnum.NonNull,
+                        resolve: () => EventType.getValue(type.toUpperCase())?.value,
+                    },
+                    timestamp: {
+                        type: new GraphQLNonNull(GraphQLFloat),
+                        resolve: (source: T) => source.timestamp,
+                    },
+                },
+            });
+
+        const nodeCreatedEvent = createField<NodeSubscriptionsEvent>("create");
+        const nodeUpdatedEvent = createField<NodeSubscriptionsEvent>("update");
+        const nodeDeletedEvent = createField<NodeSubscriptionsEvent>("delete");
+
+        if (hasProperties(eventPayload)) {
             nodeCreatedEvent.addFields({
-                [subscriptionEventPayloadFieldNames.create]: {
+                [entityAdapter.operations.subscriptionEventPayloadFieldNames.create]: {
                     type: eventPayload.NonNull,
-                    resolve: (source: SubscriptionsEvent) => source.properties.new,
+                    resolve: (source) => source.properties.new,
                 },
             });
 
             nodeUpdatedEvent.addFields({
                 previousState: {
                     type: eventPayload.NonNull,
-                    resolve: (source: SubscriptionsEvent) => source.properties.old,
+                    resolve: (source) => source.properties.old,
                 },
-                [subscriptionEventPayloadFieldNames.update]: {
+                [entityAdapter.operations.subscriptionEventPayloadFieldNames.update]: {
                     type: eventPayload.NonNull,
-                    resolve: (source: SubscriptionsEvent) => source.properties.new,
+                    resolve: (source) => source.properties.new,
                 },
             });
 
             nodeDeletedEvent.addFields({
-                [subscriptionEventPayloadFieldNames.delete]: {
+                [entityAdapter.operations.subscriptionEventPayloadFieldNames.delete]: {
                     type: eventPayload.NonNull,
-                    resolve: (source: SubscriptionsEvent) => source.properties.old,
+                    resolve: (source) => source.properties.old,
                 },
             });
         }
 
-        subscriptionComposer.addFields({
-            [subscribeOperation.created]: {
-                args: { where },
-                type: nodeCreatedEvent.NonNull,
-                subscribe: generateSubscribeMethod(node, "create"),
-                resolve: subscriptionResolve,
-            },
-            [subscribeOperation.updated]: {
-                args: { where },
-                type: nodeUpdatedEvent.NonNull,
-                subscribe: generateSubscribeMethod(node, "update"),
-                resolve: subscriptionResolve,
-            },
-            [subscribeOperation.deleted]: {
-                args: { where },
-                type: nodeDeletedEvent.NonNull,
-                subscribe: generateSubscribeMethod(node, "delete"),
-                resolve: subscriptionResolve,
-            },
-        });
+        const whereArgument = where && { args: { where } };
+
+        if (entityAdapter.isSubscribableOnCreate) {
+            subscriptionComposer.addFields({
+                [entityAdapter.operations.rootTypeFieldNames.subscribe.created]: {
+                    ...whereArgument,
+                    type: nodeCreatedEvent.NonNull,
+                    subscribe: generateSubscribeMethod({ entityAdapter, type: "create" }),
+                    resolve: subscriptionResolve,
+                },
+            });
+        }
+        if (entityAdapter.isSubscribableOnUpdate) {
+            subscriptionComposer.addFields({
+                [entityAdapter.operations.rootTypeFieldNames.subscribe.updated]: {
+                    ...whereArgument,
+                    type: nodeUpdatedEvent.NonNull,
+                    subscribe: generateSubscribeMethod({ entityAdapter, type: "update" }),
+                    resolve: subscriptionResolve,
+                },
+            });
+        }
+
+        if (entityAdapter.isSubscribableOnDelete) {
+            subscriptionComposer.addFields({
+                [entityAdapter.operations.rootTypeFieldNames.subscribe.deleted]: {
+                    ...whereArgument,
+                    type: nodeDeletedEvent.NonNull,
+                    subscribe: generateSubscribeMethod({ entityAdapter, type: "delete" }),
+                    resolve: subscriptionResolve,
+                },
+            });
+        }
     });
+}
+
+function hasProperties(x: ObjectTypeComposer): boolean {
+    return !!Object.keys(x.getFields()).length;
 }

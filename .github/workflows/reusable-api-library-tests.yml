@@ -2,13 +2,12 @@ name: "@neo4j/graphql specific tests"
 
 on:
   workflow_call:
-    secrets:
-      CODECOV_TOKEN:
-        description: "API token for Codecov, if it is available in the current context"
+    inputs:
+      disable-coverage-archival:
+        description: "Whether or not to archive the test coverage"
         required: false
-
-env:
-  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        default: false
+        type: boolean
 
 jobs:
   tck-tests:
@@ -16,37 +15,74 @@ jobs:
 
     strategy:
       matrix:
-        graphql-version:
-          - "^15.0.0"
-          - "^16.0.0"
+        shard:
+          - 1/4
+          - 2/4
+          - 3/4
+          - 4/4
+        version:
+          [
+            { graphql: "^15.0.0", neo4j: "5-enterprise" },
+            { graphql: "^16.0.0", neo4j: "5-community" },
+            { graphql: "^16.0.0", neo4j: "5-enterprise" },
+          ]
+
+    services:
+      neo4j:
+        image: neo4j:${{ matrix.version.neo4j }}
+        env:
+          NEO4J_AUTH: neo4j/password
+          NEO4J_PLUGINS: '["apoc"]'
+          NEO4J_ACCEPT_LICENSE_AGREEMENT: yes
+        ports:
+          - 7687:7687
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version: lts/*
           cache: yarn
       - name: Install dependencies
         run: yarn
       - name: Overwrite GraphQL version
-        run: yarn up --exact graphql@${{ matrix.graphql-version }}
+        run: yarn up --exact graphql@${{ matrix.version.graphql }}
       - name: Run TCK tests
-        run: yarn --cwd packages/graphql run test:tck --coverage
-      - if: ${{ env.CODECOV_TOKEN != '' }}
-        name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        run: yarn --cwd packages/graphql run test:tck --shard=${{ matrix.shard }} --coverage
+        env:
+          VERIFY_TCK: true
+          NEO_USER: neo4j
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      neo4j:
+        image: neo4j:5-enterprise
+        env:
+          NEO4J_AUTH: neo4j/password
+          NEO4J_PLUGINS: '["apoc"]'
+          NEO4J_ACCEPT_LICENSE_AGREEMENT: yes
+        ports:
+          - 7687:7687
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./packages/graphql/coverage/
-          flags: graphql,tck
-          fail_ci_if_error: true
+          node-version: lts/*
+          cache: yarn
+      - name: Install dependencies
+        run: yarn
+      - name: Run E2E tests
+        run: yarn --cwd packages/graphql run test e2e --coverage
 
   schema-tests:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4
         with:
           node-version: lts/*
           cache: yarn
@@ -54,11 +90,9 @@ jobs:
         run: yarn
       - name: Run Schema tests
         run: yarn --cwd packages/graphql run test:schema --coverage
-      - if: ${{ env.CODECOV_TOKEN != '' }}
-        name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+      - if: ${{ !inputs.disable-coverage-archival }}
+        name: Archive coverage report
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./packages/graphql/coverage/
-          flags: graphql,schema
-          fail_ci_if_error: true
+          name: api-library-coverage-graphql
+          path: packages/graphql/coverage/

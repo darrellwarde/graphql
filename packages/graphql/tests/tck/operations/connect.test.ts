@@ -1,0 +1,291 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { Neo4jGraphQL } from "../../../src";
+import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
+
+describe("Cypher Connect", () => {
+    let typeDefs: string;
+    let neoSchema: Neo4jGraphQL;
+
+    beforeAll(() => {
+        typeDefs = /* GraphQL */ `
+            type Product @node {
+                id: ID!
+                name: String
+                sizes: [Size!]! @relationship(type: "HAS_SIZE", direction: OUT)
+                colors: [Color!]! @relationship(type: "HAS_COLOR", direction: OUT)
+                photos: [Photo!]! @relationship(type: "HAS_PHOTO", direction: OUT)
+            }
+
+            type Size @node {
+                id: ID!
+                name: String!
+            }
+
+            type Color @node {
+                id: ID!
+                name: String!
+                photos: [Photo!]! @relationship(type: "OF_COLOR", direction: IN)
+            }
+
+            type Photo @node {
+                id: ID!
+                description: String!
+                url: String!
+                color: Color! @relationship(type: "OF_COLOR", direction: OUT)
+            }
+        `;
+
+        neoSchema = new Neo4jGraphQL({
+            typeDefs,
+        });
+    });
+
+    test("Recursive Connect", async () => {
+        const query = /* GraphQL */ `
+            mutation {
+                createProducts(
+                    input: [
+                        {
+                            id: "123"
+                            name: "Nested Connect"
+                            colors: {
+                                connect: [
+                                    {
+                                        where: { node: { name_EQ: "Red" } }
+                                        connect: {
+                                            photos: [
+                                                {
+                                                    where: { node: { id_EQ: "123" } }
+                                                    connect: { color: { where: { node: { id_EQ: "134" } } } }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                            photos: {
+                                connect: [
+                                    {
+                                        where: { node: { id_EQ: "321" } }
+                                        connect: { color: { where: { node: { name_EQ: "Green" } } } }
+                                    }
+                                    {
+                                        where: { node: { id_EQ: "33211" } }
+                                        connect: { color: { where: { node: { name_EQ: "Red" } } } }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                ) {
+                    products {
+                        id
+                    }
+                }
+            }
+        `;
+
+        const result = await translateQuery(neoSchema, query);
+
+        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
+            "CALL {
+            CREATE (this0:Product)
+            SET this0.id = $this0_id
+            SET this0.name = $this0_name
+            WITH *
+            CALL {
+            	WITH this0
+            	OPTIONAL MATCH (this0_colors_connect0_node:Color)
+            	WHERE this0_colors_connect0_node.name = $this0_colors_connect0_node_param0
+            	CALL {
+            		WITH *
+            		WITH collect(this0_colors_connect0_node) as connectedNodes, collect(this0) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this0
+            			UNWIND connectedNodes as this0_colors_connect0_node
+            			MERGE (this0)-[:HAS_COLOR]->(this0_colors_connect0_node)
+            		}
+            	}
+            WITH this0, this0_colors_connect0_node
+            CALL {
+            	WITH this0, this0_colors_connect0_node
+            	OPTIONAL MATCH (this0_colors_connect0_node_photos0_node:Photo)
+            	WHERE this0_colors_connect0_node_photos0_node.id = $this0_colors_connect0_node_photos0_node_param0
+            	CALL {
+            		WITH *
+            		WITH this0, collect(this0_colors_connect0_node_photos0_node) as connectedNodes, collect(this0_colors_connect0_node) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this0_colors_connect0_node
+            			UNWIND connectedNodes as this0_colors_connect0_node_photos0_node
+            			MERGE (this0_colors_connect0_node)<-[:OF_COLOR]-(this0_colors_connect0_node_photos0_node)
+            		}
+            	}
+            	WITH this0, this0_colors_connect0_node, this0_colors_connect0_node_photos0_node
+            CALL {
+            	WITH this0_colors_connect0_node_photos0_node
+            	MATCH (this0_colors_connect0_node_photos0_node)-[this0_colors_connect0_node_photos0_node_color_Color_unique:OF_COLOR]->(:Color)
+            	WITH count(this0_colors_connect0_node_photos0_node_color_Color_unique) as c
+            	WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDPhoto.color required exactly once', [0])
+            	RETURN c AS this0_colors_connect0_node_photos0_node_color_Color_unique_ignored
+            }
+            WITH this0, this0_colors_connect0_node, this0_colors_connect0_node_photos0_node
+            CALL {
+            	WITH this0, this0_colors_connect0_node, this0_colors_connect0_node_photos0_node
+            	OPTIONAL MATCH (this0_colors_connect0_node_photos0_node_color0_node:Color)
+            	WHERE this0_colors_connect0_node_photos0_node_color0_node.id = $this0_colors_connect0_node_photos0_node_color0_node_param0
+            	CALL {
+            		WITH *
+            		WITH this0, this0_colors_connect0_node, collect(this0_colors_connect0_node_photos0_node_color0_node) as connectedNodes, collect(this0_colors_connect0_node_photos0_node) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this0_colors_connect0_node_photos0_node
+            			UNWIND connectedNodes as this0_colors_connect0_node_photos0_node_color0_node
+            			MERGE (this0_colors_connect0_node_photos0_node)-[:OF_COLOR]->(this0_colors_connect0_node_photos0_node_color0_node)
+            		}
+            	}
+            	WITH this0, this0_colors_connect0_node, this0_colors_connect0_node_photos0_node, this0_colors_connect0_node_photos0_node_color0_node
+            CALL {
+            	WITH this0_colors_connect0_node_photos0_node
+            	MATCH (this0_colors_connect0_node_photos0_node)-[this0_colors_connect0_node_photos0_node_color_Color_unique:OF_COLOR]->(:Color)
+            	WITH count(this0_colors_connect0_node_photos0_node_color_Color_unique) as c
+            	WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDPhoto.color required exactly once', [0])
+            	RETURN c AS this0_colors_connect0_node_photos0_node_color_Color_unique_ignored
+            }
+            WITH this0, this0_colors_connect0_node, this0_colors_connect0_node_photos0_node, this0_colors_connect0_node_photos0_node_color0_node
+            	RETURN count(*) AS connect_this0_colors_connect0_node_photos0_node_color_Color0
+            }
+            	RETURN count(*) AS connect_this0_colors_connect0_node_photos_Photo0
+            }
+            	RETURN count(*) AS connect_this0_colors_connect_Color0
+            }
+            WITH *
+            CALL {
+            	WITH this0
+            	OPTIONAL MATCH (this0_photos_connect0_node:Photo)
+            	WHERE this0_photos_connect0_node.id = $this0_photos_connect0_node_param0
+            	CALL {
+            		WITH *
+            		WITH collect(this0_photos_connect0_node) as connectedNodes, collect(this0) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this0
+            			UNWIND connectedNodes as this0_photos_connect0_node
+            			MERGE (this0)-[:HAS_PHOTO]->(this0_photos_connect0_node)
+            		}
+            	}
+            WITH this0, this0_photos_connect0_node
+            CALL {
+            	WITH this0, this0_photos_connect0_node
+            	OPTIONAL MATCH (this0_photos_connect0_node_color0_node:Color)
+            	WHERE this0_photos_connect0_node_color0_node.name = $this0_photos_connect0_node_color0_node_param0
+            	CALL {
+            		WITH *
+            		WITH this0, collect(this0_photos_connect0_node_color0_node) as connectedNodes, collect(this0_photos_connect0_node) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this0_photos_connect0_node
+            			UNWIND connectedNodes as this0_photos_connect0_node_color0_node
+            			MERGE (this0_photos_connect0_node)-[:OF_COLOR]->(this0_photos_connect0_node_color0_node)
+            		}
+            	}
+            	WITH this0, this0_photos_connect0_node, this0_photos_connect0_node_color0_node
+            CALL {
+            	WITH this0_photos_connect0_node
+            	MATCH (this0_photos_connect0_node)-[this0_photos_connect0_node_color_Color_unique:OF_COLOR]->(:Color)
+            	WITH count(this0_photos_connect0_node_color_Color_unique) as c
+            	WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDPhoto.color required exactly once', [0])
+            	RETURN c AS this0_photos_connect0_node_color_Color_unique_ignored
+            }
+            WITH this0, this0_photos_connect0_node, this0_photos_connect0_node_color0_node
+            	RETURN count(*) AS connect_this0_photos_connect0_node_color_Color0
+            }
+            	RETURN count(*) AS connect_this0_photos_connect_Photo0
+            }
+            WITH *
+            CALL {
+            	WITH this0
+            	OPTIONAL MATCH (this0_photos_connect1_node:Photo)
+            	WHERE this0_photos_connect1_node.id = $this0_photos_connect1_node_param0
+            	CALL {
+            		WITH *
+            		WITH collect(this0_photos_connect1_node) as connectedNodes, collect(this0) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this0
+            			UNWIND connectedNodes as this0_photos_connect1_node
+            			MERGE (this0)-[:HAS_PHOTO]->(this0_photos_connect1_node)
+            		}
+            	}
+            WITH this0, this0_photos_connect1_node
+            CALL {
+            	WITH this0, this0_photos_connect1_node
+            	OPTIONAL MATCH (this0_photos_connect1_node_color0_node:Color)
+            	WHERE this0_photos_connect1_node_color0_node.name = $this0_photos_connect1_node_color0_node_param0
+            	CALL {
+            		WITH *
+            		WITH this0, collect(this0_photos_connect1_node_color0_node) as connectedNodes, collect(this0_photos_connect1_node) as parentNodes
+            		CALL {
+            			WITH connectedNodes, parentNodes
+            			UNWIND parentNodes as this0_photos_connect1_node
+            			UNWIND connectedNodes as this0_photos_connect1_node_color0_node
+            			MERGE (this0_photos_connect1_node)-[:OF_COLOR]->(this0_photos_connect1_node_color0_node)
+            		}
+            	}
+            	WITH this0, this0_photos_connect1_node, this0_photos_connect1_node_color0_node
+            CALL {
+            	WITH this0_photos_connect1_node
+            	MATCH (this0_photos_connect1_node)-[this0_photos_connect1_node_color_Color_unique:OF_COLOR]->(:Color)
+            	WITH count(this0_photos_connect1_node_color_Color_unique) as c
+            	WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDPhoto.color required exactly once', [0])
+            	RETURN c AS this0_photos_connect1_node_color_Color_unique_ignored
+            }
+            WITH this0, this0_photos_connect1_node, this0_photos_connect1_node_color0_node
+            	RETURN count(*) AS connect_this0_photos_connect1_node_color_Color0
+            }
+            	RETURN count(*) AS connect_this0_photos_connect_Photo1
+            }
+            RETURN this0
+            }
+            CALL {
+                WITH this0
+                RETURN this0 { .id } AS create_var0
+            }
+            RETURN [create_var0] AS data"
+        `);
+
+        expect(formatParams(result.params)).toMatchInlineSnapshot(`
+            "{
+                \\"this0_id\\": \\"123\\",
+                \\"this0_name\\": \\"Nested Connect\\",
+                \\"this0_colors_connect0_node_param0\\": \\"Red\\",
+                \\"this0_colors_connect0_node_photos0_node_param0\\": \\"123\\",
+                \\"this0_colors_connect0_node_photos0_node_color0_node_param0\\": \\"134\\",
+                \\"this0_photos_connect0_node_param0\\": \\"321\\",
+                \\"this0_photos_connect0_node_color0_node_param0\\": \\"Green\\",
+                \\"this0_photos_connect1_node_param0\\": \\"33211\\",
+                \\"this0_photos_connect1_node_color0_node_param0\\": \\"Red\\",
+                \\"resolvedCallbacks\\": {}
+            }"
+        `);
+    });
+});

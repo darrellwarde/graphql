@@ -17,46 +17,59 @@
  * limitations under the License.
  */
 
-import type { FieldNode, GraphQLResolveInfo } from "graphql";
-import { execute } from "../../../utils";
-import { translateCreate } from "../../../translate";
+import { Kind, type FieldNode, type GraphQLResolveInfo } from "graphql";
 import type { Node } from "../../../classes";
-import type { Context } from "../../../types";
+import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import { translateCreate } from "../../../translate";
+import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
+import { execute } from "../../../utils";
 import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
-import { publishEventsToPlugin } from "../../subscriptions/publish-events-to-plugin";
+import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
 
-export function createResolver({ node }: { node: Node }) {
-    async function resolve(_root: any, args: any, _context: unknown, info: GraphQLResolveInfo) {
-        const context = _context as Context;
-        context.resolveTree = getNeo4jResolveTree(info, { args });
-        const [cypher, params] = await translateCreate({ context, node });
+export function createResolver({
+    node,
+    concreteEntityAdapter,
+}: {
+    node: Node;
+    concreteEntityAdapter: ConcreteEntityAdapter;
+}) {
+    async function resolve(_root: any, args: any, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) {
+        const resolveTree = getNeo4jResolveTree(info, { args });
+
+        (context as Neo4jGraphQLTranslationContext).resolveTree = resolveTree;
+
+        const { cypher, params } = await translateCreate({ context: context as Neo4jGraphQLTranslationContext, node });
 
         const executeResult = await execute({
             cypher,
             params,
             defaultAccessMode: "WRITE",
             context,
+            info,
         });
 
-        const nodeProjection = info.fieldNodes[0].selectionSet?.selections.find(
-            (selection) => selection.kind === "Field" && selection.name.value === node.plural
-        ) as FieldNode;
-        const nodeKey = nodeProjection?.alias ? nodeProjection.alias.value : nodeProjection?.name?.value;
+        const nodeProjection = info.fieldNodes[0]?.selectionSet?.selections.find(
+            (selection): selection is FieldNode =>
+                selection.kind === Kind.FIELD && selection.name.value === concreteEntityAdapter.plural
+        );
 
-        publishEventsToPlugin(executeResult, context.plugins?.subscriptions);
-
-        return {
+        const resolveResult = {
             info: {
-                bookmark: executeResult.bookmark,
                 ...executeResult.statistics,
             },
-            ...(nodeProjection ? { [nodeKey]: executeResult.records[0]?.data || [] } : {}),
         };
+
+        if (nodeProjection) {
+            const nodeKey = nodeProjection?.alias ? nodeProjection.alias.value : nodeProjection?.name?.value;
+            resolveResult[nodeKey] = executeResult.records[0]?.data || [];
+        }
+
+        return resolveResult;
     }
 
     return {
-        type: `${node.mutationResponseTypeNames.create}!`,
+        type: `${concreteEntityAdapter.operations.mutationResponseTypeNames.create}!`,
         resolve,
-        args: { input: `[${node.name}CreateInput!]!` },
+        args: concreteEntityAdapter.operations.createMutationArgumentNames,
     };
 }

@@ -17,40 +17,39 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/247", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let User: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeAll(() => {
+        Movie = testHelper.createUniqueType("Movie");
+        User = testHelper.createUniqueType("User");
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should return the correct number of results following connect", async () => {
         const typeDefs = gql`
-            type Movie {
+           type ${Movie} @node {
                 title: String!
-                owners: [User!]! @relationship(type: "OWNS", direction: IN)
+                owners: [${User}!]! @relationship(type: "OWNS", direction: IN)
             }
 
-            type User {
+            type ${User} @node {
                 name: String!
-                movies: [Movie!]! @relationship(type: "OWNS", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "OWNS", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const name = generate({ charset: "alphabetic" });
 
@@ -60,8 +59,8 @@ describe("https://github.com/neo4j/graphql/issues/247", () => {
 
         const createUsers = `
             mutation CreateUser($name: String!) {
-                createUsers(input: [{ name: $name }]) {
-                    users {
+                ${User.operations.create}(input: [{ name: $name }]) {
+                    ${User.plural} {
                         name
                     }
                 }
@@ -70,8 +69,8 @@ describe("https://github.com/neo4j/graphql/issues/247", () => {
 
         const createMovies = `
             mutation CreateMovies($title1: String!, $title2: String!, $title3: String!) {
-                createMovies(input: [{ title: $title1 }, { title: $title2 }, { title: $title3 }]) {
-                    movies {
+                ${Movie.operations.create}(input: [{ title: $title1 }, { title: $title2 }, { title: $title3 }]) {
+                    ${Movie.plural} {
                         title
                     }
                 }
@@ -80,11 +79,17 @@ describe("https://github.com/neo4j/graphql/issues/247", () => {
 
         const connect = `
             mutation Connect($name: String, $title2: String!, $title3: String!) {
-                updateUsers(
-                    where: { name: $name }
-                    connect: { movies: [{ where: { node: { title_IN: [$title2, $title3] } } }] }
+                ${User.operations.update}(
+                    where: { name_EQ: $name }
+                    update: {
+                        movies: {
+                            connect: {
+                                where: { node: { title_IN: [$title2, $title3] } }
+                            }
+                        }
+                    }
                 ) {
-                    users {
+                    ${User.plural} {
                         name
                         movies {
                             title
@@ -94,42 +99,37 @@ describe("https://github.com/neo4j/graphql/issues/247", () => {
             }
         `;
 
-        const createUsersResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: createUsers,
+        const createUsersResult = await testHelper.executeGraphQL(createUsers, {
             variableValues: { name },
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(createUsersResult.errors).toBeFalsy();
-        expect((createUsersResult.data as any)?.createUsers.users).toEqual([{ name }]);
+        expect((createUsersResult.data as any)[User.operations.create][User.plural]).toEqual([{ name }]);
 
-        const createMoviesResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: createMovies,
+        const createMoviesResult = await testHelper.executeGraphQL(createMovies, {
             variableValues: { title1, title2, title3 },
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(createMoviesResult.errors).toBeFalsy();
-        expect((createMoviesResult.data as any)?.createMovies.movies).toEqual([
+        expect((createMoviesResult.data as any)[Movie.operations.create][Movie.plural]).toEqual([
             { title: title1 },
             { title: title2 },
             { title: title3 },
         ]);
 
-        const connectResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: connect,
+        const connectResult = await testHelper.executeGraphQL(connect, {
             variableValues: { name, title2, title3 },
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(connectResult.errors).toBeFalsy();
-        expect((connectResult.data as any)?.updateUsers.users).toHaveLength(1);
-        expect((connectResult.data as any)?.updateUsers.users[0].name).toEqual(name);
-        expect((connectResult.data as any)?.updateUsers.users[0].movies).toHaveLength(2);
-        expect((connectResult.data as any)?.updateUsers.users[0].movies).toContainEqual({ title: title2 });
-        expect((connectResult.data as any)?.updateUsers.users[0].movies).toContainEqual({ title: title3 });
+        expect((connectResult.data as any)[User.operations.update][User.plural]).toHaveLength(1);
+        expect((connectResult.data as any)[User.operations.update][User.plural][0].name).toEqual(name);
+        expect((connectResult.data as any)[User.operations.update][User.plural][0].movies).toHaveLength(2);
+        expect((connectResult.data as any)[User.operations.update][User.plural][0].movies).toContainEqual({
+            title: title2,
+        });
+        expect((connectResult.data as any)[User.operations.update][User.plural][0].movies).toContainEqual({
+            title: title3,
+        });
     });
 });

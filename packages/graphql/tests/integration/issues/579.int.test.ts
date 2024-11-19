@@ -17,46 +17,42 @@
  * limitations under the License.
  */
 
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
-import { Neo4jGraphQL } from "../../../src/classes";
-import Neo4j from "../neo4j";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
-describe("579", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+describe("https://github.com/neo4j/graphql/pull/579", () => {
+    const testHelper = new TestHelper();
+    let typeDefs: string;
+    let Product: UniqueType;
+    let Color: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        Product = testHelper.createUniqueType("Product");
+        Color = testHelper.createUniqueType("Color");
+        typeDefs = `
+        type ${Product} @node {
+           id: ID
+           color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT, properties: "OfColorProperties")
+         }
+
+         type OfColorProperties @relationshipProperties {
+             test: Boolean
+         }
+
+         type ${Color} @node {
+           name: String
+           id: ID
+         }
+      `;
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should update an Edge property in a one to one relationship", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-          type Product {
-             id: ID
-             color: Color! @relationship(type: "OF_COLOR", direction: OUT, properties: "OfColorProperties")
-           }
-
-           interface OfColorProperties @relationshipProperties {
-               test: Boolean
-           }
-
-           type Color {
-             name: String
-             id: ID
-           }
-        `;
-
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-
         const productId = generate({
             charset: "alphabetic",
         });
@@ -65,25 +61,27 @@ describe("579", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
-                updateProducts(
-                  where: { id: "${productId}" }
+                ${Product.operations.update}(
+                  where: { id_EQ: "${productId}" }
                   update: {
                       color: {
                           update: {
                               edge: {
-                                  test: true
+                                  test_SET: true
                               }
                           }
                       }
                   }
                 ) {
-                    products {
+                    ${Product.plural} {
                         id
                         colorConnection {
                             edges {
-                                test
+                                properties { 
+                                    test
+                                }
                             }
                         }
                     }
@@ -91,40 +89,33 @@ describe("579", () => {
               }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (product:Product {name: "Pringles", id: $productId})
-                    CREATE (color:Color {name: "Yellow", id: $colorId})
+        await testHelper.executeCypher(
+            `
+                    CREATE (product:${Product} {name: "Pringles", id: $productId})
+                    CREATE (color:${Color} {name: "Yellow", id: $colorId})
                     MERGE (product)-[:OF_COLOR { test: false }]->(color)
             `,
-                {
-                    productId,
-                    colorId,
-                }
-            );
+            {
+                productId,
+                colorId,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {},
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: {},
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(((gqlResult?.data as any)?.updateProducts.products as any[])[0]).toMatchObject({
-                id: productId,
-                colorConnection: {
-                    edges: [
-                        {
-                            test: true,
-                        },
-                    ],
-                },
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult?.data as any)[Product.operations.update][Product.plural][0]).toMatchObject({
+            id: productId,
+            colorConnection: {
+                edges: [
+                    {
+                        properties: { test: true },
+                    },
+                ],
+            },
+        });
     });
 });

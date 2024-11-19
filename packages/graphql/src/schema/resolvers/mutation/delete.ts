@@ -18,38 +18,51 @@
  */
 
 import type { GraphQLResolveInfo } from "graphql";
-import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
-import { execute } from "../../../utils";
+import type { SchemaComposer } from "graphql-compose";
+import type { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import { translateDelete } from "../../../translate";
-import type { Context } from "../../../types";
-import type { Node } from "../../../classes";
-import { publishEventsToPlugin } from "../../subscriptions/publish-events-to-plugin";
+import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphql-translation-context";
+import { execute } from "../../../utils";
+import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
+import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
 
-export function deleteResolver({ node }: { node: Node }) {
-    async function resolve(_root: any, args: any, _context: unknown, info: GraphQLResolveInfo) {
-        const context = _context as Context;
-        context.resolveTree = getNeo4jResolveTree(info, { args });
-        const [cypher, params] = translateDelete({ context, node });
+export function deleteResolver({
+    composer,
+    concreteEntityAdapter,
+}: {
+    composer: SchemaComposer;
+    concreteEntityAdapter: ConcreteEntityAdapter;
+}) {
+    async function resolve(_root: any, args: any, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) {
+        const resolveTree = getNeo4jResolveTree(info, { args });
+
+        (context as Neo4jGraphQLTranslationContext).resolveTree = resolveTree;
+
+        const { cypher, params } = translateDelete({
+            context: context as Neo4jGraphQLTranslationContext,
+            entityAdapter: concreteEntityAdapter,
+        });
         const executeResult = await execute({
             cypher,
             params,
             defaultAccessMode: "WRITE",
             context,
+            info,
         });
 
-        publishEventsToPlugin(executeResult, context.plugins?.subscriptions);
-
-        return { bookmark: executeResult.bookmark, ...executeResult.statistics };
+        return executeResult.statistics;
     }
+
+    const hasDeleteInput = composer.has(concreteEntityAdapter.operations.deleteInputTypeName);
 
     return {
         type: `DeleteInfo!`,
         resolve,
         args: {
-            where: `${node.name}Where`,
-            ...(node.relationFields.length
+            where: concreteEntityAdapter.operations.whereInputTypeName,
+            ...(hasDeleteInput
                 ? {
-                      delete: `${node.name}DeleteInput`,
+                      delete: concreteEntityAdapter.operations.deleteInputTypeName,
                   }
                 : {}),
         },

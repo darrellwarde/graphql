@@ -17,39 +17,41 @@
  * limitations under the License.
  */
 
-import type { FieldNode, GraphQLResolveInfo, SelectionSetNode } from "graphql";
+import { Kind, type FieldNode, type GraphQLResolveInfo, type SelectionSetNode } from "graphql";
 import { getOffsetWithDefault, offsetToCursor } from "graphql-relay/connection/arrayConnection";
-import type { Integer } from "neo4j-driver";
-import type { ConnectionField, ConnectionQueryArgs } from "../types";
+import type { ConnectionQueryArgs } from "../types";
 import { isNeoInt } from "../utils/utils";
 
 function getAliasKey({ selectionSet, key }: { selectionSet: SelectionSetNode | undefined; key: string }): string {
-    const selection = (selectionSet?.selections || []).find(
-        (x) => x.kind === "Field" && x.name.value === key
-    ) as FieldNode;
-
-    if (selection?.alias) {
-        return selection.alias.value;
+    for (const field of selectionSet?.selections || []) {
+        if (field.kind === Kind.FIELD && field.name.value === key && field.alias) {
+            return field.alias.value;
+        }
     }
 
     return key;
 }
 
 export function connectionFieldResolver({
-    connectionField,
+    connectionFieldName,
     source,
     args,
     info,
 }: {
-    connectionField: ConnectionField;
+    connectionFieldName: string;
     source: any;
     args: ConnectionQueryArgs;
     info: GraphQLResolveInfo;
 }) {
     const firstField = info.fieldNodes[0];
+
+    if (!firstField) {
+        throw new Error("Field not found");
+    }
+
     const { selectionSet } = firstField;
 
-    let value = source[connectionField.fieldName];
+    let value = source[connectionFieldName];
     if (firstField.alias) {
         value = source[firstField.alias.value];
     }
@@ -93,11 +95,11 @@ export function createConnectionWithEdgeProperties({
 
     const selections = selectionSet?.selections || [];
 
-    const edgesField = selections.find((x) => x.kind === "Field" && x.name.value === "edges") as FieldNode;
+    const edgesField = selections.find((x): x is FieldNode => x.kind === Kind.FIELD && x.name.value === "edges");
     const cursorKey = getAliasKey({ selectionSet: edgesField?.selectionSet, key: "cursor" });
     const nodeKey = getAliasKey({ selectionSet: edgesField?.selectionSet, key: "node" });
 
-    const sliceEnd = sliceStart + (first || (edges.length as number));
+    const sliceEnd = sliceStart + (first || edges.length);
 
     const mappedEdges = edges.map((value, index) => {
         return {
@@ -112,7 +114,7 @@ export function createConnectionWithEdgeProperties({
 
     const pageInfoKey = getAliasKey({ selectionSet, key: "pageInfo" });
     const edgesKey = getAliasKey({ selectionSet, key: "edges" });
-    const pageInfoField = selections.find((x) => x.kind === "Field" && x.name.value === "pageInfo") as FieldNode;
+    const pageInfoField = selections.find((x): x is FieldNode => x.kind === Kind.FIELD && x.name.value === "pageInfo");
     const pageInfoSelectionSet = pageInfoField?.selectionSet;
     const startCursorKey = getAliasKey({ selectionSet: pageInfoSelectionSet, key: "startCursor" });
     const endCursorKey = getAliasKey({ selectionSet: pageInfoSelectionSet, key: "endCursor" });
@@ -128,33 +130,4 @@ export function createConnectionWithEdgeProperties({
             [hasNextPageKey]: typeof first === "number" ? sliceEnd < totalCount : false,
         },
     };
-}
-
-export function createOffsetLimitStr({
-    offset,
-    limit,
-}: {
-    offset?: number | Integer;
-    limit?: number | Integer;
-}): string {
-    const hasOffset = typeof offset !== "undefined" && offset !== 0;
-    const hasLimit = typeof limit !== "undefined" && limit !== 0;
-    let offsetLimitStr = "";
-
-    if (hasOffset && !hasLimit) {
-        offsetLimitStr = `[${offset}..]`;
-    }
-
-    if (hasLimit && !hasOffset) {
-        offsetLimitStr = `[..${limit}]`;
-    }
-
-    if (hasLimit && hasOffset) {
-        const sliceStart = isNeoInt(offset) ? offset.toNumber() : offset;
-        const itemsToGrab = isNeoInt(limit) ? limit.toNumber() : limit;
-        const sliceEnd = (sliceStart as number) + (itemsToGrab as number);
-        offsetLimitStr = `[${offset}..${sliceEnd}]`;
-    }
-
-    return offsetLimitStr;
 }

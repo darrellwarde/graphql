@@ -17,79 +17,57 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
-
-const testLabel = generate({ charset: "alphabetic" });
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("Aliasing", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let bookmarks: string[];
-    let schema: GraphQLSchema;
+    const testHelper = new TestHelper();
 
-    const typeDefs = `
-        type Movie {
-          id: ID!
-          budget: Int!
-          boxOffice: Float!
-        }
-    `;
-
-    const id = generate({ readable: false });
-    const budget = 63;
-    const boxOffice = 465.3;
+    let Movie: UniqueType;
+    let id: string;
+    let budget: number;
+    let boxOffice: number;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        schema = await neoSchema.getSchema();
-        try {
-            await session.run(
-                `
-                    CREATE (movie:Movie)
-                    SET movie:${testLabel}
+        Movie = testHelper.createUniqueType("Movie");
+
+        const typeDefs = `
+        type ${Movie} @node {
+            id: ID!
+            budget: Int!
+            boxOffice: Float!
+        }
+        `;
+
+        id = generate({ readable: false });
+        budget = 63;
+        boxOffice = 465.3;
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+
+        await testHelper.executeCypher(
+            `
+                    CREATE (movie:${Movie})
                     SET movie += $properties
                 `,
-                {
-                    properties: {
-                        id,
-                        boxOffice,
-                        budget,
-                    },
-                }
-            );
-            bookmarks = session.lastBookmark();
-        } finally {
-            await session.close();
-        }
+            {
+                properties: {
+                    id,
+                    boxOffice,
+                    budget,
+                },
+            }
+        );
     });
 
     afterAll(async () => {
-        const session = await neo4j.getSession();
-        try {
-            await session.run(
-                `
-                  MATCH(node:${testLabel})
-                  DETACH DELETE node
-              `
-            );
-        } finally {
-            await session.close();
-            await driver.close();
-        }
+        await testHelper.close();
     });
 
     test("should correctly alias an ID field", async () => {
         const query = `
             query ($id: ID!) {
-                movies(where: { id: $id }) {
+                ${Movie.plural}(where: { id_EQ: $id }) {
                     aliased: id
                     budget
                     boxOffice
@@ -97,15 +75,12 @@ describe("Aliasing", () => {
             }
         `;
 
-        const gqlResult = await graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(bookmarks),
+        const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { id },
         });
 
         expect(gqlResult.errors).toBeFalsy();
-        expect((gqlResult?.data as any)?.movies[0]).toEqual({
+        expect((gqlResult?.data as any)[Movie.plural][0]).toEqual({
             aliased: id,
             budget,
             boxOffice,
@@ -115,7 +90,7 @@ describe("Aliasing", () => {
     test("should correctly alias an Int field", async () => {
         const query = `
             query ($id: ID!) {
-                movies(where: { id: $id }) {
+                ${Movie.plural}(where: { id_EQ: $id }) {
                     id
                     aliased: budget
                     boxOffice
@@ -123,15 +98,12 @@ describe("Aliasing", () => {
             }
         `;
 
-        const gqlResult = await graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(bookmarks),
+        const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { id },
         });
 
         expect(gqlResult.errors).toBeFalsy();
-        expect((gqlResult?.data as any)?.movies[0]).toEqual({
+        expect((gqlResult?.data as any)[Movie.plural][0]).toEqual({
             id,
             aliased: budget,
             boxOffice,
@@ -141,7 +113,7 @@ describe("Aliasing", () => {
     test("should correctly alias an Float field", async () => {
         const query = `
             query ($id: ID!) {
-                movies(where: { id: $id }) {
+                ${Movie.plural}(where: { id_EQ: $id }) {
                     id
                     budget
                     aliased: boxOffice
@@ -149,15 +121,12 @@ describe("Aliasing", () => {
             }
         `;
 
-        const gqlResult = await graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(bookmarks),
+        const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { id },
         });
 
         expect(gqlResult.errors).toBeFalsy();
-        expect((gqlResult?.data as any)?.movies[0]).toEqual({
+        expect((gqlResult?.data as any)[Movie.plural][0]).toEqual({
             id,
             budget,
             aliased: boxOffice,

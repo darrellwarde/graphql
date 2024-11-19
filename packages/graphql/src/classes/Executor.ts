@@ -17,23 +17,35 @@
  * limitations under the License.
  */
 
-import { Driver, Neo4jError, QueryResult, Result, Session, SessionMode, Transaction } from "neo4j-driver";
 import Debug from "debug";
-
-import type { AuthContext, CypherQueryOptions } from "../types";
-import environment from "../environment";
-import {
-    Neo4jGraphQLAuthenticationError,
-    Neo4jGraphQLConstraintValidationError,
-    Neo4jGraphQLForbiddenError,
-    Neo4jGraphQLRelationshipValidationError,
-} from "./Error";
+import type { GraphQLResolveInfo } from "graphql";
+import { print } from "graphql";
+import type {
+    Driver,
+    ManagedTransaction,
+    QueryResult,
+    Result,
+    Session,
+    SessionConfig,
+    SessionMode,
+    Transaction,
+} from "neo4j-driver";
+import { Neo4jError } from "neo4j-driver";
 import {
     AUTH_FORBIDDEN_ERROR,
     AUTH_UNAUTHENTICATED_ERROR,
     DEBUG_EXECUTE,
     RELATIONSHIP_REQUIREMENT_PREFIX,
 } from "../constants";
+import { debugCypherAndParams } from "../debug/debug-cypher-and-params";
+import environment from "../environment";
+import type { CypherQueryOptions } from "../types";
+import {
+    Neo4jGraphQLAuthenticationError,
+    Neo4jGraphQLConstraintValidationError,
+    Neo4jGraphQLForbiddenError,
+    Neo4jGraphQLRelationshipValidationError,
+} from "./Error";
 
 const debug = Debug(DEBUG_EXECUTE);
 
@@ -53,19 +65,14 @@ function isSessionLike(executionContext: any): executionContext is SessionLike {
     return typeof executionContext.beginTransaction === "function";
 }
 
-type SessionParam = {
-    defaultAccessMode?: SessionMode;
-    bookmarks?: string | string[];
-    database?: string;
-    impersonatedUser?: string;
-    fetchSize?: number;
-};
-
 type TransactionConfig = {
     metadata: {
         app: string;
         // Possible values from https://neo4j.com/docs/operations-manual/current/monitoring/logging/#attach-metadata-tx (will only be user-transpiled for @neo4j/graphql)
         type: "system" | "user-direct" | "user-action" | "user-transpiled";
+        source?: {
+            query: string;
+        };
     };
 };
 
@@ -73,47 +80,69 @@ export type ExecutionContext = Driver | Session | Transaction;
 
 export type ExecutorConstructorParam = {
     executionContext: ExecutionContext;
-    auth: AuthContext;
-    queryOptions?: CypherQueryOptions;
-    database?: string;
-    bookmarks?: string | string[];
+    cypherQueryOptions?: CypherQueryOptions;
+    sessionConfig?: SessionConfig;
+    cypherParams?: Record<string, unknown>;
+    transactionMetadata?: Record<string, unknown>;
 };
 
+export type Neo4jGraphQLSessionConfig = Pick<SessionConfig, "database" | "impersonatedUser" | "auth">;
+
 export class Executor {
-    private executionContext: Driver | Session | Transaction;
+    private executionContext: ExecutionContext;
 
-    public lastBookmark: string | null;
+    private cypherQueryOptions: CypherQueryOptions | undefined;
 
-    private queryOptions: CypherQueryOptions | undefined;
-    private auth: AuthContext;
+    private sessionConfig: SessionConfig | undefined;
 
-    private database: string | undefined;
-    private bookmarks: string | string[] | undefined;
+    private cypherParams: Record<string, unknown>;
+    private transactionMetadata: Record<string, unknown>;
 
-    constructor({ executionContext, auth, queryOptions, database, bookmarks }: ExecutorConstructorParam) {
+    constructor({
+        executionContext,
+        cypherQueryOptions,
+        sessionConfig,
+        cypherParams = {},
+        transactionMetadata = {},
+    }: ExecutorConstructorParam) {
         this.executionContext = executionContext;
-        this.lastBookmark = null;
-
-        this.queryOptions = queryOptions;
-        this.auth = auth;
-        this.database = database;
-        this.bookmarks = bookmarks;
+        this.cypherQueryOptions = cypherQueryOptions;
+        this.cypherQueryOptions = cypherQueryOptions;
+        this.sessionConfig = sessionConfig;
+        this.cypherParams = cypherParams;
+        this.transactionMetadata = transactionMetadata;
     }
 
-    public async execute(query: string, parameters: any, defaultAccessMode: SessionMode): Promise<QueryResult> {
+    public async execute(
+        query: string,
+        parameters: Record<string, any>,
+        sessionMode: SessionMode,
+        info?: GraphQLResolveInfo
+    ): Promise<QueryResult> {
+        const params = { ...parameters, ...this.cypherParams };
+
         try {
             if (isDriverLike(this.executionContext)) {
-                const session = this.executionContext.session(this.getSessionParam(defaultAccessMode));
-                const result = await this.sessionRun(query, parameters, defaultAccessMode, session);
-                await session.close();
-                return result;
+                return await this.driverRun({
+                    query,
+                    parameters: params,
+                    driver: this.executionContext,
+                    sessionMode,
+                    info,
+                });
             }
 
             if (isSessionLike(this.executionContext)) {
-                return await this.sessionRun(query, parameters, defaultAccessMode, this.executionContext);
+                return await this.sessionRun({
+                    query,
+                    parameters: params,
+                    sessionMode,
+                    session: this.executionContext,
+                    info,
+                });
             }
 
-            return await this.transactionRun(query, parameters, this.executionContext);
+            return await this.transactionRun(query, params, this.executionContext);
         } catch (error) {
             throw this.formatError(error);
         }
@@ -131,7 +160,7 @@ export class Executor {
 
             if (error.message.includes(`Caused by: java.lang.RuntimeException: ${RELATIONSHIP_REQUIREMENT_PREFIX}`)) {
                 const [, message] = error.message.split(RELATIONSHIP_REQUIREMENT_PREFIX);
-                return new Neo4jGraphQLRelationshipValidationError(message);
+                return new Neo4jGraphQLRelationshipValidationError(message || "");
             }
 
             if (error.code === "Neo.ClientError.Schema.ConstraintValidationFailed") {
@@ -145,72 +174,114 @@ export class Executor {
     }
 
     private generateQuery(query: string): string {
-        if (this.queryOptions && Object.keys(this.queryOptions).length) {
-            const queryOptions = `CYPHER ${Object.entries(this.queryOptions)
+        if (this.cypherQueryOptions && Object.keys(this.cypherQueryOptions).length) {
+            const cypherQueryOptions = `CYPHER ${Object.entries(this.cypherQueryOptions)
                 .map(([key, value]) => `${key}=${value}`)
                 .join(" ")}`;
 
-            return `${queryOptions}\n${query}`;
+            return `${cypherQueryOptions}\n${query}`;
         }
 
         return query;
     }
 
-    private generateParameters(query: string, parameters: any): Record<string, any> {
-        if (query.includes("$auth.") || query.includes("auth: $auth") || query.includes("auth:$auth")) {
-            return { ...parameters, auth: this.auth };
-        }
-
-        return parameters;
-    }
-
-    private getSessionParam(defaultAccessMode: SessionMode): SessionParam {
-        const sessionParam: SessionParam = { defaultAccessMode };
-
-        if (this.database) {
-            sessionParam.database = this.database;
-        }
-
-        if (this.bookmarks) {
-            sessionParam.bookmarks = this.bookmarks;
-        }
-
-        return sessionParam;
-    }
-
-    private getTransactionConfig(): TransactionConfig {
+    private getTransactionConfig(info?: GraphQLResolveInfo): TransactionConfig {
         const app = `${environment.NPM_PACKAGE_NAME}@${environment.NPM_PACKAGE_VERSION}`;
 
-        return {
+        const transactionConfig: TransactionConfig = {
             metadata: {
+                ...this.transactionMetadata,
                 app,
                 type: "user-transpiled",
             },
         };
+
+        if (info) {
+            const source = {
+                // We avoid using print here, when possible, as it is a heavy process
+                query:
+                    info.operation.loc?.source.body ||
+                    // Print both fragments and operation, otherwise printed queries are invalid due to missing fragments
+                    [Object.values(info.fragments).map((fragment) => print(fragment)), print(info.operation)].join(
+                        "\n\n"
+                    ),
+            };
+
+            transactionConfig.metadata.source = source;
+        }
+
+        return transactionConfig;
     }
 
-    private async sessionRun(query: string, parameters, defaultAccessMode, session): Promise<QueryResult> {
-        const transactionType = `${defaultAccessMode.toLowerCase()}Transaction`;
-        const result = await session[transactionType](
-            (transaction: Transaction) => this.transactionRun(query, parameters, transaction),
-            this.getTransactionConfig()
-        );
-        const lastBookmark = session.lastBookmark();
-        if (Array.isArray(lastBookmark) && lastBookmark[0]) {
-            this.lastBookmark = lastBookmark[0];
+    private async driverRun({
+        query,
+        parameters,
+        driver,
+        sessionMode,
+        info,
+    }: {
+        query: string;
+        parameters: Record<string, any>;
+        driver: Driver;
+        sessionMode: SessionMode;
+        info?: GraphQLResolveInfo;
+    }): Promise<QueryResult> {
+        const session = driver.session({
+            // Always specify a default database to avoid requests for routing table
+            database: "neo4j",
+            ...this.sessionConfig,
+            bookmarkManager: driver.executeQueryBookmarkManager,
+            defaultAccessMode: sessionMode,
+        });
+
+        try {
+            const result = await this.sessionRun({ query, parameters, info, session, sessionMode });
+            return result;
+        } finally {
+            await session.close();
         }
+    }
+
+    private async sessionRun({
+        query,
+        parameters,
+        session,
+        sessionMode,
+        info,
+    }: {
+        query: string;
+        parameters: Record<string, any>;
+        session: Session;
+        sessionMode: SessionMode;
+        info?: GraphQLResolveInfo;
+    }): Promise<QueryResult> {
+        let result: QueryResult | undefined;
+
+        switch (sessionMode) {
+            case "READ":
+                result = await session.executeRead((tx: ManagedTransaction) => {
+                    return this.transactionRun(query, parameters, tx);
+                }, this.getTransactionConfig(info));
+                break;
+            case "WRITE":
+                result = await session.executeWrite((tx: ManagedTransaction) => {
+                    return this.transactionRun(query, parameters, tx);
+                }, this.getTransactionConfig(info));
+                break;
+        }
+
         return result;
     }
 
-    private transactionRun(query: string, parameters, transaction: Transaction): Result {
+    private transactionRun(
+        query: string,
+        parameters: Record<string, any>,
+        transaction: Transaction | ManagedTransaction
+    ): Result {
         const queryToRun = this.generateQuery(query);
-        const parametersToRun = this.generateParameters(query, parameters);
 
-        debug(
-            "%s",
-            `About to execute Cypher:\nCypher:\n${queryToRun}\nParams:\n${JSON.stringify(parametersToRun, null, 2)}`
-        );
+        debugCypherAndParams(debug, queryToRun, parameters);
 
-        return transaction.run(queryToRun, parametersToRun);
+        return transaction.run(queryToRun, parameters);
     }
 }

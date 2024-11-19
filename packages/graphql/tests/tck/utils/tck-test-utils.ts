@@ -17,51 +17,13 @@
  * limitations under the License.
  */
 
-import type { DocumentNode, GraphQLArgs } from "graphql";
+import type { GraphQLArgs } from "graphql";
 import { graphql } from "graphql";
-import type { IncomingMessage } from "http";
-import createAuthParam from "../../../src/translate/create-auth-param";
+import { Neo4jError } from "neo4j-driver";
 import type { Neo4jGraphQL } from "../../../src";
+import { Neo4jDatabaseInfo } from "../../../src/classes/Neo4jDatabaseInfo";
 import { DriverBuilder } from "../../utils/builders/driver-builder";
-import { getQuerySource } from "../../utils/get-query-source";
-
-export function compareParams({
-    params,
-    expected,
-    cypher,
-    context,
-}: {
-    params: Record<string, any>;
-    expected: Record<string, any>;
-    cypher: string;
-    context: any;
-}) {
-    const receivedParams = params;
-
-    if (cypher.includes("$auth.") || cypher.includes("auth: $auth") || cypher.includes("auth:$auth")) {
-        receivedParams.auth = createAuthParam({ context });
-    }
-
-    expect(receivedParams).toEqual(expected);
-}
-
-export function setTestEnvVars(envVars: string | undefined): void {
-    if (envVars) {
-        envVars.split(/\n/g).forEach((v: string) => {
-            const [name, val] = v.split("=");
-            process.env[name] = val;
-        });
-    }
-}
-
-export function unsetTestEnvVars(envVars: string | undefined): void {
-    if (envVars) {
-        envVars.split(/\n/g).forEach((v: string) => {
-            const [name] = v.split("=");
-            delete process.env[name];
-        });
-    }
-}
+import { TestHelper } from "../../utils/tests-helper";
 
 export function formatCypher(cypher: string): string {
     return cypher.replace(/\s+\n/g, "\n");
@@ -73,22 +35,33 @@ export function formatParams(params: Record<string, any>): string {
 
 export async function translateQuery(
     neoSchema: Neo4jGraphQL,
-    query: DocumentNode,
+    query: string,
     options?: {
-        req?: IncomingMessage;
+        token?: string;
         variableValues?: Record<string, any>;
+        neo4jVersion?: string;
+        contextValues?: Record<string, any>;
+        subgraph?: boolean;
     }
 ): Promise<{ cypher: string; params: Record<string, any> }> {
     const driverBuilder = new DriverBuilder();
+    const neo4jDatabaseInfo = new Neo4jDatabaseInfo(options?.neo4jVersion ?? "4.4");
+    let contextValue: Record<string, any> = {
+        executionContext: driverBuilder.instance(),
+        neo4jDatabaseInfo,
+    };
 
-    const contextValue: Record<string, any> = { driver: driverBuilder.instance() };
-    if (options?.req) {
-        contextValue.req = options.req;
+    if (options?.token) {
+        contextValue.token = options.token;
+    }
+
+    if (options?.contextValues) {
+        contextValue = { ...contextValue, ...options.contextValues };
     }
 
     const graphqlArgs: GraphQLArgs = {
-        schema: await neoSchema.getSchema(),
-        source: getQuerySource(query),
+        schema: await (options?.subgraph ? neoSchema.getSubgraphSchema() : neoSchema.getSchema()),
+        source: query,
         contextValue,
     };
     if (options?.variableValues) {
@@ -114,8 +87,26 @@ export async function translateQuery(
         }
     }
 
+    const [cypher, params] = driverBuilder.runFunction.calls[0] as [string, Record<string, any>];
+
+    if (process.env.VERIFY_TCK) {
+        const testHelper = new TestHelper();
+
+        try {
+            await testHelper.executeCypher(`EXPLAIN ${cypher}`, params);
+        } catch (e) {
+            if (e instanceof Neo4jError) {
+                throw new Error(`${e.message}\n\n${cypher}\n\n${formatParams(params)}`);
+            }
+
+            throw e;
+        } finally {
+            await testHelper.close();
+        }
+    }
+
     return {
-        cypher: driverBuilder.runFunction.calls[0][0],
-        params: driverBuilder.runFunction.calls[0][1],
+        cypher,
+        params,
     };
 }

@@ -17,37 +17,43 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import { gql } from "apollo-server";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
-describe("update", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+describe("update (deprecate implicit _SET)", () => {
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let Actor: UniqueType;
+    let Person: UniqueType;
+    let Product: UniqueType;
+    let Photo: UniqueType;
+    let Color: UniqueType;
+    let Series: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
+        Actor = testHelper.createUniqueType("Actor");
+        Person = testHelper.createUniqueType("Person");
+        Product = testHelper.createUniqueType("Product");
+        Photo = testHelper.createUniqueType("Photo");
+        Color = testHelper.createUniqueType("Color");
+        Series = testHelper.createUniqueType("Series");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should update no movies where predicate yields false", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Movie {
+        const typeDefs = /* GraphQL */ `
+            type ${Movie} @node {
                 id: ID!
                 name: String
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -57,10 +63,10 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($id: ID, $name: String) {
-            updateMovies(where: { id: $id }, update: {name: $name}) {
-                movies {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: { name_SET: $name }) {
+                ${Movie.plural} {
                     id
                     name
                 }
@@ -68,33 +74,24 @@ describe("update", () => {
           }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id, name: updatedName },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { id, name: updatedName },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({ movies: [] });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({ [Movie.plural]: [] });
     });
 
     test("should update a single movie", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Movie {
+        const typeDefs = /* GraphQL */ `
+            type ${Movie} @node {
                 id: ID!
                 name: String
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -108,10 +105,10 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($id: ID, $name: String) {
-            updateMovies(where: { id: $id }, update: {name: $name}) {
-                movies {
+            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name_SET: $name}) {
+                ${Movie.plural} {
                     id
                     name
                 }
@@ -119,48 +116,128 @@ describe("update", () => {
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $id, name: $initialName})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $id, name: $initialName})
             `,
-                {
-                    id,
-                    initialName,
-                }
-            );
+            {
+                id,
+                initialName,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id, name: updatedName },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { id, name: updatedName },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({ movies: [{ id, name: updatedName }] });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({ [Movie.plural]: [{ id, name: updatedName }] });
     });
-
-    test("should update a movie when matching on relationship property", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Actor {
-                name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+    test("should connect through interface relationship", async () => {
+        const typeDefs = /* GraphQL */ `
+            type ${Movie} implements Production @subscription(events: []) @node {
+                title: String!
+                id: ID @unique
+                director: [Creature!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            type Movie {
+            type ${Series} implements Production @node {
+                title: String!
+                episode: Int!
+                id: ID @unique
+                director: [Creature!]! @relationship(type: "DIRECTED", direction: IN)
+            }
+
+            interface Production {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                director: [Creature!]! @declareRelationship
+            }
+
+            type ${Person} implements Creature @node {
+                id: ID
+                movies: Production! @relationship(type: "DIRECTED", direction: OUT)
+            }
+
+            interface Creature {
+                id: ID
+                movies: Production! @declareRelationship
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({
+            typeDefs,
+        });
+        const query = /* GraphQL */ `
+        mutation {
+            ${Movie.operations.update}(
+                where: { id_EQ: "1" }, 
+                update: { director: { 
+                    connect: {
+                    where: { node: { id_EQ: "2"} }, 
+                    connect: { movies: {
+                        where: { node: { id_EQ: "3"} }, 
+                        connect: { director: {
+                            where: { node: { id_EQ: "4"} }, 
+                            connect: { movies: {
+                                where: { node: { id_EQ: "5" } }
+                            } }
+                        } }
+                    }
+                    } } 
+                } }) {
+                ${Movie.plural} {
+                    id
+                    title
+                }
+            }
+          }
+        `;
+
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: "1", title: "Movie1"})
+                CREATE (:${Movie} {id: "3", title: "Movie3"})
+                CREATE (:${Movie} {id: "5", title: "Movie5"})
+                CREATE (p1:${Person} {id: "2"})
+                CREATE (p2:${Person} {id: "4"})
+                CREATE (s:${Series} {id: "10", title: "Series1", episode: 20})
+                MERGE (p1)-[:DIRECTED]->(s)
+                MERGE (p2)-[:DIRECTED]->(s)
+            `
+        );
+
+        const gqlResult = await testHelper.executeGraphQL(query);
+
+        expect(gqlResult.errors).toBeFalsy();
+
+        const cypherResult = await testHelper.executeCypher(
+            `
+                    MATCH (p:${Person} {id: "4"})-[:DIRECTED]->(m:${Movie} {id: "5"}) RETURN p, m
+                `
+        );
+
+        expect(cypherResult.records).toHaveLength(1);
+
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id: "1", title: "Movie1" }],
+        });
+    });
+
+    test("should update a movie when matching on relationship property", async () => {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
+                name: String
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
+            }
+
+            type ${Movie} @node {
+                id: ID
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
+            }
+        `;
+
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const initialMovieId = generate({
             charset: "alphabetic",
@@ -174,15 +251,15 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($updatedMovieId: ID, $actorName: String) {
-            updateMovies(
-              where: { actorsConnection: { node: { name: $actorName } } },
+            ${Movie.operations.update}(
+              where: { actorsConnection_SOME: { node: { name_EQ: $actorName } } },
               update: {
-                id: $updatedMovieId
+                id_SET: $updatedMovieId
               }
           ) {
-              movies {
+              ${Movie.plural} {
                 id
                 actors {
                     name
@@ -192,45 +269,36 @@ describe("update", () => {
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m:Movie {id: $initialMovieId})<-[:ACTED_IN]-(a:Actor {name: $actorName})
+        await testHelper.executeCypher(
+            `
+                CREATE (m:${Movie} {id: $initialMovieId})<-[:ACTED_IN]-(a:${Actor} {name: $actorName})
             `,
-                {
-                    initialMovieId,
-                    actorName,
-                }
-            );
+            {
+                initialMovieId,
+                actorName,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { updatedMovieId, actorName },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { updatedMovieId, actorName },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({
-                movies: [{ id: updatedMovieId, actors: [{ name: actorName }] }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id: updatedMovieId, actors: [{ name: actorName }] }],
+        });
     });
 
     test("should update 2 movies", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Movie {
+        const typeDefs = /* GraphQL */ `
+            type ${Movie} @node {
                 id: ID!
                 name: String
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id1 = generate({
             charset: "alphabetic",
@@ -242,10 +310,10 @@ describe("update", () => {
 
         const updatedName = "Beer";
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($id1: ID, $id2: ID, $name: String) {
-            updateMovies(where: { OR: [{id: $id1}, {id: $id2}] }, update: {name: $name}) {
-                movies {
+            ${Movie.operations.update}(where: { OR: [{ id_EQ: $id1 }, { id_EQ: $id2 }] }, update: {name_SET: $name}) {
+                ${Movie.plural} {
                     id
                     name
                 }
@@ -253,54 +321,45 @@ describe("update", () => {
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $id1})
-                CREATE (:Movie {id: $id2})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $id1})
+                CREATE (:${Movie} {id: $id2})
             `,
-                {
-                    id1,
-                    id2,
-                }
-            );
+            {
+                id1,
+                id2,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { id1, id2, name: updatedName },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { id1, id2, name: updatedName },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult?.data as any)?.updateMovies.movies as any[]).toHaveLength(2);
+        expect(gqlResult?.data?.[Movie.operations.update]?.[Movie.plural] as any[]).toHaveLength(2);
 
-            ((gqlResult?.data as any)?.updateMovies.movies as any[]).forEach((movie) => {
-                expect([id1, id2]).toContain(movie.id);
-                expect(movie.name).toEqual(updatedName);
-            });
-        } finally {
-            await session.close();
-        }
+        (gqlResult?.data?.[Movie.operations.update]?.[Movie.plural] as any[]).forEach((movie) => {
+            expect([id1, id2]).toContain(movie.id);
+            expect(movie.name).toEqual(updatedName);
+        });
     });
 
     test("should update nested actors from a movie", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId = generate({
             charset: "alphabetic",
@@ -314,18 +373,18 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation($movieId: ID, $initialName: String, $updatedName: String) {
-            updateMovies(
-              where: { id: $movieId },
+            ${Movie.operations.update}(
+              where: { id_EQ: $movieId },
               update: {
                 actors: [{
-                  where: { node: { name: $initialName } },
-                  update: { node: { name: $updatedName } }
+                  where: { node: { name_EQ: $initialName } },
+                  update: { node: { name_SET: $updatedName } }
                 }]
               }
           ) {
-              movies {
+              ${Movie.plural} {
                 id
                 actors {
                     name
@@ -335,52 +394,43 @@ describe("update", () => {
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m:Movie {id: $movieId})
-                CREATE (a:Actor {name: $initialName})
+        await testHelper.executeCypher(
+            `
+                CREATE (m:${Movie} {id: $movieId})
+                CREATE (a:${Actor} {name: $initialName})
                 MERGE (a)-[:ACTED_IN]->(m)
             `,
-                {
-                    movieId,
-                    initialName,
-                }
-            );
+            {
+                movieId,
+                initialName,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { movieId, updatedName, initialName },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { movieId, updatedName, initialName },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({
-                movies: [{ id: movieId, actors: [{ name: updatedName }] }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id: movieId, actors: [{ name: updatedName }] }],
+        });
     });
 
     test("should delete a nested actor from a movie abc", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = gql`
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -395,8 +445,8 @@ describe("update", () => {
 
         const mutation = `
             mutation($id: ID, $actorName1: String) {
-                updateMovies(where: { id: $id }, delete: { actors: { where: { node: { name: $actorName1 } } } }) {
-                    movies {
+                ${Movie.operations.update}(where: { id_EQ: $id }, update: { actors: { delete: { where: { node: { name_EQ: $actorName1 } } } } }) {
+                    ${Movie.plural} {
                         id
                         actors {
                             name
@@ -406,55 +456,46 @@ describe("update", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m:Movie {id: $id})
-                CREATE (a1:Actor {name: $actorName1})
-                CREATE (a2:Actor {name: $actorName2})
+        await testHelper.executeCypher(
+            `
+                CREATE (m:${Movie} {id: $id})
+                CREATE (a1:${Actor} {name: $actorName1})
+                CREATE (a2:${Actor} {name: $actorName2})
                 MERGE (a1)-[:ACTED_IN]->(m)
                 MERGE (a2)-[:ACTED_IN]->(m)
             `,
-                {
-                    id,
-                    actorName1,
-                    actorName2,
-                }
-            );
+            {
+                id,
+                actorName1,
+                actorName2,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { id, actorName1 },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { id, actorName1 },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({
-                movies: [{ id, actors: [{ name: actorName2 }] }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id, actors: [{ name: actorName2 }] }],
+        });
     });
 
     test("should delete a nested actor from a movie within an update block", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = gql`
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -469,8 +510,8 @@ describe("update", () => {
 
         const mutation = `
             mutation($id: ID, $actorName1: String) {
-                updateMovies(where: { id: $id }, update: { actors: { delete: { where: { node: { name: $actorName1 } } } } }) {
-                    movies {
+                ${Movie.operations.update}(where: { id_EQ: $id }, update: { actors: { delete: { where: { node: { name_EQ: $actorName1 } } } } }) {
+                    ${Movie.plural} {
                         id
                         actors {
                             name
@@ -480,55 +521,46 @@ describe("update", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m:Movie {id: $id})
-                CREATE (a1:Actor {name: $actorName1})
-                CREATE (a2:Actor {name: $actorName2})
+        await testHelper.executeCypher(
+            `
+                CREATE (m:${Movie} {id: $id})
+                CREATE (a1:${Actor} {name: $actorName1})
+                CREATE (a2:${Actor} {name: $actorName2})
                 MERGE (a1)-[:ACTED_IN]->(m)
                 MERGE (a2)-[:ACTED_IN]->(m)
             `,
-                {
-                    id,
-                    actorName1,
-                    actorName2,
-                }
-            );
+            {
+                id,
+                actorName1,
+                actorName2,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { id, actorName1 },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { id, actorName1 },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({
-                movies: [{ id, actors: [{ name: actorName2 }] }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id, actors: [{ name: actorName2 }] }],
+        });
     });
 
     test("should delete a nested actor and one of their nested movies, within an update block abc", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = gql`
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId1 = generate({
             charset: "alphabetic",
@@ -548,13 +580,13 @@ describe("update", () => {
 
         const mutation = `
             mutation($movieId1: ID, $actorName1: String, $movieId2: ID) {
-                updateMovies(
-                    where: { id: $movieId1 }
+                ${Movie.operations.update}(
+                    where: { id_EQ: $movieId1 }
                     update: {
-                        actors: { delete: { where: { node: { name: $actorName1 } }, delete: { movies: { where: { node: { id: $movieId2 } } } } } }
+                        actors: { delete: { where: { node: { name_EQ: $actorName1 } }, delete: { movies: { where: { node: { id_EQ: $movieId2 } } } } } }
                     }
                 ) {
-                    movies {
+                    ${Movie.plural} {
                         id
                         actors {
                             name
@@ -564,14 +596,13 @@ describe("update", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m1:Movie {id: $movieId1})
-                CREATE (m2:Movie {id: $movieId2})
+        await testHelper.executeCypher(
+            `
+                CREATE (m1:${Movie} {id: $movieId1})
+                CREATE (m2:${Movie} {id: $movieId2})
 
-                CREATE (a1:Actor {name: $actorName1})
-                CREATE (a2:Actor {name: $actorName2})
+                CREATE (a1:${Actor} {name: $actorName1})
+                CREATE (a2:${Actor} {name: $actorName2})
 
                 MERGE (a1)-[:ACTED_IN]->(m1)
                 MERGE (a1)-[:ACTED_IN]->(m2)
@@ -579,57 +610,49 @@ describe("update", () => {
                 MERGE (a2)-[:ACTED_IN]->(m1)
                 MERGE (a2)-[:ACTED_IN]->(m2)
             `,
-                {
-                    movieId1,
-                    actorName1,
-                    actorName2,
-                    movieId2,
-                }
-            );
+            {
+                movieId1,
+                actorName1,
+                actorName2,
+                movieId2,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { movieId1, actorName1, movieId2 },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { movieId1, actorName1, movieId2 },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({
-                movies: [{ id: movieId1, actors: [{ name: actorName2 }] }],
-            });
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id: movieId1, actors: [{ name: actorName2 }] }],
+        });
 
-            const movie2 = await session.run(
-                `
-              MATCH (m:Movie {id: $id})
+        const movie2 = await testHelper.executeCypher(
+            `
+              MATCH (m:${Movie} {id: $id})
               RETURN m
             `,
-                { id: movieId2 }
-            );
+            { id: movieId2 }
+        );
 
-            expect(movie2.records).toHaveLength(0);
-        } finally {
-            await session.close();
-        }
+        expect(movie2.records).toHaveLength(0);
     });
 
     test("should delete multiple nested actors from a movie", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = gql`
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -649,11 +672,11 @@ describe("update", () => {
 
         const mutation = `
             mutation($id: ID, $name1: String, $name3: String) {
-                updateMovies(
-                    where: { id: $id }
-                    delete: { actors: [{ where: { node: { name: $name1 } } }, { where: { node: { name: $name3 } } }] }
+                ${Movie.operations.update}(
+                    where: { id_EQ: $id }
+                    update: { actors: { delete: [{ where: { node: { name_EQ: $name1 } } }, { where: { node: { name_EQ: $name3 } } }]}}
                 ) {
-                    movies {
+                    ${Movie.plural} {
                         id
                         actors {
                             name
@@ -663,84 +686,75 @@ describe("update", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m:Movie {id: $id})
-                CREATE (a1:Actor {name: $name1})
-                CREATE (a2:Actor {name: $name2})
-                CREATE (a3:Actor {name: $name3})
+        await testHelper.executeCypher(
+            `
+                CREATE (m:${Movie} {id: $id})
+                CREATE (a1:${Actor} {name: $name1})
+                CREATE (a2:${Actor} {name: $name2})
+                CREATE (a3:${Actor} {name: $name3})
                 MERGE (a1)-[:ACTED_IN]->(m)
                 MERGE (a2)-[:ACTED_IN]->(m)
                 MERGE (a3)-[:ACTED_IN]->(m)
             `,
-                {
-                    id,
-                    name1,
-                    name2,
-                    name3,
-                }
-            );
+            {
+                id,
+                name1,
+                name2,
+                name3,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { id, name1, name3 },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { id, name1, name3 },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({
-                movies: [{ id, actors: [{ name: name2 }] }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id, actors: [{ name: name2 }] }],
+        });
     });
 
     test("should update nested actors from a move then update the movie from the nested actors", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
               name: String
-              movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+              movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
               id: ID
               title: String
-              actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+              actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId = generate({
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
-            updateMovies(
-              where: { id: "${movieId}" }
+            ${Movie.operations.update}(
+              where: { id_EQ: "${movieId}" }
               update: {
                 actors: [{
-                  where: { node: { name: "old actor name" } }
+                  where: { node: { name_EQ: "old actor name" } }
                   update: {
                     node: {
-                        name: "new actor name"
+                        name_SET: "new actor name"
                         movies: [{
-                            where: { node: { title: "old movie title" } }
-                            update: { node: { title: "new movie title" } }
+                            where: { node: { title_EQ: "old movie title" } }
+                            update: { node: { title_SET: "new movie title" } }
                         }]
                     }
                   }
                 }]
               }
             ) {
-                movies {
+                ${Movie.plural} {
                     id
                     title
                     actors {
@@ -751,49 +765,38 @@ describe("update", () => {
           }
         `;
 
-        try {
-            await session.run(
-                `
-            CREATE (:Movie {id: $movieId, title: "old movie title"})<-[:ACTED_IN]-(:Actor {name: "old actor name"})
+        await testHelper.executeCypher(
+            `
+            CREATE (:${Movie} {id: $movieId, title: "old movie title"})<-[:ACTED_IN]-(:${Actor} {name: "old actor name"})
         `,
-                {
-                    movieId,
-                }
-            );
+            {
+                movieId,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {},
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({
-                movies: [{ id: movieId, title: "new movie title", actors: [{ name: "new actor name" }] }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id: movieId, title: "new movie title", actors: [{ name: "new actor name" }] }],
+        });
     });
 
     test("should connect a single movie to a actor", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 id: ID
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId = generate({
             charset: "alphabetic",
@@ -803,10 +806,10 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
-            updateMovies(where: { id: "${movieId}" }, connect: {actors: [{where: {node:{id: "${actorId}"}}}]}) {
-                movies {
+            ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: {actors: { connect: [{ where: { node:{ id_EQ: "${actorId}"}}}]}}) {
+                ${Movie.plural} {
                     id
                     actors {
                         id
@@ -816,55 +819,46 @@ describe("update", () => {
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $movieId})
-                CREATE (:Actor {id: $actorId})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $movieId})
+                CREATE (:${Actor} {id: $actorId})
             `,
-                {
-                    movieId,
-                    actorId,
-                }
-            );
+            {
+                movieId,
+                actorId,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {},
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({ movies: [{ id: movieId, actors: [{ id: actorId }] }] });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id: movieId, actors: [{ id: actorId }] }],
+        });
     });
 
     test("should connect a single movie to a actor based on a connection predicate", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 id: ID
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
-                series: [Series!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
+                series: [${Series}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Series {
+            type ${Series} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId = generate({
             charset: "alphabetic",
@@ -878,13 +872,13 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation($movieId: ID, $seriesId: ID) {
-                updateMovies(
-                    where: { id: $movieId }
-                    connect: { actors: [{ where: { node: { seriesConnection: { node: { id: $seriesId } } } } }] }
+                ${Movie.operations.update}(
+                    where: { id_EQ: $movieId }
+                    update: { actors: { connect: [{ where: { node: { seriesConnection_SOME: { node: { id_EQ: $seriesId } } } } }]} }
                 ) {
-                    movies {
+                    ${Movie.plural} {
                         id
                         actors {
                             id
@@ -894,50 +888,43 @@ describe("update", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $movieId})
-                CREATE (:Actor {id: $actorId})-[:ACTED_IN]->(:Series {id: $seriesId})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $movieId})
+                CREATE (:${Actor} {id: $actorId})-[:ACTED_IN]->(:${Series} {id: $seriesId})
             `,
-                {
-                    movieId,
-                    actorId,
-                    seriesId,
-                }
-            );
+            {
+                movieId,
+                actorId,
+                seriesId,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: { movieId, seriesId },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query, {
+            variableValues: { movieId, seriesId },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({ movies: [{ id: movieId, actors: [{ id: actorId }] }] });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id: movieId, actors: [{ id: actorId }] }],
+        });
     });
 
     test("should disconnect an actor from a movie", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Actor {
+        const typeDefs = /* GraphQL */ `
+            type ${Actor} @node {
                 id: ID
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const movieId = generate({
             charset: "alphabetic",
@@ -950,10 +937,10 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
-            updateMovies(where: { id: "${movieId}" }, disconnect: {actors: [{where: { node: { id: "${actorId1}"}}}]}) {
-                movies {
+            ${Movie.operations.update}(where: { id_EQ: "${movieId}" }, update: {actors: { disconnect: [{where: { node: { id_EQ: "${actorId1}"}}}]}}) {
+                ${Movie.plural} {
                     id
                     actors {
                         id
@@ -963,57 +950,48 @@ describe("update", () => {
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m:Movie {id: $movieId})
-                CREATE (a1:Actor {id: $actorId1})
-                CREATE (a2:Actor {id: $actorId2})
+        await testHelper.executeCypher(
+            `
+                CREATE (m:${Movie} {id: $movieId})
+                CREATE (a1:${Actor} {id: $actorId1})
+                CREATE (a2:${Actor} {id: $actorId2})
                 MERGE (m)<-[:ACTED_IN]-(a1)
                 MERGE (m)<-[:ACTED_IN]-(a2)
             `,
-                {
-                    movieId,
-                    actorId1,
-                    actorId2,
-                }
-            );
+            {
+                movieId,
+                actorId1,
+                actorId2,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {},
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateMovies).toEqual({ movies: [{ id: movieId, actors: [{ id: actorId2 }] }] });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
+            [Movie.plural]: [{ id: movieId, actors: [{ id: actorId2 }] }],
+        });
     });
 
     test("should disconnect a color from a photo through a product", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Product {
+        const typeDefs = /* GraphQL */ `
+            type ${Product} @node {
                 id: ID
-                photos: [Photo!]! @relationship(type: "HAS_PHOTO", direction: OUT)
+                photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
             }
 
-            type Color {
+            type ${Color} @node {
                 id: ID
             }
 
-            type Photo {
+            type ${Photo} @node {
                 id: ID
-                color: Color @relationship(type: "OF_COLOR", direction: OUT)
+                color: ${Color} @relationship(type: "OF_COLOR", direction: OUT)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const productId = generate({
             charset: "alphabetic",
@@ -1027,22 +1005,22 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
         mutation {
-            updateProducts(
-              where: { id: "${productId}" }
+            ${Product.operations.update}(
+              where: { id_EQ: "${productId}" }
               update: {
                 photos: [{
-                  where: { node: { id: "${photoId}" } }
+                  where: { node: { id_EQ: "${photoId}" } }
                   update: {
                       node: {
-                        color: { disconnect: { where: { node: { id: "${colorId}" } } } }
+                        color: { disconnect: { where: { node: { id_EQ: "${colorId}" } } } }
                       }
                   }
                 }]
               }
             ){
-                products {
+                ${Product.plural} {
                     id
                     photos {
                         id
@@ -1055,63 +1033,52 @@ describe("update", () => {
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (p:Product {id: $productId})
-                CREATE (photo:Photo {id: $photoId})
-                CREATE (color:Color {id: $colorId})
+        await testHelper.executeCypher(
+            `
+                CREATE (p:${Product} {id: $productId})
+                CREATE (photo:${Photo} {id: $photoId})
+                CREATE (color:${Color} {id: $colorId})
                 MERGE (p)-[:HAS_PHOTO]->(photo)-[:OF_COLOR]->(color)
 
             `,
-                {
-                    productId,
-                    photoId,
-                    colorId,
-                }
-            );
+            {
+                productId,
+                photoId,
+                colorId,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {},
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.updateProducts).toEqual({
-                products: [{ id: productId, photos: [{ id: photoId, color: null }] }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Product.operations.update]).toEqual({
+            [Product.plural]: [{ id: productId, photos: [{ id: photoId, color: null }] }],
+        });
     });
 
     test("should update the colors of a product to light versions", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-          type Product {
+        const typeDefs = /* GraphQL */ `
+          type ${Product} @node {
              id: ID
              name: String
-             photos: [Photo!]! @relationship(type: "HAS_PHOTO", direction: OUT)
+             photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
            }
 
 
-           type Color {
+           type ${Color} @node {
              name: String
              id: ID
            }
 
-           type Photo {
+           type ${Photo} @node {
              id: ID
              name: String
-             color: Color! @relationship(type: "OF_COLOR", direction: OUT)
+             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const productId = generate({
             charset: "alphabetic",
@@ -1141,32 +1108,32 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
-                updateProducts(
-                  where: { id: "${productId}" }
+                ${Product.operations.update}(
+                  where: { id_EQ: "${productId}" }
                   update: {
                     photos: [
                       {
-                        where: { node: { name: "Green Photo", id: "${photo0Id}" } }
+                        where: { node: { name_EQ: "Green Photo", id_EQ: "${photo0Id}" } }
                         update: {
                             node: {
-                                name: "Light Green Photo"
+                                name_SET: "Light Green Photo"
                                 color: {
-                                    connect: { where: { node: { name: "Light Green", id: "${photo0Color1Id}" } } }
-                                    disconnect: { where: { node: { name: "Green", id: "${photo0Color0Id}" } } }
+                                    connect: { where: { node: { name_EQ: "Light Green", id_EQ: "${photo0Color1Id}" } } }
+                                    disconnect: { where: { node: { name_EQ: "Green", id_EQ: "${photo0Color0Id}" } } }
                                 }
                             }
                         }
                       }
                       {
-                        where: { node: { name: "Yellow Photo", id: "${photo1Id}" } }
+                        where: { node: { name_EQ: "Yellow Photo", id_EQ: "${photo1Id}" } }
                         update: {
                             node: {
-                                name: "Light Yellow Photo"
+                                name_SET: "Light Yellow Photo"
                                 color: {
-                                    connect: { where: { node: { name: "Light Yellow", id: "${photo1Color1Id}" } } }
-                                    disconnect: { where: { node: { name: "Yellow", id: "${photo1Color0Id}" } } }
+                                    connect: { where: { node: { name_EQ: "Light Yellow", id_EQ: "${photo1Color1Id}" } } }
+                                    disconnect: { where: { node: { name_EQ: "Yellow", id_EQ: "${photo1Color0Id}" } } }
                                 }
                             }
                         }
@@ -1174,7 +1141,7 @@ describe("update", () => {
                     ]
                   }
                 ) {
-                    products {
+                    ${Product.plural} {
                         id
                         photos {
                             id
@@ -1189,16 +1156,15 @@ describe("update", () => {
               }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (product:Product {name: "Pringles", id: $productId})
-                    CREATE (photo0:Photo {id: $photo0Id, name: "Green Photo"})
-                    CREATE (photo0_color0:Color {id: $photo0_color0Id, name: "Green"})
-                    CREATE (photo0_color1:Color {id: $photo0_color1Id, name: "Light Green"})
-                    CREATE (photo1:Photo {id: $photo1Id, name: "Yellow Photo"})
-                    CREATE (photo1_color0:Color {id: $photo1_color0Id, name: "Yellow"})
-                    CREATE (photo1_color1:Color {id: $photo1_color1Id, name: "Light Yellow"})
+        await testHelper.executeCypher(
+            `
+                    CREATE (product:${Product} {name: "Pringles", id: $productId})
+                    CREATE (photo0:${Photo} {id: $photo0Id, name: "Green Photo"})
+                    CREATE (photo0_color0:${Color} {id: $photo0_color0Id, name: "Green"})
+                    CREATE (photo0_color1:${Color} {id: $photo0_color1Id, name: "Light Green"})
+                    CREATE (photo1:${Photo} {id: $photo1Id, name: "Yellow Photo"})
+                    CREATE (photo1_color0:${Color} {id: $photo1_color0Id, name: "Yellow"})
+                    CREATE (photo1_color1:${Color} {id: $photo1_color1Id, name: "Light Yellow"})
                     MERGE (product)-[:HAS_PHOTO]->(photo0)
                     MERGE (photo0)-[:OF_COLOR]->(photo0_color0)
                     MERGE (product)-[:HAS_PHOTO]->(photo1)
@@ -1206,74 +1172,64 @@ describe("update", () => {
 
 
             `,
-                {
-                    productId,
-                    photo0Id,
-                    photo0_color0Id: photo0Color0Id,
-                    photo0_color1Id: photo0Color1Id,
-                    photo1Id,
-                    photo1_color0Id: photo1Color0Id,
-                    photo1_color1Id: photo1Color1Id,
-                }
-            );
+            {
+                productId,
+                photo0Id,
+                photo0_color0Id: photo0Color0Id,
+                photo0_color1Id: photo0Color1Id,
+                photo1Id,
+                photo1_color0Id: photo1Color0Id,
+                photo1_color1Id: photo1Color1Id,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {},
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult?.data as any)?.updateProducts.products as any[]).toHaveLength(1);
+        expect(gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[]).toHaveLength(1);
 
-            const { photos } = ((gqlResult?.data as any)?.updateProducts.products as any[])[0];
+        const { photos } = (gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0];
 
-            const greenPhoto = photos.find((x) => x.id === photo0Id);
+        const greenPhoto = photos.find((x) => x.id === photo0Id);
 
-            expect(greenPhoto).toMatchObject({
-                id: photo0Id,
-                name: "Light Green Photo",
-                color: { id: photo0Color1Id, name: "Light Green" },
-            });
+        expect(greenPhoto).toMatchObject({
+            id: photo0Id,
+            name: "Light Green Photo",
+            color: { id: photo0Color1Id, name: "Light Green" },
+        });
 
-            const yellowPhoto = photos.find((x) => x.id === photo1Id);
+        const yellowPhoto = photos.find((x) => x.id === photo1Id);
 
-            expect(yellowPhoto).toMatchObject({
-                id: photo1Id,
-                name: "Light Yellow Photo",
-                color: { id: photo1Color1Id, name: "Light Yellow" },
-            });
-        } finally {
-            await session.close();
-        }
+        expect(yellowPhoto).toMatchObject({
+            id: photo1Id,
+            name: "Light Yellow Photo",
+            color: { id: photo1Color1Id, name: "Light Yellow" },
+        });
     });
 
     test("should update a Product via creating a new Photo and creating a new Color (via field level update)", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-          type Product {
+        const typeDefs = /* GraphQL */ `
+          type ${Product} @node {
              id: ID
              name: String
-             photos: [Photo!]! @relationship(type: "HAS_PHOTO", direction: OUT)
+             photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
            }
 
 
-           type Color {
+           type ${Color} @node {
              name: String
              id: ID
            }
 
-           type Photo {
+           type ${Photo} @node {
              id: ID
              name: String
-             color: Color! @relationship(type: "OF_COLOR", direction: OUT)
+             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const productId = generate({
             charset: "alphabetic",
@@ -1287,10 +1243,10 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
-                updateProducts(
-                  where: { id: "${productId}" }
+                ${Product.operations.update}(
+                  where: { id_EQ: "${productId}" }
                   update: {
                       photos: [{
                           create: [{
@@ -1310,7 +1266,7 @@ describe("update", () => {
                       }]
                   }
                 ) {
-                    products {
+                    ${Product.plural} {
                         id
                         photos {
                           id
@@ -1325,58 +1281,47 @@ describe("update", () => {
               }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (product:Product {name: "Pringles", id: $productId})
+        await testHelper.executeCypher(
+            `
+                    CREATE (product:${Product} {name: "Pringles", id: $productId})
             `,
-                {
-                    productId,
-                }
-            );
+            {
+                productId,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {},
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(((gqlResult?.data as any)?.updateProducts.products as any[])[0]).toMatchObject({
-                id: productId,
-                photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0]).toMatchObject({
+            id: productId,
+            photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
+        });
     });
 
     test("should update a Product via creating a new Photo and creating a new Color (via top level create)", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-          type Product {
+        const typeDefs = /* GraphQL */ `
+          type ${Product} @node {
              id: ID
              name: String
-             photos: [Photo!]! @relationship(type: "HAS_PHOTO", direction: OUT)
+             photos: [${Photo}!]! @relationship(type: "HAS_PHOTO", direction: OUT)
            }
 
 
-           type Color {
+           type ${Color} @node {
              name: String
              id: ID
            }
 
-           type Photo {
+           type ${Photo} @node {
              id: ID
              name: String
-             color: Color! @relationship(type: "OF_COLOR", direction: OUT)
+             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const productId = generate({
             charset: "alphabetic",
@@ -1390,12 +1335,12 @@ describe("update", () => {
             charset: "alphabetic",
         });
 
-        const query = `
+        const query = /* GraphQL */ `
             mutation {
-                updateProducts(
-                  where: { id: "${productId}" }
-                  create: {
-                    photos: [{
+                ${Product.operations.update}(
+                  where: { id_EQ: "${productId}" }
+                  update: {
+                    photos: { create:[{
                       node: {
                         id: "${photoId}",
                         name: "Green Photo",
@@ -1408,10 +1353,10 @@ describe("update", () => {
                             }
                         }
                       }
-                    }]
+                    }]}
                   }
                 ) {
-                    products {
+                    ${Product.plural} {
                         id
                         photos {
                             id
@@ -1426,31 +1371,22 @@ describe("update", () => {
               }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (product:Product {name: "Pringles", id: $productId})
+        await testHelper.executeCypher(
+            `
+                    CREATE (product:${Product} {name: "Pringles", id: $productId})
             `,
-                {
-                    productId,
-                }
-            );
+            {
+                productId,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                variableValues: {},
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(query);
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(((gqlResult?.data as any)?.updateProducts.products as any[])[0]).toMatchObject({
-                id: productId,
-                photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
-            });
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0]).toMatchObject({
+            id: productId,
+            photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
+        });
     });
 });

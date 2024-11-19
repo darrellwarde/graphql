@@ -17,69 +17,60 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
 import type { Response } from "supertest";
 import supertest from "supertest";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 import type { TestGraphQLServer } from "../setup/apollo-server";
 import { ApolloTestServer } from "../setup/apollo-server";
-import { TestSubscriptionsPlugin } from "../../utils/TestSubscriptionPlugin";
 import { WebSocketTestClient } from "../setup/ws-client";
-import Neo4j from "../setup/neo4j";
 
-describe("Update Subscriptions", () => {
-    let neo4j: Neo4j;
-    let driver: Driver;
-
-    const typeMovie = generateUniqueType("Movie");
-    const typeActor = generateUniqueType("Actor");
-
+describe("Delete Subscription", () => {
+    const testHelper = new TestHelper({ cdc: true });
     let server: TestGraphQLServer;
     let wsClient: WebSocketTestClient;
+    let typeMovie: UniqueType;
+    let typeActor: UniqueType;
 
     beforeAll(async () => {
-        const typeDefs = `
-         type ${typeMovie} {
-             title: String
-         }
+        await testHelper.assertCDCEnabled();
+    });
 
-         type ${typeActor} {
-             name: String
+    beforeEach(async () => {
+        typeMovie = testHelper.createUniqueType("Movie");
+        typeActor = testHelper.createUniqueType("Actor");
+        const typeDefs = `
+         type ${typeMovie} @node {
+            title: String
+            actors: [${typeActor}]
+         }
+         type ${typeActor} @subscription(events: []) @node {
+            name: String
          }
          `;
 
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-
-        const neoSchema = new Neo4jGraphQL({
+        const neoSchema = await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
-            config: {
-                driverConfig: {
-                    database: neo4j.getIntegrationDatabaseName(),
-                },
-            },
-            plugins: {
-                subscriptions: new TestSubscriptionsPlugin(),
+            features: {
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
-
-        server = new ApolloTestServer(neoSchema);
+        // eslint-disable-next-line @typescript-eslint/require-await
+        server = new ApolloTestServer(neoSchema, async ({ req }) => ({
+            sessionConfig: {
+                database: testHelper.database,
+            },
+            token: req.headers.authorization,
+        }));
         await server.start();
-    });
 
-    beforeEach(() => {
         wsClient = new WebSocketTestClient(server.wsPath);
     });
 
     afterEach(async () => {
         await wsClient.close();
-    });
-
-    afterAll(async () => {
         await server.close();
-        await driver.close();
+        await testHelper.close();
     });
 
     test("update subscription", async () => {
@@ -104,6 +95,8 @@ describe("Update Subscriptions", () => {
         await updateMovie("movie1", "movie3");
         await updateMovie("movie2", "movie4");
 
+        await wsClient.waitForEvents(2);
+
         expect(wsClient.errors).toEqual([]);
         expect(wsClient.events).toEqual([
             {
@@ -124,11 +117,10 @@ describe("Update Subscriptions", () => {
             },
         ]);
     });
-
     test("update subscription with where", async () => {
         await wsClient.subscribe(`
             subscription {
-                ${typeMovie.operations.subscribe.updated}(where: { title: "movie5" }) {
+                ${typeMovie.operations.subscribe.updated}(where: { title_EQ: "movie5" }) {
                     ${typeMovie.operations.subscribe.payload.updated} {
                         title
                     }
@@ -141,6 +133,8 @@ describe("Update Subscriptions", () => {
 
         await updateMovie("movie5", "movie7");
         await updateMovie("movie6", "movie8");
+
+        await wsClient.waitForEvents(1);
 
         expect(wsClient.errors).toEqual([]);
         expect(wsClient.events).toEqual([
@@ -169,6 +163,8 @@ describe("Update Subscriptions", () => {
         await updateMovie("movie10", "movie20");
         await updateMovie("movie20", "movie20");
 
+        await wsClient.waitForEvents(1);
+
         expect(wsClient.errors).toEqual([]);
         expect(wsClient.events).toEqual([
             {
@@ -180,7 +176,27 @@ describe("Update Subscriptions", () => {
         ]);
     });
 
-    async function createMovie(title: string): Promise<Response> {
+    test("delete subscription on excluded type", async () => {
+        const onReturnError = jest.fn();
+        await wsClient.subscribe(
+            `
+            subscription {
+                ${typeActor.operations.subscribe.updated}(where: { name_EQ: "Keanu" }) {
+                    ${typeActor.operations.subscribe.payload.updated} {
+                        name
+                    }
+                }
+            }
+        `,
+            onReturnError
+        );
+        await createActor("Keanu");
+        await updateActor("Keanu", "Keanoo");
+        expect(onReturnError).toHaveBeenCalled();
+        expect(wsClient.events).toEqual([]);
+    });
+
+    async function createMovie(title): Promise<Response> {
         const result = await supertest(server.path)
             .post("")
             .send({
@@ -197,16 +213,49 @@ describe("Update Subscriptions", () => {
             .expect(200);
         return result;
     }
-
+    async function createActor(name: string): Promise<Response> {
+        const result = await supertest(server.path)
+            .post("")
+            .send({
+                query: `
+                    mutation {
+                        ${typeActor.operations.create}(input: [{ name: "${name}" }]) {
+                            ${typeActor.plural} {
+                                name
+                            }
+                        }
+                    }
+                `,
+            })
+            .expect(200);
+        return result;
+    }
     async function updateMovie(oldTitle: string, newTitle: string): Promise<Response> {
         const result = await supertest(server.path)
             .post("")
             .send({
                 query: `
                         mutation {
-                            ${typeMovie.operations.update}(where: { title: "${oldTitle}" }, update: { title: "${newTitle}" }) {
+                            ${typeMovie.operations.update}(where: { title_EQ: "${oldTitle}" }, update: { title: "${newTitle}" }) {
                                 ${typeMovie.plural} {
                                     title
+                                }
+                            }
+                        }
+                    `,
+            })
+            .expect(200);
+        return result;
+    }
+    async function updateActor(oldName: string, newName: string): Promise<Response> {
+        const result = await supertest(server.path)
+            .post("")
+            .send({
+                query: `
+                        mutation {
+                            ${typeActor.operations.update}(where: { name_EQ: "${oldName}" }, update: { name: "${newName}" }) {
+                                ${typeActor.plural} {
+                                    name
                                 }
                             }
                         }

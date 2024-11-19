@@ -17,11 +17,13 @@
  * limitations under the License.
  */
 
-import type { Driver, Session } from "neo4j-driver";
 import Debug from "debug";
-import type Node from "../Node";
-import type { DriverConfig } from "../..";
+import type { Driver, Session } from "neo4j-driver";
 import { DEBUG_EXECUTE } from "../../constants";
+import type { Neo4jGraphQLSchemaModel } from "../../schema-model/Neo4jGraphQLSchemaModel";
+import type { ConcreteEntity } from "../../schema-model/entity/ConcreteEntity";
+import { ConcreteEntityAdapter } from "../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import type { Neo4jGraphQLSessionConfig } from "../Executor";
 
 const debug = Debug(DEBUG_EXECUTE);
 
@@ -29,13 +31,43 @@ export interface AssertIndexesAndConstraintsOptions {
     create?: boolean;
 }
 
-async function createConstraints({ nodes, session }: { nodes: Node[]; session: Session }) {
-    const constraintsToCreate: { constraintName: string; label: string; property: string }[] = [];
-    const indexesToCreate: { indexName: string; label: string; properties: string[] }[] = [];
+export async function assertIndexesAndConstraints({
+    driver,
+    sessionConfig,
+    schemaModel,
+}: {
+    driver: Driver;
+    sessionConfig?: Neo4jGraphQLSessionConfig;
+    schemaModel: Neo4jGraphQLSchemaModel;
+}): Promise<void> {
+    await driver.verifyConnectivity();
 
-    const existingIndexes: Record<string, { labelsOrTypes: string; properties: string[] }> = {};
-    const indexErrors: string[] = [];
-    const indexesCypher = "CALL db.indexes";
+    const session = driver.session(sessionConfig);
+
+    try {
+        await checkIndexesAndConstraints({ schemaModel, session });
+    } finally {
+        await session.close();
+    }
+}
+
+type ExistingIndexes = Record<
+    string,
+    { labelsOrTypes: string; properties: string[]; options: Record<string, unknown> }
+>;
+
+async function getExistingIndexes({ session }: { session: Session }): Promise<ExistingIndexes> {
+    const existingIndexes: ExistingIndexes = {};
+
+    const indexesCypher = `
+        SHOW INDEXES YIELD
+        name AS name,
+        type AS type,
+        entityType AS entityType,
+        labelsOrTypes AS labelsOrTypes,
+        properties AS properties,
+        options AS options
+    `;
 
     debug(`About to execute Cypher: ${indexesCypher}`);
     const indexesResult = await session.run(indexesCypher);
@@ -43,7 +75,7 @@ async function createConstraints({ nodes, session }: { nodes: Node[]; session: S
     indexesResult.records.forEach((record) => {
         const index = record.toObject();
 
-        if (index.type !== "FULLTEXT" || index.entityType !== "NODE") {
+        if ((index.type !== "FULLTEXT" && index.type !== "VECTOR") || index.entityType !== "NODE") {
             return;
         }
 
@@ -54,100 +86,129 @@ async function createConstraints({ nodes, session }: { nodes: Node[]; session: S
         existingIndexes[index.name] = {
             labelsOrTypes: index.labelsOrTypes,
             properties: index.properties,
+            options: index.options,
         };
     });
 
-    nodes.forEach((node) => {
-        node.uniqueFields.forEach((field) => {
-            constraintsToCreate.push({
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                constraintName: field.unique!.constraintName,
-                label: node.getMainLabel(),
-                property: field.dbPropertyName || field.fieldName,
-            });
+    return existingIndexes;
+}
+
+function checkVectorIndexes(entity: ConcreteEntity, existingIndexes: ExistingIndexes, indexErrors: string[]): void {
+    if (entity.annotations.vector) {
+        entity.annotations.vector.indexes.forEach((index) => {
+            const existingIndex = existingIndexes[index.indexName];
+
+            if (!existingIndex) {
+                indexErrors.push(`Missing @vector index '${index.indexName}' on Node '${entity.name}'`);
+
+                return;
+            }
+
+            const propertyIsInIndex = existingIndex.properties.some((p) => p === index.embeddingProperty);
+            if (!propertyIsInIndex) {
+                indexErrors.push(
+                    `@vector index '${index.indexName}' on Node '${entity.name}' is missing embedding property '${index.embeddingProperty}'`
+                );
+            }
+
+            if (!existingIndex.options) {
+                indexErrors.push(`@vector index '${index.indexName}' on Node '${entity.name}' is missing options`);
+
+                return;
+            }
+
+            const indexConfig = existingIndex.options["indexConfig"];
+            if (!indexConfig) {
+                indexErrors.push(`@vector index '${index.indexName}' on Node '${entity.name}' is missing indexConfig`);
+
+                return;
+            }
         });
+    }
+}
 
-        if (node.fulltextDirective) {
-            node.fulltextDirective.indexes.forEach((index) => {
-                const existingIndex = existingIndexes[index.name];
-                if (!existingIndex) {
-                    const properties = index.fields.map((field) => {
-                        const stringField = node.primitiveFields.find((f) => f.fieldName === field);
+async function checkIndexesAndConstraints({
+    schemaModel,
+    session,
+}: {
+    schemaModel: Neo4jGraphQLSchemaModel;
+    session: Session;
+}): Promise<void> {
+    const missingConstraints = await getMissingConstraints({ schemaModel, session });
 
-                        return stringField?.dbPropertyName || field;
-                    });
+    if (missingConstraints.length) {
+        const missingConstraintMessages = missingConstraints.map(
+            (constraint) => `Missing constraint for ${constraint.label}.${constraint.property}`
+        );
+        throw new Error(missingConstraintMessages.join("\n"));
+    }
 
-                    indexesToCreate.push({
-                        indexName: index.name,
-                        label: node.getMainLabel(),
-                        properties,
-                    });
-                } else {
-                    index.fields.forEach((field) => {
-                        const stringField = node.primitiveFields.find((f) => f.fieldName === field);
-                        const fieldName = stringField?.dbPropertyName || field;
+    debug("Successfully checked for the existence of all necessary constraints");
 
-                        const property = existingIndex.properties.find((p) => p === fieldName);
-                        if (!property) {
-                            const aliasError = stringField?.dbPropertyName ? ` aliased to field '${fieldName}''` : "";
+    const existingIndexes = await getExistingIndexes({ session });
+    const indexErrors: string[] = [];
 
-                            indexErrors.push(
-                                `@fulltext index '${index.name}' on Node '${node.name}' already exists, but is missing field '${field}'${aliasError}`
-                            );
-                        }
-                    });
+    for (const entity of schemaModel.concreteEntities) {
+        if (entity.annotations.fulltext) {
+            entity.annotations.fulltext.indexes.forEach((index) => {
+                const indexName = index.indexName || index.name; // TODO remove indexName assignment and undefined check once the name argument has been removed.
+                if (indexName === undefined) {
+                    throw new Error("The name of the fulltext index should be defined using the indexName argument.");
                 }
+
+                const existingIndex = existingIndexes[indexName];
+                if (!existingIndex) {
+                    indexErrors.push(`Missing @fulltext index '${indexName}' on Node '${entity.name}'`);
+
+                    return;
+                }
+
+                // An index with the same name already exists, so we check that all index fields are included in the existing index
+                index.fields.forEach((field) => {
+                    const attribute = entity.findAttribute(field);
+                    if (!attribute) {
+                        throw new Error(`Attribute '${field}' not found in entity '${entity.name}'`);
+                    }
+
+                    const propertyIsInIndex = existingIndex.properties.some((p) => p === attribute.databaseName);
+                    if (!propertyIsInIndex) {
+                        const aliasError =
+                            attribute.databaseName !== attribute.name
+                                ? ` aliased to field '${attribute.databaseName}'`
+                                : "";
+
+                        indexErrors.push(
+                            `@fulltext index '${indexName}' on Node '${entity.name}' is missing field '${field}'${aliasError}`
+                        );
+                    }
+                });
             });
         }
-    });
+
+        checkVectorIndexes(entity, existingIndexes, indexErrors);
+    }
 
     if (indexErrors.length) {
         throw new Error(indexErrors.join("\n"));
     }
 
-    for (const constraintToCreate of constraintsToCreate) {
-        const cypher = [
-            `CREATE CONSTRAINT ${constraintToCreate.constraintName}`,
-            `IF NOT EXISTS ON (n:${constraintToCreate.label})`,
-            `ASSERT n.${constraintToCreate.property} IS UNIQUE`,
-        ].join(" ");
-
-        debug(`About to execute Cypher: ${cypher}`);
-
-        // eslint-disable-next-line no-await-in-loop
-        const result = await session.run(cypher);
-
-        const { constraintsAdded } = result.summary.counters.updates();
-
-        debug(`Created ${constraintsAdded} new constraint${constraintsAdded ? "" : "s"}`);
-    }
-
-    for (const indexToCreate of indexesToCreate) {
-        const cypher = [
-            `CALL db.index.fulltext.createNodeIndex(`,
-            `"${indexToCreate.indexName}",`,
-            `["${indexToCreate.label}"],`,
-            `[${indexToCreate.properties.map((p) => `"${p}"`).join(", ")}]`,
-            `)`,
-        ].join(" ");
-
-        debug(`About to execute Cypher: ${cypher}`);
-
-        // eslint-disable-next-line no-await-in-loop
-        await session.run(cypher);
-
-        debug(`Created @fulltext index ${indexToCreate.indexName}`);
-    }
+    debug("Successfully checked for the existence of all necessary indexes");
 }
 
-async function checkConstraints({ nodes, session }: { nodes: Node[]; session: Session }) {
-    const constraintsCypher = "SHOW UNIQUE CONSTRAINTS";
+type MissingConstraint = { constraintName: string; label: string; property: string };
 
+async function getMissingConstraints({
+    schemaModel,
+    session,
+}: {
+    schemaModel: Neo4jGraphQLSchemaModel;
+    session: Session;
+}): Promise<MissingConstraint[]> {
     const existingConstraints: Record<string, string[]> = {};
-    const missingConstraints: string[] = [];
 
+    const constraintsCypher = "SHOW UNIQUE CONSTRAINTS";
     debug(`About to execute Cypher: ${constraintsCypher}`);
-    const constraintsResult = await session.run(constraintsCypher);
+    const constraintsResult = await session.run<{ labelsOrTypes: [string]; properties: [string] }>(constraintsCypher);
 
     constraintsResult.records
         .map((record) => {
@@ -157,125 +218,47 @@ async function checkConstraints({ nodes, session }: { nodes: Node[]; session: Se
             const label = constraint.labelsOrTypes[0];
             const property = constraint.properties[0];
 
-            if (existingConstraints[label]) {
-                existingConstraints[label].push(property as string);
+            const existingConstraint = existingConstraints[label];
+
+            if (existingConstraint) {
+                existingConstraint.push(property);
             } else {
                 existingConstraints[label] = [property];
             }
         });
 
-    nodes.forEach((node) => {
-        node.uniqueFields.forEach((field) => {
-            const property = field.dbPropertyName || field.fieldName;
-            if (!existingConstraints[node.getMainLabel()]?.includes(property)) {
-                missingConstraints.push(`Missing constraint for ${node.name}.${property}`);
+    const missingConstraints: MissingConstraint[] = [];
+
+    for (const entity of schemaModel.concreteEntities) {
+        const entityAdapter = new ConcreteEntityAdapter(entity);
+        for (const uniqueField of entityAdapter.uniqueFields) {
+            if (!uniqueField.annotations.unique) {
+                continue;
             }
-        });
-    });
 
-    if (missingConstraints.length) {
-        throw new Error(missingConstraints.join("\n"));
-    }
-
-    debug("Successfully checked for the existence of all necessary constraints");
-
-    const existingIndexes: Record<string, { labelsOrTypes: string; properties: string[] }> = {};
-    const indexErrors: string[] = [];
-    const indexesCypher = "CALL db.indexes";
-
-    debug(`About to execute Cypher: ${indexesCypher}`);
-    const indexesResult = await session.run(indexesCypher);
-
-    indexesResult.records.forEach((record) => {
-        const index = record.toObject();
-
-        if (index.type !== "FULLTEXT" || index.entityType !== "NODE") {
-            return;
-        }
-
-        if (existingIndexes[index.name]) {
-            return;
-        }
-
-        existingIndexes[index.name] = {
-            labelsOrTypes: index.labelsOrTypes,
-            properties: index.properties,
-        };
-    });
-
-    nodes.forEach((node) => {
-        if (node.fulltextDirective) {
-            node.fulltextDirective.indexes.forEach((index) => {
-                const existingIndex = existingIndexes[index.name];
-                if (!existingIndex) {
-                    indexErrors.push(`Missing @fulltext index '${index.name}' on Node '${node.name}'`);
-
-                    return;
+            let anyLabelHasConstraint = false;
+            for (const label of entity.labels) {
+                // If any of the constraints for the label already exist, skip to the next unique field
+                if (existingConstraints[label]?.includes(uniqueField.databaseName)) {
+                    anyLabelHasConstraint = true;
+                    break;
                 }
+            }
 
-                index.fields.forEach((field) => {
-                    const stringField = node.primitiveFields.find((f) => f.fieldName === field);
-                    const fieldName = stringField?.dbPropertyName || field;
+            if (anyLabelHasConstraint === false) {
+                // TODO: The fallback value of `${entity.name}_${uniqueField.databaseName}` should be changed to use the main label of the entity
+                // But this can only be done once the translation layer has been updated to use the schema model instead of the Node class
+                const constraintName =
+                    uniqueField.annotations.unique.constraintName || `${entity.name}_${uniqueField.databaseName}`;
 
-                    const property = existingIndex.properties.find((p) => p === fieldName);
-                    if (!property) {
-                        const aliasError = stringField?.dbPropertyName ? ` aliased to field '${fieldName}''` : "";
-
-                        indexErrors.push(
-                            `@fulltext index '${index.name}' on Node '${node.name}' is missing field '${field}'${aliasError}`
-                        );
-                    }
+                missingConstraints.push({
+                    constraintName,
+                    label: entityAdapter.getMainLabel(),
+                    property: uniqueField.databaseName,
                 });
-            });
+            }
         }
-    });
-
-    if (indexErrors.length) {
-        throw new Error(indexErrors.join("\n"));
     }
 
-    debug("Successfully checked for the existence of all necessary indexes");
+    return missingConstraints;
 }
-
-async function assertIndexesAndConstraints({
-    driver,
-    driverConfig,
-    nodes,
-    options,
-}: {
-    driver: Driver;
-    driverConfig?: DriverConfig;
-    nodes: Node[];
-    options?: AssertIndexesAndConstraintsOptions;
-}) {
-    await driver.verifyConnectivity();
-
-    const sessionParams: {
-        bookmarks?: string | string[];
-        database?: string;
-    } = {};
-
-    if (driverConfig) {
-        if (driverConfig.database) {
-            sessionParams.database = driverConfig.database;
-        }
-
-        if (driverConfig.bookmarks) {
-            sessionParams.bookmarks = driverConfig.bookmarks;
-        }
-    }
-
-    const session = driver.session(sessionParams);
-
-    try {
-        if (options?.create) {
-            await createConstraints({ nodes, session });
-        } else {
-            await checkConstraints({ nodes, session });
-        }
-    } finally {
-        await session.close();
-    }
-}
-
-export default assertIndexesAndConstraints;

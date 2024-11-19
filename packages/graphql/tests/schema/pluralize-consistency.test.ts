@@ -18,19 +18,19 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Pluralize consistency", () => {
     test("Schema with underscore types", async () => {
         const typeDefs = gql`
-            type super_user {
+            type super_user @node {
                 name: String!
                 my_friend: [super_friend!]! @relationship(type: "FRIEND", direction: OUT)
             }
 
-            type super_friend {
+            type super_friend @node {
                 name: String!
             }
         `;
@@ -43,8 +43,10 @@ describe("Pluralize consistency", () => {
               mutation: Mutation
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -59,8 +61,10 @@ describe("Pluralize consistency", () => {
               superUsers: [super_user!]!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -71,7 +75,7 @@ describe("Pluralize consistency", () => {
               deleteSuperFriends(where: super_friendWhere): DeleteInfo!
               deleteSuperUsers(delete: super_userDeleteInput, where: super_userWhere): DeleteInfo!
               updateSuperFriends(update: super_friendUpdateInput, where: super_friendWhere): UpdateSuperFriendsMutationResponse!
-              updateSuperUsers(connect: super_userConnectInput, create: super_userRelationInput, delete: super_userDeleteInput, disconnect: super_userDisconnectInput, update: super_userUpdateInput, where: super_userWhere): UpdateSuperUsersMutationResponse!
+              updateSuperUsers(update: super_userUpdateInput, where: super_userWhere): UpdateSuperUsersMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -83,14 +87,15 @@ describe("Pluralize consistency", () => {
             }
 
             type Query {
-              superFriends(options: super_friendOptions, where: super_friendWhere): [super_friend!]!
+              superFriends(limit: Int, offset: Int, options: super_friendOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
               superFriendsAggregate(where: super_friendWhere): super_friendAggregateSelection!
-              superFriendsConnection(after: String, first: Int, sort: [super_friendSort], where: super_friendWhere): SuperFriendsConnection!
-              superUsers(options: super_userOptions, where: super_userWhere): [super_user!]!
+              superFriendsConnection(after: String, first: Int, sort: [super_friendSort!], where: super_friendWhere): SuperFriendsConnection!
+              superUsers(limit: Int, offset: Int, options: super_userOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_userSort!], where: super_userWhere): [super_user!]!
               superUsersAggregate(where: super_userWhere): super_userAggregateSelection!
-              superUsersConnection(after: String, first: Int, sort: [super_userSort], where: super_userWhere): SuperUsersConnection!
+              superUsersConnection(after: String, first: Int, sort: [super_userSort!], where: super_userWhere): SuperUsersConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -98,9 +103,9 @@ describe("Pluralize consistency", () => {
               DESC
             }
 
-            type StringAggregateSelectionNonNullable {
-              longest: String!
-              shortest: String!
+            type StringAggregateSelection {
+              longest: String
+              shortest: String
             }
 
             type SuperFriendsConnection {
@@ -115,8 +120,10 @@ describe("Pluralize consistency", () => {
               totalCount: Int!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!
@@ -139,7 +146,7 @@ describe("Pluralize consistency", () => {
 
             type super_friendAggregateSelection {
               count: Int!
-              name: StringAggregateSelectionNonNullable!
+              name: StringAggregateSelection!
             }
 
             input super_friendConnectWhere {
@@ -172,38 +179,32 @@ describe("Pluralize consistency", () => {
             }
 
             input super_friendUpdateInput {
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input super_friendWhere {
               AND: [super_friendWhere!]
+              NOT: super_friendWhere
               OR: [super_friendWhere!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String
-              name_NOT_CONTAINS: String
-              name_NOT_ENDS_WITH: String
-              name_NOT_IN: [String!]
-              name_NOT_STARTS_WITH: String
               name_STARTS_WITH: String
             }
 
             type super_user {
-              my_friend(directed: Boolean = true, options: super_friendOptions, where: super_friendWhere): [super_friend!]!
-              my_friendAggregate(directed: Boolean = true, where: super_friendWhere): super_usersuper_friendMy_friendAggregationSelection
-              my_friendConnection(after: String, directed: Boolean = true, first: Int, sort: [super_userMy_friendConnectionSort!], where: super_userMy_friendConnectionWhere): super_userMy_friendConnection!
+              my_friend(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: super_friendOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [super_friendSort!], where: super_friendWhere): [super_friend!]!
+              my_friendAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: super_friendWhere): super_usersuper_friendMy_friendAggregationSelection
+              my_friendConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [super_userMy_friendConnectionSort!], where: super_userMy_friendConnectionWhere): super_userMy_friendConnection!
               name: String!
             }
 
             type super_userAggregateSelection {
               count: Int!
-              name: StringAggregateSelectionNonNullable!
-            }
-
-            input super_userConnectInput {
-              my_friend: [super_userMy_friendConnectFieldInput!]
+              name: StringAggregateSelection!
             }
 
             input super_userCreateInput {
@@ -215,10 +216,6 @@ describe("Pluralize consistency", () => {
               my_friend: [super_userMy_friendDeleteFieldInput!]
             }
 
-            input super_userDisconnectInput {
-              my_friend: [super_userMy_friendDisconnectFieldInput!]
-            }
-
             type super_userEdge {
               cursor: String!
               node: super_user!
@@ -226,8 +223,10 @@ describe("Pluralize consistency", () => {
 
             input super_userMy_friendAggregateInput {
               AND: [super_userMy_friendAggregateInput!]
+              NOT: super_userMy_friendAggregateInput
               OR: [super_userMy_friendAggregateInput!]
-              count: Int
+              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
@@ -236,6 +235,10 @@ describe("Pluralize consistency", () => {
             }
 
             input super_userMy_friendConnectFieldInput {
+              \\"\\"\\"
+              Whether or not to overwrite any matching relationship with the new properties.
+              \\"\\"\\"
+              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: super_friendConnectWhere
             }
 
@@ -251,9 +254,9 @@ describe("Pluralize consistency", () => {
 
             input super_userMy_friendConnectionWhere {
               AND: [super_userMy_friendConnectionWhere!]
+              NOT: super_userMy_friendConnectionWhere
               OR: [super_userMy_friendConnectionWhere!]
               node: super_friendWhere
-              node_NOT: super_friendWhere
             }
 
             input super_userMy_friendCreateFieldInput {
@@ -275,27 +278,23 @@ describe("Pluralize consistency", () => {
 
             input super_userMy_friendNodeAggregationWhereInput {
               AND: [super_userMy_friendNodeAggregationWhereInput!]
+              NOT: super_userMy_friendNodeAggregationWhereInput
               OR: [super_userMy_friendNodeAggregationWhereInput!]
-              name_AVERAGE_EQUAL: Float
-              name_AVERAGE_GT: Float
-              name_AVERAGE_GTE: Float
-              name_AVERAGE_LT: Float
-              name_AVERAGE_LTE: Float
-              name_EQUAL: String
-              name_GT: Int
-              name_GTE: Int
-              name_LONGEST_EQUAL: Int
-              name_LONGEST_GT: Int
-              name_LONGEST_GTE: Int
-              name_LONGEST_LT: Int
-              name_LONGEST_LTE: Int
-              name_LT: Int
-              name_LTE: Int
-              name_SHORTEST_EQUAL: Int
-              name_SHORTEST_GT: Int
-              name_SHORTEST_GTE: Int
-              name_SHORTEST_LT: Int
-              name_SHORTEST_LTE: Int
+              name_AVERAGE_LENGTH_EQUAL: Float
+              name_AVERAGE_LENGTH_GT: Float
+              name_AVERAGE_LENGTH_GTE: Float
+              name_AVERAGE_LENGTH_LT: Float
+              name_AVERAGE_LENGTH_LTE: Float
+              name_LONGEST_LENGTH_EQUAL: Int
+              name_LONGEST_LENGTH_GT: Int
+              name_LONGEST_LENGTH_GTE: Int
+              name_LONGEST_LENGTH_LT: Int
+              name_LONGEST_LENGTH_LTE: Int
+              name_SHORTEST_LENGTH_EQUAL: Int
+              name_SHORTEST_LENGTH_GT: Int
+              name_SHORTEST_LENGTH_GTE: Int
+              name_SHORTEST_LENGTH_LT: Int
+              name_SHORTEST_LENGTH_LTE: Int
             }
 
             type super_userMy_friendRelationship {
@@ -325,10 +324,6 @@ describe("Pluralize consistency", () => {
               sort: [super_userSort!]
             }
 
-            input super_userRelationInput {
-              my_friend: [super_userMy_friendCreateFieldInput!]
-            }
-
             \\"\\"\\"
             Fields to sort SuperUsers by. The order in which sorts are applied is not guaranteed when specifying many fields in one super_userSort object.
             \\"\\"\\"
@@ -338,19 +333,30 @@ describe("Pluralize consistency", () => {
 
             input super_userUpdateInput {
               my_friend: [super_userMy_friendUpdateFieldInput!]
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
+              name_SET: String
             }
 
             input super_userWhere {
               AND: [super_userWhere!]
+              NOT: super_userWhere
               OR: [super_userWhere!]
-              my_friend: super_friendWhere @deprecated(reason: \\"Use \`my_friend_SOME\` instead.\\")
               my_friendAggregate: super_userMy_friendAggregateInput
-              my_friendConnection: super_userMy_friendConnectionWhere @deprecated(reason: \\"Use \`my_friendConnection_SOME\` instead.\\")
+              \\"\\"\\"
+              Return super_users where all of the related super_userMy_friendConnections match this filter
+              \\"\\"\\"
               my_friendConnection_ALL: super_userMy_friendConnectionWhere
+              \\"\\"\\"
+              Return super_users where none of the related super_userMy_friendConnections match this filter
+              \\"\\"\\"
               my_friendConnection_NONE: super_userMy_friendConnectionWhere
-              my_friendConnection_NOT: super_userMy_friendConnectionWhere @deprecated(reason: \\"Use \`my_friendConnection_NONE\` instead.\\")
+              \\"\\"\\"
+              Return super_users where one of the related super_userMy_friendConnections match this filter
+              \\"\\"\\"
               my_friendConnection_SINGLE: super_userMy_friendConnectionWhere
+              \\"\\"\\"
+              Return super_users where some of the related super_userMy_friendConnections match this filter
+              \\"\\"\\"
               my_friendConnection_SOME: super_userMy_friendConnectionWhere
               \\"\\"\\"
               Return super_users where all of the related super_friends match this filter
@@ -360,7 +366,6 @@ describe("Pluralize consistency", () => {
               Return super_users where none of the related super_friends match this filter
               \\"\\"\\"
               my_friend_NONE: super_friendWhere
-              my_friend_NOT: super_friendWhere @deprecated(reason: \\"Use \`my_friend_NONE\` instead.\\")
               \\"\\"\\"
               Return super_users where one of the related super_friends match this filter
               \\"\\"\\"
@@ -369,15 +374,11 @@ describe("Pluralize consistency", () => {
               Return super_users where some of the related super_friends match this filter
               \\"\\"\\"
               my_friend_SOME: super_friendWhere
-              name: String
+              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
               name_CONTAINS: String
               name_ENDS_WITH: String
+              name_EQ: String
               name_IN: [String!]
-              name_NOT: String
-              name_NOT_CONTAINS: String
-              name_NOT_ENDS_WITH: String
-              name_NOT_IN: [String!]
-              name_NOT_STARTS_WITH: String
               name_STARTS_WITH: String
             }
 
@@ -387,7 +388,7 @@ describe("Pluralize consistency", () => {
             }
 
             type super_usersuper_friendMy_friendNodeAggregateSelection {
-              name: StringAggregateSelectionNonNullable!
+              name: StringAggregateSelection!
             }"
         `);
     });

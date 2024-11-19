@@ -17,71 +17,101 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1566", () => {
-    const testContent = generateUniqueType("Content");
-    const testProject = generateUniqueType("Project");
-    const testCommunity = generateUniqueType("Community");
+    let testContent: UniqueType;
+    let testProject: UniqueType;
+    let testCommunity: UniqueType;
 
-    let schema: GraphQLSchema;
-    let neo4j: Neo4j;
-    let driver: Driver;
+    const testHelper = new TestHelper();
 
-    async function graphqlQuery(query: string) {
-        return graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues(),
-        });
-    }
-
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(async () => {
+        testContent = testHelper.createUniqueType("Content");
+        testProject = testHelper.createUniqueType("Project");
+        testCommunity = testHelper.createUniqueType("Community");
 
         const typeDefs = `
-            type ${testContent.name} {
+            type ${testContent.name} @node {
                 name: String!
             }
 
-            type ${testProject.name} {
+            type ${testProject.name} @node {
                 name: String!
             }
 
             union FeedItem = ${testContent.name} | ${testProject.name}
 
-            type ${testCommunity.name} {
+            type ${testCommunity.name} @node {
                 id: Int!
+                feedItem: FeedItem
+                    @cypher(
+                        statement: """
+                        Match(this)-[:COMMUNITY_CONTENTPIECE_HASCONTENTPIECES|:COMMUNITY_PROJECT_HASASSOCIATEDPROJECTS]-(pag)
+                        return pag
+                        """
+                        columnName: "pag"
+                    )
                 hasFeedItems(limit: Int = 10, page: Int = 0): [FeedItem!]!
                     @cypher(
                         statement: """
                         Match(this)-[:COMMUNITY_CONTENTPIECE_HASCONTENTPIECES|:COMMUNITY_PROJECT_HASASSOCIATEDPROJECTS]-(pag)
                            return pag SKIP ($limit * $page) LIMIT $limit
                         """
+                        columnName: "pag"
                     )
             }
         `;
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
         });
-        schema = await neoGraphql.getSchema();
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
+    });
+
+    test("single value is returned for custom Cypher field of Union type", async () => {
+        const query = `
+            query {
+                ${testCommunity.plural}(where: { id_EQ: 111111 }) {
+                    id
+                    feedItem {
+                        __typename
+                        ... on ${testContent.name} {
+                            name
+                        }
+                        ... on ${testProject.name} {
+                            name
+                        }
+                    }
+                }
+            }
+        `;
+
+        const cypher = `
+            CREATE (c:${testCommunity.name} { id: 111111 })-[:COMMUNITY_CONTENTPIECE_HASCONTENTPIECES]->(:${testContent.name} { name: "content1" })
+        `;
+
+        await testHelper.executeCypher(cypher);
+
+        const result = await testHelper.executeGraphQL(query);
+
+        expect(result.errors).toBeUndefined();
+        expect((result.data as any)?.[testCommunity.plural]?.[0]).toEqual({
+            id: 111111,
+            feedItem: {
+                __typename: testContent.name,
+                name: "content1",
+            },
+        });
     });
 
     test("multiple values are returned for custom Cypher field of list of Union types", async () => {
         const query = `
             query {
-                ${testCommunity.plural}(where: { id: 4656564 }) {
+                ${testCommunity.plural}(where: { id_EQ: 4656564 }) {
                     id
                     hasFeedItems {
                         __typename
@@ -102,21 +132,16 @@ describe("https://github.com/neo4j/graphql/issues/1566", () => {
             CREATE (c)-[:COMMUNITY_PROJECT_HASASSOCIATEDPROJECTS]->(:${testProject.name} { name: "project2" })
         `;
 
-        const session = await neo4j.getSession();
+        await testHelper.executeCypher(cypher);
 
-        try {
-            await session.run(cypher);
-        } finally {
-            await session.close();
-        }
+        const result = await testHelper.executeGraphQL(query);
 
-        const result = await graphqlQuery(query);
         expect(result.errors).toBeUndefined();
         expect(result.data as any).toEqual({
             [testCommunity.plural]: [
                 {
                     id: 4656564,
-                    hasFeedItems: expect.arrayContaining([
+                    hasFeedItems: expect.toIncludeSameMembers([
                         {
                             __typename: testContent.name,
                             name: "content",

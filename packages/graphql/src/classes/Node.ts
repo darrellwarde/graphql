@@ -17,18 +17,15 @@
  * limitations under the License.
  */
 
-import type { DirectiveNode, NamedTypeNode } from "graphql";
 import camelcase from "camelcase";
+import type { DirectiveNode, NamedTypeNode } from "graphql";
 import pluralize from "pluralize";
 import type {
-    Auth,
     ConnectionField,
-    Context,
     CustomEnumField,
     CustomScalarField,
     CypherField,
     FullText,
-    ComputedField,
     InterfaceField,
     ObjectField,
     PointField,
@@ -37,15 +34,15 @@ import type {
     TemporalField,
     UnionField,
 } from "../types";
-import type Exclude from "./Exclude";
+import type { Neo4jGraphQLContext } from "../types/neo4j-graphql-context";
+import type { DecodedGlobalId } from "../utils/global-ids";
+import { fromGlobalId, toGlobalId } from "../utils/global-ids";
+import { leadingUnderscores } from "../utils/leading-underscore";
+import { upperFirst } from "../utils/upper-first";
 import type { GraphElementConstructor } from "./GraphElement";
 import { GraphElement } from "./GraphElement";
+import type { LimitDirective } from "./LimitDirective";
 import type { NodeDirective } from "./NodeDirective";
-import type { DecodedGlobalId} from "../utils/global-ids";
-import { fromGlobalId, toGlobalId } from "../utils/global-ids";
-import type { QueryOptionsDirective } from "./QueryOptionsDirective";
-import { upperFirst } from "../utils/upper-first";
-import { NodeAuth } from "./NodeAuth";
 
 export interface NodeConstructor extends GraphElementConstructor {
     name: string;
@@ -56,45 +53,32 @@ export interface NodeConstructor extends GraphElementConstructor {
     scalarFields: CustomScalarField[];
     enumFields: CustomEnumField[];
     otherDirectives: DirectiveNode[];
+    propagatedDirectives: DirectiveNode[];
     unionFields: UnionField[];
     interfaceFields: InterfaceField[];
     interfaces: NamedTypeNode[];
     objectFields: ObjectField[];
     temporalFields: TemporalField[];
     pointFields: PointField[];
-    computedFields: ComputedField[];
-    auth?: Auth;
+    plural?: string;
     fulltextDirective?: FullText;
-    exclude?: Exclude;
     nodeDirective?: NodeDirective;
     description?: string;
-    queryOptionsDirective?: QueryOptionsDirective;
+    limitDirective?: LimitDirective;
     isGlobalNode?: boolean;
     globalIdField?: string;
     globalIdFieldIsInt?: boolean;
 }
 
-type MutableField =
+export type MutableField =
     | PrimitiveField
     | CustomScalarField
     | CustomEnumField
     | UnionField
-    | ObjectField
     | TemporalField
-    | PointField
     | CypherField;
 
-type AuthableField =
-    | PrimitiveField
-    | CustomScalarField
-    | CustomEnumField
-    | UnionField
-    | ObjectField
-    | TemporalField
-    | PointField
-    | CypherField;
-
-type ConstrainableField = PrimitiveField | CustomScalarField | CustomEnumField | TemporalField | PointField;
+type ConstrainableField = PrimitiveField | CustomScalarField | CustomEnumField | TemporalField;
 
 export type RootTypeFieldNames = {
     create: string;
@@ -123,6 +107,8 @@ export type SubscriptionEvents = {
     create: string;
     update: string;
     delete: string;
+    create_relationship: string;
+    delete_relationship: string;
 };
 
 class Node extends GraphElement {
@@ -130,16 +116,15 @@ class Node extends GraphElement {
     public connectionFields: ConnectionField[];
     public cypherFields: CypherField[];
     public otherDirectives: DirectiveNode[];
+    public propagatedDirectives: DirectiveNode[];
     public unionFields: UnionField[];
     public interfaceFields: InterfaceField[];
     public interfaces: NamedTypeNode[];
     public objectFields: ObjectField[];
-    public exclude?: Exclude;
     public nodeDirective?: NodeDirective;
     public fulltextDirective?: FullText;
-    public auth?: NodeAuth;
     public description?: string;
-    public queryOptions?: QueryOptionsDirective;
+    public limit?: LimitDirective;
     public singular: string;
     public plural: string;
     public isGlobalNode: boolean | undefined;
@@ -152,20 +137,19 @@ class Node extends GraphElement {
         this.connectionFields = input.connectionFields;
         this.cypherFields = input.cypherFields;
         this.otherDirectives = input.otherDirectives;
+        this.propagatedDirectives = input.propagatedDirectives;
         this.unionFields = input.unionFields;
         this.interfaceFields = input.interfaceFields;
         this.interfaces = input.interfaces;
         this.objectFields = input.objectFields;
-        this.exclude = input.exclude;
         this.nodeDirective = input.nodeDirective;
         this.fulltextDirective = input.fulltextDirective;
-        this.auth = input.auth ? new NodeAuth(input.auth) : undefined;
-        this.queryOptions = input.queryOptionsDirective;
+        this.limit = input.limitDirective;
         this.isGlobalNode = input.isGlobalNode;
         this._idField = input.globalIdField;
         this._idFieldIsInt = input.globalIdFieldIsInt;
         this.singular = this.generateSingular();
-        this.plural = this.generatePlural();
+        this.plural = this.generatePlural(input.plural);
     }
 
     // Fields you can set in a create or update mutation
@@ -174,26 +158,12 @@ class Node extends GraphElement {
             ...this.temporalFields,
             ...this.enumFields,
             ...this.objectFields,
-            ...this.scalarFields,
-            ...this.primitiveFields,
+            ...this.scalarFields, // these are just custom scalars
+            ...this.primitiveFields, // these are instead built-in scalars
             ...this.interfaceFields,
             ...this.objectFields,
             ...this.unionFields,
             ...this.pointFields,
-        ];
-    }
-
-    /** Fields you can apply auth allow and bind to */
-    public get authableFields(): AuthableField[] {
-        return [
-            ...this.primitiveFields,
-            ...this.scalarFields,
-            ...this.enumFields,
-            ...this.unionFields,
-            ...this.objectFields,
-            ...this.temporalFields,
-            ...this.pointFields,
-            ...this.cypherFields,
         ];
     }
 
@@ -259,6 +229,8 @@ class Node extends GraphElement {
             create: `${pascalCaseSingular}CreatedEvent`,
             update: `${pascalCaseSingular}UpdatedEvent`,
             delete: `${pascalCaseSingular}DeletedEvent`,
+            create_relationship: `${pascalCaseSingular}RelationshipCreatedEvent`,
+            delete_relationship: `${pascalCaseSingular}RelationshipDeletedEvent`,
         };
     }
 
@@ -269,19 +241,28 @@ class Node extends GraphElement {
             create: `created${pascalCaseSingular}`,
             update: `updated${pascalCaseSingular}`,
             delete: `deleted${pascalCaseSingular}`,
+            create_relationship: `${this.singular}`,
+            delete_relationship: `${this.singular}`,
         };
     }
 
-    public getLabelString(context: Context): string {
+    public getLabelString(context: Neo4jGraphQLContext): string {
         return this.nodeDirective?.getLabelsString(this.name, context) || `:${this.name}`;
     }
-
-    public getLabels(context: Context): string[] {
+    /**
+     * Returns the list containing labels mapped with the values contained in the Context.
+     * Be careful when using this method, labels returned are unescaped.
+     **/
+    public getLabels(context: Neo4jGraphQLContext): string[] {
         return this.nodeDirective?.getLabels(this.name, context) || [this.name];
     }
 
     public getMainLabel(): string {
-        return this.nodeDirective?.label || this.name;
+        return this.nodeDirective?.labels?.[0] || this.name;
+    }
+
+    public getAllLabels(): string[] {
+        return this.nodeDirective?.labels.length ? this.nodeDirective.labels : [this.name];
     }
 
     public getGlobalIdField(): string {
@@ -306,20 +287,14 @@ class Node extends GraphElement {
     private generateSingular(): string {
         const singular = camelcase(this.name);
 
-        return `${this.leadingUnderscores(this.name)}${singular}`;
+        return `${leadingUnderscores(this.name)}${singular}`;
     }
 
-    private generatePlural(): string {
-        const name = this.nodeDirective?.plural || this.name;
-        const plural = this.nodeDirective?.plural ? camelcase(name) : pluralize(camelcase(name));
+    private generatePlural(inputPlural: string | undefined): string {
+        const name = inputPlural || this.plural || this.name;
+        const plural = inputPlural || this.plural ? camelcase(name) : pluralize(camelcase(name));
 
-        return `${this.leadingUnderscores(name)}${plural}`;
-    }
-
-    private leadingUnderscores(name: string): string {
-        const re = /^(_+).+/;
-        const match = re.exec(name);
-        return match?.[1] || "";
+        return `${leadingUnderscores(name)}${plural}`;
     }
 }
 

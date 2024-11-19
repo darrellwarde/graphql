@@ -17,39 +17,34 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
 import { generate } from "randomstring";
-import { Neo4jGraphQL } from "../../src/classes";
-import Neo4j from "./neo4j";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("cypherParams", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should inject cypherParams on top-level cypher query", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Movie {
+        const typeDefs = /* GraphQL */ `
+            type ${Movie} @node {
               id: ID
             }
 
             type Query {
-                id: String! @cypher(statement: "RETURN $cypherParams.id")
+                id: String! @cypher(statement: "RETURN $id AS id", columnName: "id")
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -63,36 +58,28 @@ describe("cypherParams", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source,
-                contextValue: neo4j.getContextValues({ cypherParams: { id } }),
-            });
+        const gqlResult = await testHelper.executeGraphQL(source, {
+            contextValue: { cypherParams: { id } },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any).id).toEqual(id);
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any).id).toEqual(id);
     });
 
     test("should inject cypherParams on field level nested query", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type CypherParams {
                 id: ID
             }
 
-            type Movie {
+            type ${Movie} @node {
               id: ID
-              cypherParams: CypherParams @cypher(statement: "RETURN $cypherParams")
+              cypherParams: CypherParams @cypher(statement: "RETURN $cypherParams AS result", columnName: "result")
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -105,7 +92,7 @@ describe("cypherParams", () => {
 
         const source = `
             query($id: ID) {
-                movies(where: {id: $id}) {
+                ${Movie.plural}(where: {id_EQ: $id}) {
                     id
                     cypherParams {
                         id
@@ -114,50 +101,42 @@ describe("cypherParams", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $movieId})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $movieId})
             `,
-                { movieId }
-            );
+            { movieId }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source,
-                variableValues: {
-                    id: movieId,
-                },
-                contextValue: neo4j.getContextValues({ cypherParams: { id: cypherParamsId } }),
-            });
-
-            expect(gqlResult.errors).toBeFalsy();
-
-            expect((gqlResult.data as any).movies[0]).toEqual({
+        const gqlResult = await testHelper.executeGraphQL(source, {
+            variableValues: {
                 id: movieId,
-                cypherParams: {
-                    id: cypherParamsId,
-                },
-            });
-        } finally {
-            await session.close();
-        }
+            },
+            contextValue: { cypherParams: { cypherParams: { id: cypherParamsId } } },
+        });
+
+        expect(gqlResult.errors).toBeFalsy();
+
+        expect((gqlResult.data as any)[Movie.plural][0]).toEqual({
+            id: movieId,
+            cypherParams: {
+                id: cypherParamsId,
+            },
+        });
     });
 
     test("should inject cypherParams on top-level cypher mutation", async () => {
-        const session = await neo4j.getSession();
-
-        const typeDefs = `
-            type Movie {
+        const typeDefs = /* GraphQL */ `
+            type ${Movie} @node {
               id: ID
             }
 
             type Mutation {
-                id: String! @cypher(statement: "RETURN $cypherParams.id")
+                id: String! @cypher(statement: "RETURN $id AS id", columnName:"id")
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
         });
 
@@ -171,18 +150,12 @@ describe("cypherParams", () => {
             }
         `;
 
-        try {
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source,
-                contextValue: neo4j.getContextValues({ cypherParams: { id } }),
-            });
+        const gqlResult = await testHelper.executeGraphQL(source, {
+            contextValue: { cypherParams: { id } },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect((gqlResult.data as any).id).toEqual(id);
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.data as any).id).toEqual(id);
     });
 });

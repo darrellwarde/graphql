@@ -24,7 +24,8 @@ import type {
     CustomScalarField,
     TemporalField,
     PointField,
-    ComputedField,
+    CustomResolverField,
+    BaseField,
 } from "../types";
 
 export interface GraphElementConstructor {
@@ -36,7 +37,7 @@ export interface GraphElementConstructor {
     enumFields: CustomEnumField[];
     temporalFields: TemporalField[];
     pointFields: PointField[];
-    computedFields: ComputedField[];
+    customResolverFields: CustomResolverField[];
 }
 
 export abstract class GraphElement {
@@ -47,7 +48,7 @@ export abstract class GraphElement {
     public enumFields: CustomEnumField[];
     public temporalFields: TemporalField[];
     public pointFields: PointField[];
-    public computedFields: ComputedField[];
+    public customResolverFields: CustomResolverField[];
 
     constructor(input: GraphElementConstructor) {
         this.name = input.name;
@@ -57,6 +58,30 @@ export abstract class GraphElement {
         this.enumFields = input.enumFields;
         this.temporalFields = input.temporalFields;
         this.pointFields = input.pointFields;
-        this.computedFields = input.computedFields;
+        this.customResolverFields = input.customResolverFields;
+    }
+
+    public getField(name: string): BaseField | undefined {
+        for (const fieldList of this.getAllFields()) {
+            const field = this.searchFieldInList(name, fieldList);
+            if (field) return field;
+        }
+    }
+
+    private getAllFields(): Array<BaseField[]> {
+        return [
+            this.primitiveFields,
+            this.scalarFields,
+            this.enumFields,
+            this.temporalFields,
+            this.pointFields,
+            this.customResolverFields,
+        ];
+    }
+
+    private searchFieldInList(fieldName: string, fields: BaseField[]): BaseField | undefined {
+        return fields.find((field) => {
+            return field.fieldName === fieldName;
+        });
     }
 }

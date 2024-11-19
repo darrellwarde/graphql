@@ -17,37 +17,21 @@
  * limitations under the License.
  */
 
-import type { ObjectTypeDefinitionNode } from "graphql";
+import type { FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
 import { parse } from "graphql";
 import getFieldTypeMeta from "./get-field-type-meta";
 
 describe("getFieldTypeMeta", () => {
-    test("should throw Matrix arrays not supported", () => {
-        const typeDefs = `
-            type User {
-                name: [[String]]!
-            }
-          `;
-
-        const node = parse(typeDefs).definitions[0] as ObjectTypeDefinitionNode;
-
-        // @ts-ignore
-        const field = node.fields[0];
-
-        expect(() => getFieldTypeMeta(field.type)).toThrow("Matrix arrays not supported");
-    });
-
     test("should return NonNullType ListType type name", () => {
         const typeDefs = `
-            type User {
+            type User @node {
                 name: [ABC]!
             }
           `;
 
         const node = parse(typeDefs).definitions[0] as ObjectTypeDefinitionNode;
 
-        // @ts-ignore
-        const field = node.fields[0];
+        const field = node.fields?.[0] as FieldDefinitionNode;
 
         const res = getFieldTypeMeta(field.type);
 
@@ -61,15 +45,14 @@ describe("getFieldTypeMeta", () => {
 
     test("should return NonNullType NamedType type name", () => {
         const typeDefs = `
-            type User {
+            type User @node {
                 name: ABC!
             }
           `;
 
         const node = parse(typeDefs).definitions[0] as ObjectTypeDefinitionNode;
 
-        // @ts-ignore
-        const field = node.fields[0];
+        const field = node.fields?.[0] as FieldDefinitionNode;
 
         const res = getFieldTypeMeta(field.type);
 
@@ -83,15 +66,14 @@ describe("getFieldTypeMeta", () => {
 
     test("should return NamedType type name", () => {
         const typeDefs = `
-            type User {
+            type User @node {
                 name: String
             }
           `;
 
         const node = parse(typeDefs).definitions[0] as ObjectTypeDefinitionNode;
 
-        // @ts-ignore
-        const field = node.fields[0];
+        const field = node.fields?.[0] as FieldDefinitionNode;
 
         const res = getFieldTypeMeta(field.type);
 
@@ -105,15 +87,14 @@ describe("getFieldTypeMeta", () => {
 
     test("should return ListType NamedType type name", () => {
         const typeDefs = `
-            type User {
+            type User @node {
                 name: [ABC]
             }
           `;
 
         const node = parse(typeDefs).definitions[0] as ObjectTypeDefinitionNode;
 
-        // @ts-ignore
-        const field = node.fields[0];
+        const field = node.fields?.[0] as FieldDefinitionNode;
 
         const res = getFieldTypeMeta(field.type);
 
@@ -127,15 +108,14 @@ describe("getFieldTypeMeta", () => {
 
     test("should return ListType NonNullType type name", () => {
         const typeDefs = `
-            type User {
+            type User @node {
                 name: [ABC!]
             }
           `;
 
         const node = parse(typeDefs).definitions[0] as ObjectTypeDefinitionNode;
 
-        // @ts-ignore
-        const field = node.fields[0];
+        const field = node.fields?.[0] as FieldDefinitionNode;
 
         const res = getFieldTypeMeta(field.type);
 

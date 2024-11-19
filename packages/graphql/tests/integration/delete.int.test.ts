@@ -17,36 +17,33 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import { gql } from "apollo-server";
-import Neo4j from "./neo4j";
-import { Neo4jGraphQL } from "../../src/classes";
+import type { UniqueType } from "../utils/graphql-types";
+import { TestHelper } from "../utils/tests-helper";
 
 describe("delete", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+    let Movie: UniqueType;
+    let Actor: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Movie = testHelper.createUniqueType("Movie");
+        Actor = testHelper.createUniqueType("Actor");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should delete a single movie", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -54,56 +51,47 @@ describe("delete", () => {
 
         const mutation = `
         mutation($id: ID!) {
-            deleteMovies(where: { id: $id }) {
+            ${Movie.operations.delete}(where: { id_EQ: $id }) {
               nodesDeleted
               relationshipsDeleted
             }
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $id})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $id})
             `,
-                { id }
-            );
+            { id }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { id },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { id },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.deleteMovies).toEqual({ nodesDeleted: 1, relationshipsDeleted: 0 });
+        expect(gqlResult?.data?.[Movie.operations.delete]).toEqual({ nodesDeleted: 1, relationshipsDeleted: 0 });
 
-            const reFind = await session.run(
-                `
-              MATCH (m:Movie {id: $id})
+        const reFind = await testHelper.executeCypher(
+            `
+              MATCH (m:${Movie} {id: $id})
               RETURN m
             `,
-                { id }
-            );
+            { id }
+        );
 
-            expect(reFind.records).toHaveLength(0);
-        } finally {
-            await session.close();
-        }
+        expect(reFind.records).toHaveLength(0);
     });
 
     test("should not delete a movie if predicate does not yield true", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = `
-            type Movie {
+            type ${Movie} @node {
                 id: ID!
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -111,62 +99,53 @@ describe("delete", () => {
 
         const mutation = `
         mutation($id: ID!) {
-            deleteMovies(where: { id: $id }) {
+            ${Movie.operations.delete}(where: { id_EQ: $id }) {
               nodesDeleted
               relationshipsDeleted
             }
           }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (:Movie {id: $id})
+        await testHelper.executeCypher(
+            `
+                CREATE (:${Movie} {id: $id})
             `,
-                { id }
-            );
+            { id }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { id: "NOT FOUND" },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { id: "NOT FOUND" },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.deleteMovies).toEqual({ nodesDeleted: 0, relationshipsDeleted: 0 });
+        expect(gqlResult?.data?.[Movie.operations.delete]).toEqual({ nodesDeleted: 0, relationshipsDeleted: 0 });
 
-            const reFind = await session.run(
-                `
-              MATCH (m:Movie {id: $id})
+        const reFind = await testHelper.executeCypher(
+            `
+              MATCH (m:${Movie} {id: $id})
               RETURN m
             `,
-                { id }
-            );
+            { id }
+        );
 
-            expect(reFind.records).toHaveLength(1);
-        } finally {
-            await session.close();
-        }
+        expect(reFind.records).toHaveLength(1);
     });
 
     test("should delete a single movie and a single nested actor", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type Actor {
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id = generate({
             charset: "alphabetic",
@@ -178,77 +157,68 @@ describe("delete", () => {
 
         const mutation = `
             mutation($id: ID!, $name: String) {
-                deleteMovies(where: { id: $id }, delete: { actors: { where: { node: { name: $name } } } }) {
+                ${Movie.operations.delete}(where: { id_EQ: $id }, delete: { actors: { where: { node: { name_EQ: $name } } } }) {
                     nodesDeleted
                     relationshipsDeleted
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m:Movie {id: $id})
-                CREATE (a:Actor {name: $name})
+        await testHelper.executeCypher(
+            `
+                CREATE (m:${Movie} {id: $id})
+                CREATE (a:${Actor} {name: $name})
                 MERGE (a)-[:ACTED_IN]->(m)
             `,
-                {
-                    id,
-                    name,
-                }
-            );
+            {
+                id,
+                name,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { id, name },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { id, name },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.deleteMovies).toEqual({ nodesDeleted: 2, relationshipsDeleted: 1 });
+        expect(gqlResult?.data?.[Movie.operations.delete]).toEqual({ nodesDeleted: 2, relationshipsDeleted: 1 });
 
-            const movie = await session.run(
-                `
-              MATCH (m:Movie {id: $id})
+        const movie = await testHelper.executeCypher(
+            `
+              MATCH (m:${Movie} {id: $id})
               RETURN m
             `,
-                { id }
-            );
+            { id }
+        );
 
-            expect(movie.records).toHaveLength(0);
+        expect(movie.records).toHaveLength(0);
 
-            const actor = await session.run(
-                `
-              MATCH (a:Actor {name: $name})
+        const actor = await testHelper.executeCypher(
+            `
+              MATCH (a:${Actor} {name: $name})
               RETURN a
             `,
-                { name }
-            );
+            { name }
+        );
 
-            expect(actor.records).toHaveLength(0);
-        } finally {
-            await session.close();
-        }
+        expect(actor.records).toHaveLength(0);
     });
 
     test("should delete a movie, a single nested actor and another movie they act in", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type Actor {
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
+            type ${Movie} @node {
                 id: ID
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const id1 = generate({
             charset: "alphabetic",
@@ -264,9 +234,9 @@ describe("delete", () => {
 
         const mutation = `
             mutation($id1: ID!, $name: String, $id2: ID!) {
-                deleteMovies(
-                    where: { id: $id1 }
-                    delete: { actors: { where: { node: { name: $name } }, delete: { movies: { where: { node: { id: $id2 } } } } } }
+                ${Movie.operations.delete}(
+                    where: { id_EQ: $id1 }
+                    delete: { actors: { where: { node: { name_EQ: $name } }, delete: { movies: { where: { node: { id_EQ: $id2 } } } } } }
                 ) {
                     nodesDeleted
                     relationshipsDeleted
@@ -274,83 +244,74 @@ describe("delete", () => {
             }
         `;
 
-        try {
-            await session.run(
-                `
-                CREATE (m1:Movie {id: $id1})
-                CREATE (a:Actor {name: $name})
-                CREATE (m2:Movie {id: $id2})
+        await testHelper.executeCypher(
+            `
+                CREATE (m1:${Movie} {id: $id1})
+                CREATE (a:${Actor} {name: $name})
+                CREATE (m2:${Movie} {id: $id2})
                 MERGE (a)-[:ACTED_IN]->(m1)
                 MERGE (a)-[:ACTED_IN]->(m2)
             `,
-                {
-                    id1,
-                    name,
-                    id2,
-                }
-            );
+            {
+                id1,
+                name,
+                id2,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { id1, name, id2 },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { id1, name, id2 },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.deleteMovies).toEqual({ nodesDeleted: 3, relationshipsDeleted: 2 });
+        expect(gqlResult?.data?.[Movie.operations.delete]).toEqual({ nodesDeleted: 3, relationshipsDeleted: 2 });
 
-            const movie1 = await session.run(
-                `
-              MATCH (m:Movie {id: $id})
+        const movie1 = await testHelper.executeCypher(
+            `
+              MATCH (m:${Movie} {id: $id})
               RETURN m
             `,
-                { id: id1 }
-            );
+            { id: id1 }
+        );
 
-            expect(movie1.records).toHaveLength(0);
+        expect(movie1.records).toHaveLength(0);
 
-            const actor = await session.run(
-                `
-              MATCH (a:Actor {name: $name})
+        const actor = await testHelper.executeCypher(
+            `
+              MATCH (a:${Actor} {name: $name})
               RETURN a
             `,
-                { name }
-            );
+            { name }
+        );
 
-            expect(actor.records).toHaveLength(0);
+        expect(actor.records).toHaveLength(0);
 
-            const movie2 = await session.run(
-                `
-              MATCH (m:Movie {id: $id})
+        const movie2 = await testHelper.executeCypher(
+            `
+              MATCH (m:${Movie} {id: $id})
               RETURN m
             `,
-                { id: id2 }
-            );
+            { id: id2 }
+        );
 
-            expect(movie2.records).toHaveLength(0);
-        } finally {
-            await session.close();
-        }
+        expect(movie2.records).toHaveLength(0);
     });
 
     test("should delete a movie using a connection where filter", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type Actor {
+            type ${Actor} @node {
                 name: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
+                movies: [${Movie}!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
 
-            type Movie {
-                title: String
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
+            type ${Movie} @node {
+                id: ID
+                actors: [${Actor}!]! @relationship(type: "ACTED_IN", direction: IN)
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const title = generate({
             charset: "alphabetic",
@@ -362,37 +323,30 @@ describe("delete", () => {
 
         const mutation = `
             mutation($name: String) {
-                deleteMovies(where: { actorsConnection: { node: { name: $name } } } ) {
+                ${Movie.operations.delete}(where: { actorsConnection_SOME: { node: { name_EQ: $name } } } ) {
                     nodesDeleted
                     relationshipsDeleted
                 }
             }
         `;
 
-        try {
-            await session.run(
-                `
-                    CREATE (:Movie {id: $title})<-[:ACTED_IN]-(:Actor {name: $name})
-                    CREATE (:Movie {id: $title})<-[:ACTED_IN]-(:Actor {name: randomUUID()})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${Movie} {id: $title})<-[:ACTED_IN]-(:${Actor} {name: $name})
+                    CREATE (:${Movie} {id: $title})<-[:ACTED_IN]-(:${Actor} {name: randomUUID()})
                 `,
-                {
-                    title,
-                    name,
-                }
-            );
+            {
+                title,
+                name,
+            }
+        );
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: mutation,
-                variableValues: { name },
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const gqlResult = await testHelper.executeGraphQL(mutation, {
+            variableValues: { name },
+        });
 
-            expect(gqlResult.errors).toBeFalsy();
+        expect(gqlResult.errors).toBeFalsy();
 
-            expect(gqlResult?.data?.deleteMovies).toEqual({ nodesDeleted: 1, relationshipsDeleted: 1 });
-        } finally {
-            await session.close();
-        }
+        expect(gqlResult?.data?.[Movie.operations.delete]).toEqual({ nodesDeleted: 1, relationshipsDeleted: 1 });
     });
 });

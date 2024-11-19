@@ -18,8 +18,8 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
 import { Neo4jGraphQL } from "../../src";
 
 describe("Unions", () => {
@@ -27,11 +27,11 @@ describe("Unions", () => {
         const typeDefs = gql`
             union Search = Movie | Genre
 
-            type Genre {
+            type Genre @node {
                 id: ID
             }
 
-            type Movie {
+            type Movie @node {
                 id: ID
                 search: [Search!]! @relationship(type: "SEARCH", direction: OUT)
                 searchNoDirective: Search
@@ -51,8 +51,10 @@ describe("Unions", () => {
               info: CreateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
@@ -62,8 +64,10 @@ describe("Unions", () => {
               movies: [Movie!]!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -74,7 +78,7 @@ describe("Unions", () => {
 
             type GenreAggregateSelection {
               count: Int!
-              id: IDAggregateSelectionNullable!
+              id: IDAggregateSelection!
             }
 
             input GenreConnectWhere {
@@ -107,21 +111,19 @@ describe("Unions", () => {
             }
 
             input GenreUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
             }
 
             input GenreWhere {
               AND: [GenreWhere!]
+              NOT: GenreWhere
               OR: [GenreWhere!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID
-              id_NOT_CONTAINS: ID
-              id_NOT_ENDS_WITH: ID
-              id_NOT_IN: [ID]
-              id_NOT_STARTS_WITH: ID
               id_STARTS_WITH: ID
             }
 
@@ -131,21 +133,21 @@ describe("Unions", () => {
               totalCount: Int!
             }
 
-            type IDAggregateSelectionNullable {
+            type IDAggregateSelection {
               longest: ID
               shortest: ID
             }
 
             type Movie {
               id: ID
-              search(directed: Boolean = true, options: QueryOptions, where: SearchWhere): [Search!]!
-              searchConnection(after: String, directed: Boolean = true, first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
+              search(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: SearchWhere): [Search!]!
+              searchConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, where: MovieSearchConnectionWhere): MovieSearchConnection!
               searchNoDirective: Search
             }
 
             type MovieAggregateSelection {
               count: Int!
-              id: IDAggregateSelectionNullable!
+              id: IDAggregateSelection!
             }
 
             input MovieConnectInput {
@@ -183,10 +185,6 @@ describe("Unions", () => {
               sort: [MovieSort!]
             }
 
-            input MovieRelationInput {
-              search: MovieSearchCreateFieldInput
-            }
-
             input MovieSearchConnectInput {
               Genre: [MovieSearchGenreConnectFieldInput!]
               Movie: [MovieSearchMovieConnectFieldInput!]
@@ -201,11 +199,6 @@ describe("Unions", () => {
             input MovieSearchConnectionWhere {
               Genre: MovieSearchGenreConnectionWhere
               Movie: MovieSearchMovieConnectionWhere
-            }
-
-            input MovieSearchCreateFieldInput {
-              Genre: [MovieSearchGenreCreateFieldInput!]
-              Movie: [MovieSearchMovieCreateFieldInput!]
             }
 
             input MovieSearchCreateInput {
@@ -229,9 +222,9 @@ describe("Unions", () => {
 
             input MovieSearchGenreConnectionWhere {
               AND: [MovieSearchGenreConnectionWhere!]
+              NOT: MovieSearchGenreConnectionWhere
               OR: [MovieSearchGenreConnectionWhere!]
               node: GenreWhere
-              node_NOT: GenreWhere
             }
 
             input MovieSearchGenreCreateFieldInput {
@@ -271,9 +264,9 @@ describe("Unions", () => {
 
             input MovieSearchMovieConnectionWhere {
               AND: [MovieSearchMovieConnectionWhere!]
+              NOT: MovieSearchMovieConnectionWhere
               OR: [MovieSearchMovieConnectionWhere!]
               node: MovieWhere
-              node_NOT: MovieWhere
             }
 
             input MovieSearchMovieCreateFieldInput {
@@ -326,29 +319,45 @@ describe("Unions", () => {
             }
 
             input MovieUpdateInput {
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
+              id_SET: ID
               search: MovieSearchUpdateInput
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
+              NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID
+              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
               id_CONTAINS: ID
               id_ENDS_WITH: ID
+              id_EQ: ID
               id_IN: [ID]
-              id_NOT: ID
-              id_NOT_CONTAINS: ID
-              id_NOT_ENDS_WITH: ID
-              id_NOT_IN: [ID]
-              id_NOT_STARTS_WITH: ID
               id_STARTS_WITH: ID
-              searchConnection: MovieSearchConnectionWhere @deprecated(reason: \\"Use \`searchConnection_SOME\` instead.\\")
+              \\"\\"\\"
+              Return Movies where all of the related MovieSearchConnections match this filter
+              \\"\\"\\"
               searchConnection_ALL: MovieSearchConnectionWhere
+              \\"\\"\\"
+              Return Movies where none of the related MovieSearchConnections match this filter
+              \\"\\"\\"
               searchConnection_NONE: MovieSearchConnectionWhere
-              searchConnection_NOT: MovieSearchConnectionWhere @deprecated(reason: \\"Use \`searchConnection_NONE\` instead.\\")
+              \\"\\"\\"
+              Return Movies where one of the related MovieSearchConnections match this filter
+              \\"\\"\\"
               searchConnection_SINGLE: MovieSearchConnectionWhere
+              \\"\\"\\"
+              Return Movies where some of the related MovieSearchConnections match this filter
+              \\"\\"\\"
               searchConnection_SOME: MovieSearchConnectionWhere
+              \\"\\"\\"Return Movies where all of the related Searches match this filter\\"\\"\\"
+              search_ALL: SearchWhere
+              \\"\\"\\"Return Movies where none of the related Searches match this filter\\"\\"\\"
+              search_NONE: SearchWhere
+              \\"\\"\\"Return Movies where one of the related Searches match this filter\\"\\"\\"
+              search_SINGLE: SearchWhere
+              \\"\\"\\"Return Movies where some of the related Searches match this filter\\"\\"\\"
+              search_SOME: SearchWhere
             }
 
             type MoviesConnection {
@@ -363,7 +372,7 @@ describe("Unions", () => {
               deleteGenres(where: GenreWhere): DeleteInfo!
               deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
               updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-              updateMovies(connect: MovieConnectInput, create: MovieRelationInput, delete: MovieDeleteInput, disconnect: MovieDisconnectInput, update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
+              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
             }
 
             \\"\\"\\"Pagination information (Relay)\\"\\"\\"
@@ -375,14 +384,16 @@ describe("Unions", () => {
             }
 
             type Query {
-              genres(options: GenreOptions, where: GenreWhere): [Genre!]!
+              genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
               genresAggregate(where: GenreWhere): GenreAggregateSelection!
-              genresConnection(after: String, first: Int, sort: [GenreSort], where: GenreWhere): GenresConnection!
-              movies(options: MovieOptions, where: MovieWhere): [Movie!]!
+              genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
+              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort], where: MovieWhere): MoviesConnection!
+              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
+              searches(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: SearchWhere): [Search!]!
             }
 
+            \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
             input QueryOptions {
               limit: Int
               offset: Int
@@ -395,6 +406,7 @@ describe("Unions", () => {
               Movie: MovieWhere
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -407,8 +419,10 @@ describe("Unions", () => {
               info: UpdateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

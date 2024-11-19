@@ -17,48 +17,44 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
-describe("369", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+describe("https://github.com/neo4j/graphql/issues/369", () => {
+    const testHelper = new TestHelper();
+    let Dato: UniqueType;
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(() => {
+        Dato = testHelper.createUniqueType("Dato");
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should recreate issue and return correct data", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type Dato {
+            type ${Dato} @node {
                 uuid: ID
-                dependeTo: [Dato!]! @relationship(type: "DEPENDE", direction: OUT, properties: "Depende")
-                dependeFrom: [Dato!]! @relationship(type: "DEPENDE", direction: IN, properties: "Depende")
+                dependeTo: [${Dato}!]! @relationship(type: "DEPENDE", direction: OUT, properties: "Depende")
+                dependeFrom: [${Dato}!]! @relationship(type: "DEPENDE", direction: IN, properties: "Depende")
             }
 
-            interface Depende {
+            type Depende @relationshipProperties {
                 uuid: ID
             }
 
             type Query {
-                getDato(uuid: String): Dato
+                getDato(uuid: String): ${Dato}
                     @cypher(
-                        statement: """
-                        MATCH (d:Dato {uuid: $uuid}) RETURN d
-                        """
+                    statement: """
+                    MATCH (d:${Dato} {uuid: $uuid}) RETURN d
+                    """
+                    columnName: "d"
                     )
-            }
+                }
         `;
 
         const datoUUID = generate({
@@ -73,15 +69,15 @@ describe("369", () => {
             charset: "alphabetic",
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        const query = `
+        const query = /* GraphQL */ `
             {
                 getDato(uuid: "${datoUUID}" ){
                   uuid
                   dependeToConnection {
                     edges {
-                      uuid
+                     properties { uuid }
                       node {
                           uuid
                       }
@@ -90,57 +86,48 @@ describe("369", () => {
                 }
             }
         `;
-        try {
-            await session.run(
-                `
-                    CREATE (:Dato {uuid: $datoUUID})-[:DEPENDE {uuid: $relUUID}]->(:Dato {uuid: $datoToUUID})
+        await testHelper.executeCypher(
+            `
+                    CREATE (:${Dato} {uuid: $datoUUID})-[:DEPENDE {uuid: $relUUID}]->(:${Dato} {uuid: $datoToUUID})
                 `,
-                {
-                    datoUUID,
-                    datoToUUID,
-                    relUUID,
-                }
-            );
+            {
+                datoUUID,
+                datoToUUID,
+                relUUID,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            expect(result.data as any).toEqual({
-                getDato: {
-                    uuid: datoUUID,
-                    dependeToConnection: { edges: [{ uuid: relUUID, node: { uuid: datoToUUID } }] },
-                },
-            });
-        } finally {
-            await session.close();
-        }
+        expect(result.data as any).toEqual({
+            getDato: {
+                uuid: datoUUID,
+                dependeToConnection: { edges: [{ properties: { uuid: relUUID }, node: { uuid: datoToUUID } }] },
+            },
+        });
     });
 
     test("should recreate issue and return correct data using a where argument on the connection", async () => {
-        const session = await neo4j.getSession();
-
         const typeDefs = gql`
-            type Dato {
+            type ${Dato} @node {
                 uuid: ID
-                dependeTo: [Dato!]! @relationship(type: "DEPENDE", direction: OUT, properties: "Depende")
-                dependeFrom: [Dato!]! @relationship(type: "DEPENDE", direction: IN, properties: "Depende")
+                dependeTo: [${Dato}!]! @relationship(type: "DEPENDE", direction: OUT, properties: "Depende")
+                dependeFrom: [${Dato}!]! @relationship(type: "DEPENDE", direction: IN, properties: "Depende")
             }
 
-            interface Depende {
+            type Depende @relationshipProperties {
                 uuid: ID
             }
 
             type Query {
-                getDato(uuid: String): Dato
+                getDato(uuid: String): ${Dato}
                     @cypher(
                         statement: """
-                        MATCH (d:Dato {uuid: $uuid}) RETURN d
+                        MATCH (d:${Dato} {uuid: $uuid}) RETURN d
                         """
+                        columnName: "d"
                     )
             }
         `;
@@ -157,15 +144,15 @@ describe("369", () => {
             charset: "alphabetic",
         });
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
-        const query = `
+        const query = /* GraphQL */ `
             {
                 getDato(uuid: "${datoUUID}" ){
                   uuid
-                  dependeToConnection(where: { node: { uuid: "${datoToUUID}" } }) {
+                  dependeToConnection(where: { node: { uuid_EQ: "${datoToUUID}" } }) {
                     edges {
-                      uuid
+                     properties{ uuid}
                       node {
                           uuid
                       }
@@ -174,36 +161,28 @@ describe("369", () => {
                 }
             }
         `;
-        try {
-            await session.run(
-                `
-                    CREATE (d:Dato {uuid: $datoUUID})-[:DEPENDE {uuid: $relUUID}]->(:Dato {uuid: $datoToUUID})
+        await testHelper.executeCypher(
+            `
+                    CREATE (d:${Dato} {uuid: $datoUUID})-[:DEPENDE {uuid: $relUUID}]->(:${Dato} {uuid: $datoToUUID})
                     CREATE (d)-[:DEPENDE {uuid: randomUUID()}]->(:Dato {uuid: randomUUID()})
                     CREATE (d)-[:DEPENDE {uuid: randomUUID()}]->(:Dato {uuid: randomUUID()})
                 `,
-                {
-                    datoUUID,
-                    datoToUUID,
-                    relUUID,
-                }
-            );
+            {
+                datoUUID,
+                datoToUUID,
+                relUUID,
+            }
+        );
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeFalsy();
+        expect(result.errors).toBeFalsy();
 
-            expect(result.data as any).toEqual({
-                getDato: {
-                    uuid: datoUUID,
-                    dependeToConnection: { edges: [{ uuid: relUUID, node: { uuid: datoToUUID } }] },
-                },
-            });
-        } finally {
-            await session.close();
-        }
+        expect(result.data as any).toEqual({
+            getDato: {
+                uuid: datoUUID,
+                dependeToConnection: { edges: [{ properties: { uuid: relUUID }, node: { uuid: datoToUUID } }] },
+            },
+        });
     });
 });

@@ -17,40 +17,30 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
+import { gql } from "graphql-tag";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/560", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeEach(() => {});
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
     test("should not throw when Point is null", async () => {
-        const session = await neo4j.getSession();
-
-        const testLog = generateUniqueType("Log");
+        const testLog = testHelper.createUniqueType("Log");
 
         const typeDefs = gql`
-            type ${testLog.name} {
+            type ${testLog.name} @node {
                 id: ID!
                 location: Point
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const logId = generate({
             charset: "alphabetic",
@@ -71,49 +61,39 @@ describe("https://github.com/neo4j/graphql/issues/560", () => {
             }
         `;
 
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (j:${testLog.name} { id: "${logId}" })
             `);
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValues(),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            if (result.errors) {
-                console.log(JSON.stringify(result.errors, null, 2));
-            }
-
-            expect(result.errors).toBeFalsy();
-
-            expect(result.data as any).toEqual({
-                [testLog.plural]: [
-                    {
-                        id: logId,
-                        location: null,
-                    },
-                ],
-            });
-        } finally {
-            await session.close();
+        if (result.errors) {
+            console.log(JSON.stringify(result.errors, null, 2));
         }
+
+        expect(result.errors).toBeFalsy();
+
+        expect(result.data as any).toEqual({
+            [testLog.plural]: [
+                {
+                    id: logId,
+                    location: null,
+                },
+            ],
+        });
     });
 
     test("should not throw when CartesianPoint is null", async () => {
-        const session = await neo4j.getSession();
-
-        const testLog = generateUniqueType("Log");
+        const testLog = testHelper.createUniqueType("Log");
 
         const typeDefs = gql`
-            type ${testLog.name} {
+            type ${testLog.name} @node {
                 id: ID!
                 location: CartesianPoint
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const logId = generate({
             charset: "alphabetic",
@@ -134,33 +114,25 @@ describe("https://github.com/neo4j/graphql/issues/560", () => {
             }
         `;
 
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (j:${testLog.name} { id: "${logId}" })
             `);
 
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValues(),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            if (result.errors) {
-                console.log(JSON.stringify(result.errors, null, 2));
-            }
-
-            expect(result.errors).toBeFalsy();
-
-            expect(result.data as any).toEqual({
-                [testLog.plural]: [
-                    {
-                        id: logId,
-                        location: null,
-                    },
-                ],
-            });
-        } finally {
-            await session.close();
+        if (result.errors) {
+            console.log(JSON.stringify(result.errors, null, 2));
         }
+
+        expect(result.errors).toBeFalsy();
+
+        expect(result.data as any).toEqual({
+            [testLog.plural]: [
+                {
+                    id: logId,
+                    location: null,
+                },
+            ],
+        });
     });
 });

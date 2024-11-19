@@ -17,78 +17,57 @@
  * limitations under the License.
  */
 
-import { gql } from "apollo-server";
-import type { Driver, Session, Integer } from "neo4j-driver";
-import type { DocumentNode } from "graphql";
-import { graphql } from "graphql";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
-import { getQuerySource } from "../../utils/get-query-source";
+import type { Integer } from "neo4j-driver";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("Update -> ConnectOrCreate", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
-    let typeDefs: DocumentNode;
+    const testHelper = new TestHelper();
+    let typeDefs: string;
 
-    const typeMovie = generateUniqueType("Movie");
-    const typeActor = generateUniqueType("Actor");
+    const typeMovie = testHelper.createUniqueType("Movie");
+    const typeActor = testHelper.createUniqueType("Actor");
 
-    let neoSchema: Neo4jGraphQL;
-
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-
-        typeDefs = gql`
-        type ${typeMovie.name} {
+    beforeEach(async () => {
+        typeDefs = /* GraphQL */ `
+        type ${typeMovie.name} @node {
             title: String!
             id: Int! @unique
             ${typeActor.plural}: [${typeActor.name}!]! @relationship(type: "ACTED_IN", direction: IN, properties:"ActedIn")
         }
 
-        type ${typeActor.name} {
+        type ${typeActor.name} @node {
             name: String
             ${typeMovie.plural}: [${typeMovie.name}!]! @relationship(type: "ACTED_IN", direction: OUT, properties:"ActedIn")
         }
 
-        interface ActedIn {
+        type ActedIn @relationshipProperties {
             screentime: Int
         }
         `;
 
-        neoSchema = new Neo4jGraphQL({ typeDefs });
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterEach(async () => {
-        await session.close();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("Update with ConnectOrCreate creates new node", async () => {
-        await session.run(`CREATE (:${typeActor.name} { name: "Tom Hanks"})`);
+        await testHelper.executeCypher(`CREATE (:${typeActor.name} { name: "Tom Hanks"})`);
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.update}(
                 update: {
-                    name: "Tom Hanks 2"
+                    name_SET: "Tom Hanks 2"
                     ${typeMovie.plural}: {
                       connectOrCreate: {
-                        where: { node: { id: 5 } }
+                        where: { node: { id_EQ: 5 } }
                         onCreate: { edge: { screentime: 105 }, node: { title: "The Terminal", id: 5 } }
                       }
                     }
                   }
-                where: { name: "Tom Hanks"}
+                where: { name_EQ: "Tom Hanks"}
               ) {
                 ${typeActor.plural} {
                   name
@@ -97,11 +76,7 @@ describe("Update -> ConnectOrCreate", () => {
             }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: getQuerySource(query),
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeActor.operations.update][typeActor.plural]).toEqual([
             {
@@ -109,7 +84,7 @@ describe("Update -> ConnectOrCreate", () => {
             },
         ]);
 
-        const movieTitleAndId = await session.run(`
+        const movieTitleAndId: any = await testHelper.executeCypher(`
           MATCH (m:${typeMovie.name} {id: 5})
           RETURN m.title as title, m.id as id
         `);
@@ -118,7 +93,7 @@ describe("Update -> ConnectOrCreate", () => {
         expect(movieTitleAndId.records[0].toObject().title).toBe("The Terminal");
         expect((movieTitleAndId.records[0].toObject().id as Integer).toNumber()).toBe(5);
 
-        const actedInRelation = await session.run(`
+        const actedInRelation: any = await testHelper.executeCypher(`
             MATCH (:${typeMovie.name} {id: 5})<-[r:ACTED_IN]-(:${typeActor.name} {name: "Tom Hanks 2"})
             RETURN r.screentime as screentime
             `);
@@ -130,22 +105,22 @@ describe("Update -> ConnectOrCreate", () => {
     test("Update with ConnectOrCreate on existing node", async () => {
         const testActorName = "aRandomActor";
         const updatedActorName = "updatedActor";
-        await session.run(`CREATE (m:${typeMovie.name} { title: "Terminator2", id: 2222})`);
-        await session.run(`CREATE (:${typeActor.name} { name: "${testActorName}"})`);
+        await testHelper.executeCypher(`CREATE (m:${typeMovie.name} { title: "Terminator2", id: 2222})`);
+        await testHelper.executeCypher(`CREATE (:${typeActor.name} { name: "${testActorName}"})`);
 
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
               ${typeActor.operations.update}(
                 update: {
-                    name: "${updatedActorName}"
+                    name_SET: "${updatedActorName}"
                     ${typeMovie.plural}: {
                       connectOrCreate: {
-                        where: { node: { id: 2222 } }
+                        where: { node: { id_EQ: 2222 } }
                         onCreate: { edge: { screentime: 105 }, node: { title: "The Terminal", id: 22224 } }
                       }
                     }
                   }
-                where: { name: "${testActorName}"}
+                where: { name_EQ: "${testActorName}"}
               ) {
                 ${typeActor.plural} {
                   name
@@ -154,11 +129,7 @@ describe("Update -> ConnectOrCreate", () => {
             }
             `;
 
-        const gqlResult = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: getQuerySource(query),
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult = await testHelper.executeGraphQL(query);
         expect(gqlResult.errors).toBeUndefined();
         expect((gqlResult as any).data[typeActor.operations.update][`${typeActor.plural}`]).toEqual([
             {
@@ -166,28 +137,28 @@ describe("Update -> ConnectOrCreate", () => {
             },
         ]);
 
-        const actorsWithMovieCount = await session.run(`
+        const actorsWithMovieCount: any = await testHelper.executeCypher(`
           MATCH (a:${typeActor.name} {name: "${updatedActorName}"})-[]->(m:${typeMovie.name} {id: 2222})
           RETURN COUNT(a) as count
         `);
 
         expect(actorsWithMovieCount.records[0].toObject().count.toInt()).toBe(1);
 
-        const moviesWithIdCount = await session.run(`
+        const moviesWithIdCount: any = await testHelper.executeCypher(`
           MATCH (m:${typeMovie.name} {id: 2222})
           RETURN COUNT(m) as count
         `);
 
         expect(moviesWithIdCount.records[0].toObject().count.toInt()).toBe(1);
 
-        const theTerminalMovieCount = await session.run(`
+        const theTerminalMovieCount: any = await testHelper.executeCypher(`
           MATCH (m:${typeMovie.name} {id: 2222, name: "The Terminal"})
           RETURN COUNT(m) as count
         `);
 
         expect(theTerminalMovieCount.records[0].toObject().count.toInt()).toBe(0);
 
-        const actedInRelation = await session.run(`
+        const actedInRelation: any = await testHelper.executeCypher(`
             MATCH (:${typeMovie.name} {id: 2222})<-[r:ACTED_IN]-(:${typeActor.name} {name: "${updatedActorName}"})
             RETURN r.screentime as screentime
             `);
@@ -195,7 +166,7 @@ describe("Update -> ConnectOrCreate", () => {
         expect(actedInRelation.records).toHaveLength(1);
         expect((actedInRelation.records[0].toObject().screentime as Integer).toNumber()).toBe(105);
 
-        const newIdMovieCount = await session.run(`
+        const newIdMovieCount: any = await testHelper.executeCypher(`
             MATCH (m:${typeMovie.name} {id: 22224})
             RETURN COUNT(m) as count
             `);

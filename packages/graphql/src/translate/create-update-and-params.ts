@@ -17,37 +17,50 @@
  * limitations under the License.
  */
 
+import Cypher from "@neo4j/cypher-builder";
+import pluralize from "pluralize";
 import type { Node, Relationship } from "../classes";
-import type { Context } from "../types";
-import createConnectAndParams from "./create-connect-and-params";
-import createDisconnectAndParams from "./create-disconnect-and-params";
-import createCreateAndParams from "./create-create-and-params";
-import { AUTH_FORBIDDEN_ERROR, META_CYPHER_VARIABLE, META_OLD_PROPS_CYPHER_VARIABLE } from "../constants";
-import createDeleteAndParams from "./create-delete-and-params";
-import createAuthParam from "./create-auth-param";
-import createAuthAndParams from "./create-auth-and-params";
-import createSetRelationshipProperties from "./create-set-relationship-properties";
-import createConnectionWhereAndParams from "./where/create-connection-where-and-params";
-import mapToDbProperty from "../utils/map-to-db-property";
-import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
-import createRelationshipValidationStr from "./create-relationship-validation-string";
-import { createEventMeta } from "./subscriptions/create-event-meta";
-import { filterMetaVariable } from "./subscriptions/filter-meta-variable";
-import { escapeQuery } from "./utils/escape-query";
 import type { CallbackBucket } from "../classes/CallbackBucket";
+import type { BaseField } from "../types";
+import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
+import { caseWhere } from "../utils/case-where";
+import { wrapStringInApostrophes } from "../utils/wrap-string-in-apostrophes";
+import { checkAuthentication } from "./authorization/check-authentication";
+import {
+    createAuthorizationAfterAndParams,
+    createAuthorizationAfterAndParamsField,
+} from "./authorization/compatibility/create-authorization-after-and-params";
+import {
+    createAuthorizationBeforeAndParams,
+    createAuthorizationBeforeAndParamsField,
+} from "./authorization/compatibility/create-authorization-before-and-params";
+import createConnectAndParams from "./create-connect-and-params";
+import { createConnectOrCreateAndParams } from "./create-connect-or-create-and-params";
+import createCreateAndParams from "./create-create-and-params";
+import createDeleteAndParams from "./create-delete-and-params";
+import createDisconnectAndParams from "./create-disconnect-and-params";
+import { createRelationshipValidationString } from "./create-relationship-validation-string";
+import { createSetRelationshipProperties } from "./create-set-relationship-properties";
+import { assertNonAmbiguousUpdate } from "./utils/assert-non-ambiguous-update";
 import { addCallbackAndSetParam } from "./utils/callback-utils";
-import { buildMathStatements, matchMathField, mathDescriptorBuilder } from "./utils/math";
+import { getAuthorizationStatements } from "./utils/get-authorization-statements";
+import { getMutationFieldStatements } from "./utils/get-mutation-field-statements";
 import { indentBlock } from "./utils/indent-block";
+import { parseMutableField } from "./utils/parse-mutable-field";
+import createConnectionWhereAndParams from "./where/create-connection-where-and-params";
 
 interface Res {
     strs: string[];
     params: any;
-    meta?: UpdateMeta;
+    meta: UpdateMeta;
 }
 
 interface UpdateMeta {
-    preAuthStrs: string[];
-    postAuthStrs: string[];
+    preArrayMethodValidationStrs: [string, string][];
+    authorizationBeforeSubqueries: string[];
+    authorizationBeforePredicates: string[];
+    authorizationAfterSubqueries: string[];
+    authorizationAfterPredicates: string[];
 }
 
 export default function createUpdateAndParams({
@@ -68,16 +81,19 @@ export default function createUpdateAndParams({
     chainStr?: string;
     node: Node;
     withVars: string[];
-    context: Context;
+    context: Neo4jGraphQLTranslationContext;
     callbackBucket: CallbackBucket;
     parameterPrefix: string;
     includeRelationshipValidation?: boolean;
 }): [string, any] {
     let hasAppliedTimeStamps = false;
 
+    assertNonAmbiguousUpdate(node, updateInput);
+
+    checkAuthentication({ context, node, targetOperations: ["UPDATE"] });
+
     function reducer(res: Res, [key, value]: [string, any]) {
         let param: string;
-
         if (chainStr) {
             param = `${chainStr}_${key}`;
         } else {
@@ -85,8 +101,6 @@ export default function createUpdateAndParams({
         }
 
         const relationField = node.relationFields.find((x) => key === x.fieldName);
-        const pointField = node.pointFields.find((x) => key === x.fieldName);
-        const dbFieldName = mapToDbProperty(node, key);
 
         if (relationField) {
             const refNodes: Node[] = [];
@@ -111,245 +125,28 @@ export default function createUpdateAndParams({
             const outStr = relationField.direction === "OUT" ? "->" : "-";
 
             const subqueries: string[] = [];
-
+            const intermediateWithMetaStatements: string[] = [];
             refNodes.forEach((refNode) => {
                 const v = relationField.union ? value[refNode.name] : value;
                 const updates = relationField.typeMeta.array ? v : [v];
                 const subquery: string[] = [];
 
                 updates.forEach((update, index) => {
-                    const relationshipVariable = `${varName}_${relationField.type.toLowerCase()}${index}_relationship`;
+                    const relationshipVariable = `${varName}_${relationField.typeUnescaped.toLowerCase()}${index}_relationship`;
                     const relTypeStr = `[${relationshipVariable}:${relationField.type}]`;
-                    const _varName = `${varName}_${key}${relationField.union ? `_${refNode.name}` : ""}${index}`;
-
-                    if (update.update) {
-                        const whereStrs: string[] = [];
-
-                        if (update.where) {
-                            try {
-                                const where = createConnectionWhereAndParams({
-                                    whereInput: update.where,
-                                    node: refNode,
-                                    nodeVariable: _varName,
-                                    relationship,
-                                    relationshipVariable,
-                                    context,
-                                    parameterPrefix: `${parameterPrefix}.${key}${
-                                        relationField.union ? `.${refNode.name}` : ""
-                                    }${relationField.typeMeta.array ? `[${index}]` : ``}.where`,
-                                });
-                                const [whereClause] = where;
-                                if (whereClause) {
-                                    whereStrs.push(whereClause);
-                                }
-                            } catch {
-                                return;
-                            }
-                        }
-
-                        if (withVars) {
-                            subquery.push(`WITH ${withVars.join(", ")}`);
-                        }
-
-                        const labels = refNode.getLabelString(context);
-                        subquery.push(
-                            `OPTIONAL MATCH (${parentVar})${inStr}${relTypeStr}${outStr}(${_varName}${labels})`
-                        );
-
-                        if (node.auth) {
-                            const whereAuth = createAuthAndParams({
-                                operations: "UPDATE",
-                                entity: refNode,
-                                context,
-                                where: { varName: _varName, node: refNode },
-                            });
-                            if (whereAuth[0]) {
-                                whereStrs.push(whereAuth[0]);
-                                res.params = { ...res.params, ...whereAuth[1] };
-                            }
-                        }
-                        if (whereStrs.length) {
-                            subquery.push(`WHERE ${whereStrs.join(" AND ")}`);
-                        }
-
-                        if (update.update.node) {
-                            subquery.push(`CALL apoc.do.when(${_varName} IS NOT NULL, "`);
-                            const nestedWithVars = [...withVars, _varName];
-                            const auth = createAuthParam({ context });
-                            let innerApocParams = { auth };
-
-                            const nestedUpdateInput = Object.entries(update.update.node)
-                                .filter(([k]) => {
-                                    if (k === "_on") {
-                                        return false;
-                                    }
-
-                                    if (relationField.interface && update.update.node?._on?.[refNode.name]) {
-                                        const onArray = Array.isArray(update.update.node._on[refNode.name])
-                                            ? update.update.node._on[refNode.name]
-                                            : [update.update.node._on[refNode.name]];
-                                        if (onArray.some((onKey) => Object.prototype.hasOwnProperty.call(onKey, k))) {
-                                            return false;
-                                        }
-                                    }
-
-                                    return true;
-                                })
-                                .reduce((d1, [k1, v1]) => ({ ...d1, [k1]: v1 }), {});
-
-                            const updateAndParams = createUpdateAndParams({
-                                context,
-                                callbackBucket,
-                                node: refNode,
-                                updateInput: nestedUpdateInput,
-                                varName: _varName,
-                                withVars: nestedWithVars,
-                                parentVar: _varName,
-                                chainStr: `${param}${relationField.union ? `_${refNode.name}` : ""}${index}`,
-                                parameterPrefix: `${parameterPrefix}.${key}${
-                                    relationField.union ? `.${refNode.name}` : ""
-                                }${relationField.typeMeta.array ? `[${index}]` : ``}.update.node`,
-                                includeRelationshipValidation: true,
-                            });
-                            res.params = { ...res.params, ...updateAndParams[1], auth };
-                            innerApocParams = { ...innerApocParams, ...updateAndParams[1] };
-                            const updateStrs = [escapeQuery(updateAndParams[0])];
-
-                            if (relationField.interface && update.update.node?._on?.[refNode.name]) {
-                                const onUpdateAndParams = createUpdateAndParams({
-                                    context,
-                                    callbackBucket,
-                                    node: refNode,
-                                    updateInput: update.update.node._on[refNode.name],
-                                    varName: _varName,
-                                    withVars: nestedWithVars,
-                                    parentVar: _varName,
-                                    chainStr: `${param}${relationField.union ? `_${refNode.name}` : ""}${index}_on_${
-                                        refNode.name
-                                    }`,
-                                    parameterPrefix: `${parameterPrefix}.${key}${
-                                        relationField.union ? `.${refNode.name}` : ""
-                                    }${relationField.typeMeta.array ? `[${index}]` : ``}.update.node._on.${
-                                        refNode.name
-                                    }`,
-                                });
-                                res.params = { ...res.params, ...onUpdateAndParams[1], auth };
-                                innerApocParams = { ...innerApocParams, ...onUpdateAndParams[1] };
-                                updateStrs.push(escapeQuery(onUpdateAndParams[0]));
-                            }
-                            if (context.subscriptionsEnabled) {
-                                updateStrs.push(`RETURN ${META_CYPHER_VARIABLE}`);
-                            } else {
-                                updateStrs.push("RETURN count(*) AS _");
-                            }
-                            const apocArgs = `{${withVars.map((withVar) => `${withVar}:${withVar}`).join(", ")}, ${
-                                parameterPrefix?.split(".")[0]
-                            }: $${parameterPrefix?.split(".")[0]}, ${_varName}:${_varName}REPLACE_ME}`;
-
-                            updateStrs.push(
-                                `", ${
-                                    context.subscriptionsEnabled ? `"RETURN ${META_CYPHER_VARIABLE}"` : `""`
-                                }, ${apocArgs})`
-                            );
-                            if (context.subscriptionsEnabled) {
-                                updateStrs.push("YIELD value");
-                                updateStrs.push(`WITH ${filterMetaVariable(withVars).join(", ")}, value.meta AS meta`);
-                            } else {
-                                updateStrs.push("YIELD value AS _");
-                            }
-
-                            const paramsString = Object.keys(innerApocParams)
-                                .reduce((r: string[], k) => [...r, `${k}:$${k}`], [])
-                                .join(",");
-
-                            const updateStr = updateStrs.join("\n").replace(/REPLACE_ME/g, `, ${paramsString}`);
-                            subquery.push(updateStr);
-                        }
-
-                        if (update.update.edge) {
-                            subquery.push(`CALL apoc.do.when(${relationshipVariable} IS NOT NULL, "`);
-
-                            const setProperties = createSetRelationshipProperties({
-                                properties: update.update.edge,
-                                varName: relationshipVariable,
-                                withVars,
-                                relationship,
-                                callbackBucket,
-                                operation: "UPDATE",
-                                parameterPrefix: `${parameterPrefix}.${key}${
-                                    relationField.union ? `.${refNode.name}` : ""
-                                }${relationField.typeMeta.array ? `[${index}]` : ``}.update.edge`,
-                            });
-
-                            const updateStrs = [escapeQuery(setProperties), escapeQuery("RETURN count(*) AS _")];
-                            const varsAsArgumentString = withVars.map(variable => `${variable}:${variable}`).join(", ");
-                            const apocArgs = `{${varsAsArgumentString}, ${relationshipVariable}:${relationshipVariable}, ${
-                                parameterPrefix?.split(".")[0]
-                            }: $${parameterPrefix?.split(".")[0]}, resolvedCallbacks: $resolvedCallbacks}`;
-
-                            updateStrs.push(`", "", ${apocArgs})`);
-                            updateStrs.push(`YIELD value AS ${relationshipVariable}_${key}${index}_edge`);
-                            subquery.push(updateStrs.join("\n"));
-                        }
-                    }
-
-                    if (update.disconnect) {
-                        const disconnectAndParams = createDisconnectAndParams({
-                            context,
-                            refNodes: [refNode],
-                            value: update.disconnect,
-                            varName: `${_varName}_disconnect`,
-                            withVars,
-                            parentVar,
-                            relationField,
-                            labelOverride: relationField.union ? refNode.name : "",
-                            parentNode: node,
-                            parameterPrefix: `${parameterPrefix}.${key}${
-                                relationField.union ? `.${refNode.name}` : ""
-                            }${relationField.typeMeta.array ? `[${index}]` : ""}.disconnect`,
-                        });
-                        subquery.push(disconnectAndParams[0]);
-                        res.params = { ...res.params, ...disconnectAndParams[1] };
-                    }
-
-                    if (update.connect) {
-                        const connectAndParams = createConnectAndParams({
-                            context,
-                            callbackBucket,
-                            refNodes: [refNode],
-                            value: update.connect,
-                            varName: `${_varName}_connect`,
-                            withVars,
-                            parentVar,
-                            relationField,
-                            labelOverride: relationField.union ? refNode.name : "",
-                            parentNode: node,
-                        });
-                        subquery.push(connectAndParams[0]);
-                        res.params = { ...res.params, ...connectAndParams[1] };
-                    }
-
-                    if (update.connectOrCreate) {
-                        const { cypher, params } = createConnectOrCreateAndParams({
-                            input: update.connectOrCreate,
-                            varName: `${_varName}_connectOrCreate`,
-                            parentVar: varName,
-                            relationField,
-                            refNode,
-                            context,
-                            withVars,
-                        });
-                        subquery.push(cypher);
-                        res.params = { ...res.params, ...params };
-                    }
+                    const variableName = `${varName}_${key}${relationField.union ? `_${refNode.name}` : ""}${index}`;
 
                     if (update.delete) {
-                        const innerVarName = `${_varName}_delete`;
+                        const innerVarName = `${variableName}_delete`;
+                        let deleteInput = { [key]: update.delete };
+                        if (relationField.union) {
+                            deleteInput = { [key]: { [refNode.name]: update.delete } };
+                        }
 
                         const deleteAndParams = createDeleteAndParams({
                             context,
                             node,
-                            deleteInput: { [key]: update.delete }, // OBJECT ENTIERS key reused twice
+                            deleteInput: deleteInput,
                             varName: innerVarName,
                             chainStr: innerVarName,
                             parentVar,
@@ -363,49 +160,328 @@ export default function createUpdateAndParams({
                         res.params = { ...res.params, ...deleteAndParams[1] };
                     }
 
+                    if (update.disconnect) {
+                        const disconnectAndParams = createDisconnectAndParams({
+                            context,
+                            refNodes: [refNode],
+                            value: update.disconnect,
+                            varName: `${variableName}_disconnect`,
+                            withVars,
+                            parentVar,
+                            relationField,
+                            labelOverride: relationField.union ? refNode.name : "",
+                            parentNode: node,
+                            parameterPrefix: `${parameterPrefix}.${key}${
+                                relationField.union ? `.${refNode.name}` : ""
+                            }${relationField.typeMeta.array ? `[${index}]` : ""}.disconnect`,
+                        });
+                        subquery.push(disconnectAndParams[0]);
+                        res.params = { ...res.params, ...disconnectAndParams[1] };
+                    }
+
+                    if (update.update) {
+                        const whereStrs: string[] = [];
+                        const delayedSubquery: string[] = [];
+                        let aggregationWhere = false;
+
+                        if (update.where) {
+                            try {
+                                const {
+                                    cypher: whereClause,
+                                    subquery: preComputedSubqueries,
+                                    params: whereParams,
+                                } = createConnectionWhereAndParams({
+                                    whereInput: update.where,
+                                    node: refNode,
+                                    nodeVariable: variableName,
+                                    relationship,
+                                    relationshipVariable,
+                                    context,
+                                    parameterPrefix: `${parameterPrefix}.${key}${
+                                        relationField.union ? `.${refNode.name}` : ""
+                                    }${relationField.typeMeta.array ? `[${index}]` : ``}.where`,
+                                });
+
+                                if (whereClause) {
+                                    whereStrs.push(whereClause);
+                                    res.params = { ...res.params, ...whereParams };
+                                    if (preComputedSubqueries) {
+                                        delayedSubquery.push(preComputedSubqueries);
+                                        aggregationWhere = true;
+                                    }
+                                }
+                            } catch {
+                                return;
+                            }
+                        }
+
+                        const innerUpdate: string[] = [];
+                        if (withVars) {
+                            innerUpdate.push(`WITH ${withVars.join(", ")}`);
+                        }
+
+                        const labels = refNode.getLabelString(context);
+                        innerUpdate.push(
+                            `MATCH (${parentVar})${inStr}${relTypeStr}${outStr}(${variableName}${labels})`
+                        );
+                        innerUpdate.push(...delayedSubquery);
+
+                        const authorizationBeforeAndParams = createAuthorizationBeforeAndParams({
+                            context,
+                            nodes: [{ node: refNode, variable: variableName }],
+                            operations: ["UPDATE"],
+                        });
+
+                        if (authorizationBeforeAndParams) {
+                            const { cypher, params: authWhereParams, subqueries } = authorizationBeforeAndParams;
+
+                            whereStrs.push(cypher);
+                            res.params = { ...res.params, ...authWhereParams };
+
+                            if (subqueries) {
+                                innerUpdate.push(subqueries);
+                            }
+                        }
+
+                        if (whereStrs.length) {
+                            const predicate = `${whereStrs.join(" AND ")}`;
+                            if (aggregationWhere) {
+                                const columns = [
+                                    new Cypher.NamedVariable(relationshipVariable),
+                                    new Cypher.NamedVariable(variableName),
+                                ];
+                                const caseWhereClause = caseWhere(new Cypher.Raw(predicate), columns);
+                                const { cypher } = caseWhereClause.build({ prefix: "aggregateWhereFilter" });
+                                innerUpdate.push(cypher);
+                            } else {
+                                innerUpdate.push(`WHERE ${predicate}`);
+                            }
+                        }
+
+                        if (update.update.edge) {
+                            const entity = context.schemaModel.getConcreteEntityAdapter(node.name);
+                            const relationshipAdapter = entity
+                                ? entity.findRelationship(relationField.fieldName)
+                                : undefined;
+                            const res = createSetRelationshipProperties({
+                                properties: update.update.edge,
+                                varName: relationshipVariable,
+                                withVars: withVars,
+                                relationship,
+                                relationshipAdapter,
+                                callbackBucket,
+                                operation: "UPDATE",
+                                parameterPrefix: `${parameterPrefix}.${key}${
+                                    relationField.union ? `.${refNode.name}` : ""
+                                }${relationField.typeMeta.array ? `[${index}]` : ``}.update.edge`,
+                                parameterNotation: ".",
+                            });
+                            let setProperties;
+                            if (res) {
+                                setProperties = res[0];
+                            }
+                            if (setProperties) {
+                                innerUpdate.push(setProperties);
+                            }
+                        }
+
+                        if (update.update.node) {
+                            const nestedWithVars = [...withVars, variableName];
+
+                            const nestedUpdateInput = Object.entries(update.update.node).reduce(
+                                (d1, [k1, v1]) => ({ ...d1, [k1]: v1 }),
+                                {}
+                            );
+
+                            const updateAndParams = createUpdateAndParams({
+                                context,
+                                callbackBucket,
+                                node: refNode,
+                                updateInput: nestedUpdateInput,
+                                varName: variableName,
+                                withVars: nestedWithVars,
+                                parentVar: variableName,
+                                chainStr: `${param}${relationField.union ? `_${refNode.name}` : ""}${index}`,
+                                parameterPrefix: `${parameterPrefix}.${key}${
+                                    relationField.union ? `.${refNode.name}` : ""
+                                }${relationField.typeMeta.array ? `[${index}]` : ``}.update.node`,
+                                includeRelationshipValidation: true,
+                            });
+                            res.params = { ...res.params, ...updateAndParams[1] };
+                            innerUpdate.push(updateAndParams[0]);
+                        }
+
+                        innerUpdate.push(`RETURN count(*) AS update_${variableName}`);
+
+                        subquery.push(
+                            `WITH ${withVars.join(", ")}`,
+                            "CALL {",
+                            indentBlock(innerUpdate.join("\n")),
+                            "}"
+                        );
+                    }
+
+                    if (update.connect) {
+                        if (relationField.interface) {
+                            if (!relationField.typeMeta.array) {
+                                const inStr = relationField.direction === "IN" ? "<-" : "-";
+                                const outStr = relationField.direction === "OUT" ? "->" : "-";
+
+                                const validatePredicates: string[] = [];
+                                refNodes.forEach((refNode) => {
+                                    const validateRelationshipExistence = `EXISTS((${varName})${inStr}[:${relationField.type}]${outStr}(:${refNode.name}))`;
+                                    validatePredicates.push(validateRelationshipExistence);
+                                });
+
+                                if (validatePredicates.length) {
+                                    subquery.push("WITH *");
+                                    subquery.push(
+                                        `WHERE apoc.util.validatePredicate(${validatePredicates.join(
+                                            " OR "
+                                        )},'Relationship field "%s.%s" cannot have more than one node linked',["${
+                                            relationField.connectionPrefix
+                                        }","${relationField.fieldName}"])`
+                                    );
+                                }
+                            }
+                        }
+
+                        const connectAndParams = createConnectAndParams({
+                            context,
+                            callbackBucket,
+                            refNodes: [refNode],
+                            value: update.connect,
+                            varName: `${variableName}_connect`,
+                            withVars,
+                            parentVar,
+                            relationField,
+                            labelOverride: relationField.union ? refNode.name : "",
+                            parentNode: node,
+                            source: "UPDATE",
+                        });
+                        subquery.push(connectAndParams[0]);
+
+                        res.params = { ...res.params, ...connectAndParams[1] };
+                    }
+
+                    if (update.connectOrCreate) {
+                        const { cypher, params } = createConnectOrCreateAndParams({
+                            input: update.connectOrCreate,
+                            varName: `${variableName}_connectOrCreate`,
+                            parentVar: varName,
+                            relationField,
+                            refNode,
+                            node,
+                            context,
+                            withVars,
+                            callbackBucket,
+                        });
+                        subquery.push(cypher);
+                        res.params = { ...res.params, ...params };
+                    }
+
                     if (update.create) {
                         if (withVars) {
                             subquery.push(`WITH ${withVars.join(", ")}`);
                         }
                         const creates = relationField.typeMeta.array ? update.create : [update.create];
                         creates.forEach((create, i) => {
-                            const baseName = `${_varName}_create${i}`;
+                            const baseName = `${variableName}_create${i}`;
                             const nodeName = `${baseName}_node`;
                             const propertiesName = `${baseName}_relationship`;
 
-                            const createAndParams = createCreateAndParams({
-                                context,
-                                callbackBucket,
-                                node: refNode,
+                            let createNodeInput = {
                                 input: create.node,
+                            };
+
+                            if (relationField.interface) {
+                                const nodeFields = create.node[refNode.name];
+                                if (!nodeFields) return; // Interface specific type not defined
+                                createNodeInput = {
+                                    input: nodeFields,
+                                };
+                            }
+
+                            if (!relationField.typeMeta.array) {
+                                subquery.push("WITH *");
+
+                                const validatePredicateTemplate = (condition: string) =>
+                                    `WHERE apoc.util.validatePredicate(${condition},'Relationship field "%s.%s" cannot have more than one node linked',["${relationField.connectionPrefix}","${relationField.fieldName}"])`;
+
+                                const singleCardinalityValidationTemplate = (nodeName) =>
+                                    `EXISTS((${varName})${inStr}[:${relationField.type}]${outStr}(:${nodeName}))`;
+
+                                if (relationField.union && relationField.union.nodes) {
+                                    const validateRelationshipExistence = relationField.union.nodes.map(
+                                        singleCardinalityValidationTemplate
+                                    );
+                                    subquery.push(
+                                        validatePredicateTemplate(validateRelationshipExistence.join(" OR "))
+                                    );
+                                } else if (relationField.interface && relationField.interface.implementations) {
+                                    const validateRelationshipExistence = relationField.interface.implementations.map(
+                                        singleCardinalityValidationTemplate
+                                    );
+                                    subquery.push(
+                                        validatePredicateTemplate(validateRelationshipExistence.join(" OR "))
+                                    );
+                                } else {
+                                    const validateRelationshipExistence = singleCardinalityValidationTemplate(
+                                        refNode.name
+                                    );
+                                    subquery.push(validatePredicateTemplate(validateRelationshipExistence));
+                                }
+                            }
+
+                            const {
+                                create: nestedCreate,
+                                params,
+                                authorizationPredicates,
+                                authorizationSubqueries,
+                            } = createCreateAndParams({
+                                context,
+                                node: refNode,
+                                callbackBucket,
                                 varName: nodeName,
                                 withVars: [...withVars, nodeName],
                                 includeRelationshipValidation: false,
+                                ...createNodeInput,
                             });
-                            subquery.push(createAndParams[0]);
-                            res.params = { ...res.params, ...createAndParams[1] };
+                            subquery.push(nestedCreate);
+                            res.params = { ...res.params, ...params };
+                            const relationVarName = create.edge ? propertiesName : "";
                             subquery.push(
-                                `MERGE (${parentVar})${inStr}[${create.edge ? propertiesName : ""}:${
-                                    relationField.type
-                                }]${outStr}(${nodeName})`
+                                `MERGE (${parentVar})${inStr}[${relationVarName}:${relationField.type}]${outStr}(${nodeName})`
                             );
 
                             if (create.edge) {
+                                const entity = context.schemaModel.getConcreteEntityAdapter(node.name);
+                                const relationshipAdapter = entity
+                                    ? entity.findRelationship(relationField.fieldName)
+                                    : undefined;
                                 const setA = createSetRelationshipProperties({
                                     properties: create.edge,
                                     varName: propertiesName,
                                     withVars,
                                     relationship,
+                                    relationshipAdapter,
                                     callbackBucket,
                                     operation: "CREATE",
                                     parameterPrefix: `${parameterPrefix}.${key}${
                                         relationField.union ? `.${refNode.name}` : ""
                                     }[${index}].create[${i}].edge`,
+                                    parameterNotation: ".",
                                 });
-                                subquery.push(setA);
+                                if (setA) {
+                                    subquery.push(setA[0]);
+                                }
                             }
 
-                            const relationshipValidationStr = createRelationshipValidationStr({
+                            subquery.push(
+                                ...getAuthorizationStatements(authorizationPredicates, authorizationSubqueries)
+                            );
+
+                            const relationshipValidationStr = createRelationshipValidationString({
                                 node: refNode,
                                 context,
                                 varName: nodeName,
@@ -418,7 +494,9 @@ export default function createUpdateAndParams({
                     }
 
                     if (relationField.interface) {
-                        subquery.push("RETURN count(*) AS _");
+                        const returnStatement = `RETURN count(*) AS update_${varName}_${refNode.name}`;
+
+                        subquery.push(returnStatement);
                     }
                 });
 
@@ -426,12 +504,13 @@ export default function createUpdateAndParams({
                     subqueries.push(subquery.join("\n"));
                 }
             });
-
             if (relationField.interface) {
                 res.strs.push(`WITH ${withVars.join(", ")}`);
-                res.strs.push("CALL {");
-                res.strs.push(subqueries.join("\nUNION\n"));
-                res.strs.push("}");
+                res.strs.push(`CALL {\n\t WITH ${withVars.join(", ")}\n\t`);
+                const subqueriesWithMetaPassedOn = subqueries.map(
+                    (each, i) => each + `\n}\n${intermediateWithMetaStatements[i] || ""}`
+                );
+                res.strs.push(subqueriesWithMetaPassedOn.join(`\nCALL {\n\t WITH ${withVars.join(", ")}\n\t`));
             } else {
                 res.strs.push(subqueries.join("\n"));
             }
@@ -453,71 +532,66 @@ export default function createUpdateAndParams({
             hasAppliedTimeStamps = true;
         }
 
-        node.primitiveFields.forEach((field) =>
+        [...node.primitiveFields, ...node.temporalFields].forEach((field) =>
             addCallbackAndSetParam(field, varName, updateInput, callbackBucket, res.strs, "UPDATE")
         );
 
-        const mathMatch = matchMathField(key);
-        const { hasMatched, propertyName } = mathMatch;
-        const settableFieldComparator = hasMatched ? propertyName : key;
-        const settableField = node.mutableFields.find((x) => x.fieldName === settableFieldComparator);
-        const authableField = node.authableFields.find((x) => x.fieldName === key);
+        const { settableField, operator } = parseMutableField(node, key);
 
         if (settableField) {
             if (settableField.typeMeta.required && value === null) {
                 throw new Error(`Cannot set non-nullable field ${node.name}.${settableField.fieldName} to null`);
             }
-
-            if (pointField) {
-                if (pointField.typeMeta.array) {
-                    res.strs.push(`SET ${varName}.${dbFieldName} = [p in $${param} | point(p)]`);
-                } else {
-                    res.strs.push(`SET ${varName}.${dbFieldName} = point($${param})`);
-                }
-            } else if (hasMatched) {
-                const mathDescriptor = mathDescriptorBuilder(value as number, node, mathMatch);
-                if (updateInput[mathDescriptor.dbName]) {
-                    throw new Error(`Ambiguous property: ${mathDescriptor.dbName}`);
-                }
-
-                const mathStatements = buildMathStatements(mathDescriptor, varName, withVars, param);
-                res.strs.push(...mathStatements);
-            } else {
-                res.strs.push(`SET ${varName}.${dbFieldName} = $${param}`);
+            checkAuthentication({ context, node, targetOperations: ["UPDATE"], field: settableField.fieldName });
+            if (operator === "PUSH" || operator === "POP") {
+                validateNonNullProperty(res, varName, settableField);
             }
+            const mutationFieldStatements = getMutationFieldStatements({
+                nodeOrRel: node,
+                param,
+                key,
+                varName,
+                value,
+                withVars,
+            });
+            res.strs.push(mutationFieldStatements);
+
             res.params[param] = value;
-        }
 
-        if (authableField) {
-            if (authableField.auth) {
-                const preAuth = createAuthAndParams({
-                    entity: authableField,
-                    operations: "UPDATE",
-                    context,
-                    allow: { varName, parentNode: node, chainStr: param },
-                });
-                const postAuth = createAuthAndParams({
-                    entity: authableField,
-                    operations: "UPDATE",
-                    skipRoles: true,
-                    skipIsAuthenticated: true,
-                    context,
-                    bind: { parentNode: node, varName, chainStr: param },
-                });
+            const authorizationBeforeAndParams = createAuthorizationBeforeAndParamsField({
+                context,
+                nodes: [{ node: node, variable: varName, fieldName: settableField.fieldName }],
+                operations: ["UPDATE"],
+            });
 
-                if (!res.meta) {
-                    res.meta = { preAuthStrs: [], postAuthStrs: [] };
+            if (authorizationBeforeAndParams) {
+                const { cypher, params: authWhereParams, subqueries } = authorizationBeforeAndParams;
+
+                res.meta.authorizationBeforePredicates.push(cypher);
+
+                if (subqueries) {
+                    res.meta.authorizationBeforeSubqueries.push(subqueries);
                 }
 
-                if (preAuth[0]) {
-                    res.meta.preAuthStrs.push(preAuth[0]);
-                    res.params = { ...res.params, ...preAuth[1] };
+                res.params = { ...res.params, ...authWhereParams };
+            }
+
+            const authorizationAfterAndParams = createAuthorizationAfterAndParamsField({
+                context,
+                nodes: [{ node: node, variable: varName, fieldName: settableField.fieldName }],
+                operations: ["UPDATE"],
+            });
+
+            if (authorizationAfterAndParams) {
+                const { cypher, params: authWhereParams, subqueries } = authorizationAfterAndParams;
+
+                res.meta.authorizationAfterPredicates.push(cypher);
+
+                if (subqueries) {
+                    res.meta.authorizationAfterSubqueries.push(subqueries);
                 }
 
-                if (postAuth[0]) {
-                    res.meta.postAuthStrs.push(postAuth[0]);
-                    res.params = { ...res.params, ...postAuth[1] };
-                }
+                res.params = { ...res.params, ...authWhereParams };
             }
         }
 
@@ -526,102 +600,102 @@ export default function createUpdateAndParams({
 
     const reducedUpdate = Object.entries(updateInput as Record<string, unknown>).reduce(reducer, {
         strs: [],
+        meta: {
+            preArrayMethodValidationStrs: [],
+            authorizationBeforeSubqueries: [],
+            authorizationBeforePredicates: [],
+            authorizationAfterSubqueries: [],
+            authorizationAfterPredicates: [],
+        },
         params: {},
     });
-
-    const { strs, meta = { preAuthStrs: [], postAuthStrs: [] } } = reducedUpdate;
+    const { strs, meta } = reducedUpdate;
     let params = reducedUpdate.params;
 
-    let preAuthStrs: string[] = [];
-    let postAuthStrs: string[] = [];
+    const authorizationBeforeStrs = meta.authorizationBeforePredicates;
+    const authorizationBeforeSubqueries = meta.authorizationBeforeSubqueries;
+    const authorizationAfterStrs = meta.authorizationAfterPredicates;
+    const authorizationAfterSubqueries = meta.authorizationAfterSubqueries;
+
     const withStr = `WITH ${withVars.join(", ")}`;
 
-    const preAuth = createAuthAndParams({
-        entity: node,
+    const authorizationAfterAndParams = createAuthorizationAfterAndParams({
         context,
-        allow: { parentNode: node, varName },
-        operations: "UPDATE",
+        nodes: [{ node, variable: varName }],
+        operations: ["UPDATE"],
     });
-    if (preAuth[0]) {
-        preAuthStrs.push(preAuth[0]);
-        params = { ...params, ...preAuth[1] };
+
+    if (authorizationAfterAndParams) {
+        const { cypher, params: authWhereParams, subqueries } = authorizationAfterAndParams;
+
+        if (cypher) {
+            if (subqueries) {
+                authorizationAfterSubqueries.push(subqueries);
+            }
+
+            authorizationAfterStrs.push(cypher);
+            params = { ...params, ...authWhereParams };
+        }
     }
 
-    const postAuth = createAuthAndParams({
-        entity: node,
-        context,
-        skipIsAuthenticated: true,
-        skipRoles: true,
-        operations: "UPDATE",
-        bind: { parentNode: node, varName },
-    });
-    if (postAuth[0]) {
-        postAuthStrs.push(postAuth[0]);
-        params = { ...params, ...postAuth[1] };
-    }
+    const preUpdatePredicates = authorizationBeforeStrs;
 
-    if (meta) {
-        preAuthStrs = [...preAuthStrs, ...meta.preAuthStrs];
-        postAuthStrs = [...postAuthStrs, ...meta.postAuthStrs];
-    }
-
-    let preAuthStr = "";
-    let postAuthStr = "";
+    const preArrayMethodValidationStr = "";
     const relationshipValidationStr = includeRelationshipValidation
-        ? createRelationshipValidationStr({ node, context, varName })
+        ? createRelationshipValidationString({ node, context, varName })
         : "";
 
-    const forbiddenString = `"${AUTH_FORBIDDEN_ERROR}"`;
+    if (meta.preArrayMethodValidationStrs.length) {
+        const nullChecks = meta.preArrayMethodValidationStrs.map((validationStr) => `${validationStr[0]} IS NULL`);
+        const propertyNames = meta.preArrayMethodValidationStrs.map((validationStr) => validationStr[1]);
 
-    if (preAuthStrs.length) {
-        const apocStr = `CALL apoc.util.validate(NOT (${preAuthStrs.join(" AND ")}), ${forbiddenString}, [0])`;
-        preAuthStr = `${withStr}\n${apocStr}`;
+        preUpdatePredicates.push(
+            `apoc.util.validatePredicate(${nullChecks.join(" OR ")}, "${pluralize(
+                "Property",
+                propertyNames.length
+            )} ${propertyNames.map(() => "%s").join(", ")} cannot be NULL", [${wrapStringInApostrophes(
+                propertyNames
+            ).join(", ")}])`
+        );
     }
 
-    if (postAuthStrs.length) {
-        const apocStr = `CALL apoc.util.validate(NOT (${postAuthStrs.join(" AND ")}), ${forbiddenString}, [0])`;
-        postAuthStr = `${withStr}\n${apocStr}`;
+    let preUpdatePredicatesStr = "";
+    let authorizationAfterStr = "";
+
+    if (preUpdatePredicates.length) {
+        if (authorizationBeforeSubqueries.length) {
+            preUpdatePredicatesStr = `${withStr}\n${authorizationBeforeSubqueries.join(
+                "\n"
+            )}\nWITH *\nWHERE ${preUpdatePredicates.join(" AND ")}`;
+        } else {
+            preUpdatePredicatesStr = `${withStr}\nWHERE ${preUpdatePredicates.join(" AND ")}`;
+        }
     }
 
-    let statements = strs;
-    if (context.subscriptionsEnabled) {
-        statements = wrapInSubscriptionsMetaCall({
-            withVars,
-            nodeVariable: varName,
-            typename: node.name,
-            statements: strs,
-        });
+    if (authorizationAfterStrs.length) {
+        if (authorizationAfterSubqueries.length) {
+            authorizationAfterStr = `${withStr}\n${authorizationAfterSubqueries.join(
+                "\n"
+            )}\nWITH *\nWHERE ${authorizationAfterStrs.join(" AND ")}`;
+        } else {
+            authorizationAfterStr = `${withStr}\nWHERE ${authorizationAfterStrs.join(" AND ")}`;
+        }
     }
+
+    const statements = strs;
+
     return [
         [
-            preAuthStr,
+            preUpdatePredicatesStr,
+            preArrayMethodValidationStr,
             ...statements,
-            postAuthStr,
+            authorizationAfterStr,
             ...(relationshipValidationStr ? [withStr, relationshipValidationStr] : []),
         ].join("\n"),
         params,
     ];
 }
 
-function wrapInSubscriptionsMetaCall({
-    statements,
-    nodeVariable,
-    typename,
-    withVars,
-}: {
-    statements: string[];
-    nodeVariable: string;
-    typename: string;
-    withVars: string[];
-}): string[] {
-    const updateMetaVariable = "update_meta";
-    const preCallWith = `WITH ${nodeVariable} { .* } AS ${META_OLD_PROPS_CYPHER_VARIABLE}, ${withVars.join(", ")}`;
-
-    const callBlock = ["WITH *", ...statements, `RETURN ${META_CYPHER_VARIABLE} as ${updateMetaVariable}`];
-    const postCallWith = `WITH *, ${updateMetaVariable} as ${META_CYPHER_VARIABLE}`;
-
-    const eventMeta = createEventMeta({ event: "update", nodeVariable, typename });
-    const eventMetaWith = `WITH ${filterMetaVariable(withVars).join(", ")}, ${eventMeta}`;
-
-    return [preCallWith, "CALL {", ...indentBlock(callBlock), "}", postCallWith, eventMetaWith];
+function validateNonNullProperty(res: Res, varName: string, field: BaseField) {
+    res.meta.preArrayMethodValidationStrs.push([`${varName}.${field.dbPropertyName}`, `${field.dbPropertyName}`]);
 }

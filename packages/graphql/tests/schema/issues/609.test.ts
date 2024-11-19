@@ -19,13 +19,13 @@
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
 import { lexicographicSortSchema } from "graphql/utilities";
-import { gql } from "apollo-server";
+import { gql } from "graphql-tag";
 import { Neo4jGraphQL } from "../../../src";
 
 describe("609", () => {
     test("@deprecated directive should remain in output", async () => {
         const typeDefs = gql`
-            type Deprecated {
+            type Deprecated @node {
                 deprecatedField: String @deprecated
             }
         `;
@@ -43,14 +43,18 @@ describe("609", () => {
               info: CreateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created during a create mutation
+            \\"\\"\\"
             type CreateInfo {
-              bookmark: String
               nodesCreated: Int!
               relationshipsCreated: Int!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships deleted during a delete mutation
+            \\"\\"\\"
             type DeleteInfo {
-              bookmark: String
               nodesDeleted: Int!
               relationshipsDeleted: Int!
             }
@@ -61,11 +65,11 @@ describe("609", () => {
 
             type DeprecatedAggregateSelection {
               count: Int!
-              deprecatedField: StringAggregateSelectionNullable!
+              deprecatedField: StringAggregateSelection!
             }
 
             input DeprecatedCreateInput {
-              deprecatedField: String
+              deprecatedField: String @deprecated
             }
 
             type DeprecatedEdge {
@@ -86,26 +90,24 @@ describe("609", () => {
             Fields to sort Deprecateds by. The order in which sorts are applied is not guaranteed when specifying many fields in one DeprecatedSort object.
             \\"\\"\\"
             input DeprecatedSort {
-              deprecatedField: SortDirection
+              deprecatedField: SortDirection @deprecated
             }
 
             input DeprecatedUpdateInput {
-              deprecatedField: String
+              deprecatedField: String @deprecated
+              deprecatedField_SET: String @deprecated
             }
 
             input DeprecatedWhere {
               AND: [DeprecatedWhere!]
+              NOT: DeprecatedWhere
               OR: [DeprecatedWhere!]
-              deprecatedField: String
-              deprecatedField_CONTAINS: String
-              deprecatedField_ENDS_WITH: String
-              deprecatedField_IN: [String]
-              deprecatedField_NOT: String
-              deprecatedField_NOT_CONTAINS: String
-              deprecatedField_NOT_ENDS_WITH: String
-              deprecatedField_NOT_IN: [String]
-              deprecatedField_NOT_STARTS_WITH: String
-              deprecatedField_STARTS_WITH: String
+              deprecatedField: String @deprecated
+              deprecatedField_CONTAINS: String @deprecated
+              deprecatedField_ENDS_WITH: String @deprecated
+              deprecatedField_EQ: String @deprecated
+              deprecatedField_IN: [String] @deprecated
+              deprecatedField_STARTS_WITH: String @deprecated
             }
 
             type DeprecatedsConnection {
@@ -129,11 +131,12 @@ describe("609", () => {
             }
 
             type Query {
-              deprecateds(options: DeprecatedOptions, where: DeprecatedWhere): [Deprecated!]!
+              deprecateds(limit: Int, offset: Int, options: DeprecatedOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [DeprecatedSort!], where: DeprecatedWhere): [Deprecated!]!
               deprecatedsAggregate(where: DeprecatedWhere): DeprecatedAggregateSelection!
-              deprecatedsConnection(after: String, first: Int, sort: [DeprecatedSort], where: DeprecatedWhere): DeprecatedsConnection!
+              deprecatedsConnection(after: String, first: Int, sort: [DeprecatedSort!], where: DeprecatedWhere): DeprecatedsConnection!
             }
 
+            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
             enum SortDirection {
               \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
               ASC
@@ -141,7 +144,7 @@ describe("609", () => {
               DESC
             }
 
-            type StringAggregateSelectionNullable {
+            type StringAggregateSelection {
               longest: String
               shortest: String
             }
@@ -151,8 +154,10 @@ describe("609", () => {
               info: UpdateInfo!
             }
 
+            \\"\\"\\"
+            Information about the number of nodes and relationships created and deleted during an update mutation
+            \\"\\"\\"
             type UpdateInfo {
-              bookmark: String
               nodesCreated: Int!
               nodesDeleted: Int!
               relationshipsCreated: Int!

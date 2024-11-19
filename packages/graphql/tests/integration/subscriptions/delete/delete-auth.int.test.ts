@@ -17,43 +17,35 @@
  * limitations under the License.
  */
 
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import { Neo4jGraphQLAuthJWTPlugin } from "@neo4j/graphql-plugin-auth";
+import console from "console";
 import { generate } from "randomstring";
-import { Neo4jGraphQL } from "../../../../src";
-import { generateUniqueType } from "../../../utils/graphql-types";
-import { TestSubscriptionsPlugin } from "../../../utils/TestSubscriptionPlugin";
-import Neo4j from "../../neo4j";
-import { createJwtRequest } from "../../../utils/create-jwt-request";
+import { createBearerToken } from "../../../utils/create-bearer-token";
+import { TestHelper } from "../../../utils/tests-helper";
 
 describe("Subscriptions delete", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let plugin: TestSubscriptionsPlugin;
+    const testHelper = new TestHelper({ cdc: true });
+    let cdcEnabled: boolean;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
-
-    beforeEach(() => {
-        plugin = new TestSubscriptionsPlugin();
+        cdcEnabled = await testHelper.assertCDCEnabled();
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should throw Forbidden when deleting a node with invalid allow", async () => {
-        const session = await neo4j.getSession({ defaultAccessMode: "WRITE" });
-        const typeUser = generateUniqueType("User");
+        if (!cdcEnabled) {
+            console.log("CDC NOT AVAILABLE - SKIPPING");
+            return;
+        }
+        const typeUser = testHelper.createUniqueType("User");
         const typeDefs = `
-        type ${typeUser.name} {
+        type ${typeUser.name} @node {
             id: ID
         }
 
-        extend type ${typeUser.name} @auth(rules: [{ operations: [DELETE], allow: { id: "$jwt.sub" }}])
+        extend type ${typeUser.name} @authorization(validate: [{ operations: [DELETE], when: [BEFORE], where: { node: { id_EQ: "$jwt.sub" } } }])
     `;
 
         const userId = generate({
@@ -63,39 +55,31 @@ describe("Subscriptions delete", () => {
         const query = `
         mutation {
             ${typeUser.operations.delete}(
-                where: { id: "${userId}" }
+                where: { id_EQ: "${userId}" }
             ) {
                nodesDeleted
             }
         }
     `;
 
-        const neoSchema = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            plugins: {
-                auth: new Neo4jGraphQLAuthJWTPlugin({
-                    secret: "secret",
-                }),
-                subscriptions: plugin,
+            features: {
+                authorization: {
+                    key: "secret",
+                },
+                subscriptions: await testHelper.getSubscriptionEngine(),
             },
         });
 
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
             CREATE (:${typeUser.name} {id: "${userId}"})
         `);
 
-            const req = createJwtRequest("secret", { sub: "invalid" });
+        const token = createBearerToken("secret", { sub: "invalid" });
 
-            const gqlResult = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark(), { req }),
-            });
+        const gqlResult = await testHelper.executeGraphQLWithToken(query, token);
 
-            expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
-        } finally {
-            await session.close();
-        }
+        expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
     });
 });

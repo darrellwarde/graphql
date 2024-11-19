@@ -19,22 +19,21 @@
 
 import type {
     GraphQLField,
+    GraphQLInputType,
     GraphQLInterfaceType,
+    GraphQLList,
     GraphQLNamedType,
     GraphQLNonNull,
     GraphQLObjectType,
     GraphQLResolveInfo,
-    GraphQLInputType,
-    GraphQLList} from "graphql";
-import {
-    GraphQLInputObjectType,
-    GraphQLScalarType,
+    GraphQLSchema,
 } from "graphql";
+import { GraphQLInputObjectType, GraphQLScalarType, Kind } from "graphql";
 import type { ResolveTree } from "graphql-parse-resolve-info";
 import { parseResolveInfo } from "graphql-parse-resolve-info";
 import neo4j from "neo4j-driver";
 
-function getNeo4jArgumentValue({ argument, type }: { argument: unknown | unknown[]; type: GraphQLInputType }) {
+function getNeo4jArgumentValue({ argument, type }: { argument: unknown; type: GraphQLInputType }) {
     if (argument === null) {
         return argument;
     }
@@ -51,6 +50,10 @@ function getNeo4jArgumentValue({ argument, type }: { argument: unknown | unknown
 
     if (type instanceof GraphQLInputObjectType) {
         return Object.entries(argument as Record<string, unknown>).reduce((res, [key, value]) => {
+            // Ignore meta field _emptyInput
+            if (key === "_emptyInput") {
+                return res;
+            }
             const field = Object.values(type.getFields()).find((f) => f.name === key);
 
             if (!field) {
@@ -87,7 +90,25 @@ export interface GetNeo4jResolveTreeOptions {
     args?: any;
 }
 
-function getNeo4jResolveTree(resolveInfo: GraphQLResolveInfo, options?: GetNeo4jResolveTreeOptions) {
+function findField(schema: GraphQLSchema, fieldName: string): GraphQLField<any, any> {
+    const queryType = schema.getQueryType();
+    const mutationType = schema.getMutationType();
+    const subscriptionType = schema.getSubscriptionType();
+
+    const queryFields = queryType?.getFields()[fieldName];
+    const mutationFields = mutationType?.getFields()[fieldName];
+    const subscriptionFields = subscriptionType?.getFields()[fieldName];
+
+    const field = queryFields || mutationFields || subscriptionFields;
+    if (!field) throw new Error(`Field ${field} not found`);
+
+    return field;
+}
+
+export default function getNeo4jResolveTree(
+    resolveInfo: GraphQLResolveInfo,
+    options?: GetNeo4jResolveTreeOptions
+): ResolveTree {
     const resolveTree = options?.resolveTree || (parseResolveInfo(resolveInfo) as ResolveTree);
     const resolverArgs = options?.args;
     const mergedArgs: Record<string, unknown> = { ...resolveTree.args, ...resolverArgs };
@@ -97,15 +118,7 @@ function getNeo4jResolveTree(resolveInfo: GraphQLResolveInfo, options?: GetNeo4j
     if (options?.field) {
         field = options.field;
     } else {
-        const queryType = resolveInfo.schema.getQueryType();
-        const mutationType = resolveInfo.schema.getMutationType();
-        const subscriptionType = resolveInfo.schema.getSubscriptionType();
-
-        field = Object.values({
-            ...queryType?.getFields(),
-            ...mutationType?.getFields(),
-            ...subscriptionType?.getFields(),
-        }).find((f) => f.name === resolveTree.name) as GraphQLField<any, any>;
+        field = findField(resolveInfo.schema, resolveTree.name);
     }
 
     const args = Object.entries(mergedArgs).reduce((res, [name, value]) => {
@@ -126,7 +139,6 @@ function getNeo4jResolveTree(resolveInfo: GraphQLResolveInfo, options?: GetNeo4j
     const fieldsByTypeName = Object.entries(resolveTree.fieldsByTypeName).reduce((res, [typeName, fields]) => {
         let type: GraphQLObjectType | GraphQLInterfaceType;
 
-        // eslint-disable-next-line no-underscore-dangle,@typescript-eslint/naming-convention
         const _type = resolveInfo.schema.getType(typeName) as GraphQLNamedType;
 
         if (!_type) {
@@ -135,9 +147,9 @@ function getNeo4jResolveTree(resolveInfo: GraphQLResolveInfo, options?: GetNeo4j
             );
         }
 
-        if (_type.astNode?.kind === "ObjectTypeDefinition") {
+        if (_type.astNode?.kind === Kind.OBJECT_TYPE_DEFINITION) {
             type = _type as GraphQLObjectType;
-        } else if (_type.astNode?.kind === "InterfaceTypeDefinition") {
+        } else if (_type.astNode?.kind === Kind.INTERFACE_TYPE_DEFINITION) {
             type = _type as GraphQLInterfaceType;
         } else {
             return {
@@ -166,7 +178,5 @@ function getNeo4jResolveTree(resolveInfo: GraphQLResolveInfo, options?: GetNeo4j
 
     const { alias, name } = resolveTree;
 
-    return { alias, args, fieldsByTypeName, name } as ResolveTree;
+    return { alias, args, fieldsByTypeName, name };
 }
-
-export default getNeo4jResolveTree;

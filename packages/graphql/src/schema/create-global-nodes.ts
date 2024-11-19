@@ -20,17 +20,25 @@
 import type { GraphQLResolveInfo } from "graphql";
 import type { ObjectTypeComposerFieldConfigAsObjectDefinition, SchemaComposer } from "graphql-compose";
 import { nodeDefinitions } from "graphql-relay";
-import type { Context, Node } from "../types";
+import type { Node } from "../types";
 import { globalNodeResolver } from "./resolvers/query/global-node";
+import type { Neo4jGraphQLComposedContext } from "./resolvers/composition/wrap-query-and-mutation";
+import type { ConcreteEntity } from "../schema-model/entity/ConcreteEntity";
+import { ConcreteEntityAdapter } from "../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 
 // returns true if globalNodeFields added or false if not
-export function addGlobalNodeFields(nodes: Node[], composer: SchemaComposer): boolean {
+export function addGlobalNodeFields(
+    nodes: Node[],
+    composer: SchemaComposer,
+    concreteEntities: ConcreteEntity[]
+): boolean {
     const globalNodes = nodes.filter((n) => n.isGlobalNode);
+    const globalEntities = concreteEntities.map((e) => new ConcreteEntityAdapter(e)).filter((e) => e.isGlobalNode());
 
     if (globalNodes.length === 0) return false;
 
-    const fetchById = (id: string, context: Context, info: GraphQLResolveInfo) => {
-        const resolver = globalNodeResolver({ nodes: globalNodes });
+    const fetchById = (id: string, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) => {
+        const resolver = globalNodeResolver({ entities: globalEntities });
         return resolver.resolve(null, { id }, context, info);
     };
 
@@ -39,8 +47,13 @@ export function addGlobalNodeFields(nodes: Node[], composer: SchemaComposer): bo
     const { nodeInterface, nodeField } = nodeDefinitions(fetchById, resolveType);
 
     composer.createInterfaceTC(nodeInterface);
+
     composer.Query.addFields({
-        node: nodeField as ObjectTypeComposerFieldConfigAsObjectDefinition<null, Context, { id: string }>,
+        node: nodeField as ObjectTypeComposerFieldConfigAsObjectDefinition<
+            null,
+            Neo4jGraphQLComposedContext,
+            { id: string }
+        >,
     });
     return true;
 }

@@ -17,45 +17,13 @@
  * limitations under the License.
  */
 
-import type { Session } from "neo4j-driver";
-import semver from "semver";
-import { MIN_VERSIONS } from "../../constants";
+import { MIN_NEO4J_VERSION } from "../../constants";
+import type { Neo4jDatabaseInfo } from "../Neo4jDatabaseInfo";
 
-export async function verifyVersion(sessionFactory: () => Session): Promise<void> {
-    const session = sessionFactory();
-
-    const cypher = `
-        CALL dbms.components() YIELD versions
-        RETURN head(versions) AS version
-    `;
-
-    try {
-        const result = await session.run(cypher);
-        const record = result.records[0].toObject() as { version: string };
-        const version = record.version;
-
-        if (!version.includes("aura")) {
-            const minimumVersions = MIN_VERSIONS.find(({ majorMinor }) => version.startsWith(majorMinor));
-            const coercedNeo4jVersion = semver.coerce(version);
-
-            if (coercedNeo4jVersion) {
-                if (!minimumVersions) {
-                    // If new major/minor version comes out, this will stop error being thrown
-                    if (semver.lt(coercedNeo4jVersion, MIN_VERSIONS[0].neo4j)) {
-                        throw new Error(
-                            `Expected Neo4j version '${MIN_VERSIONS[0].majorMinor}' or greater, received: '${version}'`
-                        );
-                    }
-                } else if (semver.lt(coercedNeo4jVersion, minimumVersions.neo4j)) {
-                    throw new Error(
-                        `Expected minimum Neo4j version: '${minimumVersions.neo4j}' received: '${version}'`
-                    );
-                }
-            } else {
-                throw new Error(`Unable to coerce version '${version}'`);
-            }
+export function verifyVersion(dbInfo: Neo4jDatabaseInfo): void {
+    if (!dbInfo.toString().includes("aura")) {
+        if (dbInfo.lt(MIN_NEO4J_VERSION)) {
+            throw new Error(`Expected minimum Neo4j version: '${MIN_NEO4J_VERSION}', received: '${dbInfo.toString()}'`);
         }
-    } finally {
-        await session.close();
     }
 }

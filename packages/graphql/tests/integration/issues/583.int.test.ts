@@ -17,89 +17,91 @@
  * limitations under the License.
  */
 
-import gql from "graphql-tag";
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
 import { generate } from "randomstring";
-import { Neo4jGraphQL } from "../../../src/classes";
-import Neo4j from "../neo4j";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
-const testLabel = generate({ charset: "alphabetic" });
+describe("https://github.com/neo4j/graphql/issues/583", () => {
+    const testHelper = new TestHelper();
+    let typeDefs: string;
+    let Series: UniqueType;
+    let Actor: UniqueType;
+    let Movie: UniqueType;
+    let ShortFilm: UniqueType;
 
-describe("583", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let schema: GraphQLSchema;
-
-    const typeDefs = gql`
-        interface Show {
-            title: String
-        }
-
-        interface Awardable {
-            awardsGiven: Int!
-        }
-
-        type Actor implements Awardable {
-            id: ID!
-            name: String
-            awardsGiven: Int!
-            actedIn: [Show!]! @relationship(type: "ACTED_IN", direction: OUT)
-        }
-
-        type Movie implements Show & Awardable {
-            title: String
-            awardsGiven: Int!
-        }
-
-        type Series implements Show & Awardable {
-            title: String
-            awardsGiven: Int!
-        }
-
-        type ShortFilm implements Show {
-            title: String
-        }
-    `;
-
-    const actor = {
-        id: generate(),
-        name: "aaa",
-        awardsGiven: 0,
-    };
-
-    const series = {
-        title: "stranger who",
-        awardsGiven: 2,
-    };
-
-    const movie = {
-        title: "doctor things",
-        awardsGiven: 42,
-    };
-
-    const shortFilm = {
-        title: "all too well",
-    };
+    let actor: { id: string; name: string; awardsGiven: number };
+    let series: { title: string; awardsGiven: number };
+    let movie: { title: string; awardsGiven: number };
+    let shortFilm: { title: string };
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-        const session = await neo4j.getSession();
+        Actor = testHelper.createUniqueType("Actor");
+        Series = testHelper.createUniqueType("Series");
+        Movie = testHelper.createUniqueType("Movie");
+        ShortFilm = testHelper.createUniqueType("ShortFilm");
+        actor = {
+            id: generate(),
+            name: "aaa",
+            awardsGiven: 0,
+        };
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        schema = await neoSchema.getSchema();
+        series = {
+            title: "stranger who",
+            awardsGiven: 2,
+        };
 
-        await session.run(
+        movie = {
+            title: "doctor things",
+            awardsGiven: 42,
+        };
+
+        shortFilm = {
+            title: "all too well",
+        };
+
+        typeDefs = `
+            interface Show {
+                title: String
+            }
+
+            interface Awardable {
+                awardsGiven: Int!
+            }
+
+            type ${Actor} implements Awardable @node {
+                id: ID!
+                name: String
+                awardsGiven: Int!
+                actedIn: [Show!]! @relationship(type: "ACTED_IN", direction: OUT)
+            }
+
+            type ${Movie} implements Show & Awardable @node {
+                title: String
+                awardsGiven: Int!
+            }
+
+            type ${Series} implements Show & Awardable @node {
+                title: String
+                awardsGiven: Int!
+            }
+
+            type ${ShortFilm} implements Show @node {
+                title: String
+            }
+        `;
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+
+        const testLabel = testHelper.createUniqueType("Test");
+
+        await testHelper.executeCypher(
             `
-            CREATE (actor:Actor:${testLabel})
+            CREATE (actor:${Actor}:${testLabel})
             SET actor = $actor
-            CREATE (actor)-[:ACTED_IN]->(series:Series:${testLabel})
+            CREATE (actor)-[:ACTED_IN]->(series:${Series}:${testLabel})
             SET series = $series
-            CREATE (actor)-[:ACTED_IN]->(movie:Movie:${testLabel})
+            CREATE (actor)-[:ACTED_IN]->(movie:${Movie}:${testLabel})
             SET movie = $movie
-            CREATE (actor)-[:ACTED_IN]->(shortFilm:ShortFilm:${testLabel})
+            CREATE (actor)-[:ACTED_IN]->(shortFilm:${ShortFilm}:${testLabel})
             SET shortFilm = $shortFilm
           `,
             {
@@ -109,22 +111,16 @@ describe("583", () => {
                 shortFilm,
             }
         );
-        await session.close();
     });
 
     afterAll(async () => {
-        const session = await neo4j.getSession();
-
-        await session.run(`MATCH (node:${testLabel}) DETACH DELETE node`);
-        await session.close();
-
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should project all interfaces of node", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             query ($actorId: ID!) {
-                actors(where: { id: $actorId }) {
+                ${Actor.plural}(where: { id_EQ: $actorId }) {
                     id
                     name
                     actedIn {
@@ -136,21 +132,19 @@ describe("583", () => {
                 }
             }
         `;
-        const gqlResult = await graphql({
-            schema,
-            source: query.loc!.source,
+
+        const gqlResult = await testHelper.executeGraphQL(query, {
             variableValues: { actorId: actor.id },
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(gqlResult.errors).toBeFalsy();
 
         const gqlActors: Array<{ id: string; name: string; actedIn: { title: string; awardsGiven?: number } }> = (
             gqlResult?.data as any
-        )?.actors;
+        )[Actor.plural];
         expect(gqlActors[0]).toBeDefined();
-        expect(gqlActors[0].actedIn).toContainEqual(movie);
-        expect(gqlActors[0].actedIn).toContainEqual(series);
-        expect(gqlActors[0].actedIn).toContainEqual(shortFilm);
+        expect(gqlActors[0]?.actedIn).toContainEqual(movie);
+        expect(gqlActors[0]?.actedIn).toContainEqual(series);
+        expect(gqlActors[0]?.actedIn).toContainEqual(shortFilm);
     });
 });

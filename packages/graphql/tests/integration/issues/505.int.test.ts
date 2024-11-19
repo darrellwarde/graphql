@@ -17,25 +17,26 @@
  * limitations under the License.
  */
 
-import type { Driver, Session } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
 import { generate } from "randomstring";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/505", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    const userType = generateUniqueType("User");
-    const workspaceType = generateUniqueType("Workspace");
-    const pageType = generateUniqueType("User");
+    let userType: UniqueType;
+    let workspaceType: UniqueType;
+    let pageType: UniqueType;
 
-    // Update to use _INCLUDES once https://github.com/neo4j/graphql/pull/500 is merged
-    const typeDefs = gql`
-        type ${userType} {
+    let typeDefs: string;
+
+    beforeEach(() => {
+        userType = testHelper.createUniqueType("User");
+        workspaceType = testHelper.createUniqueType("Workspace");
+        pageType = testHelper.createUniqueType("User");
+
+        typeDefs = /* GraphQL */ `
+        type ${userType} @node {
             id: ID!
             authId: String
             workspaces: [${workspaceType}!]! @relationship(type: "MEMBER_OF", direction: OUT)
@@ -44,15 +45,16 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
         }
 
         type ${workspaceType}
-            @auth(
-                rules: [
+            @node
+            @authorization(
+                filter: [
                     {
                         operations: [READ]
-                        where: { OR: [{ members: { authId: "$jwt.sub" } }, { admins: { authId: "$jwt.sub" } }] }
+                        where: { OR: [{ node: { members_SOME: { authId_EQ: "$jwt.sub" } } }, { node: { admins_SOME: { authId_EQ: "$jwt.sub" } } }] }
                     }
                 ]
             )
-            @exclude(operations: [CREATE, UPDATE]) {
+            @mutation(operations: [DELETE]) {
             id: ID!
             name: String!
             members: [${userType}!]! @relationship(type: "MEMBER_OF", direction: IN)
@@ -61,27 +63,30 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
         }
 
         type ${pageType}
-            @auth(
-                rules: [
+            @node
+            @authorization(
+                filter: [
                     {
                         operations: [READ]
                         where: {
-                            OR: [
-                                { owner: { authId: "$jwt.sub" } }
-                                {
-                                    AND: [
-                                        { shared: true }
-                                        {
-                                            workspace: {
-                                                OR: [
-                                                    { members: { authId: "$jwt.sub" } }
-                                                    { admins: { authId: "$jwt.sub" } }
-                                                ]
+                            node: { 
+                                OR: [
+                                    { owner: { authId_EQ: "$jwt.sub" } } 
+                                    {
+                                        AND: [
+                                            { shared_EQ: true } 
+                                            {
+                                                workspace: {
+                                                    OR: [
+                                                        { members_SOME: { authId_EQ: "$jwt.sub" } } 
+                                                        { admins_SOME: { authId_EQ: "$jwt.sub" } } 
+                                                    ]
+                                                }
                                             }
-                                        }
-                                    ]
-                                }
-                            ]
+                                        ]
+                                    }
+                                ]
+                            }
                         }
                     }
                 ]
@@ -95,33 +100,27 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspace: ${workspaceType}! @relationship(type: "HAS_PAGE", direction: IN)
         }
     `;
-
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
     });
 
-    afterAll(async () => {
-        await driver.close();
+    afterEach(async () => {
+        await testHelper.close();
     });
 
-    async function queryTest(neoSchema: Neo4jGraphQL, variableValues: any, userId: string, session: Session) {
+    async function queryTest(variableValues: any, userId: string) {
         async function graphqlQuery(query: string) {
-            return graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark(), {
+            return testHelper.executeGraphQL(query, {
+                contextValue: {
                     jwt: {
                         sub: userId,
                     },
-                }),
+                },
                 variableValues,
             });
         }
 
         const usersQuery = `
             query Users($userId: ID!) {
-                ${userType.plural}(where: { id: $userId }) {
+                ${userType.plural}(where: { id_EQ: $userId }) {
                     id,
                     authId,
                     createdPages {
@@ -132,7 +131,7 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
         `;
         const workspacesQuery = `
             query Workspaces($workspaceId: ID!) {
-                ${workspaceType.plural}(where: { id: $workspaceId }) {
+                ${workspaceType.plural}(where: { id_EQ: $workspaceId }) {
                     id,
                     pages {
                         id
@@ -142,7 +141,7 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
         `;
         const pagesQuery = `
             query Pages($workspaceId: ID!) {
-                ${pageType.plural}(where: { workspace: { id: $workspaceId } }) {
+                ${pageType.plural}(where: { workspace: { id_EQ: $workspaceId } }) {
                     id
                 }
             }
@@ -163,15 +162,17 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
     }
 
     test("single user, single workspace, multiple pages", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
         const userId = generate({ charset: "alphabetic" });
         const workspaceId = generate({ charset: "alphabetic" });
         const pageIds = Array(2)
             .fill(0)
             .map(() => generate({ charset: "alphabetic" }));
 
-        await session.run(
+        await testHelper.executeCypher(
             `CREATE (u:${userType} {id: $userId, authId: $userId}),
                 (w:${workspaceType} {id: $workspaceId}),
                 (w)-[:HAS_ADMIN]->(u),
@@ -196,37 +197,30 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspaceId,
         };
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
-                neoSchema,
-                variableValues,
-                userId,
-                session
-            );
+        const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(variableValues, userId);
 
-            expect(usersResult?.errors).toBeFalsy();
-            expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
-            expect((usersResult?.data as any as any)?.[userType.plural][0]?.createdPages).toHaveLength(2);
+        expect(usersResult?.errors).toBeFalsy();
+        expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
+        expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(2);
 
-            expect(workspacesResult?.errors).toBeFalsy();
-            expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
-            expect((workspacesResult?.data as any as any)?.[workspaceType.plural][0]?.pages).toHaveLength(2);
+        expect(workspacesResult?.errors).toBeFalsy();
+        expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
+        expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(2);
 
-            expect(pagesResult?.errors).toBeFalsy();
-            expect(pagesResult?.data?.[pageType.plural]).toHaveLength(2);
+        expect(pagesResult?.errors).toBeFalsy();
+        expect(pagesResult?.data?.[pageType.plural]).toHaveLength(2);
 
-            expect(allPagesResult?.errors).toBeFalsy();
-            expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(2);
-        } finally {
-            await session.close();
-        }
+        expect(allPagesResult?.errors).toBeFalsy();
+        expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(2);
     });
 
     test("single user, multiple workspaces, multiple shared pages", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
         const userId = generate({ charset: "alphabetic" });
         const workspaceIds = Array(2)
             .fill(0)
@@ -235,7 +229,7 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             .fill(0)
             .map(() => generate({ charset: "alphabetic" }));
 
-        await session.run(
+        await testHelper.executeCypher(
             `CREATE (u:${userType} {id: $userId, authId: $userId}),
                 (w1:${workspaceType} {id: $w0id}),
                 (w2:${workspaceType} {id: $w1id}),
@@ -270,52 +264,45 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspaceId: workspaceIds[0],
         };
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
-                neoSchema,
-                variableValues,
-                userId,
-                session
-            );
+        const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(variableValues, userId);
 
-            expect(usersResult?.errors).toBeFalsy();
+        expect(usersResult?.errors).toBeFalsy();
 
-            expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
-            expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(4);
+        expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
+        expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(4);
 
-            expect(workspacesResult?.errors).toBeFalsy();
-            expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
-            expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(2);
+        expect(workspacesResult?.errors).toBeFalsy();
+        expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
+        expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(2);
 
-            expect(pagesResult?.errors).toBeFalsy();
-            expect(pagesResult?.data?.[pageType.plural]).toHaveLength(2);
+        expect(pagesResult?.errors).toBeFalsy();
+        expect(pagesResult?.data?.[pageType.plural]).toHaveLength(2);
 
-            expect(allPagesResult?.errors).toBeFalsy();
-            expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(4);
-        } finally {
-            await session.close();
-        }
+        expect(allPagesResult?.errors).toBeFalsy();
+        expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(4);
     });
 
     test("multiple users, multiple workspaces, multiple shared pages", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
         const userIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const workspaceIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const pageIds = Array(4)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string, string, string];
 
         // current relationship on where checks *all* nodes hold true
         // so all members/admins of workspace must have matching jwt sub
         // for now, don't add u0 as member of workspaces so constraint holds
-        await session.run(
+        await testHelper.executeCypher(
             `CREATE (u0:${userType} {id: $u0id, authId: $u0id}),
                 (u1:${userType} {id: $u1id, authId: $u1id}),
                 (w1:${workspaceType} {id: $w0id}),
@@ -354,51 +341,47 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspaceId: workspaceIds[0],
         };
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
-                neoSchema,
-                variableValues,
-                userIds[1],
-                session
-            );
+        const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
+            variableValues,
+            userIds[1]
+        );
 
-            expect(usersResult?.errors).toBeFalsy();
-            expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
-            expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
+        expect(usersResult?.errors).toBeFalsy();
+        expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
+        expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
 
-            expect(workspacesResult?.errors).toBeFalsy();
-            expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
-            expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(2);
+        expect(workspacesResult?.errors).toBeFalsy();
+        expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
+        expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(2);
 
-            expect(pagesResult?.errors).toBeFalsy();
-            expect(pagesResult?.data?.[pageType.plural]).toHaveLength(2);
+        expect(pagesResult?.errors).toBeFalsy();
+        expect(pagesResult?.data?.[pageType.plural]).toHaveLength(2);
 
-            expect(allPagesResult?.errors).toBeFalsy();
-            expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(4);
-        } finally {
-            await session.close();
-        }
+        expect(allPagesResult?.errors).toBeFalsy();
+        expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(4);
     });
 
     test("multiple users, multiple workspaces, multiple mixed shared pages", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
         const userIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const workspaceIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const pageIds = Array(4)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string, string, string];
 
         // current relationship on where checks *all* nodes hold true
         // so all members/admins of workspace must have matching jwt sub
         // for now, don't add u0 as member of workspaces so constraint holds
-        await session.run(
+        await testHelper.executeCypher(
             `CREATE (u0:${userType} {id: $u0id, authId: $u0id}),
                 (u1:${userType} {id: $u1id, authId: $u1id}),
                 (w1:${workspaceType} {id: $w0id}),
@@ -437,51 +420,47 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspaceId: workspaceIds[0],
         };
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
-                neoSchema,
-                variableValues,
-                userIds[1],
-                session
-            );
+        const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
+            variableValues,
+            userIds[1]
+        );
 
-            expect(usersResult?.errors).toBeFalsy();
-            expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
-            expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
+        expect(usersResult?.errors).toBeFalsy();
+        expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
+        expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
 
-            expect(workspacesResult?.errors).toBeFalsy();
-            expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
-            expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(1);
+        expect(workspacesResult?.errors).toBeFalsy();
+        expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
+        expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(1);
 
-            expect(pagesResult?.errors).toBeFalsy();
-            expect(pagesResult?.data?.[pageType.plural]).toHaveLength(1);
+        expect(pagesResult?.errors).toBeFalsy();
+        expect(pagesResult?.data?.[pageType.plural]).toHaveLength(1);
 
-            expect(allPagesResult?.errors).toBeFalsy();
-            expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(2);
-        } finally {
-            await session.close();
-        }
+        expect(allPagesResult?.errors).toBeFalsy();
+        expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(2);
     });
 
     test("multiple users, multiple workspaces, multiple private pages", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
         const userIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const workspaceIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const pageIds = Array(4)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string, string, string];
 
         // current relationship on where checks *all* nodes hold true
         // so all members/admins of workspace must have matching jwt sub
         // for now, don't add u0 as member of workspaces so constraint holds
-        await session.run(
+        await testHelper.executeCypher(
             `CREATE (u0:${userType} {id: $u0id, authId: $u0id}),
                 (u1:${userType} {id: $u1id, authId: $u1id}),
                 (w1:${workspaceType} {id: $w0id}),
@@ -520,51 +499,47 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspaceId: workspaceIds[0],
         };
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
-                neoSchema,
-                variableValues,
-                userIds[1],
-                session
-            );
+        const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
+            variableValues,
+            userIds[1]
+        );
 
-            expect(usersResult?.errors).toBeFalsy();
-            expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
-            expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
+        expect(usersResult?.errors).toBeFalsy();
+        expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
+        expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
 
-            expect(workspacesResult?.errors).toBeFalsy();
-            expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
-            expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(0);
+        expect(workspacesResult?.errors).toBeFalsy();
+        expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
+        expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(0);
 
-            expect(pagesResult?.errors).toBeFalsy();
-            expect(pagesResult?.data?.[pageType.plural]).toHaveLength(0);
+        expect(pagesResult?.errors).toBeFalsy();
+        expect(pagesResult?.data?.[pageType.plural]).toHaveLength(0);
 
-            expect(allPagesResult?.errors).toBeFalsy();
-            expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(0);
-        } finally {
-            await session.close();
-        }
+        expect(allPagesResult?.errors).toBeFalsy();
+        expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(0);
     });
 
     test("multiple users, multiple workspaces where not member, multiple shared pages", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
         const userIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const workspaceIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const pageIds = Array(4)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string, string, string];
 
         // current relationship on where checks *all* nodes hold true
         // so all members/admins of workspace must have matching jwt sub
         // for now, don't add u0 as member of workspaces so constraint holds
-        await session.run(
+        await testHelper.executeCypher(
             `CREATE (u0:${userType} {id: $u0id, authId: $u0id}),
                 (u1:${userType} {id: $u1id, authId: $u1id}),
                 (w1:${workspaceType} {id: $w0id}),
@@ -603,50 +578,46 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspaceId: workspaceIds[0],
         };
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
-                neoSchema,
-                variableValues,
-                userIds[1],
-                session
-            );
+        const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
+            variableValues,
+            userIds[1]
+        );
 
-            expect(usersResult?.errors).toBeFalsy();
-            expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
-            expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
+        expect(usersResult?.errors).toBeFalsy();
+        expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
+        expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
 
-            expect(workspacesResult?.errors).toBeFalsy();
-            expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(0);
+        expect(workspacesResult?.errors).toBeFalsy();
+        expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(0);
 
-            expect(pagesResult?.errors).toBeFalsy();
-            expect(pagesResult?.data?.[pageType.plural]).toHaveLength(0);
+        expect(pagesResult?.errors).toBeFalsy();
+        expect(pagesResult?.data?.[pageType.plural]).toHaveLength(0);
 
-            expect(allPagesResult?.errors).toBeFalsy();
-            expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(0);
-        } finally {
-            await session.close();
-        }
+        expect(allPagesResult?.errors).toBeFalsy();
+        expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(0);
     });
 
     test("multiple users, multiple workspaces with partial membership, multiple shared pages", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
         const userIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const workspaceIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const pageIds = Array(4)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string, string, string];
 
         // current relationship on where checks *all* nodes hold true
         // so all members/admins of workspace must have matching jwt sub
         // for now, don't add u0 as member of workspaces so constraint holds
-        await session.run(
+        await testHelper.executeCypher(
             `CREATE (u0:${userType} {id: $u0id, authId: $u0id}),
                 (u1:${userType} {id: $u1id, authId: $u1id}),
                 (w1:${workspaceType} {id: $w0id}),
@@ -685,51 +656,47 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspaceId: workspaceIds[0],
         };
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
-                neoSchema,
-                variableValues,
-                userIds[1],
-                session
-            );
+        const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
+            variableValues,
+            userIds[1]
+        );
 
-            expect(usersResult?.errors).toBeFalsy();
-            expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
-            expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
+        expect(usersResult?.errors).toBeFalsy();
+        expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
+        expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
 
-            expect(workspacesResult?.errors).toBeFalsy();
-            expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
-            expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(2);
+        expect(workspacesResult?.errors).toBeFalsy();
+        expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
+        expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(2);
 
-            expect(pagesResult?.errors).toBeFalsy();
-            expect(pagesResult?.data?.[pageType.plural]).toHaveLength(2);
+        expect(pagesResult?.errors).toBeFalsy();
+        expect(pagesResult?.data?.[pageType.plural]).toHaveLength(2);
 
-            expect(allPagesResult?.errors).toBeFalsy();
-            expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(2);
-        } finally {
-            await session.close();
-        }
+        expect(allPagesResult?.errors).toBeFalsy();
+        expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(2);
     });
 
     test("multiple users, multiple workspaces with partial membership, multiple mixed shared pages", async () => {
-        const session = await neo4j.getSession();
-        const neoSchema = new Neo4jGraphQL({ typeDefs, driver });
+        const neoSchema = await testHelper.initNeo4jGraphQL({
+            typeDefs,
+            features: { authorization: { key: "secret" } },
+        });
         const userIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const workspaceIds = Array(2)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string];
         const pageIds = Array(4)
             .fill(0)
-            .map(() => generate({ charset: "alphabetic" }));
+            .map(() => generate({ charset: "alphabetic" })) as [string, string, string, string];
 
         // current relationship on where checks *all* nodes hold true
         // so all members/admins of workspace must have matching jwt sub
         // for now, don't add u0 as member of workspaces so constraint holds
-        await session.run(
+        await testHelper.executeCypher(
             `CREATE (u0:${userType} {id: $u0id, authId: $u0id}),
                 (u1:${userType} {id: $u1id, authId: $u1id}),
                 (w1:${workspaceType} {id: $w0id}),
@@ -768,31 +735,25 @@ describe("https://github.com/neo4j/graphql/issues/505", () => {
             workspaceId: workspaceIds[0],
         };
 
-        try {
-            await neoSchema.checkNeo4jCompat();
+        await neoSchema.checkNeo4jCompat();
 
-            const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
-                neoSchema,
-                variableValues,
-                userIds[1],
-                session
-            );
+        const { usersResult, workspacesResult, pagesResult, allPagesResult } = await queryTest(
+            variableValues,
+            userIds[1]
+        );
 
-            expect(usersResult?.errors).toBeFalsy();
-            expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
-            expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
+        expect(usersResult?.errors).toBeFalsy();
+        expect((usersResult?.data as any)?.[userType.plural]).toHaveLength(1);
+        expect((usersResult?.data as any)?.[userType.plural][0]?.createdPages).toHaveLength(0);
 
-            expect(workspacesResult?.errors).toBeFalsy();
-            expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
-            expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(0);
+        expect(workspacesResult?.errors).toBeFalsy();
+        expect((workspacesResult?.data as any)?.[workspaceType.plural]).toHaveLength(1);
+        expect((workspacesResult?.data as any)?.[workspaceType.plural][0]?.pages).toHaveLength(0);
 
-            expect(pagesResult?.errors).toBeFalsy();
-            expect(pagesResult?.data?.[pageType.plural]).toHaveLength(0);
+        expect(pagesResult?.errors).toBeFalsy();
+        expect(pagesResult?.data?.[pageType.plural]).toHaveLength(0);
 
-            expect(allPagesResult?.errors).toBeFalsy();
-            expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(0);
-        } finally {
-            await session.close();
-        }
+        expect(allPagesResult?.errors).toBeFalsy();
+        expect(allPagesResult?.data?.[pageType.plural]).toHaveLength(0);
     });
 });

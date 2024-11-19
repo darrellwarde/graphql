@@ -17,9 +17,10 @@
  * limitations under the License.
  */
 
-import { SchemaComposer } from "graphql-compose";
-import { updateResolver } from "./update";
 import { NodeBuilder } from "../../../../tests/utils/builders/node-builder";
+import { ConcreteEntity } from "../../../schema-model/entity/ConcreteEntity";
+import { ConcreteEntityAdapter } from "../../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
+import { updateResolver } from "./update";
 
 describe("Update resolver", () => {
     test("should return the correct; type, args and resolve", () => {
@@ -28,17 +29,57 @@ describe("Update resolver", () => {
             // @ts-ignore
             relationFields: [{}, {}],
         }).instance();
+        const concreteEntity = new ConcreteEntity({
+            name: "Movie",
+            labels: ["Movie"],
+            annotations: {},
+            attributes: [],
+            compositeEntities: [],
+            description: undefined,
+            relationships: [],
+        });
+        const concreteEntityAdapter = new ConcreteEntityAdapter(concreteEntity);
 
-        const schemaComposer = new SchemaComposer();
-
-        const result = updateResolver({ node, schemaComposer });
+        const result = updateResolver({ node, concreteEntityAdapter });
         expect(result.type).toBe("UpdateMoviesMutationResponse!");
         expect(result.resolve).toBeInstanceOf(Function);
         expect(result.args).toMatchObject({
             where: "MovieWhere",
             update: "MovieUpdateInput",
-            connect: "MovieConnectInput",
-            disconnect: "MovieDisconnectInput",
+        });
+    });
+    test("should return fewer fields based on number of InputTCs created", () => {
+        const node = new NodeBuilder({
+            name: "Movie",
+            // @ts-ignore
+            relationFields: [{}, {}],
+        }).instance();
+        const concreteEntity = new ConcreteEntity({
+            name: "Movie",
+            labels: ["Movie"],
+            annotations: {},
+            attributes: [],
+            compositeEntities: [],
+            description: undefined,
+            relationships: [],
+        });
+        const concreteEntityAdapter = new ConcreteEntityAdapter(concreteEntity);
+
+        const result = updateResolver({ node, concreteEntityAdapter });
+        expect(result.type).toBe("UpdateMoviesMutationResponse!");
+        expect(result.resolve).toBeInstanceOf(Function);
+
+        expect(result.args).not.toMatchObject({
+            where: "MovieWhere",
+            update: "MovieUpdateInput",
+
+            create: "MovieRelationInput",
+            delete: "MovieDeleteInput",
+            connectOrCreate: "MovieConnectOrCreateInput",
+        });
+        expect(result.args).toMatchObject({
+            where: "MovieWhere",
+            update: "MovieUpdateInput",
         });
     });
 });

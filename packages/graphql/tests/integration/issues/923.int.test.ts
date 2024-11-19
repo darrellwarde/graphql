@@ -17,69 +17,41 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver, Session, Integer } from "neo4j-driver";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { getQuerySource } from "../../utils/get-query-source";
-import { generateUniqueType } from "../../utils/graphql-types";
-import { Neo4jGraphQL } from "../../../src";
+import { gql } from "graphql-tag";
+import type { Integer } from "neo4j-driver";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/923", () => {
-    const testBlogpost = generateUniqueType("BlogPost");
-    const testCategory = generateUniqueType("Category");
+    const testHelper = new TestHelper();
 
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
+    let testBlogpost: UniqueType;
+    let testCategory: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        testBlogpost = testHelper.createUniqueType("BlogPost");
+        testCategory = testHelper.createUniqueType("Category");
+        // driver = await neo4j.getDriver();
 
         const typeDefs = gql`
-            type ${testBlogpost.name} @fulltext(indexes: [{ name: "BlogTitle", fields: ["title"] }]) {
+            type ${testBlogpost.name} @fulltext(indexes: [{ name: "BlogTitle", fields: ["title"] }]) @node {
                 title: String!
                 slug: String! @unique
             }
-            type ${testCategory.name} {
+            type ${testCategory.name} @node {
                 name: String! @unique
                 blogs: [${testBlogpost.name}!]! @relationship(type: "IN_CATEGORY", direction: IN)
             }
-            extend type ${testBlogpost.name}
-                @auth(
-                    rules: [
-                        { operations: [UPDATE], allow: { author: { id: "$jwt.sub" } } }
-                        { operations: [UPDATE], bind: { author: "$jwt.sub" } }
-                        { operations: [CREATE, UPDATE, CONNECT, DISCONNECT, DELETE], isAuthenticated: true }
-                    ]
-                )
-            extend type ${testCategory.name}
-                @auth(rules: [{ operations: [CREATE, UPDATE, DELETE, DISCONNECT, CONNECT], isAuthenticated: true }])
         `;
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
-    });
-
-    afterEach(async () => {
-        await session.run(`MATCH (b:${testBlogpost.name}) DETACH DELETE b`);
-        await session.run(`MATCH (c:${testCategory.name}) DETACH DELETE c`);
-
-        await session.close();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should query nested connection", async () => {
-        const query = gql`
+        const query = /* GraphQL */ `
             mutation {
                 ${testCategory.operations.create}(
                     input: [
@@ -87,7 +59,7 @@ describe("https://github.com/neo4j/graphql/issues/923", () => {
                             blogs: {
                                 connectOrCreate: [
                                     {
-                                        where: { node: { slug: "dsa" } }
+                                        where: { node: { slug_EQ: "dsa" } }
                                         onCreate: { node: { title: "mytitle", slug: "myslug" } }
                                     }
                                 ]
@@ -103,21 +75,19 @@ describe("https://github.com/neo4j/graphql/issues/923", () => {
             }
         `;
 
-        const result = await graphql({
-            schema,
-            source: getQuerySource(query),
-            contextValue: neo4j.getContextValues({
+        const result = await testHelper.executeGraphQL(query, {
+            contextValue: {
                 jwt: {
                     sub: "test",
                 },
-            }),
+            },
         });
         expect(result.errors).toBeUndefined();
 
-        const blogPostCount = await session.run(`
+        const blogPostCount = await testHelper.executeCypher(`
           MATCH (m:${testBlogpost.name} { slug: "myslug" })
           RETURN COUNT(m) as count
         `);
-        expect((blogPostCount.records[0].toObject().count as Integer).toNumber()).toBe(1);
+        expect((blogPostCount.records[0]?.toObject().count as Integer).toNumber()).toBe(1);
     });
 });

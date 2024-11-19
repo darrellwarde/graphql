@@ -17,53 +17,43 @@
  * limitations under the License.
  */
 
-import type { Driver } from "neo4j-driver";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src/classes";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { gql } from "graphql-tag";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/549", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
 
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
-    });
+    beforeAll(() => {});
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should throw when creating a node without a mandatory relationship", async () => {
-        const session = await neo4j.getSession();
-
-        const testPerson = generateUniqueType("Person");
-        const testMovie = generateUniqueType("Movie");
+        const testPerson = testHelper.createUniqueType("Person");
+        const testMovie = testHelper.createUniqueType("Movie");
 
         const typeDefs = gql`
-            type ${testPerson.name} {
+            type ${testPerson.name} @node {
                 name: String!
                 born: Int!
                 actedInMovies: [${testMovie.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: OUT)
                 directedMovies: [${testMovie.name}!]! @relationship(type: "DIRECTED", direction: OUT)
             }
 
-            type ${testMovie.name} {
+            type ${testMovie.name} @node {
                 title: String!
                 released: Int!
                 actors: [${testPerson.name}!]! @relationship(type: "ACTED_IN", properties: "ActedIn", direction: IN)
                 director: ${testPerson.name}! @relationship(type: "DIRECTED", direction: IN)
             }
 
-            interface ActedIn @relationshipProperties {
+            type ActedIn @relationshipProperties {
                 roles: [String!]
             }
         `;
 
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
+        await testHelper.initNeo4jGraphQL({ typeDefs });
 
         const query = `
             mutation {
@@ -75,17 +65,9 @@ describe("https://github.com/neo4j/graphql/issues/549", () => {
             }
         `;
 
-        try {
-            const result = await graphql({
-                schema: await neoSchema.getSchema(),
-                source: query,
-                contextValue: neo4j.getContextValues(),
-            });
+        const result = await testHelper.executeGraphQL(query);
 
-            expect(result.errors).toBeTruthy();
-            expect((result.errors as any[])[0].message).toBe(`${testMovie.name}.director required`);
-        } finally {
-            await session.close();
-        }
+        expect(result.errors).toBeTruthy();
+        expect((result.errors as any[])[0].message).toBe(`${testMovie.name}.director required exactly once`);
     });
 });

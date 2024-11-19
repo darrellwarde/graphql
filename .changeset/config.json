@@ -1,11 +1,15 @@
 {
     "$schema": "https://unpkg.com/@changesets/config@2.0.0/schema.json",
-    "changelog": "@changesets/changelog-github",
+    "changelog": ["@changesets/changelog-github", { "repo": "neo4j/graphql" }],
     "commit": false,
-    "fixed": [["@neo4j/graphql", "@neo4j/graphql-ogm"]],
+    "fixed": [["@neo4j/graphql"]],
     "linked": [],
     "access": "public",
     "baseBranch": "dev",
     "updateInternalDependencies": "patch",
-    "ignore": []
+    "ignore": ["apollo-federation-subgraph-compatibility"],
+    "privatePackages": { "version": true, "tag": true },
+    "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
+        "onlyUpdatePeerDependentsWhenOutOfRange": true
+    }
 }

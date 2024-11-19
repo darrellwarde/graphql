@@ -17,95 +17,101 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import { gql } from "apollo-server";
-import type { Driver } from "neo4j-driver";
-import { Neo4jGraphQLAuthJWTPlugin } from "@neo4j/graphql-plugin-auth";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { createJwtRequest } from "../../utils/create-jwt-request";
+import { gql } from "graphql-tag";
+import { createBearerToken } from "../../utils/create-bearer-token";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1150", () => {
     const secret = "secret";
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
+    const testHelper = new TestHelper();
+
+    let Battery: UniqueType;
+    let CombustionEngine: UniqueType;
+    let Drive: UniqueType;
+    let DriveComposition: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        Battery = testHelper.createUniqueType("Battery");
+        CombustionEngine = testHelper.createUniqueType("CombustionEngine");
+        Drive = testHelper.createUniqueType("Drive");
+        DriveComposition = testHelper.createUniqueType("DriveComposition");
 
         const typeDefs = gql`
-            type Battery {
-                id: ID! @id(autogenerate: false)
+            type JWTPayload @jwt {
+                roles: [String!]!
+            }
+
+            type ${Battery} @node {
+                id: ID! @unique
                 current: Boolean!
             }
 
-            extend type Battery @auth(rules: [{ isAuthenticated: true, roles: ["admin"] }])
+            extend type ${Battery}
+                @authorization(validate: [{ when: [BEFORE], where: { jwt: { roles_INCLUDES: "admin" } } }])
 
-            type CombustionEngine {
-                id: ID! @id(autogenerate: false)
+            type ${CombustionEngine} @node {
+                id: ID! @unique
                 current: Boolean!
             }
 
-            type Drive {
-                id: ID! @id(autogenerate: false)
+            type ${Drive} @node {
+                id: ID! @unique
                 current: Boolean!
-                driveCompositions: [DriveComposition!]!
+                driveCompositions: [${DriveComposition}!]!
                     @relationship(type: "CONSISTS_OF", properties: "RelationProps", direction: OUT)
             }
 
-            union DriveComponent = Battery | CombustionEngine
+            union DriveComponent = ${Battery} | ${CombustionEngine}
 
-            type DriveComposition {
-                id: ID! @id(autogenerate: false)
+            type ${DriveComposition} @node {
+                id: ID! @unique
                 current: Boolean!
                 driveComponent: [DriveComponent!]!
                     @relationship(type: "HAS", properties: "RelationProps", direction: OUT)
             }
 
-            interface RelationProps {
+            type  RelationProps @relationshipProperties {
                 current: Boolean!
             }
         `;
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
-            plugins: {
-                auth: new Neo4jGraphQLAuthJWTPlugin({
-                    secret,
-                }),
+            features: {
+                authorization: {
+                    key: secret,
+                },
             },
         });
-        schema = await neoGraphql.getSchema();
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should handle union types with auth and connection-where", async () => {
-        const query = `
+        const query = /* GraphQL */ `
             query getDrivesWithFilteredUnionType {
-                drives(where: { current: true }) {
+                ${Drive.plural}(where: { current_EQ: true }) {
                     current
-                    driveCompositionsConnection(where: { edge: { current: true } }) {
+                    driveCompositionsConnection(where: { edge: { current_EQ: true } }) {
                         edges {
                             node {
                                 driveComponentConnection(
                                     where: {
-                                        Battery: { edge: { current: true } }
-                                        CombustionEngine: { edge: { current: true } }
+                                        ${Battery}: { edge: { current_EQ: true } }
+                                        ${CombustionEngine}: { edge: { current_EQ: true } }
                                     }
                                 ) {
                                     edges {
-                                        current
+                                        properties {
+                                            current
+                                        }
                                         node {
-                                            ... on Battery {
+                                            ... on ${Battery} {
                                                 id
                                             }
-                                            ... on CombustionEngine {
+                                            ... on ${CombustionEngine} {
                                                 id
                                             }
                                         }
@@ -118,15 +124,11 @@ describe("https://github.com/neo4j/graphql/issues/1150", () => {
             }
         `;
 
-        const req = createJwtRequest(secret, { roles: "admin" });
-        const res = await graphql({
-            schema,
-            source: query,
-            contextValue: neo4j.getContextValues({ req }),
-        });
+        const token = createBearerToken(secret, { roles: "admin" });
+        const res = await testHelper.executeGraphQLWithToken(query, token);
 
         expect(res.errors).toBeUndefined();
 
-        expect(res.data).toEqual({ drives: [] });
+        expect(res.data).toEqual({ [Drive.plural]: [] });
     });
 });

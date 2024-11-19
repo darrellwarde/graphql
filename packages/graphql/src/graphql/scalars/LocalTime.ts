@@ -19,12 +19,26 @@
 
 import type { ValueNode } from "graphql";
 import { GraphQLError, GraphQLScalarType, Kind } from "graphql";
-import neo4j from "neo4j-driver";
+import neo4j, { isLocalTime } from "neo4j-driver";
 
 export const LOCAL_TIME_REGEX =
     /^(?<hour>[01]\d|2[0-3]):(?<minute>[0-5]\d):(?<second>[0-5]\d)(\.(?<fraction>\d{1}(?:\d{0,8})))?$/;
 
-export const parseLocalTime = (value: any) => {
+type LocalTimeMatchGroups = {
+    hour: string;
+    minute: string;
+    second: string;
+    fraction: string | undefined;
+};
+
+export const parseLocalTime = (
+    value: unknown
+): {
+    hour: number;
+    minute: number;
+    second: number;
+    nanosecond: number;
+} => {
     if (typeof value !== "string") {
         throw new TypeError(`Value must be of type string: ${value}`);
     }
@@ -35,8 +49,7 @@ export const parseLocalTime = (value: any) => {
         throw new TypeError(`Value must be formatted as LocalTime: ${value}`);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const { hour, minute, second, fraction } = match.groups!;
+    const { hour, minute, second, fraction } = match.groups as LocalTimeMatchGroups;
 
     // Calculate the number of nanoseconds by padding the fraction of seconds with zeroes to nine digits
     let nanosecond = 0;
@@ -52,7 +65,11 @@ export const parseLocalTime = (value: any) => {
     };
 };
 
-const parse = (value: any) => {
+const parse = (value: unknown) => {
+    if (isLocalTime(value)) {
+        return value;
+    }
+
     const { hour, minute, second, nanosecond } = parseLocalTime(value);
 
     return new neo4j.types.LocalTime(hour, minute, second, nanosecond);

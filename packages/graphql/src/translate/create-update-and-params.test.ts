@@ -18,15 +18,19 @@
  */
 
 import createUpdateAndParams from "./create-update-and-params";
-import type { Neo4jGraphQL } from "../classes";
 import { CallbackBucket } from "../classes/CallbackBucket";
-import type { Context } from "../types";
+import type { BaseField } from "../types";
 import { trimmer } from "../utils";
 import { NodeBuilder } from "../../tests/utils/builders/node-builder";
+import { ContextBuilder } from "../../tests/utils/builders/context-builder";
+import { Neo4jGraphQLSchemaModel } from "../schema-model/Neo4jGraphQLSchemaModel";
+import { ConcreteEntity } from "../schema-model/entity/ConcreteEntity";
+import { Attribute } from "../schema-model/attribute/Attribute";
+import { GraphQLBuiltInScalarType, ScalarType } from "../schema-model/attribute/AttributeType";
 
 describe("createUpdateAndParams", () => {
     test("should return the correct update and params", () => {
-        const idField = {
+        const idField: BaseField = {
             fieldName: "id",
             typeMeta: {
                 name: "String",
@@ -48,6 +52,18 @@ describe("createUpdateAndParams", () => {
                     },
                 },
             },
+            selectableOptions: {
+                onRead: true,
+                onAggregate: false,
+            },
+            settableOptions: {
+                onCreate: true,
+                onUpdate: true,
+            },
+            filterableOptions: {
+                byValue: true,
+                byAggregate: true,
+            },
             otherDirectives: [],
             arguments: [],
         };
@@ -57,13 +73,27 @@ describe("createUpdateAndParams", () => {
             primitiveFields: [idField],
         }).instance();
 
-        // @ts-ignore
-        const neoSchema: Neo4jGraphQL = {
-            nodes: [node],
-        };
-
-        // @ts-ignore
-        const context: Context = { neoSchema };
+        const context = new ContextBuilder({
+            schemaModel: new Neo4jGraphQLSchemaModel({
+                concreteEntities: [
+                    new ConcreteEntity({
+                        name: "Movie",
+                        labels: ["Movie"],
+                        attributes: [
+                            new Attribute({
+                                name: "id",
+                                type: new ScalarType(GraphQLBuiltInScalarType.String, true),
+                                annotations: {},
+                                args: [],
+                            }),
+                        ],
+                    }),
+                ],
+                compositeEntities: [],
+                operations: {},
+                annotations: {},
+            }),
+        }).instance();
 
         const result = createUpdateAndParams({
             updateInput: { id: "new" },

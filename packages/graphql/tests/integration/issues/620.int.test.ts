@@ -17,80 +17,57 @@
  * limitations under the License.
  */
 
-import { gql } from "apollo-server";
-import { graphql } from "graphql";
-import type { Driver, Session } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import { gql } from "graphql-tag";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/620", () => {
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
-    let neoSchema: Neo4jGraphQL;
+    const testHelper = new TestHelper();
 
-    const typeUser = generateUniqueType("User");
-    const typeBusiness = generateUniqueType("Business");
+    let typeUser: UniqueType;
+    let typeBusiness: UniqueType;
 
     beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        typeUser = testHelper.createUniqueType("User");
+        typeBusiness = testHelper.createUniqueType("Business");
 
         const typeDefs = gql`
-            type ${typeUser.name} {
+            type ${typeUser.name} @node {
                 id: String
                 name: String
             }
-            type ${typeBusiness.name} {
+            type ${typeBusiness.name} @node {
                 id: String
                 name: String
             }
         `;
 
-        neoSchema = new Neo4jGraphQL({ typeDefs });
-        try {
-            session = await neo4j.getSession();
-            await session.run(`
+        await testHelper.initNeo4jGraphQL({ typeDefs });
+        await testHelper.executeCypher(`
               CREATE (u:${typeUser.name} {id: "1234", name: "arthur"})
               CREATE (b:${typeBusiness.name} {id: "1234", name: "ford"})
             `);
-        } finally {
-            await session.close();
-        }
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
-    });
-
-    afterEach(async () => {
-        await session.close();
     });
 
     afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should return topic count", async () => {
         const query = `
             query {
-                ${typeUser.plural}(where: { id: "1234"}) {
+                ${typeUser.plural}(where: { id_EQ: "1234"}) {
                     id
                     name
                 }
-                ${typeBusiness.plural}(where: { id: "1234" }) {
+                ${typeBusiness.plural}(where: { id_EQ: "1234" }) {
                     id
                     name
                 }
             }
         `;
 
-        const gqlResult: any = await graphql({
-            schema: await neoSchema.getSchema(),
-            source: query,
-            contextValue: neo4j.getContextValuesWithBookmarks(session.lastBookmark()),
-        });
+        const gqlResult: any = await testHelper.executeGraphQL(query);
 
         expect(gqlResult.errors).toBeUndefined();
 

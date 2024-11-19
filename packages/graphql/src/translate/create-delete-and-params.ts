@@ -17,13 +17,13 @@
  * limitations under the License.
  */
 
+import Cypher from "@neo4j/cypher-builder";
 import type { Node, Relationship } from "../classes";
-import type { Context } from "../types";
-import createAuthAndParams from "./create-auth-and-params";
+import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
+import { caseWhere } from "../utils/case-where";
+import { checkAuthentication } from "./authorization/check-authentication";
+import { createAuthorizationBeforeAndParams } from "./authorization/compatibility/create-authorization-before-and-params";
 import createConnectionWhereAndParams from "./where/create-connection-where-and-params";
-import { AUTH_FORBIDDEN_ERROR, META_CYPHER_VARIABLE } from "../constants";
-import { createEventMetaObject } from "./subscriptions/create-event-meta";
-import { filterMetaVariable } from "./subscriptions/filter-meta-variable";
 
 interface Res {
     strs: string[];
@@ -38,7 +38,6 @@ function createDeleteAndParams({
     chainStr,
     withVars,
     context,
-    insideDoWhen,
     parameterPrefix,
     recursing,
 }: {
@@ -48,12 +47,15 @@ function createDeleteAndParams({
     chainStr?: string;
     node: Node;
     withVars: string[];
-    context: Context;
-    insideDoWhen?: boolean;
+    context: Neo4jGraphQLTranslationContext;
     parameterPrefix: string;
     recursing?: boolean;
 }): [string, any] {
+    checkAuthentication({ context, node, targetOperations: ["DELETE"] });
+
     function reducer(res: Res, [key, value]: [string, any]) {
+        checkAuthentication({ context, node, targetOperations: ["DELETE"], field: key });
+
         const relationField = node.relationFields.find((x) => key === x.fieldName);
 
         if (relationField) {
@@ -79,22 +81,43 @@ function createDeleteAndParams({
             const outStr = relationField.direction === "OUT" ? "->" : "-";
 
             refNodes.forEach((refNode) => {
+                checkAuthentication({ context, node: refNode, targetOperations: ["DELETE"] });
+
                 const v = relationField.union ? value[refNode.name] : value;
                 const deletes = relationField.typeMeta.array ? v : [v];
+
                 deletes.forEach((d, index) => {
-                    const _varName = chainStr
+                    const innerStrs: string[] = [];
+
+                    const variableName = chainStr
                         ? `${varName}${index}`
                         : `${varName}_${key}${
                               relationField.union || relationField.interface ? `_${refNode.name}` : ""
                           }${index}`;
-                    const relationshipVariable = `${_varName}_relationship`;
+                    const relationshipVariable = `${variableName}_relationship`;
                     const relTypeStr = `[${relationshipVariable}:${relationField.type}]`;
+                    const nodeToDelete = `${variableName}_to_delete`;
+                    const labels = refNode.getLabelString(context);
+
+                    innerStrs.push("WITH *");
+                    innerStrs.push("CALL {");
+                    if (withVars) {
+                        innerStrs.push(`WITH *`);
+                    }
+                    innerStrs.push(
+                        `OPTIONAL MATCH (${parentVar})${inStr}${relTypeStr}${outStr}(${variableName}${labels})`
+                    );
 
                     const whereStrs: string[] = [];
+                    let aggregationWhere = false;
                     if (d.where) {
                         try {
-                            const whereAndParams = createConnectionWhereAndParams({
-                                nodeVariable: _varName,
+                            const {
+                                cypher: whereCypher,
+                                subquery: preComputedSubqueries,
+                                params: whereParams,
+                            } = createConnectionWhereAndParams({
+                                nodeVariable: variableName,
                                 whereInput: d.where,
                                 node: refNode,
                                 context,
@@ -104,131 +127,93 @@ function createDeleteAndParams({
                                     relationField.union ? `.${refNode.name}` : ""
                                 }${relationField.typeMeta.array ? `[${index}]` : ""}.where`,
                             });
-                            if (whereAndParams[0]) {
-                                whereStrs.push(whereAndParams[0]);
+                            if (whereCypher) {
+                                whereStrs.push(whereCypher);
+                                res.params = { ...res.params, ...whereParams };
+                                if (preComputedSubqueries) {
+                                    innerStrs.push(preComputedSubqueries);
+                                    aggregationWhere = true;
+                                }
                             }
-                        } catch {
+                        } catch (err) {
+                            innerStrs.push(" \n}");
                             return;
                         }
                     }
 
-                    if (withVars) {
-                        res.strs.push(`WITH ${withVars.join(", ")}`);
-                    }
-
-                    const labels = refNode.getLabelString(context);
-                    res.strs.push(`OPTIONAL MATCH (${parentVar})${inStr}${relTypeStr}${outStr}(${_varName}${labels})`);
-
-                    const whereAuth = createAuthAndParams({
-                        operations: "DELETE",
-                        entity: refNode,
+                    const authorizationAndParams = createAuthorizationBeforeAndParams({
                         context,
-                        where: { varName: _varName, node: refNode },
+                        nodes: [
+                            {
+                                variable: variableName,
+                                node: refNode,
+                            },
+                        ],
+                        operations: ["DELETE"],
                     });
-                    if (whereAuth[0]) {
-                        whereStrs.push(whereAuth[0]);
-                        res.params = { ...res.params, ...whereAuth[1] };
+
+                    if (authorizationAndParams) {
+                        const { cypher, params, subqueries } = authorizationAndParams;
+
+                        whereStrs.push(cypher);
+                        res.params = { ...res.params, ...params };
+
+                        if (subqueries) {
+                            innerStrs.push(subqueries);
+                            innerStrs.push("WITH *");
+                        }
                     }
+
                     if (whereStrs.length) {
-                        res.strs.push(`WHERE ${whereStrs.join(" AND ")}`);
-                    }
-
-                    const allowAuth = createAuthAndParams({
-                        entity: refNode,
-                        operations: "DELETE",
-                        context,
-                        escapeQuotes: Boolean(insideDoWhen),
-                        allow: { parentNode: refNode, varName: _varName },
-                    });
-                    if (allowAuth[0]) {
-                        const quote = insideDoWhen ? `\\"` : `"`;
-                        res.strs.push(`WITH ${[...withVars, _varName].join(", ")}`);
-                        res.strs.push(
-                            `CALL apoc.util.validate(NOT (${allowAuth[0]}), ${quote}${AUTH_FORBIDDEN_ERROR}${quote}, [0])`
-                        );
-                        res.params = { ...res.params, ...allowAuth[1] };
+                        const predicate = `${whereStrs.join(" AND ")}`;
+                        if (aggregationWhere) {
+                            const columns = [
+                                new Cypher.NamedVariable(relationshipVariable),
+                                new Cypher.NamedVariable(variableName),
+                            ];
+                            const caseWhereClause = caseWhere(new Cypher.Raw(predicate), columns);
+                            const { cypher } = caseWhereClause.build({ prefix: "aggregateWhereFilter" });
+                            innerStrs.push(cypher);
+                        } else {
+                            innerStrs.push(`WHERE ${predicate}`);
+                        }
                     }
 
                     if (d.delete) {
-                        const nestedDeleteInput = Object.entries(d.delete)
-                            .filter(([k]) => {
-                                if (k === "_on") {
-                                    return false;
-                                }
-
-                                if (relationField.interface && d.delete?._on?.[refNode.name]) {
-                                    const onArray = Array.isArray(d.delete._on[refNode.name])
-                                        ? d.delete._on[refNode.name]
-                                        : [d.delete._on[refNode.name]];
-                                    if (onArray.some((onKey) => Object.prototype.hasOwnProperty.call(onKey, k))) {
-                                        return false;
-                                    }
-                                }
-
-                                return true;
-                            })
-                            .reduce((d1, [k1, v1]) => ({ ...d1, [k1]: v1 }), {});
+                        const nestedDeleteInput = Object.entries(d.delete).reduce(
+                            (d1, [k1, v1]) => ({ ...d1, [k1]: v1 }),
+                            {}
+                        );
+                        const importWithVars = [...withVars, variableName];
 
                         const deleteAndParams = createDeleteAndParams({
                             context,
                             node: refNode,
                             deleteInput: nestedDeleteInput,
-                            varName: _varName,
-                            withVars: [...withVars, _varName],
-                            parentVar: _varName,
+                            varName: variableName,
+                            withVars: importWithVars,
+                            parentVar: variableName,
                             parameterPrefix: `${parameterPrefix}${!recursing ? `.${key}` : ""}${
                                 relationField.union ? `.${refNode.name}` : ""
                             }${relationField.typeMeta.array ? `[${index}]` : ""}.delete`,
                             recursing: false,
                         });
-                        res.strs.push(deleteAndParams[0]);
+                        innerStrs.push(deleteAndParams[0]);
                         res.params = { ...res.params, ...deleteAndParams[1] };
-
-                        if (relationField.interface && d.delete?._on?.[refNode.name]) {
-                            const onDeletes = Array.isArray(d.delete._on[refNode.name])
-                                ? d.delete._on[refNode.name]
-                                : [d.delete._on[refNode.name]];
-
-                            onDeletes.forEach((onDelete, onDeleteIndex) => {
-                                const onDeleteAndParams = createDeleteAndParams({
-                                    context,
-                                    node: refNode,
-                                    deleteInput: onDelete,
-                                    varName: _varName,
-                                    withVars: [...withVars, _varName],
-                                    parentVar: _varName,
-                                    parameterPrefix: `${parameterPrefix}${!recursing ? `.${key}` : ""}${
-                                        relationField.union ? `.${refNode.name}` : ""
-                                    }${relationField.typeMeta.array ? `[${index}]` : ""}.delete._on.${
-                                        refNode.name
-                                    }[${onDeleteIndex}]`,
-                                    recursing: false,
-                                });
-                                res.strs.push(onDeleteAndParams[0]);
-                                res.params = { ...res.params, ...onDeleteAndParams[1] };
-                            });
-                        }
                     }
 
-                    const nodeToDelete = `${_varName}_to_delete`;
-                    res.strs.push(
-                        `WITH ${[...withVars, `collect(DISTINCT ${_varName}) as ${nodeToDelete}`].join(", ")}`
-                    );
+                    const statements = [
+                        `WITH ${relationshipVariable}, collect(DISTINCT ${variableName}) AS ${nodeToDelete}`,
+                        "CALL {",
+                        `\tWITH ${nodeToDelete}`,
+                        `\tUNWIND ${nodeToDelete} AS x`,
+                        `\tDETACH DELETE x`,
+                        `}`,
+                        `}`,
+                    ];
+                    innerStrs.push(...statements);
 
-                    if (context.subscriptionsEnabled) {
-                        const metaObjectStr = createEventMetaObject({
-                            event: "delete",
-                            nodeVariable: "n",
-                            typename: refNode.name,
-                        });
-                        const reduceStr = `REDUCE(m=${META_CYPHER_VARIABLE}, n IN ${nodeToDelete} | m + ${metaObjectStr}) AS ${META_CYPHER_VARIABLE}`;
-                        res.strs.push(
-                            `WITH ${[...filterMetaVariable(withVars), nodeToDelete].join(", ")}, ${reduceStr}`
-                        );
-                    }
-
-                    res.strs.push(`FOREACH(x IN ${_varName}_to_delete | DETACH DELETE x)`);
-                    // TODO - relationship validation
+                    res.strs.push(...innerStrs);
                 });
             });
 
@@ -238,7 +223,10 @@ function createDeleteAndParams({
         return res;
     }
 
-    const { strs, params } = Object.entries(deleteInput).reduce(reducer, { strs: [], params: {} });
+    const { strs, params } = Object.entries(deleteInput).reduce(reducer, {
+        strs: [],
+        params: {},
+    });
 
     return [strs.join("\n"), params];
 }

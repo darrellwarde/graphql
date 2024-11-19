@@ -17,12 +17,32 @@
  * limitations under the License.
  */
 
-import type { Integer} from "neo4j-driver";
+import type { Integer } from "neo4j-driver";
 import { isInt } from "neo4j-driver";
 
 /** Checks if value is string */
 export function isString(value: unknown): value is string {
-    return typeof value === "string" || value instanceof String;
+    return typeof value === "string";
+}
+
+/** Checks if value is object (array not included) */
+export function isObject(value: unknown): value is object {
+    return typeof value === "object" && !Array.isArray(value) && value !== null;
+}
+
+/** Checks if value is a Record (Array and other BuiltIn Object not included)  */
+export function isRecord(value: unknown): value is Record<string, any> {
+    return value !== undefined && value !== null && value.constructor.name === "Object";
+}
+
+/** Checks if two value have the same type */
+export function isSameType<T>(a: T, b: unknown): b is T {
+    return typeof a === typeof b && isObject(a) === isObject(b) && Array.isArray(a) === Array.isArray(b);
+}
+
+/** Checks if two objects have the number of properties */
+export function haveSameLength(o1: Record<string, any>, o2: Record<string, any>) {
+    return Object.keys(o1).length === Object.keys(o2).length;
 }
 
 /** Checks if value is a Neo4j int object */
@@ -30,9 +50,9 @@ export function isNeoInt(value: unknown): value is Integer {
     return isInt(value);
 }
 
-/** Joins all strings with given separator, ignoring empty or undefined statements */
-export function joinStrings(statements: string | Array<string | undefined>, separator = "\n"): string {
-    return filterTruthy(asArray(statements)).join(separator);
+/** Transforms a value to number, if possible */
+export function toNumber(value: Integer | number): number {
+    return isNeoInt(value) ? value.toNumber() : value;
 }
 
 /** Makes sure input is an array, if not it turns into an array (empty array if input is null or undefined) */
@@ -43,10 +63,8 @@ export function asArray<T>(raw: T | Array<T> | undefined | null): Array<T> {
 }
 
 /** Filter all elements in an array, only leaving truthy values */
-export function filterTruthy(arr: Array<boolean | null | undefined>): Array<true>;
-export function filterTruthy<T>(arr: Array<T | null | undefined>): Array<T>;
-export function filterTruthy<T>(arr: Array<T | null | undefined>) {
-    return arr.filter(Boolean);
+export function filterTruthy<T>(arr: Array<T | null | undefined | void>): Array<T> {
+    return arr.filter((v): v is T => !!v);
 }
 
 /** Check if both arrays share at least one element */
@@ -77,4 +95,24 @@ export function omitFields<T>(obj: Record<string, T>, fields: string[]): Record<
             acc[key] = value;
             return acc;
         }, {});
+}
+
+/** Keep only the provided fields from record */
+export function filterFields<T>(obj: Record<string, T>, fieldsToKeep: string[]): Record<string, T> {
+    return Object.entries(obj)
+        .filter((item) => fieldsToKeep.includes(item[0]))
+        .reduce((acc, [key, value]) => {
+            acc[key] = value;
+            return acc;
+        }, {});
+}
+
+/** Rename the keys of given fields */
+export function renameFields<T>(obj: Record<string, T>, fieldNameMap: Record<string, string>): Record<string, T> {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+        const newKey = fieldNameMap[key] || key;
+
+        acc[newKey] = value;
+        return acc;
+    }, {});
 }

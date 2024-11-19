@@ -17,103 +17,84 @@
  * limitations under the License.
  */
 
-import type { GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver } from "neo4j-driver";
-import Neo4j from "../neo4j";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/1221", () => {
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
-    const testMain = generateUniqueType("Main");
-    const testSeries = generateUniqueType("Series");
-    const testNameDetails = generateUniqueType("NameDetails");
-    const testMasterData = generateUniqueType("MasterData");
+    const testHelper = new TestHelper();
 
-    const typeDefs = `
-        type ${testSeries} {
-            id: ID! @id(autogenerate: false)
-            current: Boolean!
-            architecture: [${testMasterData}!]!
-                @relationship(type: "ARCHITECTURE", properties: "RelationProps", direction: OUT)
-        }
+    let testMain: UniqueType;
+    let testSeries: UniqueType;
+    let testNameDetails: UniqueType;
+    let testMasterData: UniqueType;
 
-        type ${testNameDetails} @exclude(operations: [CREATE, UPDATE, DELETE, READ]) {
-            fullName: String!
-        }
+    let typeDefs: string;
 
-        interface RelationProps {
-            current: Boolean!
-        }
+    let extendedTypeDefs: string;
 
-        type ${testMasterData} {
-            id: ID! @id(autogenerate: false)
-            current: Boolean!
-            nameDetails: ${testNameDetails} @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
-        }
-    `;
+    beforeEach(() => {
+        testMain = testHelper.createUniqueType("Main");
+        testSeries = testHelper.createUniqueType("Series");
+        testNameDetails = testHelper.createUniqueType("NameDetails");
+        testMasterData = testHelper.createUniqueType("MasterData");
 
-    const extendedTypeDefs = `
-        type ${testMain} {
-            id: ID! @id(autogenerate: false)
-            current: Boolean!
-            main: [${testSeries}!]! @relationship(type: "MAIN", properties: "RelationProps", direction: OUT)
-        }
+        typeDefs = `
+            type ${testSeries} @node {
+                id: ID! @unique
+                current: Boolean!
+                architecture: [${testMasterData}!]!
+                    @relationship(type: "ARCHITECTURE", properties: "RelationProps", direction: OUT)
+            }
+    
+            type ${testNameDetails} @mutation(operations: []) @query(read: false, aggregate: false) @node {
+                fullName: String!
+            }
+    
+            type RelationProps @relationshipProperties {
+                current: Boolean!
+            }
+    
+            type ${testMasterData} @node {
+                id: ID! @unique
+                current: Boolean!
+                nameDetails: ${testNameDetails} @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
+            }
+        `;
 
-        ${typeDefs}
-    `;
-
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+        extendedTypeDefs = `
+            type ${testMain} @node {
+                id: ID! @unique
+                current: Boolean!
+                main: [${testSeries}!]! @relationship(type: "MAIN", properties: "RelationProps", direction: OUT)
+            }
+    
+            ${typeDefs}
+        `;
     });
 
     afterEach(async () => {
-        const session = await neo4j.getSession();
-
-        try {
-            await session.run(`MATCH (o:${testMain}) DETACH DELETE o`);
-            await session.run(`MATCH (s:${testSeries}) DETACH DELETE s`);
-            await session.run(`MATCH (n:${testNameDetails}) DETACH DELETE n`);
-            await session.run(`MATCH (m:${testMasterData}) DETACH DELETE m`);
-        } finally {
-            await session.close();
-        }
-    });
-
-    afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should only return the single 'chain' and not the 'chain' having two HAS_NAME relationships, two relations deep", async () => {
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
         });
-        schema = await neoGraphql.getSchema();
 
-        const session = await neo4j.getSession();
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "123" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "321" })
                 CREATE (m:${testMasterData} { current: true, id: "323" })
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(m)<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "421" })
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(m)
-                
+
                 // For verification purpose, this should be filtered out by the where clause:
                 CREATE (:${testNameDetails} { fullName: "MHBB" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "523" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "621" })
             `);
-        } finally {
-            await session.close();
-        }
 
         const query = `
                 query (
-                    $where: ${testSeries}Where = { current: true }
-                    $connectionWhere: RelationPropsWhere = { current: true }
+                    $where: ${testSeries}Where = { current_EQ: true }
+                    $connectionWhere: RelationPropsWhere = { current_EQ: true }
                 ) {
                     ${testSeries.plural}(where: $where) {
                         id
@@ -136,33 +117,30 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
 
         const variableValues = {
             where: {
-                current: true,
+                current_EQ: true,
                 architectureConnection_SINGLE: {
                     node: {
                         nameDetailsConnection: {
                             node: {
-                                fullName: "MHA",
+                                fullName_EQ: "MHA",
                             },
                         },
                     },
                 },
             },
             connectionWhere: {
-                current: true,
+                current_EQ: true,
             },
         };
 
-        const res = await graphql({
-            schema,
-            source: query,
+        const res = await testHelper.executeGraphQL(query, {
             variableValues,
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(res.errors).toBeUndefined();
 
         expect(res.data).toEqual({
-            [testSeries.plural]: [
+            [testSeries.plural]: expect.toIncludeSameMembers([
                 {
                     architectureConnection: {
                         edges: [
@@ -183,34 +161,27 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
                     },
                     id: "321",
                 },
-            ],
+            ]),
         });
     });
 
     test("should return both seperate single 'chains', two relations deep", async () => {
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
         });
-        schema = await neoGraphql.getSchema();
 
-        const session = await neo4j.getSession();
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "123" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "321" })
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "323" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "621" })
-                
+
                 // For verification purpose, this should be filtered out by the where clause:
                 CREATE (:${testNameDetails} { fullName: "MHBB" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "523" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "621" })
             `);
-        } finally {
-            await session.close();
-        }
 
         const query = `
                 query (
-                    $where: ${testSeries}Where = { current: true }
-                    $connectionWhere: RelationPropsWhere = { current: true }
+                    $where: ${testSeries}Where = { current_EQ: true }
+                    $connectionWhere: RelationPropsWhere = { current_EQ: true }
                 ) {
                     ${testSeries.plural}(where: $where) {
                         id
@@ -233,33 +204,30 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
 
         const variableValues = {
             where: {
-                current: true,
+                current_EQ: true,
                 architectureConnection_SINGLE: {
                     node: {
                         nameDetailsConnection: {
                             node: {
-                                fullName: "MHA",
+                                fullName_EQ: "MHA",
                             },
                         },
                     },
                 },
             },
             connectionWhere: {
-                current: true,
+                current_EQ: true,
             },
         };
 
-        const res = await graphql({
-            schema,
-            source: query,
+        const res = await testHelper.executeGraphQL(query, {
             variableValues,
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(res.errors).toBeUndefined();
 
         expect(res.data).toEqual({
-            [testSeries.plural]: [
+            [testSeries.plural]: expect.toIncludeSameMembers([
                 {
                     architectureConnection: {
                         edges: [
@@ -300,35 +268,28 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
                     },
                     id: "621",
                 },
-            ],
+            ]),
         });
     });
 
     test("should return as two single 'chains', two relations deep", async () => {
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs,
-            driver,
         });
-        schema = await neoGraphql.getSchema();
 
-        const session = await neo4j.getSession();
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(m:${testMasterData} { current: true, id: "123" })
                 CREATE (m)<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "321" })
                 CREATE (m)<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "921" })
-                
+
                 // For verification purpose, this should be filtered out by the where clause:
                 CREATE (:${testNameDetails} { fullName: "MHDD" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "523" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "621" })
             `);
-        } finally {
-            await session.close();
-        }
 
         const query = `
                 query (
-                    $where: ${testSeries}Where = { current: true }
-                    $connectionWhere: RelationPropsWhere = { current: true }
+                    $where: ${testSeries}Where = { current_EQ: true }
+                    $connectionWhere: RelationPropsWhere = { current_EQ: true }
                 ) {
                     ${testSeries.plural}(where: $where) {
                         id
@@ -351,34 +312,30 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
 
         const variableValues = {
             where: {
-                current: true,
+                current_EQ: true,
                 architectureConnection_SINGLE: {
                     node: {
                         nameDetailsConnection: {
                             node: {
-                                fullName: "MHA",
+                                fullName_EQ: "MHA",
                             },
                         },
                     },
                 },
             },
             connectionWhere: {
-                current: true,
+                current_EQ: true,
             },
         };
 
-        const res = await graphql({
-            schema,
-            source: query,
+        const res = await testHelper.executeGraphQL(query, {
             variableValues,
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(res.errors).toBeUndefined();
 
-        expect(res.data?.[testSeries.plural]).toHaveLength(2);
         expect(res.data).toEqual({
-            [testSeries.plural]: expect.arrayContaining([
+            [testSeries.plural]: expect.toIncludeSameMembers([
                 {
                     architectureConnection: {
                         edges: [
@@ -424,26 +381,19 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
     });
 
     test("should only return the single 'chain' and not the 'chain' having two HAS_NAME and ARCHITECTURE relationships, three relations deep", async () => {
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs: extendedTypeDefs,
-            driver,
         });
-        schema = await neoGraphql.getSchema();
 
-        const session = await neo4j.getSession();
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "123" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "321" })<-[:MAIN { current: true }]-(:${testMain} { current: true, id: "1321" })
                 CREATE (s:${testSeries} { current: true, id: "421" })
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "123" })<-[:ARCHITECTURE { current: true }]-(s)<-[:MAIN { current: true }]-(:${testMain} { current: true, id: "1321" })
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "1123" })<-[:ARCHITECTURE { current: true }]-(s)
-               
+
                 // For verification purpose, this should be filtered out by the where clause:
                 CREATE (:${testNameDetails} { fullName: "MHBB" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "523" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "621" })<-[:MAIN { current: true }]-(:${testMain} { current: true, id: "1621" })
             `);
-        } finally {
-            await session.close();
-        }
 
         const query = `
                 query (
@@ -477,14 +427,14 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
 
         const variableValues = {
             where: {
-                current: true,
+                current_EQ: true,
                 mainConnection_SINGLE: {
                     node: {
-                        architectureConnection: {
+                        architectureConnection_SINGLE: {
                             node: {
                                 nameDetailsConnection: {
                                     node: {
-                                        fullName: "MHA",
+                                        fullName_EQ: "MHA",
                                     },
                                 },
                             },
@@ -493,21 +443,18 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
                 },
             },
             connectionWhere: {
-                current: true,
+                current_EQ: true,
             },
         };
 
-        const res = await graphql({
-            schema,
-            source: query,
+        const res = await testHelper.executeGraphQL(query, {
             variableValues,
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(res.errors).toBeUndefined();
 
         expect(res.data).toEqual({
-            [testMain.plural]: [
+            [testMain.plural]: expect.toIncludeSameMembers([
                 {
                     mainConnection: {
                         edges: [
@@ -536,37 +483,30 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
                     },
                     id: "1321",
                 },
-            ],
+            ]),
         });
     });
 
     test("should return as two single 'chains', three relations deep", async () => {
-        const neoGraphql = new Neo4jGraphQL({
+        await testHelper.initNeo4jGraphQL({
             typeDefs: extendedTypeDefs,
-            driver,
         });
-        schema = await neoGraphql.getSchema();
 
-        const session = await neo4j.getSession();
-        try {
-            await session.run(`
+        await testHelper.executeCypher(`
                 CREATE (:${testNameDetails} { fullName: "MHA" })<-[:HAS_NAME { current: true }]-(m:${testMasterData} { current: true, id: "123" })
                 CREATE (m)<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "321" })
                 CREATE (m)<-[:ARCHITECTURE { current: true }]-(s:${testSeries} { current: true, id: "921" })
                 CREATE (s)<-[:MAIN { current: true }]-(:${testMain} { current: true, id: "1321" })
                 CREATE (s)<-[:MAIN { current: true }]-(:${testMain} { current: true, id: "1621" })
-                
+
                 // For verification purpose, this should be filtered out by the where clause:
                 CREATE (:${testNameDetails} { fullName: "MHCC" })<-[:HAS_NAME { current: true }]-(:${testMasterData} { current: true, id: "523" })<-[:ARCHITECTURE { current: true }]-(:${testSeries} { current: true, id: "621" })<-[:MAIN { current: true }]-(:${testMain} { current: true, id: "1621" })
             `);
-        } finally {
-            await session.close();
-        }
 
         const query = `
                 query (
-                    $where: ${testMain}Where = { current: true }
-                    $connectionWhere: RelationPropsWhere = { current: true }
+                    $where: ${testMain}Where = { current_EQ: true }
+                    $connectionWhere: RelationPropsWhere = { current_EQ: true }
                 ) {
                     ${testMain.plural}(where: $where) {
                         id
@@ -595,14 +535,14 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
 
         const variableValues = {
             where: {
-                current: true,
+                current_EQ: true,
                 mainConnection_SINGLE: {
                     node: {
-                        architectureConnection: {
+                        architectureConnection_SINGLE: {
                             node: {
                                 nameDetailsConnection: {
                                     node: {
-                                        fullName: "MHA",
+                                        fullName_EQ: "MHA",
                                     },
                                 },
                             },
@@ -611,21 +551,18 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
                 },
             },
             connectionWhere: {
-                current: true,
+                current_EQ: true,
             },
         };
 
-        const res = await graphql({
-            schema,
-            source: query,
+        const res = await testHelper.executeGraphQL(query, {
             variableValues,
-            contextValue: neo4j.getContextValues(),
         });
 
         expect(res.errors).toBeUndefined();
 
         expect(res.data).toEqual({
-            [testMain.plural]: [
+            [testMain.plural]: expect.toIncludeAllMembers([
                 {
                     mainConnection: {
                         edges: [
@@ -682,7 +619,7 @@ describe("https://github.com/neo4j/graphql/issues/1221", () => {
                     },
                     id: "1621",
                 },
-            ],
+            ]),
         });
     });
 });

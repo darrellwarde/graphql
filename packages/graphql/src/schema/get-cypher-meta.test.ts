@@ -18,7 +18,7 @@
  */
 
 import type { FieldDefinitionNode } from "graphql";
-import getCypherMeta from "./get-cypher-meta";
+import { getCypherMeta } from "./get-cypher-meta";
 
 describe("getCypherMeta", () => {
     test("should return undefined if no directive found", () => {
@@ -107,7 +107,7 @@ describe("getCypherMeta", () => {
             ],
         };
 
-        expect(() => getCypherMeta(field)).toThrow("@cypher statement not a string");
+        expect(() => getCypherMeta(field)).toThrow("@cypher statement is not a string");
     });
 
     test("should return the correct meta", () => {
@@ -124,6 +124,12 @@ describe("getCypherMeta", () => {
                             name: { value: "statement" },
                             // @ts-ignore
                             value: { kind: "StringValue", value: "MATCH (m:Movie) RETURN m" },
+                        },
+                        {
+                            // @ts-ignore
+                            name: { value: "columnName" },
+                            // @ts-ignore
+                            value: { kind: "StringValue", value: "m" },
                         },
                     ],
                 },

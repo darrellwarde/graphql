@@ -17,68 +17,39 @@
  * limitations under the License.
  */
 
-import type { DocumentNode, GraphQLSchema } from "graphql";
-import { graphql } from "graphql";
-import type { Driver, Session } from "neo4j-driver";
-import { gql } from "apollo-server";
-import Neo4j from "../neo4j";
-import { getQuerySource } from "../../utils/get-query-source";
-import { Neo4jGraphQL } from "../../../src";
-import { generateUniqueType } from "../../utils/graphql-types";
+import type { UniqueType } from "../../utils/graphql-types";
+import { TestHelper } from "../../utils/tests-helper";
 
 describe("https://github.com/neo4j/graphql/issues/894", () => {
-    const testUser = generateUniqueType("User");
-    const testOrganization = generateUniqueType("Organization");
-    let schema: GraphQLSchema;
-    let driver: Driver;
-    let neo4j: Neo4j;
-    let session: Session;
+    let testUser: UniqueType;
+    let testOrganization: UniqueType;
+    const testHelper = new TestHelper();
 
-    async function graphqlQuery(query: DocumentNode) {
-        return graphql({
-            schema,
-            source: getQuerySource(query),
-            contextValue: neo4j.getContextValues(),
-        });
-    }
-
-    beforeAll(async () => {
-        neo4j = new Neo4j();
-        driver = await neo4j.getDriver();
+    beforeEach(async () => {
+        testUser = testHelper.createUniqueType("User");
+        testOrganization = testHelper.createUniqueType("Organization");
 
         const typeDefs = `
-        type ${testUser.name} {
-            id: ID! @id @alias(property: "_id")
+        type ${testUser.name} @node {
+            id: ID! @id @unique @alias(property: "_id")
             name: String!
             activeOrganization: ${testOrganization.name} @relationship(type: "ACTIVELY_MANAGING", direction: OUT)
         }
 
-        type ${testOrganization.name} {
-            id: ID! @id @alias(property: "_id")
+        type ${testOrganization.name} @node {
+            id: ID! @id @unique @alias(property: "_id")
             name: String!
         }
         `;
-        const neoGraphql = new Neo4jGraphQL({ typeDefs, driver });
-        schema = await neoGraphql.getSchema();
-    });
-
-    beforeEach(async () => {
-        session = await neo4j.getSession();
+        await testHelper.initNeo4jGraphQL({ typeDefs });
     });
 
     afterEach(async () => {
-        await session.run(`MATCH (node:${testUser.name}) DETACH DELETE node`);
-        await session.run(`MATCH (org:${testOrganization.name}) DETACH DELETE org`);
-
-        await session.close();
-    });
-
-    afterAll(async () => {
-        await driver.close();
+        await testHelper.close();
     });
 
     test("should query nested connection", async () => {
-        const createUserQuery = gql`
+        const createUserQuery = /* GraphQL */ `
             mutation {
                 ${testUser.operations.create}(
                     input: {
@@ -92,7 +63,7 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
                 }
             }
         `;
-        const createOrgQuery = gql`
+        const createOrgQuery = /* GraphQL */ `
             mutation {
                 ${testOrganization.operations.create}(input: { name: "The Empire" }) {
                     ${testOrganization.plural} {
@@ -101,36 +72,41 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
                 }
             }
         `;
-        const createUserResult = await graphqlQuery(createUserQuery);
+        const createUserResult = await testHelper.executeGraphQL(createUserQuery);
         expect(createUserResult.errors).toBeUndefined();
 
-        const createOrgResult = (await graphqlQuery(createOrgQuery)) as any;
+        const createOrgResult = (await testHelper.executeGraphQL(createOrgQuery)) as any;
         expect(createOrgResult.errors).toBeUndefined();
         const orgId = createOrgResult?.data[testOrganization.operations.create][testOrganization.plural][0]
             .id as string;
 
-        const swapSidesQuery = gql`
-                mutation {
-                    ${testUser.operations.update}(
-                        where: { name: "Luke Skywalker" }
-                        connect: { activeOrganization: { where: { node: { id: "${orgId}" } } } }
-                        disconnect: { activeOrganization: { where: { node: { id_NOT: "${orgId}" } } } }
-                    ) {
-                        ${testUser.plural} {
-                            id
+        const swapSidesQuery = /* GraphQL */ `
+            mutation {
+                ${testUser.operations.update}(
+                    where: { name_EQ: "Luke Skywalker" }
+                    update: {
+                        activeOrganization: {
+                            connect: { where: { node: { id_EQ: "${orgId}" } } } 
+                            disconnect: { where: { node: { NOT: { id_EQ: "${orgId}" } } } } 
+                            
                         }
                     }
+                    ) {
+                    ${testUser.plural} {
+                        id
+                    }
                 }
-            `;
+            }
+        `;
 
-        const swapSidesResult = await graphqlQuery(swapSidesQuery);
+        const swapSidesResult = await testHelper.executeGraphQL(swapSidesQuery);
         expect(swapSidesResult.errors).toBeUndefined();
 
-        const userOrgs = await session.run(`
+        const userOrgs = await testHelper.executeCypher(`
                 MATCH (user:${testUser.name} { name: "Luke Skywalker" })-[r:ACTIVELY_MANAGING]->(org:${testOrganization.name}) return org.name as orgName
             `);
 
         expect(userOrgs.records).toHaveLength(1);
-        expect(userOrgs.records[0].toObject().orgName as string).toBe("The Empire");
+        expect(userOrgs.records[0]?.toObject().orgName as string).toBe("The Empire");
     });
 });
