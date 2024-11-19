@@ -42,7 +42,7 @@ export const typeDefs = gql`
 
     directive @custom on OBJECT
 
-    type Product @custom @key(fields: "id") @key(fields: "sku package") @key(fields: "sku variation { id }") {
+    type Product @custom @key(fields: "id") @key(fields: "sku package") @key(fields: "sku variation { id }") @node {
         id: ID!
         sku: String
         package: String
@@ -75,18 +75,25 @@ export const typeDefs = gql`
         research: [ProductResearch!]! @relationship(type: "HAS_RESEARCH", direction: OUT)
     }
 
-    type DeprecatedProduct @key(fields: "sku package") {
+    type DeprecatedProduct @key(fields: "sku package") @node {
         sku: String!
         package: String!
         reason: String
-        createdBy: [User!]! @relationship(type: "CREATED_BY", direction: OUT)
+        createdBy: User
+            @cypher(
+                statement: """
+                MATCH (this)-[:CREATED_BY]->(res:User)
+                RETURN res
+                """
+                columnName: "res"
+            )
     }
 
-    type ProductVariation {
+    type ProductVariation @node {
         id: ID!
     }
 
-    type ProductResearch @key(fields: "study { caseNumber }") {
+    type ProductResearch @key(fields: "study { caseNumber }") @node {
         study: CaseStudy!
             @cypher(
                 statement: """
@@ -98,12 +105,12 @@ export const typeDefs = gql`
         outcome: String
     }
 
-    type CaseStudy {
+    type CaseStudy @node {
         caseNumber: ID!
         description: String
     }
 
-    type ProductDimension @shareable {
+    type ProductDimension @shareable @node {
         size: String
         weight: Float
         unit: String @inaccessible
@@ -122,7 +129,7 @@ export const typeDefs = gql`
 
     # Should be extend type as below
     # extend type User @key(fields: "email") {
-    type User @key(fields: "email") @extends {
+    type User @key(fields: "email") @node @extends {
         averageProductsCreatedPerYear: Int @requires(fields: "totalProductsCreated yearsOfEmployment")
         email: ID! @external
         name: String @override(from: "users")
