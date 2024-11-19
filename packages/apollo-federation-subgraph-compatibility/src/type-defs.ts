@@ -46,9 +46,31 @@ export const typeDefs = gql`
         id: ID!
         sku: String
         package: String
-        variation: ProductVariation @relationship(type: "HAS_VARIATION", direction: OUT)
-        dimensions: ProductDimension @relationship(type: "HAS_DIMENSIONS", direction: OUT)
-        createdBy: User @provides(fields: "totalProductsCreated") @relationship(type: "CREATED_BY", direction: OUT)
+        variation: ProductVariation
+            @cypher(
+                statement: """
+                MATCH (this)-[:HAS_VARIATION]->(res:ProductVariation)
+                RETURN res
+                """
+                columnName: "res"
+            )
+        dimensions: ProductDimension
+            @cypher(
+                statement: """
+                MATCH (this)-[:HAS_DIMENSIONS]->(res:ProductDimension)
+                RETURN res
+                """
+                columnName: "res"
+            )
+        createdBy: User
+            @provides(fields: "totalProductsCreated")
+            @cypher(
+                statement: """
+                MATCH (this)-[:CREATED_BY]->(res:User)
+                RETURN res
+                """
+                columnName: "res"
+            )
         notes: String @tag(name: "internal")
         research: [ProductResearch!]! @relationship(type: "HAS_RESEARCH", direction: OUT)
     }
@@ -57,7 +79,7 @@ export const typeDefs = gql`
         sku: String!
         package: String!
         reason: String
-        createdBy: User @relationship(type: "CREATED_BY", direction: OUT)
+        createdBy: [User!]! @relationship(type: "CREATED_BY", direction: OUT)
     }
 
     type ProductVariation {
@@ -65,7 +87,14 @@ export const typeDefs = gql`
     }
 
     type ProductResearch @key(fields: "study { caseNumber }") {
-        study: CaseStudy! @relationship(type: "HAS_STUDY", direction: OUT)
+        study: CaseStudy!
+            @cypher(
+                statement: """
+                MATCH (this)-[:HAS_STUDY]->(res:CaseStudy)
+                RETURN res
+                """
+                columnName: "res"
+            )
         outcome: String
     }
 

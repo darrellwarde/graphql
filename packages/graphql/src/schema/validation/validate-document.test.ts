@@ -139,30 +139,6 @@ describe("single relationship deprecation warning", () => {
         warn.mockReset();
     });
 
-    test("deprecated warning triggers on single relationships", () => {
-        const doc = gql`
-            type Movie @node {
-                id: ID
-                topActor: Actor @relationship(type: "TOP_ACTOR", direction: OUT)
-            }
-
-            type Actor @node {
-                name: String
-            }
-        `;
-
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
-
-        expect(warn).toHaveBeenCalledWith(
-            "Using @relationship directive on a non-list element is deprecated and will be removed in next major version."
-        );
-        expect(warn).toHaveBeenCalledOnce();
-    });
-
     test("deprecated warning does not trigger on list relationships", () => {
         const doc = gql`
             type Movie @node {
