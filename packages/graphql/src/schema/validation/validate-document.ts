@@ -49,6 +49,7 @@ import { isRootType } from "../../utils/is-root-type";
 import { DirectiveArgumentOfCorrectType } from "./custom-rules/directive-argument-of-correct-type";
 import { directiveIsValid } from "./custom-rules/directives/valid-directive";
 import { ValidDirectiveAtFieldLocation } from "./custom-rules/directives/valid-directive-field-location";
+import { ErrorIfSingleRelationships } from "./custom-rules/error-single-relationships";
 import { ValidJwtDirectives } from "./custom-rules/features/valid-jwt-directives";
 import { ValidRelationshipDeclaration } from "./custom-rules/features/valid-relationship-declaration";
 import { ValidRelationshipProperties } from "./custom-rules/features/valid-relationship-properties";
@@ -225,6 +226,7 @@ function runValidationRulesOnFilteredDocument({
             DirectiveArgumentOfCorrectType(false),
             WarnIfAuthorizationFeatureDisabled(features?.authorization),
             WarnIfListOfListsFieldDefinition,
+            ErrorIfSingleRelationships,
             WarnIfAMaxLimitCanBeBypassedThroughInterface(),
             WarnObjectFieldsWithoutResolver({
                 customResolvers: asArray(userCustomResolvers ?? []),
