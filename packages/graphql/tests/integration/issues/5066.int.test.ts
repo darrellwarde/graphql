@@ -39,18 +39,18 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
         const typeDefs = /* GraphQL */ `
             type ${AdminGroup} @node(labels: ["${AdminGroup}"]) @mutation(operations: []) @authorization(
                 filter: [
-                    { where: { node: { createdBy: { id_EQ: "$jwt.sub" } } } },
+                    { where: { node: { createdBy_SINGLE: { id_EQ: "$jwt.sub" } } } },
                 ]
             ) {
                 id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
-                createdBy: ${User}! @relationship(type: "CREATED_ADMIN_GROUP", direction: IN) @settable(onCreate: true, onUpdate: false)
+                createdBy: [${User}!]! @relationship(type: "CREATED_ADMIN_GROUP", direction: IN) @settable(onCreate: true, onUpdate: false)
             }
 
             type ${User} @node(labels: ["${User}"]) @mutation(operations: []) @authorization(
                 filter: [
-                    { where: { node: { NOT: { blockedUsers_SOME: { to: { id_EQ: "$jwt.sub" } } } } } },
+                    { where: { node: { NOT: { blockedUsers_SOME: { to_SINGLE: { id_EQ: "$jwt.sub" } } } } } },
                 ]
             ) {
                 id: ID! @settable(onCreate: true, onUpdate: false)
@@ -63,28 +63,28 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
         
             type ${UserBlockedUser} @node(labels: ["${UserBlockedUser}"]) @query(read: false, aggregate: false) @mutation(operations: []) @authorization(
                 filter: [
-                    { where: { node: { from: { id_EQ: "$jwt.sub" } } } }
+                    { where: { node: { from_SINGLE: { id_EQ: "$jwt.sub" } } } }
                 ]
             ) {
                 id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
-                from: ${User}! @relationship(type: "HAS_BLOCKED", direction: IN) @settable(onCreate: true, onUpdate: false)
-                to: ${User}! @relationship(type: "IS_BLOCKING", direction: OUT) @settable(onCreate: true, onUpdate: false)
+                from: [${User}!]! @relationship(type: "HAS_BLOCKED", direction: IN) @settable(onCreate: true, onUpdate: false)
+                to: [${User}!]! @relationship(type: "IS_BLOCKING", direction: OUT) @settable(onCreate: true, onUpdate: false)
             }
 
             union PartyCreator = ${User} | ${AdminGroup}
 
             type ${Party} @node(labels: ["${Party}"]) @mutation(operations: []) @authorization(
                 filter: [
-                    { where: { node: { createdByConnection: { ${User}: { node: { id_EQ: "$jwt.sub" } } } } } },
-                    { where: { node: { createdByConnection: { ${AdminGroup}: { node: { createdBy: { id_EQ: "$jwt.sub" } } } } } } },
+                    { where: { node: { createdByConnection_SINGLE: { ${User}: { node: { id_EQ: "$jwt.sub" } } } } } },
+                    { where: { node: { createdByConnection_SINGLE: { ${AdminGroup}: { node: { createdBy_SINGLE: { id_EQ: "$jwt.sub" } } } } } } },
                 ]
             ){
                 id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
-                createdBy: PartyCreator! @relationship(type: "CREATED_PARTY", direction: IN) @settable(onCreate: true, onUpdate: false)
+                createdBy: [PartyCreator!]! @relationship(type: "CREATED_PARTY", direction: IN) @settable(onCreate: true, onUpdate: false)
             }
         `;
         await testHelper.initNeo4jGraphQL({
@@ -123,7 +123,7 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
         const result = await testHelper.executeGraphQLWithToken(query, token);
         expect(result.errors).toBeUndefined();
         expect(result.data as any).toEqual({
-            [Party.plural]: [{ id: "1", createdBy: { username: "arthur" } }],
+            [Party.plural]: [{ id: "1", createdBy: [{ username: "arthur" }] }],
         });
     });
 });

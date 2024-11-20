@@ -29,8 +29,6 @@ describe("schema/rfc/003", () => {
             const typeDefs = gql`
                 type Source @node {
                     targets: [Target!]! @relationship(type: "HAS_TARGET", direction: OUT)
-                    target1: SecondTarget! @relationship(type: "HAS_TARGET", direction: OUT)
-                    target2: ThirdTarget @relationship(type: "HAS_TARGET", direction: OUT)
                 }
 
                 type Target @node {
@@ -104,15 +102,11 @@ describe("schema/rfc/003", () => {
             const typeDefs = gql`
                 interface SourceInterface {
                     targets: [Target!]! @declareRelationship
-                    target1: Target! @declareRelationship
-                    target2: Target @declareRelationship
                 }
 
                 type Source implements SourceInterface @node {
                     id: ID @id
                     targets: [Target!]! @relationship(type: "HAS_TARGET", direction: OUT)
-                    target1: Target! @relationship(type: "HAS_TARGET", direction: OUT)
-                    target2: Target @relationship(type: "HAS_TARGET", direction: OUT)
                 }
 
                 type Target @node {

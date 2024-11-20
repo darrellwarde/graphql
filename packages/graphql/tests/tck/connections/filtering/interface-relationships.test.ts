@@ -46,7 +46,7 @@ describe("interface relationships with aliased fields", () => {
 
             type Actor @node {
                 name: String!
-                currentlyActingIn: Production @relationship(type: "CURRENTLY_ACTING_IN", direction: OUT)
+                currentlyActingIn: [Production!]! @relationship(type: "CURRENTLY_ACTING_IN", direction: OUT)
                 actedIn: [Production!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
 

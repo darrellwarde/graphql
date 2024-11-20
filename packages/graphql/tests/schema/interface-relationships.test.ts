@@ -599,7 +599,7 @@ describe("Interface Relationships", () => {
         const typeDefs = gql`
             type Episode @node {
                 runtime: Int!
-                series: Series! @relationship(type: "HAS_EPISODE", direction: IN)
+                series: [Series!]! @relationship(type: "HAS_EPISODE", direction: IN)
             }
 
             interface Production {
@@ -943,7 +943,7 @@ describe("Interface Relationships", () => {
 
             type Episode {
               runtime: Int!
-              series(limit: Int, offset: Int, sort: [SeriesSort!], where: SeriesWhere): Series!
+              series(limit: Int, offset: Int, sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): EpisodeSeriesSeriesAggregationSelection
               seriesConnection(after: String, first: Int, sort: [EpisodeSeriesConnectionSort!], where: EpisodeSeriesConnectionWhere): EpisodeSeriesConnection!
             }
@@ -954,7 +954,7 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeConnectInput {
-              series: EpisodeSeriesConnectFieldInput
+              series: [EpisodeSeriesConnectFieldInput!]
             }
 
             input EpisodeConnectWhere {
@@ -967,11 +967,11 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeDeleteInput {
-              series: EpisodeSeriesDeleteFieldInput
+              series: [EpisodeSeriesDeleteFieldInput!]
             }
 
             input EpisodeDisconnectInput {
-              series: EpisodeSeriesDisconnectFieldInput
+              series: [EpisodeSeriesDisconnectFieldInput!]
             }
 
             type EpisodeEdge {
@@ -992,7 +992,7 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeSeriesConnectFieldInput {
-              connect: SeriesConnectInput
+              connect: [SeriesConnectInput!]
               where: SeriesConnectWhere
             }
 
@@ -1028,8 +1028,8 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeSeriesFieldInput {
-              connect: EpisodeSeriesConnectFieldInput
-              create: EpisodeSeriesCreateFieldInput
+              connect: [EpisodeSeriesConnectFieldInput!]
+              create: [EpisodeSeriesCreateFieldInput!]
             }
 
             input EpisodeSeriesNodeAggregationWhereInput {
@@ -1093,10 +1093,10 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeSeriesUpdateFieldInput {
-              connect: EpisodeSeriesConnectFieldInput
-              create: EpisodeSeriesCreateFieldInput
-              delete: EpisodeSeriesDeleteFieldInput
-              disconnect: EpisodeSeriesDisconnectFieldInput
+              connect: [EpisodeSeriesConnectFieldInput!]
+              create: [EpisodeSeriesCreateFieldInput!]
+              delete: [EpisodeSeriesDeleteFieldInput!]
+              disconnect: [EpisodeSeriesDisconnectFieldInput!]
               update: EpisodeSeriesUpdateConnectionInput
               where: EpisodeSeriesConnectionWhere
             }
@@ -1112,7 +1112,7 @@ describe("Interface Relationships", () => {
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              series: EpisodeSeriesUpdateFieldInput
+              series: [EpisodeSeriesUpdateFieldInput!]
             }
 
             input EpisodeWhere {
@@ -1125,9 +1125,31 @@ describe("Interface Relationships", () => {
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              series: SeriesWhere
               seriesAggregate: EpisodeSeriesAggregateInput
-              seriesConnection: EpisodeSeriesConnectionWhere
+              \\"\\"\\"
+              Return Episodes where all of the related EpisodeSeriesConnections match this filter
+              \\"\\"\\"
+              seriesConnection_ALL: EpisodeSeriesConnectionWhere
+              \\"\\"\\"
+              Return Episodes where none of the related EpisodeSeriesConnections match this filter
+              \\"\\"\\"
+              seriesConnection_NONE: EpisodeSeriesConnectionWhere
+              \\"\\"\\"
+              Return Episodes where one of the related EpisodeSeriesConnections match this filter
+              \\"\\"\\"
+              seriesConnection_SINGLE: EpisodeSeriesConnectionWhere
+              \\"\\"\\"
+              Return Episodes where some of the related EpisodeSeriesConnections match this filter
+              \\"\\"\\"
+              seriesConnection_SOME: EpisodeSeriesConnectionWhere
+              \\"\\"\\"Return Episodes where all of the related Series match this filter\\"\\"\\"
+              series_ALL: SeriesWhere
+              \\"\\"\\"Return Episodes where none of the related Series match this filter\\"\\"\\"
+              series_NONE: SeriesWhere
+              \\"\\"\\"Return Episodes where one of the related Series match this filter\\"\\"\\"
+              series_SINGLE: SeriesWhere
+              \\"\\"\\"Return Episodes where some of the related Series match this filter\\"\\"\\"
+              series_SOME: SeriesWhere
             }
 
             type EpisodesConnection {
@@ -1964,7 +1986,7 @@ describe("Interface Relationships", () => {
         const typeDefs = gql`
             type Episode @node {
                 runtime: Int!
-                series: Series! @relationship(type: "HAS_EPISODE", direction: IN)
+                series: [Series!]! @relationship(type: "HAS_EPISODE", direction: IN)
             }
 
             interface Production {
@@ -2311,7 +2333,7 @@ describe("Interface Relationships", () => {
 
             type Episode {
               runtime: Int!
-              series(limit: Int, offset: Int, sort: [SeriesSort!], where: SeriesWhere): Series!
+              series(limit: Int, offset: Int, sort: [SeriesSort!], where: SeriesWhere): [Series!]!
               seriesAggregate(where: SeriesWhere): EpisodeSeriesSeriesAggregationSelection
               seriesConnection(after: String, first: Int, sort: [EpisodeSeriesConnectionSort!], where: EpisodeSeriesConnectionWhere): EpisodeSeriesConnection!
             }
@@ -2322,7 +2344,7 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeConnectInput {
-              series: EpisodeSeriesConnectFieldInput
+              series: [EpisodeSeriesConnectFieldInput!]
             }
 
             input EpisodeConnectWhere {
@@ -2335,11 +2357,11 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeDeleteInput {
-              series: EpisodeSeriesDeleteFieldInput
+              series: [EpisodeSeriesDeleteFieldInput!]
             }
 
             input EpisodeDisconnectInput {
-              series: EpisodeSeriesDisconnectFieldInput
+              series: [EpisodeSeriesDisconnectFieldInput!]
             }
 
             type EpisodeEdge {
@@ -2360,7 +2382,7 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeSeriesConnectFieldInput {
-              connect: SeriesConnectInput
+              connect: [SeriesConnectInput!]
               where: SeriesConnectWhere
             }
 
@@ -2396,8 +2418,8 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeSeriesFieldInput {
-              connect: EpisodeSeriesConnectFieldInput
-              create: EpisodeSeriesCreateFieldInput
+              connect: [EpisodeSeriesConnectFieldInput!]
+              create: [EpisodeSeriesCreateFieldInput!]
             }
 
             input EpisodeSeriesNodeAggregationWhereInput {
@@ -2461,10 +2483,10 @@ describe("Interface Relationships", () => {
             }
 
             input EpisodeSeriesUpdateFieldInput {
-              connect: EpisodeSeriesConnectFieldInput
-              create: EpisodeSeriesCreateFieldInput
-              delete: EpisodeSeriesDeleteFieldInput
-              disconnect: EpisodeSeriesDisconnectFieldInput
+              connect: [EpisodeSeriesConnectFieldInput!]
+              create: [EpisodeSeriesCreateFieldInput!]
+              delete: [EpisodeSeriesDeleteFieldInput!]
+              disconnect: [EpisodeSeriesDisconnectFieldInput!]
               update: EpisodeSeriesUpdateConnectionInput
               where: EpisodeSeriesConnectionWhere
             }
@@ -2480,7 +2502,7 @@ describe("Interface Relationships", () => {
               runtime_DECREMENT: Int
               runtime_INCREMENT: Int
               runtime_SET: Int
-              series: EpisodeSeriesUpdateFieldInput
+              series: [EpisodeSeriesUpdateFieldInput!]
             }
 
             input EpisodeWhere {
@@ -2493,9 +2515,31 @@ describe("Interface Relationships", () => {
               runtime_IN: [Int!]
               runtime_LT: Int
               runtime_LTE: Int
-              series: SeriesWhere
               seriesAggregate: EpisodeSeriesAggregateInput
-              seriesConnection: EpisodeSeriesConnectionWhere
+              \\"\\"\\"
+              Return Episodes where all of the related EpisodeSeriesConnections match this filter
+              \\"\\"\\"
+              seriesConnection_ALL: EpisodeSeriesConnectionWhere
+              \\"\\"\\"
+              Return Episodes where none of the related EpisodeSeriesConnections match this filter
+              \\"\\"\\"
+              seriesConnection_NONE: EpisodeSeriesConnectionWhere
+              \\"\\"\\"
+              Return Episodes where one of the related EpisodeSeriesConnections match this filter
+              \\"\\"\\"
+              seriesConnection_SINGLE: EpisodeSeriesConnectionWhere
+              \\"\\"\\"
+              Return Episodes where some of the related EpisodeSeriesConnections match this filter
+              \\"\\"\\"
+              seriesConnection_SOME: EpisodeSeriesConnectionWhere
+              \\"\\"\\"Return Episodes where all of the related Series match this filter\\"\\"\\"
+              series_ALL: SeriesWhere
+              \\"\\"\\"Return Episodes where none of the related Series match this filter\\"\\"\\"
+              series_NONE: SeriesWhere
+              \\"\\"\\"Return Episodes where one of the related Series match this filter\\"\\"\\"
+              series_SINGLE: SeriesWhere
+              \\"\\"\\"Return Episodes where some of the related Series match this filter\\"\\"\\"
+              series_SOME: SeriesWhere
             }
 
             type EpisodesConnection {
@@ -6897,20 +6941,20 @@ describe("Interface Relationships", () => {
             interface Content {
                 id: ID
                 content: String
-                creator: User! @declareRelationship
+                creator: [User!]! @declareRelationship
             }
 
             type Comment implements Content @node {
                 id: ID
                 content: String
-                creator: User! @relationship(type: "HAS_CONTENT", direction: IN)
-                post: Post! @relationship(type: "HAS_COMMENT", direction: IN)
+                creator: [User!]! @relationship(type: "HAS_CONTENT", direction: IN)
+                post: [Post!]! @relationship(type: "HAS_COMMENT", direction: IN)
             }
 
             type Post implements Content @node {
                 id: ID
                 content: String
-                creator: User! @relationship(type: "HAS_CONTENT", direction: IN)
+                creator: [User!]! @relationship(type: "HAS_CONTENT", direction: IN)
                 comments: [Comment!]! @relationship(type: "HAS_COMMENT", direction: OUT)
             }
 
@@ -6932,11 +6976,11 @@ describe("Interface Relationships", () => {
 
             type Comment implements Content {
               content: String
-              creator(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): User!
+              creator(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               creatorAggregate(where: UserWhere): CommentUserCreatorAggregationSelection
               creatorConnection(after: String, first: Int, sort: [ContentCreatorConnectionSort!], where: ContentCreatorConnectionWhere): ContentCreatorConnection!
               id: ID
-              post(limit: Int, offset: Int, sort: [PostSort!], where: PostWhere): Post!
+              post(limit: Int, offset: Int, sort: [PostSort!], where: PostWhere): [Post!]!
               postAggregate(where: PostWhere): CommentPostPostAggregationSelection
               postConnection(after: String, first: Int, sort: [CommentPostConnectionSort!], where: CommentPostConnectionWhere): CommentPostConnection!
             }
@@ -6948,8 +6992,8 @@ describe("Interface Relationships", () => {
             }
 
             input CommentConnectInput {
-              creator: CommentCreatorConnectFieldInput
-              post: CommentPostConnectFieldInput
+              creator: [CommentCreatorConnectFieldInput!]
+              post: [CommentPostConnectFieldInput!]
             }
 
             input CommentConnectWhere {
@@ -6976,7 +7020,7 @@ describe("Interface Relationships", () => {
             }
 
             input CommentCreatorConnectFieldInput {
-              connect: UserConnectInput
+              connect: [UserConnectInput!]
               where: UserConnectWhere
             }
 
@@ -6985,8 +7029,8 @@ describe("Interface Relationships", () => {
             }
 
             input CommentCreatorFieldInput {
-              connect: CommentCreatorConnectFieldInput
-              create: CommentCreatorCreateFieldInput
+              connect: [CommentCreatorConnectFieldInput!]
+              create: [CommentCreatorCreateFieldInput!]
             }
 
             input CommentCreatorNodeAggregationWhereInput {
@@ -7025,22 +7069,22 @@ describe("Interface Relationships", () => {
             }
 
             input CommentCreatorUpdateFieldInput {
-              connect: CommentCreatorConnectFieldInput
-              create: CommentCreatorCreateFieldInput
-              delete: ContentCreatorDeleteFieldInput
-              disconnect: ContentCreatorDisconnectFieldInput
+              connect: [CommentCreatorConnectFieldInput!]
+              create: [CommentCreatorCreateFieldInput!]
+              delete: [ContentCreatorDeleteFieldInput!]
+              disconnect: [ContentCreatorDisconnectFieldInput!]
               update: CommentCreatorUpdateConnectionInput
               where: ContentCreatorConnectionWhere
             }
 
             input CommentDeleteInput {
-              creator: ContentCreatorDeleteFieldInput
-              post: CommentPostDeleteFieldInput
+              creator: [ContentCreatorDeleteFieldInput!]
+              post: [CommentPostDeleteFieldInput!]
             }
 
             input CommentDisconnectInput {
-              creator: ContentCreatorDisconnectFieldInput
-              post: CommentPostDisconnectFieldInput
+              creator: [ContentCreatorDisconnectFieldInput!]
+              post: [CommentPostDisconnectFieldInput!]
             }
 
             type CommentEdge {
@@ -7061,7 +7105,7 @@ describe("Interface Relationships", () => {
             }
 
             input CommentPostConnectFieldInput {
-              connect: PostConnectInput
+              connect: [PostConnectInput!]
               where: PostConnectWhere
             }
 
@@ -7097,8 +7141,8 @@ describe("Interface Relationships", () => {
             }
 
             input CommentPostFieldInput {
-              connect: CommentPostConnectFieldInput
-              create: CommentPostCreateFieldInput
+              connect: [CommentPostConnectFieldInput!]
+              create: [CommentPostCreateFieldInput!]
             }
 
             input CommentPostNodeAggregationWhereInput {
@@ -7152,10 +7196,10 @@ describe("Interface Relationships", () => {
             }
 
             input CommentPostUpdateFieldInput {
-              connect: CommentPostConnectFieldInput
-              create: CommentPostCreateFieldInput
-              delete: CommentPostDeleteFieldInput
-              disconnect: CommentPostDisconnectFieldInput
+              connect: [CommentPostConnectFieldInput!]
+              create: [CommentPostCreateFieldInput!]
+              delete: [CommentPostDeleteFieldInput!]
+              disconnect: [CommentPostDisconnectFieldInput!]
               update: CommentPostUpdateConnectionInput
               where: CommentPostConnectionWhere
             }
@@ -7170,9 +7214,9 @@ describe("Interface Relationships", () => {
 
             input CommentUpdateInput {
               content_SET: String
-              creator: CommentCreatorUpdateFieldInput
+              creator: [CommentCreatorUpdateFieldInput!]
               id_SET: ID
-              post: CommentPostUpdateFieldInput
+              post: [CommentPostUpdateFieldInput!]
             }
 
             type CommentUserCreatorAggregationSelection {
@@ -7194,17 +7238,61 @@ describe("Interface Relationships", () => {
               content_EQ: String
               content_IN: [String]
               content_STARTS_WITH: String
-              creator: UserWhere
               creatorAggregate: CommentCreatorAggregateInput
-              creatorConnection: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Comments where all of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_ALL: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Comments where none of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_NONE: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Comments where one of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_SINGLE: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Comments where some of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_SOME: ContentCreatorConnectionWhere
+              \\"\\"\\"Return Comments where all of the related Users match this filter\\"\\"\\"
+              creator_ALL: UserWhere
+              \\"\\"\\"Return Comments where none of the related Users match this filter\\"\\"\\"
+              creator_NONE: UserWhere
+              \\"\\"\\"Return Comments where one of the related Users match this filter\\"\\"\\"
+              creator_SINGLE: UserWhere
+              \\"\\"\\"Return Comments where some of the related Users match this filter\\"\\"\\"
+              creator_SOME: UserWhere
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
               id_IN: [ID]
               id_STARTS_WITH: ID
-              post: PostWhere
               postAggregate: CommentPostAggregateInput
-              postConnection: CommentPostConnectionWhere
+              \\"\\"\\"
+              Return Comments where all of the related CommentPostConnections match this filter
+              \\"\\"\\"
+              postConnection_ALL: CommentPostConnectionWhere
+              \\"\\"\\"
+              Return Comments where none of the related CommentPostConnections match this filter
+              \\"\\"\\"
+              postConnection_NONE: CommentPostConnectionWhere
+              \\"\\"\\"
+              Return Comments where one of the related CommentPostConnections match this filter
+              \\"\\"\\"
+              postConnection_SINGLE: CommentPostConnectionWhere
+              \\"\\"\\"
+              Return Comments where some of the related CommentPostConnections match this filter
+              \\"\\"\\"
+              postConnection_SOME: CommentPostConnectionWhere
+              \\"\\"\\"Return Comments where all of the related Posts match this filter\\"\\"\\"
+              post_ALL: PostWhere
+              \\"\\"\\"Return Comments where none of the related Posts match this filter\\"\\"\\"
+              post_NONE: PostWhere
+              \\"\\"\\"Return Comments where one of the related Posts match this filter\\"\\"\\"
+              post_SINGLE: PostWhere
+              \\"\\"\\"Return Comments where some of the related Posts match this filter\\"\\"\\"
+              post_SOME: PostWhere
             }
 
             type CommentsConnection {
@@ -7215,7 +7303,7 @@ describe("Interface Relationships", () => {
 
             interface Content {
               content: String
-              creator(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): User!
+              creator(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               creatorConnection(after: String, first: Int, sort: [ContentCreatorConnectionSort!], where: ContentCreatorConnectionWhere): ContentCreatorConnection!
               id: ID
             }
@@ -7227,7 +7315,7 @@ describe("Interface Relationships", () => {
             }
 
             input ContentConnectInput {
-              creator: ContentCreatorConnectFieldInput
+              creator: [ContentCreatorConnectFieldInput!]
             }
 
             input ContentConnectWhere {
@@ -7252,7 +7340,7 @@ describe("Interface Relationships", () => {
             }
 
             input ContentCreatorConnectFieldInput {
-              connect: UserConnectInput
+              connect: [UserConnectInput!]
               where: UserConnectWhere
             }
 
@@ -7328,20 +7416,20 @@ describe("Interface Relationships", () => {
             }
 
             input ContentCreatorUpdateFieldInput {
-              connect: ContentCreatorConnectFieldInput
-              create: ContentCreatorCreateFieldInput
-              delete: ContentCreatorDeleteFieldInput
-              disconnect: ContentCreatorDisconnectFieldInput
+              connect: [ContentCreatorConnectFieldInput!]
+              create: [ContentCreatorCreateFieldInput!]
+              delete: [ContentCreatorDeleteFieldInput!]
+              disconnect: [ContentCreatorDisconnectFieldInput!]
               update: ContentCreatorUpdateConnectionInput
               where: ContentCreatorConnectionWhere
             }
 
             input ContentDeleteInput {
-              creator: ContentCreatorDeleteFieldInput
+              creator: [ContentCreatorDeleteFieldInput!]
             }
 
             input ContentDisconnectInput {
-              creator: ContentCreatorDisconnectFieldInput
+              creator: [ContentCreatorDisconnectFieldInput!]
             }
 
             type ContentEdge {
@@ -7364,7 +7452,7 @@ describe("Interface Relationships", () => {
 
             input ContentUpdateInput {
               content_SET: String
-              creator: ContentCreatorUpdateFieldInput
+              creator: [ContentCreatorUpdateFieldInput!]
               id_SET: ID
             }
 
@@ -7377,9 +7465,31 @@ describe("Interface Relationships", () => {
               content_EQ: String
               content_IN: [String]
               content_STARTS_WITH: String
-              creator: UserWhere
               creatorAggregate: ContentCreatorAggregateInput
-              creatorConnection: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Contents where all of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_ALL: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Contents where none of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_NONE: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Contents where one of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_SINGLE: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Contents where some of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_SOME: ContentCreatorConnectionWhere
+              \\"\\"\\"Return Contents where all of the related Users match this filter\\"\\"\\"
+              creator_ALL: UserWhere
+              \\"\\"\\"Return Contents where none of the related Users match this filter\\"\\"\\"
+              creator_NONE: UserWhere
+              \\"\\"\\"Return Contents where one of the related Users match this filter\\"\\"\\"
+              creator_SINGLE: UserWhere
+              \\"\\"\\"Return Contents where some of the related Users match this filter\\"\\"\\"
+              creator_SOME: UserWhere
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID
@@ -7455,7 +7565,7 @@ describe("Interface Relationships", () => {
               commentsAggregate(where: CommentWhere): PostCommentCommentsAggregationSelection
               commentsConnection(after: String, first: Int, sort: [PostCommentsConnectionSort!], where: PostCommentsConnectionWhere): PostCommentsConnection!
               content: String
-              creator(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): User!
+              creator(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               creatorAggregate(where: UserWhere): PostUserCreatorAggregationSelection
               creatorConnection(after: String, first: Int, sort: [ContentCreatorConnectionSort!], where: ContentCreatorConnectionWhere): ContentCreatorConnection!
               id: ID
@@ -7581,7 +7691,7 @@ describe("Interface Relationships", () => {
 
             input PostConnectInput {
               comments: [PostCommentsConnectFieldInput!]
-              creator: PostCreatorConnectFieldInput
+              creator: [PostCreatorConnectFieldInput!]
             }
 
             input PostConnectWhere {
@@ -7608,7 +7718,7 @@ describe("Interface Relationships", () => {
             }
 
             input PostCreatorConnectFieldInput {
-              connect: UserConnectInput
+              connect: [UserConnectInput!]
               where: UserConnectWhere
             }
 
@@ -7617,8 +7727,8 @@ describe("Interface Relationships", () => {
             }
 
             input PostCreatorFieldInput {
-              connect: PostCreatorConnectFieldInput
-              create: PostCreatorCreateFieldInput
+              connect: [PostCreatorConnectFieldInput!]
+              create: [PostCreatorCreateFieldInput!]
             }
 
             input PostCreatorNodeAggregationWhereInput {
@@ -7657,22 +7767,22 @@ describe("Interface Relationships", () => {
             }
 
             input PostCreatorUpdateFieldInput {
-              connect: PostCreatorConnectFieldInput
-              create: PostCreatorCreateFieldInput
-              delete: ContentCreatorDeleteFieldInput
-              disconnect: ContentCreatorDisconnectFieldInput
+              connect: [PostCreatorConnectFieldInput!]
+              create: [PostCreatorCreateFieldInput!]
+              delete: [ContentCreatorDeleteFieldInput!]
+              disconnect: [ContentCreatorDisconnectFieldInput!]
               update: PostCreatorUpdateConnectionInput
               where: ContentCreatorConnectionWhere
             }
 
             input PostDeleteInput {
               comments: [PostCommentsDeleteFieldInput!]
-              creator: ContentCreatorDeleteFieldInput
+              creator: [ContentCreatorDeleteFieldInput!]
             }
 
             input PostDisconnectInput {
               comments: [PostCommentsDisconnectFieldInput!]
-              creator: ContentCreatorDisconnectFieldInput
+              creator: [ContentCreatorDisconnectFieldInput!]
             }
 
             type PostEdge {
@@ -7691,7 +7801,7 @@ describe("Interface Relationships", () => {
             input PostUpdateInput {
               comments: [PostCommentsUpdateFieldInput!]
               content_SET: String
-              creator: PostCreatorUpdateFieldInput
+              creator: [PostCreatorUpdateFieldInput!]
               id_SET: ID
             }
 
@@ -7739,9 +7849,31 @@ describe("Interface Relationships", () => {
               content_EQ: String
               content_IN: [String]
               content_STARTS_WITH: String
-              creator: UserWhere
               creatorAggregate: PostCreatorAggregateInput
-              creatorConnection: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Posts where all of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_ALL: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Posts where none of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_NONE: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Posts where one of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_SINGLE: ContentCreatorConnectionWhere
+              \\"\\"\\"
+              Return Posts where some of the related ContentCreatorConnections match this filter
+              \\"\\"\\"
+              creatorConnection_SOME: ContentCreatorConnectionWhere
+              \\"\\"\\"Return Posts where all of the related Users match this filter\\"\\"\\"
+              creator_ALL: UserWhere
+              \\"\\"\\"Return Posts where none of the related Users match this filter\\"\\"\\"
+              creator_NONE: UserWhere
+              \\"\\"\\"Return Posts where one of the related Users match this filter\\"\\"\\"
+              creator_SINGLE: UserWhere
+              \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
+              creator_SOME: UserWhere
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID

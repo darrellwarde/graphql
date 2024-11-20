@@ -43,23 +43,23 @@ describe("https://github.com/neo4j/graphql/issues/5515", () => {
                 cabinets: [Cabinet!]! @relationship(type: "HAS_CABINET", direction: OUT)
             }
 
-            type Cabinet @authorization(filter: [{ where: { node: { user: { id_EQ: "$jwt.sub" } } } }]) @node {
+            type Cabinet @authorization(filter: [{ where: { node: { user_SOME: { id_EQ: "$jwt.sub" } } } }]) @node {
                 id: ID! @id
                 categories: [Category!]! @relationship(type: "HAS_CATEGORY", direction: OUT)
-                user: User! @relationship(type: "HAS_CABINET", direction: IN)
+                user: [User!]! @relationship(type: "HAS_CABINET", direction: IN)
             }
 
             type Category
-                @authorization(filter: [{ where: { node: { cabinet: { user: { id_EQ: "$jwt.sub" } } } } }])
+                @authorization(filter: [{ where: { node: { cabinet_SOME: { user_SOME: { id_EQ: "$jwt.sub" } } } } }])
                 @node {
                 id: ID! @id
                 files: [File!]! @relationship(type: "HAS_FILE", direction: OUT)
-                cabinet: Cabinet! @relationship(type: "HAS_CATEGORY", direction: IN)
+                cabinet: [Cabinet!]! @relationship(type: "HAS_CATEGORY", direction: IN)
             }
 
             type File @node {
                 id: ID!
-                category: Category @relationship(type: "HAS_FILE", direction: IN)
+                category: [Category!]! @relationship(type: "HAS_FILE", direction: IN)
             }
         `;
 
@@ -83,25 +83,15 @@ describe("https://github.com/neo4j/graphql/issues/5515", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Category)
-            CALL {
-                WITH this
-                MATCH (this)<-[:HAS_CATEGORY]-(this0:Cabinet)
-                OPTIONAL MATCH (this0)<-[:HAS_CABINET]-(this1:User)
-                WITH *, count(this1) AS userCount
-                WITH *
-                WHERE (userCount <> 0 AND ($jwt.sub IS NOT NULL AND this1.id = $jwt.sub))
-                RETURN count(this0) = 1 AS var2
-            }
-            WITH *
-            WHERE (this.id = $param1 AND ($isAuthenticated = true AND var2 = true))
+            WHERE (this.id = $param0 AND ($isAuthenticated = true AND size([(this)<-[:HAS_CATEGORY]-(this1:Cabinet) WHERE size([(this1)<-[:HAS_CABINET]-(this0:User) WHERE ($jwt.sub IS NOT NULL AND this0.id = $jwt.sub) | 1]) > 0 | 1]) > 0))
             DETACH DELETE this"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"jwt\\": {},
-                \\"param1\\": \\"category-video\\",
-                \\"isAuthenticated\\": false
+                \\"param0\\": \\"category-video\\",
+                \\"isAuthenticated\\": false,
+                \\"jwt\\": {}
             }"
         `);
     });

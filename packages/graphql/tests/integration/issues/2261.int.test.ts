@@ -51,7 +51,7 @@ describe("https://github.com/neo4j/graphql/issues/2261", () => {
             type ${Edition} @node {
                 id: ID! @id
                 uri: String! @cypher(statement: "RETURN 'example://edition/' + this.id as x", columnName: "x")
-                product: Product! @relationship(type: "HAS_EDITION", direction: IN)
+                product: [Product!]! @relationship(type: "HAS_EDITION", direction: IN)
             }
         `;
 
@@ -96,9 +96,11 @@ describe("https://github.com/neo4j/graphql/issues/2261", () => {
                 {
                     id: "ed-id",
                     uri: "example://edition/ed-id",
-                    product: {
-                        __typename: ProgrammeItem.name,
-                    },
+                    product: [
+                        {
+                            __typename: ProgrammeItem.name,
+                        },
+                    ],
                 },
             ],
         });

@@ -139,30 +139,6 @@ describe("single relationship deprecation warning", () => {
         warn.mockReset();
     });
 
-    test("deprecated warning triggers on single relationships", () => {
-        const doc = gql`
-            type Movie @node {
-                id: ID
-                topActor: Actor @relationship(type: "TOP_ACTOR", direction: OUT)
-            }
-
-            type Actor @node {
-                name: String
-            }
-        `;
-
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
-
-        expect(warn).toHaveBeenCalledWith(
-            "Using @relationship directive on a non-list element is deprecated and will be removed in next major version."
-        );
-        expect(warn).toHaveBeenCalledOnce();
-    });
-
     test("deprecated warning does not trigger on list relationships", () => {
         const doc = gql`
             type Movie @node {
@@ -704,7 +680,7 @@ describe("validation 2.0", () => {
             test("@relationship properties required", () => {
                 const doc = gql`
                     type User @node {
-                        name: Post @relationship
+                        name: [Post!]! @relationship
                     }
                     type Post @node {
                         title: String
@@ -724,7 +700,7 @@ describe("validation 2.0", () => {
             test("@relationship type required", () => {
                 const doc = gql`
                     type User @node {
-                        name: Post @relationship(direction: IN)
+                        name: [Post!]! @relationship(direction: IN)
                     }
                     type Post @node {
                         title: String
@@ -744,7 +720,7 @@ describe("validation 2.0", () => {
             test("@relationship direction required", () => {
                 const doc = gql`
                     type User @node {
-                        name: Post @relationship(type: "HAS_POST")
+                        name: [Post!]! @relationship(type: "HAS_POST")
                     }
                     type Post @node {
                         title: String
@@ -764,7 +740,7 @@ describe("validation 2.0", () => {
             test("@relationship ok", () => {
                 const doc = gql`
                     type User @node {
-                        name: Post @relationship(direction: IN, type: "HAS_POST")
+                        name: [Post!]! @relationship(direction: IN, type: "HAS_POST")
                     }
                     type Post @node {
                         title: String
@@ -778,6 +754,34 @@ describe("validation 2.0", () => {
                         features: {},
                     });
                 expect(executeValidate).not.toThrow();
+            });
+
+            test("Error on 1-1 relationships", () => {
+                const doc = gql`
+                    type Movie @node {
+                        id: ID
+                        actors: Actor @relationship(type: "ACTED_IN", direction: OUT)
+                    }
+
+                    type Actor @node {
+                        name: String
+                        movie: Movie! @relationship(type: "ACTED_IN", direction: IN)
+                    }
+                `;
+
+                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+                const errors = getError(executeValidate);
+                expect(errors).toHaveLength(2);
+                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+                expect(errors[1]).not.toBeInstanceOf(NoErrorThrownError);
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    `Using @relationship directive on a non-list property "actors" is not supported.`
+                );
+                expect(errors[1]).toHaveProperty(
+                    "message",
+                    `Using @relationship directive on a non-list property "movie" is not supported.`
+                );
             });
         });
     });
@@ -823,7 +827,7 @@ describe("validation 2.0", () => {
         test("@relationship.direction property must be enum value", () => {
             const doc = gql`
                 type User @node {
-                    post: Post @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
+                    post: [Post!]! @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
                 }
                 type Post @node {
                     title: String
@@ -852,7 +856,7 @@ describe("validation 2.0", () => {
                     id: ID
                 }
                 extend type User {
-                    post: Post @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
+                    post: [Post!]! @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
                 }
                 type Post @node {
                     title: String
@@ -878,7 +882,7 @@ describe("validation 2.0", () => {
         test("@relationship.type property must be string", () => {
             const doc = gql`
                 type User @node {
-                    post: Post @relationship(type: 42, direction: IN)
+                    post: [Post!]! @relationship(type: 42, direction: IN)
                 }
                 type Post @node {
                     title: String
@@ -909,7 +913,7 @@ describe("validation 2.0", () => {
             `;
             const doc = gql`
                 type User implements Person @node {
-                    post: Post @relationship(type: 42, direction: IN)
+                    post: [Post!]! @relationship(type: 42, direction: IN)
                 }
                 type Post @node {
                     title: String
@@ -946,7 +950,7 @@ describe("validation 2.0", () => {
             const doc = gql`
                 type User implements Person @node {
                     id: ID
-                    post: Post @relationship(type: 42, direction: IN)
+                    post: [Post!]! @relationship(type: 42, direction: IN)
                 }
                 type Post @node {
                     title: String
@@ -2878,7 +2882,7 @@ describe("validation 2.0", () => {
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT, properties: "Poster")
                         archived: [Post!]!
                             @relationship(type: "HAS_ARCHIVED_POST", direction: OUT, properties: "Poster")
-                        favorite: Post @relationship(type: "HAS_FAVORITE", direction: OUT)
+                        favorite: [Post!]! @relationship(type: "HAS_FAVORITE", direction: OUT)
                     }
                     type Post @node {
                         title: String
@@ -5047,7 +5051,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5089,7 +5093,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5127,7 +5131,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5165,7 +5169,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5198,13 +5202,13 @@ describe("validation 2.0", () => {
                 test("should throw error if @relationship is used on relationship property", () => {
                     const relationshipProperties = gql`
                         type ActedIn @relationshipProperties {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
                     `;
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5244,7 +5248,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5484,7 +5488,6 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         type User @node {
                             name: String
-                            posts: Int! @relationship(type: "HAS_POST", direction: OUT)
                             allPosts: [Int!] @relationship(type: "HAS_POST", direction: OUT)
                         }
                     `;
@@ -5497,19 +5500,14 @@ describe("validation 2.0", () => {
                         });
 
                     const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(2);
+                    expect(errors).toHaveLength(1);
                     expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[1]).not.toBeInstanceOf(NoErrorThrownError);
+
                     expect(errors[0]).toHaveProperty(
                         "message",
                         "Invalid field type: Scalar types cannot be relationship targets. Please use an Object type instead."
                     );
-                    expect(errors[1]).toHaveProperty(
-                        "message",
-                        "Invalid field type: Scalar types cannot be relationship targets. Please use an Object type instead."
-                    );
-                    expect(errors[0]).toHaveProperty("path", ["User", "posts"]);
-                    expect(errors[1]).toHaveProperty("path", ["User", "allPosts"]);
+                    expect(errors[0]).toHaveProperty("path", ["User", "allPosts"]);
                 });
             });
 
@@ -6117,7 +6115,7 @@ describe("validation 2.0", () => {
                     eligibleForBonus: Boolean
                     bonusPercentage: Float
                     salaryReviewDate: DateTime
-                    pays_salary: EmploymentRecord! @relationship(type: "PAYS_SALARY", direction: IN)
+                    pays_salary: [EmploymentRecord!]! @relationship(type: "PAYS_SALARY", direction: IN)
                 }
 
                 type EmploymentRecord @node {
@@ -6345,8 +6343,8 @@ describe("validation 2.0", () => {
                     type Order @node {
                         orderID: ID! @id
                         placedAt: DateTime @timestamp
-                        shipTo: Address! @relationship(type: "SHIPS_TO", direction: OUT)
-                        customer: Customer! @relationship(type: "PLACED", direction: IN)
+                        shipTo: [Address!]! @relationship(type: "SHIPS_TO", direction: OUT)
+                        customer: [Customer!]! @relationship(type: "PLACED", direction: IN)
                         books: [Book!]! @relationship(type: "CONTAINS", direction: OUT)
                     }
 
@@ -6378,7 +6376,7 @@ describe("validation 2.0", () => {
                     type Address @node {
                         address: String
                         location: Point
-                        order: Order @relationship(type: "SHIPS_TO", direction: IN)
+                        order: [Order!]! @relationship(type: "SHIPS_TO", direction: IN)
                     }
 
                     extend type Address {
@@ -6427,8 +6425,8 @@ describe("validation 2.0", () => {
                         rating: Int
                         text: String
                         createdAt: DateTime @timestamp
-                        book: Book! @relationship(type: "REVIEWS", direction: OUT)
-                        author: Customer! @relationship(type: "WROTE", direction: IN)
+                        book: [Book!]! @relationship(type: "REVIEWS", direction: OUT)
+                        author: [Customer!]! @relationship(type: "WROTE", direction: IN)
                     }
 
                     type Author @node {

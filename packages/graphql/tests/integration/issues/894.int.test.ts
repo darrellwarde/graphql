@@ -33,7 +33,7 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
         type ${testUser.name} @node {
             id: ID! @id @alias(property: "_id")
             name: String!
-            activeOrganization: ${testOrganization.name} @relationship(type: "ACTIVELY_MANAGING", direction: OUT)
+            activeOrganization: [${testOrganization.name}!]! @relationship(type: "ACTIVELY_MANAGING", direction: OUT)
         }
 
         type ${testOrganization.name} @node {

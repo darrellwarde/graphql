@@ -57,7 +57,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
                         """,
                         columnName: "markedAttendance"
                     )
-                serviceDate: ${TimeGraphType}! @relationship(type: "BUSSED_ON", direction: OUT)
+                serviceDate: [${TimeGraphType}!]! @relationship(type: "BUSSED_ON", direction: OUT)
             }
     
             interface Church {
@@ -89,7 +89,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
                 id: ID!
                 attendance: Int
                 markedAttendance: Boolean!
-                serviceDate: ${TimeGraphType}! @declareRelationship
+                serviceDate: [${TimeGraphType}!]! @declareRelationship
             }
             `;
 

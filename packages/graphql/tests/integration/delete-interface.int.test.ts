@@ -49,7 +49,7 @@ describe("delete interface relationships", () => {
         const typeDefs = gql`
             type ${episodeType.name} @node {
                 runtime: Int!
-                series: ${seriesType.name} ! @relationship(type: "HAS_EPISODE", direction: IN)
+                series: [${seriesType.name}!]! @relationship(type: "HAS_EPISODE", direction: IN)
             }
 
             interface Production {

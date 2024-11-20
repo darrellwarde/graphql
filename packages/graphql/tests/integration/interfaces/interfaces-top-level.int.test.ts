@@ -47,7 +47,7 @@ describe("Top-level interface query fields", () => {
             }
             type ${OtherNodeType} @node {
                 id: ID! @id
-                interfaceField: MyInterface! @relationship(type: "HAS_INTERFACE_NODES", direction: OUT)
+                interfaceField: [MyInterface!]! @relationship(type: "HAS_INTERFACE_NODES", direction: OUT)
             }
             interface MyInterface {
                 id: ID!

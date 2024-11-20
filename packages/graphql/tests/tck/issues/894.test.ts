@@ -29,7 +29,7 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
             type User @node {
                 id: ID! @id @alias(property: "_id")
                 name: String!
-                activeOrganization: Organization @relationship(type: "ACTIVELY_MANAGING", direction: OUT)
+                activeOrganization: [Organization!]! @relationship(type: "ACTIVELY_MANAGING", direction: OUT)
             }
 
             type Organization @node {
@@ -71,7 +71,7 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
             CALL {
             WITH this
             OPTIONAL MATCH (this)-[this_activeOrganization0_disconnect0_rel:ACTIVELY_MANAGING]->(this_activeOrganization0_disconnect0:Organization)
-            WHERE NOT (this_activeOrganization0_disconnect0._id = $updateUsers_args_update_activeOrganization_disconnect_where_Organization_this_activeOrganization0_disconnect0param0)
+            WHERE NOT (this_activeOrganization0_disconnect0._id = $updateUsers_args_update_activeOrganization0_disconnect0_where_Organization_this_activeOrganization0_disconnect0param0)
             CALL {
             	WITH this_activeOrganization0_disconnect0, this_activeOrganization0_disconnect0_rel, this
             	WITH collect(this_activeOrganization0_disconnect0) as this_activeOrganization0_disconnect0, this_activeOrganization0_disconnect0_rel, this
@@ -98,43 +98,41 @@ describe("https://github.com/neo4j/graphql/issues/894", () => {
             WITH this, this_activeOrganization0_connect0_node
             	RETURN count(*) AS connect_this_activeOrganization0_connect_Organization0
             }
-            WITH *
-            CALL {
-            	WITH this
-            	MATCH (this)-[this_activeOrganization_Organization_unique:ACTIVELY_MANAGING]->(:Organization)
-            	WITH count(this_activeOrganization_Organization_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDUser.activeOrganization must be less than or equal to one', [0])
-            	RETURN c AS this_activeOrganization_Organization_unique_ignored
-            }
             RETURN collect(DISTINCT this { id: this._id }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
                 \\"param0\\": \\"Luke Skywalker\\",
-                \\"updateUsers_args_update_activeOrganization_disconnect_where_Organization_this_activeOrganization0_disconnect0param0\\": \\"test-id\\",
+                \\"updateUsers_args_update_activeOrganization0_disconnect0_where_Organization_this_activeOrganization0_disconnect0param0\\": \\"test-id\\",
                 \\"this_activeOrganization0_connect0_node_param0\\": \\"test-id\\",
                 \\"updateUsers\\": {
                     \\"args\\": {
                         \\"update\\": {
-                            \\"activeOrganization\\": {
-                                \\"connect\\": {
-                                    \\"where\\": {
-                                        \\"node\\": {
-                                            \\"id_EQ\\": \\"test-id\\"
-                                        }
-                                    }
-                                },
-                                \\"disconnect\\": {
-                                    \\"where\\": {
-                                        \\"node\\": {
-                                            \\"NOT\\": {
-                                                \\"id_EQ\\": \\"test-id\\"
+                            \\"activeOrganization\\": [
+                                {
+                                    \\"connect\\": [
+                                        {
+                                            \\"where\\": {
+                                                \\"node\\": {
+                                                    \\"id_EQ\\": \\"test-id\\"
+                                                }
                                             }
                                         }
-                                    }
+                                    ],
+                                    \\"disconnect\\": [
+                                        {
+                                            \\"where\\": {
+                                                \\"node\\": {
+                                                    \\"NOT\\": {
+                                                        \\"id_EQ\\": \\"test-id\\"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
                                 }
-                            }
+                            ]
                         }
                     }
                 },

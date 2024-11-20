@@ -78,15 +78,6 @@ describe("https://github.com/neo4j/graphql/issues/1575", () => {
               node: Foo!
             }
 
-            input FooOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more FooSort objects to sort Foos by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [FooSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Foos by. The order in which sorts are applied is not guaranteed when specifying many fields in one FooSort object.
             \\"\\"\\"
@@ -96,9 +87,7 @@ describe("https://github.com/neo4j/graphql/issues/1575", () => {
             }
 
             input FooUpdateInput {
-              geo_point: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               geo_point_SET: PointInput
-              point: PointInput @deprecated(reason: \\"Please use the explicit _SET field\\")
               point_SET: PointInput
             }
 
@@ -106,7 +95,6 @@ describe("https://github.com/neo4j/graphql/issues/1575", () => {
               AND: [FooWhere!]
               NOT: FooWhere
               OR: [FooWhere!]
-              geo_point: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               geo_point_DISTANCE: PointDistance
               geo_point_EQ: PointInput
               geo_point_GT: PointDistance
@@ -114,7 +102,6 @@ describe("https://github.com/neo4j/graphql/issues/1575", () => {
               geo_point_IN: [PointInput]
               geo_point_LT: PointDistance
               geo_point_LTE: PointDistance
-              point: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
               point_DISTANCE: PointDistance
               point_EQ: PointInput
               point_GT: PointDistance
@@ -170,7 +157,7 @@ describe("https://github.com/neo4j/graphql/issues/1575", () => {
             }
 
             type Query {
-              foos(limit: Int, offset: Int, options: FooOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [FooSort!], where: FooWhere): [Foo!]!
+              foos(limit: Int, offset: Int, sort: [FooSort!], where: FooWhere): [Foo!]!
               foosAggregate(where: FooWhere): FooAggregateSelection!
               foosConnection(after: String, first: Int, sort: [FooSort!], where: FooWhere): FoosConnection!
             }

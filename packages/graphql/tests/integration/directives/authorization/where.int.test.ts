@@ -92,10 +92,10 @@ describe("auth/where", () => {
 
                 type ${Post} @node {
                     id: ID
-                    creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
+                    creator: [${User}!]! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator_SINGLE: { id_EQ: "$jwt.sub" } } } }])
             `;
 
             const userId = generate({
@@ -157,10 +157,10 @@ describe("auth/where", () => {
 
                 type ${Post} @node {
                     id: ID
-                    creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
+                    creator: [${User}!]! @relationship(type: "HAS_POST", direction: IN)
                 }
 
-                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator_SINGLE: { id_EQ: "$jwt.sub" } } } }])
             `;
 
             const userId = generate({
@@ -237,10 +237,10 @@ describe("auth/where", () => {
 
                     type ${Post} @node {
                         id: ID
-                        creator: ${User}! @relationship(type: "HAS_CONTENT", direction: IN)
+                        creator: [${User}!]! @relationship(type: "HAS_CONTENT", direction: IN)
                     }
 
-                    extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+                    extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator_SINGLE: { id_EQ: "$jwt.sub" } } } }])
                     extend type ${User} @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
@@ -308,10 +308,10 @@ describe("auth/where", () => {
 
                 type ${Post} @node {
                     id: ID
-                    creator: ${User}! @relationship(type: "HAS_CONTENT", direction: IN)
+                    creator: [${User}!]! @relationship(type: "HAS_CONTENT", direction: IN)
                 }
 
-                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+                extend type ${Post} @authorization(filter: [{ operations: [READ], where: { node: { creator_SINGLE: { id_EQ: "$jwt.sub" } } } }])
                 extend type ${User} @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
             `;
 
@@ -487,7 +487,7 @@ describe("auth/where", () => {
 
                 type ${Post} @node {
                     id: ID
-                    creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
+                    creator: [${User}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
                 extend type ${User} @authorization(filter: [{ operations: [UPDATE, CREATE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }])
@@ -545,7 +545,7 @@ describe("auth/where", () => {
 
                 type ${Post} @node {
                     id: ID
-                    creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
+                    creator: [${User}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
                 extend type ${User} @authorization(filter: [{ operations: [UPDATE, CREATE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }])
@@ -605,7 +605,7 @@ describe("auth/where", () => {
 
                 type ${Post} @node {
                     id: ID
-                    creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
+                    creator: [${User}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
                 extend type ${User} @authorization(filter: [{ operations: [UPDATE, DELETE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }])
@@ -667,7 +667,7 @@ describe("auth/where", () => {
 
                 type ${Post} @node {
                     id: ID
-                    creator: ${User}! @relationship(type: "HAS_POST", direction: OUT)
+                    creator: [${User}!]! @relationship(type: "HAS_POST", direction: OUT)
                 }
 
                 extend type ${User} @authorization(filter: [{ operations: [UPDATE, DELETE_RELATIONSHIP], where: { node: { id_EQ: "$jwt.sub" } } }])

@@ -47,7 +47,7 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
                 id: ID! @id
                 email: String!
                 roles: [String!]!
-                store: ${Store.name} @relationship(type: "WORKS_AT", direction: OUT)
+                store: [${Store.name}!]! @relationship(type: "WORKS_AT", direction: OUT)
             }
 
             type ${Store.name} @node {
@@ -59,13 +59,13 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
 
             type ${Transaction.name} @node {
                 id: ID! @id
-                store: ${Store.name}! @relationship(type: "TRANSACTION", direction: OUT)
+                store: [${Store.name}!]! @relationship(type: "TRANSACTION", direction: OUT)
                 type: String!
                 items: [${TransactionItem.name}!]! @relationship(type: "ITEM_TRANSACTED", direction: IN)
             }
 
             type ${TransactionItem.name} @node {
-                transaction: ${Transaction.name} @relationship(type: "ITEM_TRANSACTED", direction: OUT)
+                transaction: [${Transaction.name}!]! @relationship(type: "ITEM_TRANSACTED", direction: OUT)
                 name: String
                 price: Float
                 quantity: Int
@@ -79,7 +79,7 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { store: { id_EQ: "$jwt.store" } }
+                                node: { store_SINGLE: { id_EQ: "$jwt.store" } }
                             }
                         }
                     ]
@@ -93,7 +93,7 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { transaction: { store: { id_EQ: "$jwt.store" } } }
+                                node: { transaction_SINGLE: { store_SINGLE: { id_EQ: "$jwt.store" } } }
                             }
                         }
                     ]
@@ -200,9 +200,11 @@ describe("https://github.com/neo4j/graphql/issues/4113", () => {
             [Transaction.operations.create]: {
                 [Transaction.plural]: [
                     {
-                        store: {
-                            name: "Store",
-                        },
+                        store: [
+                            {
+                                name: "Store",
+                            },
+                        ],
                         items: expect.toIncludeSameMembers([
                             {
                                 name: "Milk",
@@ -246,7 +248,7 @@ describe("replicates the test for relationship to interface so that multiple ref
                 id: ID! @id
                 email: String!
                 roles: [String!]!
-                store: ${Store.name} @relationship(type: "WORKS_AT", direction: OUT)
+                store: [${Store.name}!]! @relationship(type: "WORKS_AT", direction: OUT)
             }
 
             type ${Store.name} @node {
@@ -258,27 +260,27 @@ describe("replicates the test for relationship to interface so that multiple ref
 
             type ${Transaction.name} @node {
                 id: ID! @id
-                store: ${Store.name}! @relationship(type: "TRANSACTION", direction: OUT)
+                store: [${Store.name}!]! @relationship(type: "TRANSACTION", direction: OUT)
                 type: String!
                 items: [TransactionItemI!]! @relationship(type: "ITEM_TRANSACTED", direction: IN)
             }
 
             interface TransactionItemI {
-                transaction: ${Transaction.name} @declareRelationship
+                transaction: [${Transaction.name}!]! @declareRelationship
                 name: String
                 price: Float
                 quantity: Int
             }
 
             type ${TransactionItem1.name} implements TransactionItemI @node {
-                transaction: ${Transaction.name} @relationship(type: "ITEM_TRANSACTED", direction: OUT)
+                transaction: [${Transaction.name}!]! @relationship(type: "ITEM_TRANSACTED", direction: OUT)
                 name: String
                 price: Float
                 quantity: Int
             }
 
             type ${TransactionItem2.name} implements TransactionItemI @node {
-                transaction: ${Transaction.name} @relationship(type: "ITEM_TRANSACTED", direction: OUT)
+                transaction: [${Transaction.name}!]! @relationship(type: "ITEM_TRANSACTED", direction: OUT)
                 name: String
                 price: Float
                 quantity: Int
@@ -292,7 +294,7 @@ describe("replicates the test for relationship to interface so that multiple ref
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { store: { id_EQ: "$jwt.store" } }
+                                node: { store_SINGLE: { id_EQ: "$jwt.store" } }
                             }
                         }
                     ]
@@ -306,7 +308,7 @@ describe("replicates the test for relationship to interface so that multiple ref
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { transaction: { store: { id_EQ: "$jwt.store" } } }
+                                node: { transaction_SINGLE: { store_SINGLE: { id_EQ: "$jwt.store" } } }
                             }
                         }
                     ]
@@ -320,7 +322,7 @@ describe("replicates the test for relationship to interface so that multiple ref
                             operations: [CREATE, CREATE_RELATIONSHIP]
                             where: {
                                 jwt: { OR: [{ roles_INCLUDES: "store-owner" }, { roles_INCLUDES: "employee" }] }
-                                node: { transaction: { store: { id_EQ: "$jwt.store" } } }
+                                node: { transaction_SINGLE: { store_SINGLE: { id_EQ: "$jwt.store" } } }
                             }
                         }
                     ]
@@ -432,9 +434,11 @@ describe("replicates the test for relationship to interface so that multiple ref
             [Transaction.operations.create]: {
                 [Transaction.plural]: [
                     {
-                        store: {
-                            name: "Store",
-                        },
+                        store: [
+                            {
+                                name: "Store",
+                            },
+                        ],
                         items: expect.toIncludeSameMembers([
                             {
                                 name: "Milk",

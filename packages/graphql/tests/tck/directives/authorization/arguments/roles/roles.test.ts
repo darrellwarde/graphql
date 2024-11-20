@@ -42,13 +42,13 @@ describe("Cypher Auth Roles", () => {
             type Comment @node {
                 id: String
                 content: String
-                post: Post! @relationship(type: "HAS_COMMENT", direction: IN)
+                post: [Post!]! @relationship(type: "HAS_COMMENT", direction: IN)
             }
 
             type Post @node {
                 id: String
                 content: String
-                creator: User! @relationship(type: "HAS_POST", direction: OUT)
+                creator: [User!]! @relationship(type: "HAS_POST", direction: OUT)
                 comments: [Comment!]! @relationship(type: "HAS_COMMENT", direction: OUT)
             }
 
@@ -533,23 +533,7 @@ describe("Cypher Auth Roles", () => {
             	WHERE (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
             		RETURN count(*) AS connect_this_post0_creator0_connect_User0
             	}
-            	WITH this, this_post0
-            	CALL {
-            		WITH this_post0
-            		MATCH (this_post0)-[this_post0_creator_User_unique:HAS_POST]->(:User)
-            		WITH count(this_post0_creator_User_unique) as c
-            		WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDPost.creator required exactly once', [0])
-            		RETURN c AS this_post0_creator_User_unique_ignored
-            	}
             	RETURN count(*) AS update_this_post0
-            }
-            WITH *
-            CALL {
-            	WITH this
-            	MATCH (this)<-[this_post_Post_unique:HAS_COMMENT]-(:Post)
-            	WITH count(this_post_Post_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDComment.post required exactly once', [0])
-            	RETURN c AS this_post_Post_unique_ignored
             }
             RETURN collect(DISTINCT this { .content }) AS data"
         `);
@@ -667,7 +651,7 @@ describe("Cypher Auth Roles", () => {
             	CALL {
             	WITH this, this_post0
             	OPTIONAL MATCH (this_post0)-[this_post0_creator0_disconnect0_rel:HAS_POST]->(this_post0_creator0_disconnect0:User)
-            	WHERE this_post0_creator0_disconnect0.id = $updateComments_args_update_post_update_node_creator_disconnect_where_User_this_post0_creator0_disconnect0param0 AND (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param2 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param3 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
+            	WHERE this_post0_creator0_disconnect0.id = $updateComments_args_update_post0_update_node_creator0_disconnect0_where_User_this_post0_creator0_disconnect0param0 AND (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param2 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__before_param3 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
             	CALL {
             		WITH this_post0_creator0_disconnect0, this_post0_creator0_disconnect0_rel, this_post0
             		WITH collect(this_post0_creator0_disconnect0) as this_post0_creator0_disconnect0, this_post0_creator0_disconnect0_rel, this_post0
@@ -678,30 +662,14 @@ describe("Cypher Auth Roles", () => {
             	WHERE (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param2 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization__after_param3 IN $jwt.roles)), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
             	RETURN count(*) AS disconnect_this_post0_creator0_disconnect_User
             	}
-            	WITH this, this_post0
-            	CALL {
-            		WITH this_post0
-            		MATCH (this_post0)-[this_post0_creator_User_unique:HAS_POST]->(:User)
-            		WITH count(this_post0_creator_User_unique) as c
-            		WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDPost.creator required exactly once', [0])
-            		RETURN c AS this_post0_creator_User_unique_ignored
-            	}
             	RETURN count(*) AS update_this_post0
-            }
-            WITH *
-            CALL {
-            	WITH this
-            	MATCH (this)<-[this_post_Post_unique:HAS_COMMENT]-(:Post)
-            	WITH count(this_post_Post_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c = 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDComment.post required exactly once', [0])
-            	RETURN c AS this_post_Post_unique_ignored
             }
             RETURN collect(DISTINCT this { .content }) AS data"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"updateComments_args_update_post_update_node_creator_disconnect_where_User_this_post0_creator0_disconnect0param0\\": \\"user-id\\",
+                \\"updateComments_args_update_post0_update_node_creator0_disconnect0_where_User_this_post0_creator0_disconnect0param0\\": \\"user-id\\",
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [
@@ -716,21 +684,27 @@ describe("Cypher Auth Roles", () => {
                 \\"updateComments\\": {
                     \\"args\\": {
                         \\"update\\": {
-                            \\"post\\": {
-                                \\"update\\": {
-                                    \\"node\\": {
-                                        \\"creator\\": {
-                                            \\"disconnect\\": {
-                                                \\"where\\": {
-                                                    \\"node\\": {
-                                                        \\"id_EQ\\": \\"user-id\\"
-                                                    }
+                            \\"post\\": [
+                                {
+                                    \\"update\\": {
+                                        \\"node\\": {
+                                            \\"creator\\": [
+                                                {
+                                                    \\"disconnect\\": [
+                                                        {
+                                                            \\"where\\": {
+                                                                \\"node\\": {
+                                                                    \\"id_EQ\\": \\"user-id\\"
+                                                                }
+                                                            }
+                                                        }
+                                                    ]
                                                 }
-                                            }
+                                            ]
                                         }
                                     }
                                 }
-                            }
+                            ]
                         }
                     }
                 },

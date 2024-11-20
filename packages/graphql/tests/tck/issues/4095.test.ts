@@ -35,13 +35,13 @@ describe("https://github.com/neo4j/graphql/issues/4095", () => {
             type Family @node {
                 id: ID! @id
                 members: [Person!]! @relationship(type: "MEMBER_OF", direction: IN)
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN)
             }
 
-            type Person @authorization(filter: [{ where: { node: { creator: { id_EQ: "$jwt.uid" } } } }]) @node {
+            type Person @authorization(filter: [{ where: { node: { creator_SOME: { id_EQ: "$jwt.uid" } } } }]) @node {
                 id: ID! @id
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
-                family: Family! @relationship(type: "MEMBER_OF", direction: OUT)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
+                family: [Family!]! @relationship(type: "MEMBER_OF", direction: OUT)
             }
             extend schema @authentication
         `;
@@ -75,10 +75,7 @@ describe("https://github.com/neo4j/graphql/issues/4095", () => {
             CALL {
                 WITH this
                 MATCH (this)<-[this0:MEMBER_OF]-(this1:Person)
-                OPTIONAL MATCH (this1)<-[:CREATOR_OF]-(this2:User)
-                WITH *, count(this2) AS creatorCount
-                WITH *
-                WHERE ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.uid IS NOT NULL AND this2.id = $jwt.uid)))
+                WHERE ($isAuthenticated = true AND size([(this1)<-[:CREATOR_OF]-(this2:User) WHERE ($jwt.uid IS NOT NULL AND this2.id = $jwt.uid) | 1]) > 0)
                 RETURN count(this1) AS var3
             }
             RETURN this { .id, membersAggregate: { count: var3 } } AS this"

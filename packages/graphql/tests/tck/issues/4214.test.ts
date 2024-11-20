@@ -37,7 +37,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
             id: ID! @id
             email: String!
             roles: [String!]!
-            store: Store @relationship(type: "WORKS_AT", direction: OUT)
+            store: [Store!]! @relationship(type: "WORKS_AT", direction: OUT)
         }
 
         type Store @node {
@@ -49,14 +49,14 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
 
         type Transaction @node {
             id: ID! @id
-            store: Store! @relationship(type: "TRANSACTION", direction: OUT)
+            store: [Store!]! @relationship(type: "TRANSACTION", direction: OUT)
             type: String!
             items: [TransactionItem!]! @relationship(type: "ITEM_TRANSACTED", direction: IN)
             completed: Boolean
         }
 
         type TransactionItem @node {
-            transaction: Transaction @relationship(type: "ITEM_TRANSACTED", direction: OUT)
+            transaction: [Transaction!]! @relationship(type: "ITEM_TRANSACTED", direction: OUT)
             name: String
             price: Float
             quantity: Int
@@ -71,7 +71,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                         operations: [CREATE, CREATE_RELATIONSHIP]
                         where: {
                             OR: [{ jwt: { roles_INCLUDES: "store-owner" } }, { jwt: { roles_INCLUDES: "employee" } }]
-                            node: { store: { id_EQ: "$jwt.store" } }
+                            node: { store_SOME: { id_EQ: "$jwt.store" } }
                         }
                     }
                 ]
@@ -83,7 +83,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                     {
                         where: {
                             OR: [{ jwt: { roles_INCLUDES: "store-owner" } }, { jwt: { roles_INCLUDES: "employee" } }]
-                            node: { store: { id_EQ: "$jwt.store" } }
+                            node: { store_SOME: { id_EQ: "$jwt.store" } }
                         }
                     }
                 ]
@@ -98,7 +98,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                         operations: [CREATE, CREATE_RELATIONSHIP]
                         where: {
                             OR: [{ jwt: { roles_INCLUDES: "store-owner" } }, { jwt: { roles_INCLUDES: "employee" } }]
-                            node: { transaction: { store: { id_EQ: "$jwt.store" } } }
+                            node: { transaction_SOME: { store_SOME: { id_EQ: "$jwt.store" } } }
                         }
                     }
                 ]
@@ -110,7 +110,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
                     {
                         where: {
                             OR: [{ jwt: { roles_INCLUDES: "store-owner" } }, { jwt: { roles_INCLUDES: "employee" } }]
-                            node: { transaction: { store: { id_EQ: "$jwt.store" } } }
+                            node: { transaction_SOME: { store_SOME: { id_EQ: "$jwt.store" } } }
                         }
                     }
                 ]
@@ -167,12 +167,7 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
             CALL {
             	WITH this0
             	OPTIONAL MATCH (this0_transaction_connect0_node:Transaction)
-            OPTIONAL MATCH (this0_transaction_connect0_node)-[:TRANSACTION]->(authorization_0_before_this0:Store)
-            WITH *, count(authorization_0_before_this0) AS storeCount
-            OPTIONAL MATCH (this0_transaction_connect0_node)-[:TRANSACTION]->(authorization_0_before_this1:Store)
-            WITH *, count(authorization_0_before_this1) AS storeCount
-            WITH *
-            	WHERE this0_transaction_connect0_node.id = $this0_transaction_connect0_node_param0 AND ((($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization_0_before_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_before_param3 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_before_param4 IN $jwt.roles)) AND (storeCount <> 0 AND ($jwt.store IS NOT NULL AND authorization_0_before_this0.id = $jwt.store)))) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_before_param5 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_before_param6 IN $jwt.roles)) AND (storeCount <> 0 AND ($jwt.store IS NOT NULL AND authorization_0_before_this1.id = $jwt.store))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
+            	WHERE this0_transaction_connect0_node.id = $this0_transaction_connect0_node_param0 AND ((($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $authorization_0_before_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_before_param3 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_before_param4 IN $jwt.roles)) AND size([(this0_transaction_connect0_node)-[:TRANSACTION]->(authorization_0_before_this0:Store) WHERE ($jwt.store IS NOT NULL AND authorization_0_before_this0.id = $jwt.store) | 1]) > 0)) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_before_param5 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_before_param6 IN $jwt.roles)) AND size([(this0_transaction_connect0_node)-[:TRANSACTION]->(authorization_0_before_this1:Store) WHERE ($jwt.store IS NOT NULL AND authorization_0_before_this1.id = $jwt.store) | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
             	CALL {
             		WITH *
             		WITH collect(this0_transaction_connect0_node) as connectedNodes, collect(this0) as parentNodes
@@ -184,62 +179,28 @@ describe("https://github.com/neo4j/graphql/issues/4214", () => {
             		}
             	}
             WITH this0, this0_transaction_connect0_node
-            WITH *
-            CALL {
-                WITH this0
-                MATCH (this0)-[:ITEM_TRANSACTED]->(authorization_0_after_this2:Transaction)
-                OPTIONAL MATCH (authorization_0_after_this2)-[:TRANSACTION]->(authorization_0_after_this3:Store)
-                WITH *, count(authorization_0_after_this3) AS storeCount
-                WITH *
-                WHERE (storeCount <> 0 AND ($jwt.store IS NOT NULL AND authorization_0_after_this3.id = $jwt.store))
-                RETURN count(authorization_0_after_this2) = 1 AS authorization_0_after_var0
-            }
-            OPTIONAL MATCH (this0_transaction_connect0_node)-[:TRANSACTION]->(authorization_0_after_this1:Store)
-            WITH *, count(authorization_0_after_this1) AS storeCount
-            WITH *
-            WHERE (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_after_param2 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_after_param3 IN $jwt.roles)) AND authorization_0_after_var0 = true), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_after_param4 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_after_param5 IN $jwt.roles)) AND (storeCount <> 0 AND ($jwt.store IS NOT NULL AND authorization_0_after_this1.id = $jwt.store))), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
+            WITH this0, this0_transaction_connect0_node
+            WHERE (apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_after_param2 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_after_param3 IN $jwt.roles)) AND size([(this0)-[:ITEM_TRANSACTED]->(authorization_0_after_this1:Transaction) WHERE size([(authorization_0_after_this1)-[:TRANSACTION]->(authorization_0_after_this0:Store) WHERE ($jwt.store IS NOT NULL AND authorization_0_after_this0.id = $jwt.store) | 1]) > 0 | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0]) AND apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_after_param4 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_after_param5 IN $jwt.roles)) AND size([(this0_transaction_connect0_node)-[:TRANSACTION]->(authorization_0_after_this2:Store) WHERE ($jwt.store IS NOT NULL AND authorization_0_after_this2.id = $jwt.store) | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0]))
             	RETURN count(*) AS connect_this0_transaction_connect_Transaction0
             }
             WITH *
-            CALL {
-            	WITH this0
-            	MATCH (this0)-[this0_transaction_Transaction_unique:ITEM_TRANSACTED]->(:Transaction)
-            	WITH count(this0_transaction_Transaction_unique) as c
-            	WHERE apoc.util.validatePredicate(NOT (c <= 1), '@neo4j/graphql/RELATIONSHIP-REQUIREDTransactionItem.transaction must be less than or equal to one', [0])
-            	RETURN c AS this0_transaction_Transaction_unique_ignored
-            }
-            WITH *
-            CALL {
-                WITH this0
-                MATCH (this0)-[:ITEM_TRANSACTED]->(authorization_0_after_this1:Transaction)
-                OPTIONAL MATCH (authorization_0_after_this1)-[:TRANSACTION]->(authorization_0_after_this2:Store)
-                WITH *, count(authorization_0_after_this2) AS storeCount
-                WITH *
-                WHERE (storeCount <> 0 AND ($jwt.store IS NOT NULL AND authorization_0_after_this2.id = $jwt.store))
-                RETURN count(authorization_0_after_this1) = 1 AS authorization_0_after_var0
-            }
-            WITH *
-            WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_after_param2 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_after_param3 IN $jwt.roles)) AND authorization_0_after_var0 = true), \\"@neo4j/graphql/FORBIDDEN\\", [0])
+            WHERE apoc.util.validatePredicate(NOT ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $authorization_0_after_param2 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $authorization_0_after_param3 IN $jwt.roles)) AND size([(this0)-[:ITEM_TRANSACTED]->(authorization_0_after_this1:Transaction) WHERE size([(authorization_0_after_this1)-[:TRANSACTION]->(authorization_0_after_this0:Store) WHERE ($jwt.store IS NOT NULL AND authorization_0_after_this0.id = $jwt.store) | 1]) > 0 | 1]) > 0), \\"@neo4j/graphql/FORBIDDEN\\", [0])
             RETURN this0
             }
             CALL {
                 WITH this0
-                WITH *
                 CALL {
                     WITH this0
                     MATCH (this0)-[create_this0:ITEM_TRANSACTED]->(create_this1:Transaction)
-                    OPTIONAL MATCH (create_this1)-[:TRANSACTION]->(create_this2:Store)
-                    WITH *, count(create_this2) AS storeCount
-                    WITH *
-                    WHERE (($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $create_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $create_param3 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $create_param4 IN $jwt.roles)) AND (storeCount <> 0 AND ($jwt.store IS NOT NULL AND create_this2.id = $jwt.store))))
+                    WHERE (($isAuthenticated = true AND ($jwt.roles IS NOT NULL AND $create_param2 IN $jwt.roles)) OR ($isAuthenticated = true AND (($jwt.roles IS NOT NULL AND $create_param3 IN $jwt.roles) OR ($jwt.roles IS NOT NULL AND $create_param4 IN $jwt.roles)) AND size([(create_this1)-[:TRANSACTION]->(create_this2:Store) WHERE ($jwt.store IS NOT NULL AND create_this2.id = $jwt.store) | 1]) > 0))
                     CALL {
                         WITH create_this1
                         MATCH (create_this1)-[create_this3:TRANSACTION]->(create_this4:Store)
                         WITH create_this4 { .name } AS create_this4
-                        RETURN head(collect(create_this4)) AS create_var5
+                        RETURN collect(create_this4) AS create_var5
                     }
                     WITH create_this1 { .id, store: create_var5 } AS create_this1
-                    RETURN head(collect(create_this1)) AS create_var6
+                    RETURN collect(create_this1) AS create_var6
                 }
                 RETURN this0 { .name, transaction: create_var6 } AS create_var7
             }

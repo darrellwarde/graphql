@@ -101,10 +101,10 @@ describe("auth/object-path", () => {
 
             type ${Post} @node {
                 id: ID
-                creator: ${User}! @relationship(type: "HAS_POST", direction: IN)
+                creator: [${User}!]! @relationship(type: "HAS_POST", direction: IN)
             }
 
-            extend type ${Post} @node @authorization(validate: [{ when: [BEFORE], operations: [READ], where: { node: { creator: { id_EQ: "$context.userId" } } } }])
+            extend type ${Post} @node @authorization(validate: [{ when: [BEFORE], operations: [READ], where: { node: { creator_SINGLE: { id_EQ: "$context.userId" } } } }])
         `;
 
         const userId = generate({

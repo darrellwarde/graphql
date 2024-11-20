@@ -50,7 +50,7 @@ describe("https://github.com/neo4j/graphql/issues/2437", () => {
                 uuid: ID! @id
                 archivedAt: DateTime
 
-                agent: ${Agent}! @relationship(type: "IS_VALUATION_AGENT", direction: IN)
+                agent: [${Agent}!]! @relationship(type: "IS_VALUATION_AGENT", direction: IN)
             }
 
             extend type ${Valuation} @authorization(filter: [{ where: { node: { archivedAt_EQ: null } } }])

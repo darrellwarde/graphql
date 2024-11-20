@@ -39,7 +39,7 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
 
         type Photo @node {
             id: ID!
-            color: Color @relationship(type: "OF_COLOR", direction: OUT)
+            color: [Color!]! @relationship(type: "OF_COLOR", direction: OUT)
         }
     `;
 
@@ -122,7 +122,7 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
             CALL {
             WITH this, this_colors0_disconnect0, this_colors0_disconnect0_photos0
             OPTIONAL MATCH (this_colors0_disconnect0_photos0)-[this_colors0_disconnect0_photos0_color0_rel:OF_COLOR]->(this_colors0_disconnect0_photos0_color0:Color)
-            WHERE this_colors0_disconnect0_photos0_color0.id = $updateProducts_args_update_colors0_disconnect0_disconnect_photos_disconnect_color_where_Color_this_colors0_disconnect0_photos0_color0param0
+            WHERE this_colors0_disconnect0_photos0_color0.id = $updateProducts_args_update_colors0_disconnect0_disconnect_photos0_disconnect_color0_where_Color_this_colors0_disconnect0_photos0_color0param0
             CALL {
             	WITH this_colors0_disconnect0_photos0_color0, this_colors0_disconnect0_photos0_color0_rel, this_colors0_disconnect0_photos0
             	WITH collect(this_colors0_disconnect0_photos0_color0) as this_colors0_disconnect0_photos0_color0, this_colors0_disconnect0_photos0_color0_rel, this_colors0_disconnect0_photos0
@@ -149,7 +149,7 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
             CALL {
             WITH this, this_photos0_disconnect0
             OPTIONAL MATCH (this_photos0_disconnect0)-[this_photos0_disconnect0_color0_rel:OF_COLOR]->(this_photos0_disconnect0_color0:Color)
-            WHERE this_photos0_disconnect0_color0.name = $updateProducts_args_update_photos0_disconnect_disconnect_color_where_Color_this_photos0_disconnect0_color0param0
+            WHERE this_photos0_disconnect0_color0.name = $updateProducts_args_update_photos0_disconnect0_disconnect_color0_where_Color_this_photos0_disconnect0_color0param0
             CALL {
             	WITH this_photos0_disconnect0_color0, this_photos0_disconnect0_color0_rel, this_photos0_disconnect0
             	WITH collect(this_photos0_disconnect0_color0) as this_photos0_disconnect0_color0, this_photos0_disconnect0_color0_rel, this_photos0_disconnect0
@@ -174,7 +174,7 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
             CALL {
             WITH this, this_photos0_disconnect1
             OPTIONAL MATCH (this_photos0_disconnect1)-[this_photos0_disconnect1_color0_rel:OF_COLOR]->(this_photos0_disconnect1_color0:Color)
-            WHERE this_photos0_disconnect1_color0.name = $updateProducts_args_update_photos0_disconnect_disconnect_color_where_Color_this_photos0_disconnect1_color0param0
+            WHERE this_photos0_disconnect1_color0.name = $updateProducts_args_update_photos0_disconnect0_disconnect_color0_where_Color_this_photos0_disconnect1_color0param0
             CALL {
             	WITH this_photos0_disconnect1_color0, this_photos0_disconnect1_color0_rel, this_photos0_disconnect1
             	WITH collect(this_photos0_disconnect1_color0) as this_photos0_disconnect1_color0, this_photos0_disconnect1_color0_rel, this_photos0_disconnect1
@@ -194,11 +194,11 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
                 \\"this_update_name_SET\\": \\"Nested Connect\\",
                 \\"updateProducts_args_update_colors0_disconnect0_where_Color_this_colors0_disconnect0param0\\": \\"Red\\",
                 \\"updateProducts_args_update_colors0_disconnect0_disconnect_photos0_where_Photo_this_colors0_disconnect0_photos0param0\\": \\"123\\",
-                \\"updateProducts_args_update_colors0_disconnect0_disconnect_photos_disconnect_color_where_Color_this_colors0_disconnect0_photos0_color0param0\\": \\"134\\",
+                \\"updateProducts_args_update_colors0_disconnect0_disconnect_photos0_disconnect_color0_where_Color_this_colors0_disconnect0_photos0_color0param0\\": \\"134\\",
                 \\"updateProducts_args_update_photos0_disconnect0_where_Photo_this_photos0_disconnect0param0\\": \\"321\\",
-                \\"updateProducts_args_update_photos0_disconnect_disconnect_color_where_Color_this_photos0_disconnect0_color0param0\\": \\"Green\\",
+                \\"updateProducts_args_update_photos0_disconnect0_disconnect_color0_where_Color_this_photos0_disconnect0_color0param0\\": \\"Green\\",
                 \\"updateProducts_args_update_photos0_disconnect1_where_Photo_this_photos0_disconnect1param0\\": \\"33211\\",
-                \\"updateProducts_args_update_photos0_disconnect_disconnect_color_where_Color_this_photos0_disconnect1_color0param0\\": \\"Red\\",
+                \\"updateProducts_args_update_photos0_disconnect0_disconnect_color0_where_Color_this_photos0_disconnect1_color0param0\\": \\"Red\\",
                 \\"updateProducts\\": {
                     \\"args\\": {
                         \\"update\\": {
@@ -222,13 +222,15 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
                                                             }
                                                         },
                                                         \\"disconnect\\": {
-                                                            \\"color\\": {
-                                                                \\"where\\": {
-                                                                    \\"node\\": {
-                                                                        \\"id_EQ\\": \\"134\\"
+                                                            \\"color\\": [
+                                                                {
+                                                                    \\"where\\": {
+                                                                        \\"node\\": {
+                                                                            \\"id_EQ\\": \\"134\\"
+                                                                        }
                                                                     }
                                                                 }
-                                                            }
+                                                            ]
                                                         }
                                                     }
                                                 ]
@@ -247,13 +249,15 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
                                                 }
                                             },
                                             \\"disconnect\\": {
-                                                \\"color\\": {
-                                                    \\"where\\": {
-                                                        \\"node\\": {
-                                                            \\"name_EQ\\": \\"Green\\"
+                                                \\"color\\": [
+                                                    {
+                                                        \\"where\\": {
+                                                            \\"node\\": {
+                                                                \\"name_EQ\\": \\"Green\\"
+                                                            }
                                                         }
                                                     }
-                                                }
+                                                ]
                                             }
                                         },
                                         {
@@ -263,13 +267,15 @@ describe("https://github.com/neo4j/graphql/issues/2782", () => {
                                                 }
                                             },
                                             \\"disconnect\\": {
-                                                \\"color\\": {
-                                                    \\"where\\": {
-                                                        \\"node\\": {
-                                                            \\"name_EQ\\": \\"Red\\"
+                                                \\"color\\": [
+                                                    {
+                                                        \\"where\\": {
+                                                            \\"node\\": {
+                                                                \\"name_EQ\\": \\"Red\\"
+                                                            }
                                                         }
                                                     }
-                                                }
+                                                ]
                                             }
                                         }
                                     ]

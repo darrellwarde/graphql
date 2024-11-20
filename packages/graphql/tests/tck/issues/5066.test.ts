@@ -31,11 +31,11 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
             type AdminGroup
                 @node(labels: ["AdminGroup"])
                 @mutation(operations: [])
-                @authorization(filter: [{ where: { node: { createdBy: { id_EQ: "$jwt.sub" } } } }]) {
+                @authorization(filter: [{ where: { node: { createdBy_SOME: { id_EQ: "$jwt.sub" } } } }]) {
                 id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
-                createdBy: User!
+                createdBy: [User!]!
                     @relationship(type: "CREATED_ADMIN_GROUP", direction: IN)
                     @settable(onCreate: true, onUpdate: false)
             }
@@ -44,7 +44,7 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
                 @node(labels: ["User"])
                 @mutation(operations: [])
                 @authorization(
-                    filter: [{ where: { node: { NOT: { blockedUsers_SOME: { to: { id_EQ: "$jwt.sub" } } } } } }]
+                    filter: [{ where: { node: { NOT: { blockedUsers_SOME: { to_SOME: { id_EQ: "$jwt.sub" } } } } } }]
                 ) {
                 id: ID! @settable(onCreate: true, onUpdate: false)
                 createdAt: DateTime! @private
@@ -58,12 +58,16 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
                 @node(labels: ["UserBlockedUser"])
                 @query(read: false, aggregate: false)
                 @mutation(operations: [])
-                @authorization(filter: [{ where: { node: { from: { id_EQ: "$jwt.sub" } } } }]) {
+                @authorization(filter: [{ where: { node: { from_SOME: { id_EQ: "$jwt.sub" } } } }]) {
                 id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
-                from: User! @relationship(type: "HAS_BLOCKED", direction: IN) @settable(onCreate: true, onUpdate: false)
-                to: User! @relationship(type: "IS_BLOCKING", direction: OUT) @settable(onCreate: true, onUpdate: false)
+                from: [User!]!
+                    @relationship(type: "HAS_BLOCKED", direction: IN)
+                    @settable(onCreate: true, onUpdate: false)
+                to: [User!]!
+                    @relationship(type: "IS_BLOCKING", direction: OUT)
+                    @settable(onCreate: true, onUpdate: false)
             }
 
             union PartyCreator = User | AdminGroup
@@ -73,11 +77,13 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
                 @mutation(operations: [])
                 @authorization(
                     filter: [
-                        { where: { node: { createdByConnection: { User: { node: { id_EQ: "$jwt.sub" } } } } } }
+                        { where: { node: { createdByConnection_SOME: { User: { node: { id_EQ: "$jwt.sub" } } } } } }
                         {
                             where: {
                                 node: {
-                                    createdByConnection: { AdminGroup: { node: { createdBy: { id_EQ: "$jwt.sub" } } } }
+                                    createdByConnection_SOME: {
+                                        AdminGroup: { node: { createdBy_SOME: { id_EQ: "$jwt.sub" } } }
+                                    }
                                 }
                             }
                         }
@@ -86,7 +92,7 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
                 id: ID! @id
                 createdAt: DateTime! @timestamp(operations: [CREATE]) @private
                 updatedAt: DateTime! @timestamp(operations: [CREATE, UPDATE]) @private
-                createdBy: PartyCreator!
+                createdBy: [PartyCreator!]!
                     @relationship(type: "CREATED_PARTY", direction: IN)
                     @settable(onCreate: true, onUpdate: false)
             }
@@ -125,58 +131,36 @@ describe("https://github.com/neo4j/graphql/issues/5066", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Party)
-            CALL {
-                WITH this
-                MATCH (this)<-[this0:CREATED_PARTY]-(this1:AdminGroup)
-                OPTIONAL MATCH (this1)<-[:CREATED_ADMIN_GROUP]-(this2:User)
-                WITH *, count(this2) AS createdByCount
-                WITH *
-                WHERE (createdByCount <> 0 AND ($jwt.sub IS NOT NULL AND this2.id = $jwt.sub))
-                RETURN count(this1) > 0 AS var3
-            }
             WITH *
-            WHERE (($isAuthenticated = true AND single(this4 IN [(this)<-[this5:CREATED_PARTY]-(this4:User) WHERE ($jwt.sub IS NOT NULL AND this4.id = $jwt.sub) | 1] WHERE true)) OR ($isAuthenticated = true AND var3 = true))
+            WHERE (($isAuthenticated = true AND size([(this)<-[this1:CREATED_PARTY]-(this0:User) WHERE ($jwt.sub IS NOT NULL AND this0.id = $jwt.sub) | 1]) > 0) OR ($isAuthenticated = true AND size([(this)<-[this4:CREATED_PARTY]-(this3:AdminGroup) WHERE size([(this3)<-[:CREATED_ADMIN_GROUP]-(this2:User) WHERE ($jwt.sub IS NOT NULL AND this2.id = $jwt.sub) | 1]) > 0 | 1]) > 0))
             CALL {
                 WITH this
                 CALL {
                     WITH *
-                    MATCH (this)<-[this6:CREATED_PARTY]-(this7:User)
-                    CALL {
-                        WITH this7
-                        MATCH (this7)-[:HAS_BLOCKED]->(this8:UserBlockedUser)
-                        OPTIONAL MATCH (this8)-[:IS_BLOCKING]->(this9:User)
-                        WITH *, count(this9) AS toCount
-                        WITH *
-                        WHERE (toCount <> 0 AND ($jwt.sub IS NOT NULL AND this9.id = $jwt.sub))
-                        RETURN count(this8) > 0 AS var10
-                    }
-                    WITH *
-                    WHERE ($isAuthenticated = true AND NOT (var10 = true))
-                    WITH this7 { .username, __resolveType: \\"User\\", __id: id(this7) } AS this7
-                    RETURN this7 AS var11
+                    MATCH (this)<-[this5:CREATED_PARTY]-(this6:User)
+                    WHERE ($isAuthenticated = true AND NOT (size([(this6)-[:HAS_BLOCKED]->(this8:UserBlockedUser) WHERE size([(this8)-[:IS_BLOCKING]->(this7:User) WHERE ($jwt.sub IS NOT NULL AND this7.id = $jwt.sub) | 1]) > 0 | 1]) > 0))
+                    WITH this6 { .username, __resolveType: \\"User\\", __id: id(this6) } AS this6
+                    RETURN this6 AS var9
                     UNION
                     WITH *
-                    MATCH (this)<-[this12:CREATED_PARTY]-(this13:AdminGroup)
-                    OPTIONAL MATCH (this13)<-[:CREATED_ADMIN_GROUP]-(this14:User)
-                    WITH *, count(this14) AS createdByCount
-                    WITH *
-                    WHERE ($isAuthenticated = true AND (createdByCount <> 0 AND ($jwt.sub IS NOT NULL AND this14.id = $jwt.sub)))
-                    WITH this13 { __resolveType: \\"AdminGroup\\", __id: id(this13) } AS this13
-                    RETURN this13 AS var11
+                    MATCH (this)<-[this10:CREATED_PARTY]-(this11:AdminGroup)
+                    WHERE ($isAuthenticated = true AND size([(this11)<-[:CREATED_ADMIN_GROUP]-(this12:User) WHERE ($jwt.sub IS NOT NULL AND this12.id = $jwt.sub) | 1]) > 0)
+                    WITH this11 { __resolveType: \\"AdminGroup\\", __id: id(this11) } AS this11
+                    RETURN this11 AS var9
                 }
-                WITH var11
-                RETURN head(collect(var11)) AS var11
+                WITH var9
+                RETURN collect(var9) AS var9
             }
-            RETURN this { .id, createdBy: var11 } AS this"
+            RETURN this { .id, createdBy: var9 } AS this"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
+                \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [],
                     \\"sub\\": \\"1\\"
-                },
-                \\"isAuthenticated\\": true
+                }
             }"
         `);
     });

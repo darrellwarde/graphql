@@ -44,20 +44,23 @@ describe("Connection auth filter", () => {
             type Post @node {
                 id: ID
                 content: String
-                creator: User! @relationship(type: "HAS_POST", direction: IN)
+                creator: [User!]! @relationship(type: "HAS_POST", direction: IN)
             }
 
             extend type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
 
             extend type User {
-                password: String! @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
+                password: String!
+                    @authorization(filter: [{ operations: [READ], where: { node: { id_EQ: "$jwt.sub" } } }])
             }
 
             extend type Post {
                 secretKey: String!
-                    @authorization(filter: [{ operations: [READ], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+                    @authorization(
+                        filter: [{ operations: [READ], where: { node: { creator_SOME: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
-            extend type Post @authorization(filter: [{ where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+            extend type Post @authorization(filter: [{ where: { node: { creator_SOME: { id_EQ: "$jwt.sub" } } } }])
         `;
 
         neoSchema = new Neo4jGraphQL({
@@ -194,10 +197,8 @@ describe("Connection auth filter", () => {
                 CALL {
                     WITH this0
                     MATCH (this0)-[this1:HAS_POST]->(this2:Post)
-                    OPTIONAL MATCH (this2)<-[:HAS_POST]-(this3:User)
-                    WITH *, count(this3) AS creatorCount
                     WITH *
-                    WHERE ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub)))
+                    WHERE ($isAuthenticated = true AND size([(this2)<-[:HAS_POST]-(this3:User) WHERE ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub) | 1]) > 0)
                     WITH this2 { .content } AS this2
                     RETURN collect(this2) AS var4
                 }
@@ -256,10 +257,7 @@ describe("Connection auth filter", () => {
                 CALL {
                     WITH this0
                     MATCH (this0)-[this1:HAS_POST]->(this2:Post)
-                    OPTIONAL MATCH (this2)<-[:HAS_POST]-(this3:User)
-                    WITH *, count(this3) AS creatorCount
-                    WITH *
-                    WHERE ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub)))
+                    WHERE ($isAuthenticated = true AND size([(this2)<-[:HAS_POST]-(this3:User) WHERE ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub) | 1]) > 0)
                     WITH collect({ node: this2, relationship: this1 }) AS edges
                     WITH edges, size(edges) AS totalCount
                     CALL {
@@ -325,10 +323,7 @@ describe("Connection auth filter", () => {
                 CALL {
                     WITH this0
                     MATCH (this0)-[this1:HAS_POST]->(this2:Post)
-                    OPTIONAL MATCH (this2)<-[:HAS_POST]-(this3:User)
-                    WITH *, count(this3) AS creatorCount
-                    WITH *
-                    WHERE (this2.id = $param2 AND ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub))))
+                    WHERE (this2.id = $param2 AND ($isAuthenticated = true AND size([(this2)<-[:HAS_POST]-(this3:User) WHERE ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub) | 1]) > 0))
                     WITH collect({ node: this2, relationship: this1 }) AS edges
                     WITH edges, size(edges) AS totalCount
                     CALL {
@@ -391,10 +386,8 @@ describe("Connection auth filter", () => {
                 CALL {
                     WITH this0
                     MATCH (this0)-[this1:HAS_POST]->(this2:Post)
-                    OPTIONAL MATCH (this2)<-[:HAS_POST]-(this3:User)
-                    WITH *, count(this3) AS creatorCount
                     WITH *
-                    WHERE (this2.content = $param2 AND ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub))))
+                    WHERE (this2.content = $param2 AND ($isAuthenticated = true AND size([(this2)<-[:HAS_POST]-(this3:User) WHERE ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub) | 1]) > 0))
                     WITH this2 { .content } AS this2
                     RETURN collect(this2) AS var4
                 }
@@ -454,10 +447,7 @@ describe("Connection auth filter", () => {
                     CALL {
                         WITH *
                         MATCH (this0)-[this1:HAS_POST]->(this2:Post)
-                        OPTIONAL MATCH (this2)<-[:HAS_POST]-(this3:User)
-                        WITH *, count(this3) AS creatorCount
-                        WITH *
-                        WHERE ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub)))
+                        WHERE ($isAuthenticated = true AND size([(this2)<-[:HAS_POST]-(this3:User) WHERE ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub) | 1]) > 0)
                         WITH this2 { .id, __resolveType: \\"Post\\", __id: id(this2) } AS this2
                         RETURN this2 AS var4
                     }
@@ -523,10 +513,7 @@ describe("Connection auth filter", () => {
                     CALL {
                         WITH this0
                         MATCH (this0)-[this1:HAS_POST]->(this2:Post)
-                        OPTIONAL MATCH (this2)<-[:HAS_POST]-(this3:User)
-                        WITH *, count(this3) AS creatorCount
-                        WITH *
-                        WHERE ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub)))
+                        WHERE ($isAuthenticated = true AND size([(this2)<-[:HAS_POST]-(this3:User) WHERE ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub) | 1]) > 0)
                         WITH { node: { __resolveType: \\"Post\\", __id: id(this2), id: this2.id } } AS edge
                         RETURN edge
                     }
@@ -593,10 +580,7 @@ describe("Connection auth filter", () => {
                     CALL {
                         WITH this0
                         MATCH (this0)-[this1:HAS_POST]->(this2:Post)
-                        OPTIONAL MATCH (this2)<-[:HAS_POST]-(this3:User)
-                        WITH *, count(this3) AS creatorCount
-                        WITH *
-                        WHERE (this2.id = $param2 AND ($isAuthenticated = true AND (creatorCount <> 0 AND ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub))))
+                        WHERE (this2.id = $param2 AND ($isAuthenticated = true AND size([(this2)<-[:HAS_POST]-(this3:User) WHERE ($jwt.sub IS NOT NULL AND this3.id = $jwt.sub) | 1]) > 0))
                         WITH { node: { __resolveType: \\"Post\\", __id: id(this2), id: this2.id } } AS edge
                         RETURN edge
                     }

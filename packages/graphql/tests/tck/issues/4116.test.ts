@@ -21,7 +21,7 @@ import { Neo4jGraphQL } from "../../../src";
 import { createBearerToken } from "../../utils/create-bearer-token";
 import { formatCypher, formatParams, translateQuery } from "../utils/tck-test-utils";
 
-describe("https://github.com/neo4j/graphql/issues/4115", () => {
+describe("https://github.com/neo4j/graphql/issues/4116", () => {
     const secret = "sssh!";
     let typeDefs: string;
     let neoSchema: Neo4jGraphQL;
@@ -36,17 +36,17 @@ describe("https://github.com/neo4j/graphql/issues/4115", () => {
             type Family @node {
                 id: ID! @id
                 members: [Person!]! @relationship(type: "MEMBER_OF", direction: IN)
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN)
             }
 
             type Person
                 @node
                 @authorization(
-                    filter: [{ where: { node: { family: { creator: { roles_INCLUDES: "plan:paid" } } } } }]
+                    filter: [{ where: { node: { family_SOME: { creator_SOME: { roles_INCLUDES: "plan:paid" } } } } }]
                 ) {
                 id: ID! @id
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
-                family: Family! @relationship(type: "MEMBER_OF", direction: OUT)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
+                family: [Family!]! @relationship(type: "MEMBER_OF", direction: OUT)
             }
 
             type JWT @jwt {
@@ -85,26 +85,16 @@ describe("https://github.com/neo4j/graphql/issues/4115", () => {
             CALL {
                 WITH this
                 MATCH (this)<-[this0:MEMBER_OF]-(this1:Person)
-                CALL {
-                    WITH this1
-                    MATCH (this1)-[:MEMBER_OF]->(this2:Family)
-                    OPTIONAL MATCH (this2)<-[:CREATOR_OF]-(this3:User)
-                    WITH *, count(this3) AS creatorCount
-                    WITH *
-                    WHERE (creatorCount <> 0 AND ($param0 IS NOT NULL AND $param0 IN this3.roles))
-                    RETURN count(this2) = 1 AS var4
-                }
-                WITH *
-                WHERE ($isAuthenticated = true AND var4 = true)
-                RETURN count(this1) AS var5
+                WHERE ($isAuthenticated = true AND size([(this1)-[:MEMBER_OF]->(this3:Family) WHERE size([(this3)<-[:CREATOR_OF]-(this2:User) WHERE ($param1 IS NOT NULL AND $param1 IN this2.roles) | 1]) > 0 | 1]) > 0)
+                RETURN count(this1) AS var4
             }
-            RETURN this { .id, membersAggregate: { count: var5 } } AS this"
+            RETURN this { .id, membersAggregate: { count: var4 } } AS this"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"param0\\": \\"plan:paid\\",
-                \\"isAuthenticated\\": true
+                \\"isAuthenticated\\": true,
+                \\"param1\\": \\"plan:paid\\"
             }"
         `);
     });

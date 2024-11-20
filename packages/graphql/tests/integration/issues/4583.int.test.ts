@@ -52,7 +52,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
         const typeDefs = gql`
             type ${Episode} @node {
                 runtime: Int!
-                series: ${Series}! @relationship(type: "HAS_EPISODE", direction: IN)
+                series: [${Series}!]! @relationship(type: "HAS_EPISODE", direction: IN)
             }
 
             interface Production {

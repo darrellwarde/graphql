@@ -190,6 +190,12 @@ export function createRelationshipFields({
             return;
         }
 
+        if (!relationshipAdapter.isList) {
+            throw new Error(
+                `@relationship on non-list field [${relationshipAdapter.source.name}.${relationshipAdapter.name}] not supported`
+            );
+        }
+
         // TODO: find a way to merge these 2 into 1 RelationshipProperties generation function
         if (relationshipAdapter instanceof RelationshipDeclarationAdapter) {
             doForRelationshipDeclaration({

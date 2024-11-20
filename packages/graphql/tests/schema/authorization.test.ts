@@ -34,7 +34,7 @@ describe("Authorization", () => {
             type Post @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                 id: ID!
                 name: String!
-                author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
             }
         `;
 
@@ -96,7 +96,7 @@ describe("Authorization", () => {
             }
 
             type Post {
-              author(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): User!
+              author(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               authorAggregate(where: UserWhere): PostUserAuthorAggregationSelection
               authorConnection(after: String, first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
               id: ID!
@@ -122,7 +122,7 @@ describe("Authorization", () => {
             }
 
             input PostAuthorConnectFieldInput {
-              connect: UserConnectInput
+              connect: [UserConnectInput!]
               where: UserConnectWhere
             }
 
@@ -158,8 +158,8 @@ describe("Authorization", () => {
             }
 
             input PostAuthorFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
             }
 
             input PostAuthorNodeAggregationWhereInput {
@@ -203,10 +203,10 @@ describe("Authorization", () => {
             }
 
             input PostAuthorUpdateFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
-              delete: PostAuthorDeleteFieldInput
-              disconnect: PostAuthorDisconnectFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
+              delete: [PostAuthorDeleteFieldInput!]
+              disconnect: [PostAuthorDisconnectFieldInput!]
               update: PostAuthorUpdateConnectionInput
               where: PostAuthorConnectionWhere
             }
@@ -218,7 +218,7 @@ describe("Authorization", () => {
             }
 
             input PostDeleteInput {
-              author: PostAuthorDeleteFieldInput
+              author: [PostAuthorDeleteFieldInput!]
             }
 
             type PostEdge {
@@ -235,7 +235,7 @@ describe("Authorization", () => {
             }
 
             input PostUpdateInput {
-              author: PostAuthorUpdateFieldInput
+              author: [PostAuthorUpdateFieldInput!]
               id_SET: ID
               name_SET: String
             }
@@ -254,9 +254,31 @@ describe("Authorization", () => {
               AND: [PostWhere!]
               NOT: PostWhere
               OR: [PostWhere!]
-              author: UserWhere
               authorAggregate: PostAuthorAggregateInput
-              authorConnection: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where all of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_ALL: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where none of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_NONE: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where one of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SINGLE: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where some of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SOME: PostAuthorConnectionWhere
+              \\"\\"\\"Return Posts where all of the related Users match this filter\\"\\"\\"
+              author_ALL: UserWhere
+              \\"\\"\\"Return Posts where none of the related Users match this filter\\"\\"\\"
+              author_NONE: UserWhere
+              \\"\\"\\"Return Posts where one of the related Users match this filter\\"\\"\\"
+              author_SINGLE: UserWhere
+              \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
+              author_SOME: UserWhere
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID

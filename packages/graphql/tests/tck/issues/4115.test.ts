@@ -36,7 +36,7 @@ describe("https://github.com/neo4j/graphql/issues/4115", () => {
             type Family @node {
                 id: ID! @id
                 members: [Person!]! @relationship(type: "MEMBER_OF", direction: IN)
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN)
             }
 
             type Person
@@ -46,16 +46,16 @@ describe("https://github.com/neo4j/graphql/issues/4115", () => {
                         {
                             where: {
                                 AND: [
-                                    { node: { creator: { id_EQ: "$jwt.uid" } } }
-                                    { node: { family: { creator: { roles_INCLUDES: "plan:paid" } } } }
+                                    { node: { creator_SOME: { id_EQ: "$jwt.uid" } } }
+                                    { node: { family_SOME: { creator_SOME: { roles_INCLUDES: "plan:paid" } } } }
                                 ]
                             }
                         }
                     ]
                 ) {
                 id: ID! @id
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
-                family: Family! @relationship(type: "MEMBER_OF", direction: OUT)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
+                family: [Family!]! @relationship(type: "MEMBER_OF", direction: OUT)
             }
 
             type JWT @jwt {
@@ -94,34 +94,22 @@ describe("https://github.com/neo4j/graphql/issues/4115", () => {
             CALL {
                 WITH this
                 MATCH (this)<-[this0:MEMBER_OF]-(this1:Person)
-                OPTIONAL MATCH (this1)<-[:CREATOR_OF]-(this2:User)
-                WITH *, count(this2) AS creatorCount
-                CALL {
-                    WITH this1
-                    MATCH (this1)-[:MEMBER_OF]->(this3:Family)
-                    OPTIONAL MATCH (this3)<-[:CREATOR_OF]-(this4:User)
-                    WITH *, count(this4) AS creatorCount
-                    WITH *
-                    WHERE (creatorCount <> 0 AND ($param0 IS NOT NULL AND $param0 IN this4.roles))
-                    RETURN count(this3) = 1 AS var5
-                }
-                WITH *
-                WHERE ($isAuthenticated = true AND ((creatorCount <> 0 AND ($jwt.uid IS NOT NULL AND this2.id = $jwt.uid)) AND var5 = true))
-                RETURN count(this1) AS var6
+                WHERE ($isAuthenticated = true AND (size([(this1)<-[:CREATOR_OF]-(this2:User) WHERE ($jwt.uid IS NOT NULL AND this2.id = $jwt.uid) | 1]) > 0 AND size([(this1)-[:MEMBER_OF]->(this4:Family) WHERE size([(this4)<-[:CREATOR_OF]-(this3:User) WHERE ($param2 IS NOT NULL AND $param2 IN this3.roles) | 1]) > 0 | 1]) > 0))
+                RETURN count(this1) AS var5
             }
-            RETURN this { .id, membersAggregate: { count: var6 } } AS this"
+            RETURN this { .id, membersAggregate: { count: var5 } } AS this"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`
             "{
-                \\"param0\\": \\"plan:paid\\",
                 \\"isAuthenticated\\": true,
                 \\"jwt\\": {
                     \\"roles\\": [
                         \\"admin\\"
                     ],
                     \\"sub\\": \\"michel\\"
-                }
+                },
+                \\"param2\\": \\"plan:paid\\"
             }"
         `);
     });

@@ -28,7 +28,7 @@ describe("https://github.com/neo4j/graphql/issues/1320", () => {
         typeDefs = /* GraphQL */ `
             type Risk @node {
                 code: String!
-                ownedBy: Team @relationship(type: "OWNS_RISK", direction: IN)
+                ownedBy: [Team!]! @relationship(type: "OWNS_RISK", direction: IN)
                 mitigationState: [MitigationState]
             }
 

@@ -492,7 +492,7 @@ describe("Algebraic", () => {
             type Movie @node {
                 id: ID
                 viewers: Int!
-                directedBy: Director @relationship(type: "DIRECTS", direction: IN)
+                directedBy: [Director!]! @relationship(type: "DIRECTS", direction: IN)
             }
 
             type Director @node {
@@ -756,7 +756,7 @@ describe("Algebraic", () => {
             }
 
             type Movie {
-              directedBy(limit: Int, offset: Int, sort: [DirectorSort!], where: DirectorWhere): Director
+              directedBy(limit: Int, offset: Int, sort: [DirectorSort!], where: DirectorWhere): [Director!]!
               directedByAggregate(where: DirectorWhere): MovieDirectorDirectedByAggregationSelection
               directedByConnection(after: String, first: Int, sort: [MovieDirectedByConnectionSort!], where: MovieDirectedByConnectionWhere): MovieDirectedByConnection!
               id: ID
@@ -770,7 +770,7 @@ describe("Algebraic", () => {
             }
 
             input MovieConnectInput {
-              directedBy: MovieDirectedByConnectFieldInput
+              directedBy: [MovieDirectedByConnectFieldInput!]
             }
 
             input MovieConnectWhere {
@@ -784,7 +784,7 @@ describe("Algebraic", () => {
             }
 
             input MovieDeleteInput {
-              directedBy: MovieDirectedByDeleteFieldInput
+              directedBy: [MovieDirectedByDeleteFieldInput!]
             }
 
             input MovieDirectedByAggregateInput {
@@ -800,7 +800,7 @@ describe("Algebraic", () => {
             }
 
             input MovieDirectedByConnectFieldInput {
-              connect: DirectorConnectInput
+              connect: [DirectorConnectInput!]
               where: DirectorConnectWhere
             }
 
@@ -836,8 +836,8 @@ describe("Algebraic", () => {
             }
 
             input MovieDirectedByFieldInput {
-              connect: MovieDirectedByConnectFieldInput
-              create: MovieDirectedByCreateFieldInput
+              connect: [MovieDirectedByConnectFieldInput!]
+              create: [MovieDirectedByCreateFieldInput!]
             }
 
             input MovieDirectedByNodeAggregationWhereInput {
@@ -871,10 +871,10 @@ describe("Algebraic", () => {
             }
 
             input MovieDirectedByUpdateFieldInput {
-              connect: MovieDirectedByConnectFieldInput
-              create: MovieDirectedByCreateFieldInput
-              delete: MovieDirectedByDeleteFieldInput
-              disconnect: MovieDirectedByDisconnectFieldInput
+              connect: [MovieDirectedByConnectFieldInput!]
+              create: [MovieDirectedByCreateFieldInput!]
+              delete: [MovieDirectedByDeleteFieldInput!]
+              disconnect: [MovieDirectedByDisconnectFieldInput!]
               update: MovieDirectedByUpdateConnectionInput
               where: MovieDirectedByConnectionWhere
             }
@@ -889,7 +889,7 @@ describe("Algebraic", () => {
             }
 
             input MovieDisconnectInput {
-              directedBy: MovieDirectedByDisconnectFieldInput
+              directedBy: [MovieDirectedByDisconnectFieldInput!]
             }
 
             type MovieEdge {
@@ -906,7 +906,7 @@ describe("Algebraic", () => {
             }
 
             input MovieUpdateInput {
-              directedBy: MovieDirectedByUpdateFieldInput
+              directedBy: [MovieDirectedByUpdateFieldInput!]
               id_SET: ID
               viewers_DECREMENT: Int
               viewers_INCREMENT: Int
@@ -917,9 +917,31 @@ describe("Algebraic", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              directedBy: DirectorWhere
               directedByAggregate: MovieDirectedByAggregateInput
-              directedByConnection: MovieDirectedByConnectionWhere
+              \\"\\"\\"
+              Return Movies where all of the related MovieDirectedByConnections match this filter
+              \\"\\"\\"
+              directedByConnection_ALL: MovieDirectedByConnectionWhere
+              \\"\\"\\"
+              Return Movies where none of the related MovieDirectedByConnections match this filter
+              \\"\\"\\"
+              directedByConnection_NONE: MovieDirectedByConnectionWhere
+              \\"\\"\\"
+              Return Movies where one of the related MovieDirectedByConnections match this filter
+              \\"\\"\\"
+              directedByConnection_SINGLE: MovieDirectedByConnectionWhere
+              \\"\\"\\"
+              Return Movies where some of the related MovieDirectedByConnections match this filter
+              \\"\\"\\"
+              directedByConnection_SOME: MovieDirectedByConnectionWhere
+              \\"\\"\\"Return Movies where all of the related Directors match this filter\\"\\"\\"
+              directedBy_ALL: DirectorWhere
+              \\"\\"\\"Return Movies where none of the related Directors match this filter\\"\\"\\"
+              directedBy_NONE: DirectorWhere
+              \\"\\"\\"Return Movies where one of the related Directors match this filter\\"\\"\\"
+              directedBy_SINGLE: DirectorWhere
+              \\"\\"\\"Return Movies where some of the related Directors match this filter\\"\\"\\"
+              directedBy_SOME: DirectorWhere
               id_CONTAINS: ID
               id_ENDS_WITH: ID
               id_EQ: ID

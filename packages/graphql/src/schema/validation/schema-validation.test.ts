@@ -943,7 +943,7 @@ describe("schema validation", () => {
                     }
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -1128,12 +1128,12 @@ describe("schema validation", () => {
                 expect(executeValidate).not.toThrow();
             });
 
-            test("should returns errors when used correctly in more than one extension", () => {
+            test("should returns error when used correctly in more than one extension", () => {
                 const userDocument = gql`
                     type User @node {
                         id: ID!
                         name: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Post @node {
@@ -1263,7 +1263,7 @@ describe("schema validation", () => {
                         @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -1291,7 +1291,7 @@ describe("schema validation", () => {
                     type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
-                        author: User!
+                        author: [User!]!
                             @relationship(type: "HAS_AUTHOR", direction: IN)
                             @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
@@ -1329,7 +1329,7 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                             @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
-                        author: User!
+                        author: [User!]!
                             @relationship(type: "HAS_AUTHOR", direction: IN)
                             @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
@@ -1385,7 +1385,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1420,7 +1420,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1457,7 +1457,7 @@ describe("schema validation", () => {
                         @node
                         @subscriptionsAuthorization(filter: [{ where: { node: { content_EQ: "$jwt.sub" } } }]) {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1492,7 +1492,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1540,7 +1540,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1576,7 +1576,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1909,7 +1909,7 @@ describe("schema validation", () => {
                     }
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!] @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -2094,7 +2094,7 @@ describe("schema validation", () => {
                     type User @node {
                         id: ID!
                         name: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Post @node {
@@ -2208,7 +2208,7 @@ describe("schema validation", () => {
                     extend interface Member @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -2237,7 +2237,7 @@ describe("schema validation", () => {
                     type Post @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Document implements File @node {
@@ -2270,7 +2270,7 @@ describe("schema validation", () => {
                     type Post @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String! @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Document implements File @node {
@@ -2313,7 +2313,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2345,7 +2345,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2377,7 +2377,7 @@ describe("schema validation", () => {
 
                     type Post @authorization(filter: [{ where: { node: { content_EQ: "$jwt.sub" } } }]) @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2413,7 +2413,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2456,7 +2456,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2492,7 +2492,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2814,7 +2814,7 @@ describe("schema validation", () => {
                     }
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -3049,7 +3049,7 @@ describe("schema validation", () => {
                     type User @node {
                         id: ID!
                         name: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Post @node {
@@ -3170,7 +3170,7 @@ describe("schema validation", () => {
                     extend interface Member @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -3209,7 +3209,7 @@ describe("schema validation", () => {
                     type Post @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Document implements File @node {
@@ -3249,7 +3249,7 @@ describe("schema validation", () => {
                     type Post @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String! @authentication(ops: [CREATE], jwt: { sub_EQ: "test" })
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Document implements File @node {
@@ -3296,7 +3296,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3336,7 +3336,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3376,7 +3376,7 @@ describe("schema validation", () => {
 
                     type Post @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3410,7 +3410,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -3459,7 +3459,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3503,7 +3503,7 @@ describe("schema validation", () => {
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3620,66 +3620,6 @@ describe("schema validation", () => {
                         type User @authorization(validate: [{ operations: [CREATE] }]) @node {
                             id: ID!
                             name: String!
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    expect(executeValidate).not.toThrow();
-                });
-
-                test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post
-                            @authorization(filter: [{ where: { node: { author: { name_EQ: "Simone" } } } }])
-                            @node {
-                            content: String!
-                            author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    expect(executeValidate).not.toThrow();
-                });
-
-                test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post
-                            @authorization(filter: [{ where: { node: { authors_SOME: { name_EQ: "Simone" } } } }])
-                            @node {
-                            content: String!
-                            authors: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                         }
                     `;
 
@@ -3819,90 +3759,6 @@ describe("schema validation", () => {
                     );
                     expect(errors[0]).toHaveProperty("path", ["User", "@authorization", "filter", 0, "where", "node"]);
                 });
-
-                test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post
-                            @authorization(filter: [{ where: { node: { author: { content_EQ: "Simone" } } } }])
-                            @node {
-                            content: String!
-                            author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(1);
-                    expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[0]).toHaveProperty(
-                        "message",
-                        'Invalid argument: filter, error: Field "content_EQ" is not defined by type.'
-                    );
-                    expect(errors[0]).toHaveProperty("path", [
-                        "Post",
-                        "@authorization",
-                        "filter",
-                        0,
-                        "where",
-                        "node",
-                        "author",
-                    ]);
-                });
-
-                test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post
-                            @node
-                            @authorization(
-                                filter: [{ where: { node: { author_NOT_A_QUANTIFIER: { name_EQ: "Simone" } } } }]
-                            ) {
-                            content: String!
-                            authors: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(1);
-                    expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[0]).toHaveProperty(
-                        "message",
-                        'Invalid argument: filter, error: Field "author_NOT_A_QUANTIFIER" is not defined by type.'
-                    );
-                    expect(errors[0]).toHaveProperty("path", ["Post", "@authorization", "filter", 0, "where", "node"]);
-                });
             });
         });
 
@@ -3936,64 +3792,6 @@ describe("schema validation", () => {
                         type User @node {
                             id: ID! @authorization(validate: [{ operations: [CREATE] }])
                             name: String!
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    expect(executeValidate).not.toThrow();
-                });
-
-                test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node {
-                            content: String!
-                                @authorization(filter: [{ where: { node: { author: { name_EQ: "Simone" } } } }])
-                            author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    expect(executeValidate).not.toThrow();
-                });
-
-                test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node {
-                            content: String!
-                                @authorization(filter: [{ where: { node: { authors_SOME: { name_EQ: "Simone" } } } }])
-                            authors: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                         }
                     `;
 
@@ -4104,98 +3902,6 @@ describe("schema validation", () => {
                     expect(errors[0]).toHaveProperty("path", [
                         "User",
                         "id",
-                        "@authorization",
-                        "filter",
-                        0,
-                        "where",
-                        "node",
-                    ]);
-                });
-
-                test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node {
-                            content: String!
-                                @authorization(filter: [{ where: { node: { author: { content_EQ: "Simone" } } } }])
-                            author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(1);
-                    expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[0]).toHaveProperty(
-                        "message",
-                        'Invalid argument: filter, error: Field "content_EQ" is not defined by type.'
-                    );
-                    expect(errors[0]).toHaveProperty("path", [
-                        "Post",
-                        "content",
-                        "@authorization",
-                        "filter",
-                        0,
-                        "where",
-                        "node",
-                        "author",
-                    ]);
-                });
-
-                test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node {
-                            content: String!
-                                @authorization(
-                                    filter: [{ where: { node: { author_NOT_A_QUANTIFIER: { name_EQ: "Simone" } } } }]
-                                )
-                            authors: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-
-                    const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(1);
-                    expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[0]).toHaveProperty(
-                        "message",
-                        'Invalid argument: filter, error: Field "author_NOT_A_QUANTIFIER" is not defined by type.'
-                    );
-                    expect(errors[0]).toHaveProperty("path", [
-                        "Post",
-                        "content",
                         "@authorization",
                         "filter",
                         0,

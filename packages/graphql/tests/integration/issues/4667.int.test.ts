@@ -44,12 +44,12 @@ describe("https://github.com/neo4j/graphql/issues/4667", () => {
         const typeDefs = /* GraphQL */ `
             type ${MyThing} @node {
                 id: ID! @id
-                stuff: ${MyStuff} @relationship(type: "THE_STUFF", direction: OUT)
+                stuff: [${MyStuff}!]! @relationship(type: "THE_STUFF", direction: OUT)
             }
 
             type ${MyStuff} @node {
                 id: ID! @id
-                thing: ${MyThing} @relationship(type: "THE_STUFF", direction: IN)
+                thing: [${MyThing}!]! @relationship(type: "THE_STUFF", direction: IN)
             }
         `;
         await testHelper.initNeo4jGraphQL({
@@ -57,7 +57,7 @@ describe("https://github.com/neo4j/graphql/issues/4667", () => {
         });
         const query = /* GraphQL */ `
             query {
-                ${MyThing.plural}(where: { stuff: null }) {
+                ${MyThing.plural}(where: { stuff_SOME: null }) {
                     id
                     stuff {
                         id

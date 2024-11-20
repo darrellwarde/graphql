@@ -19,29 +19,27 @@
 
 import type { ASTVisitor, FieldDefinitionNode, ListTypeNode, NonNullTypeNode } from "graphql";
 import { Kind } from "graphql";
-import { relationshipDirective } from "../../../../graphql/directives";
+import type { SDLValidationContext } from "graphql/validation/ValidationContext";
+import { relationshipDirective } from "../../../graphql/directives";
+import { createGraphQLError } from "./utils/document-validation-error";
 
-export function WarnIfSingleRelationships(): ASTVisitor {
-    let warningAlreadyIssued = false;
-
+export function ErrorIfSingleRelationships(context: SDLValidationContext): ASTVisitor {
     return {
         FieldDefinition(field: FieldDefinitionNode) {
-            if (!warningAlreadyIssued) {
-                let isRelationship = false;
-                for (const directive of field.directives ?? []) {
-                    if (directive.name.value === relationshipDirective.name) {
-                        isRelationship = true;
-                    }
+            let isRelationship = false;
+            for (const directive of field.directives ?? []) {
+                if (directive.name.value === relationshipDirective.name) {
+                    isRelationship = true;
                 }
+            }
 
-                const isList = Boolean(getListTypeNode(field));
-
-                if (isRelationship && !isList) {
-                    console.warn(
-                        "Using @relationship directive on a non-list element is deprecated and will be removed in next major version."
-                    );
-                    warningAlreadyIssued = true;
-                }
+            const isList = Boolean(getListTypeNode(field));
+            if (isRelationship && !isList) {
+                context.reportError(
+                    createGraphQLError({
+                        errorMsg: `Using @relationship directive on a non-list property "${field.name.value}" is not supported.`,
+                    })
+                );
             }
         },
     };

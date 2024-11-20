@@ -53,7 +53,7 @@ describe("https://github.com/neo4j/graphql/issues/2388", () => {
                 { operations: [READ], where: { jwt: { roles_INCLUDES: "downstream" } } }
             ])
         {
-            partAddress: ${PartAddress}
+            partAddress: [${PartAddress}!]!
             @relationship(type: "BELONGS_TO", direction: OUT)
         }
 
@@ -92,7 +92,7 @@ describe("https://github.com/neo4j/graphql/issues/2388", () => {
         const query = `
         query PartByNumber {
             ${Part.plural} {
-                partUsagesAggregate(where: { partAddress: { id_EQ: "123" } }) {
+                partUsagesAggregate(where: { partAddress_SOME: { id_EQ: "123" } }) {
                     count
                 }
             }

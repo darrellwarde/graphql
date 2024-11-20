@@ -41,7 +41,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
                         """
                         columnName: "markedAttendance"
                     )
-                serviceDate: TimeGraph! @relationship(type: "BUSSED_ON", direction: OUT)
+                serviceDate: [TimeGraph!]! @relationship(type: "BUSSED_ON", direction: OUT)
             }
 
             interface Church {
@@ -73,7 +73,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
                 id: ID!
                 attendance: Int
                 markedAttendance: Boolean!
-                serviceDate: TimeGraph! @declareRelationship
+                serviceDate: [TimeGraph!]! @declareRelationship
             }
         `;
 
@@ -121,7 +121,7 @@ describe("https://github.com/neo4j/graphql/issues/2100", () => {
                     WITH this0
                     MATCH (this0)-[this1:BUSSED_ON]->(this2:TimeGraph)
                     WITH this2 { .date } AS this2
-                    RETURN head(collect(this2)) AS var3
+                    RETURN collect(this2) AS var3
                 }
                 CALL {
                     WITH this0

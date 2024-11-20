@@ -31,7 +31,8 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
                 current: Boolean!
                 architecture: [MasterData!]!
                     @relationship(type: "ARCHITECTURE", properties: "RelationProps", direction: OUT)
-                nameDetails: NameDetails @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
+                nameDetails: [NameDetails!]!
+                    @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
             }
 
             type NameDetails @mutation(operations: []) @query(read: false, aggregate: false) @node {
@@ -45,7 +46,8 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
             type MasterData @node {
                 id: ID!
                 current: Boolean!
-                nameDetails: NameDetails @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
+                nameDetails: [NameDetails!]!
+                    @relationship(type: "HAS_NAME", properties: "RelationProps", direction: OUT)
             }
         `;
 
@@ -86,7 +88,7 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
         const variableValues = {
             where: {
                 current_EQ: true,
-                nameDetailsConnection: {
+                nameDetailsConnection_SOME: {
                     edge: {
                         current_EQ: true,
                     },
@@ -99,7 +101,7 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
                         current_EQ: true,
                     },
                     node: {
-                        nameDetailsConnection: {
+                        nameDetailsConnection_SOME: {
                             edge: {
                                 current_EQ: true,
                             },
@@ -119,7 +121,13 @@ describe("https://github.com/neo4j/graphql/issues/1783", () => {
 
         expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
             "MATCH (this:Series)
-            WHERE (this.current = $param0 AND single(this2 IN [(this)-[this3:ARCHITECTURE]->(this2:MasterData) WHERE (single(this0 IN [(this2)-[this1:HAS_NAME]->(this0:NameDetails) WHERE (this0.fullName = $param1 AND this1.current = $param2) | 1] WHERE true) AND this3.current = $param3) | 1] WHERE true) AND single(this4 IN [(this)-[this5:HAS_NAME]->(this4:NameDetails) WHERE (this4.fullName CONTAINS $param4 AND this5.current = $param5) | 1] WHERE true))
+            WHERE (this.current = $param0 AND single(this0 IN [(this)-[this3:ARCHITECTURE]->(this0:MasterData) WHERE (EXISTS {
+                MATCH (this0)-[this1:HAS_NAME]->(this2:NameDetails)
+                WHERE (this2.fullName = $param1 AND this1.current = $param2)
+            } AND this3.current = $param3) | 1] WHERE true) AND EXISTS {
+                MATCH (this)-[this4:HAS_NAME]->(this5:NameDetails)
+                WHERE (this5.fullName CONTAINS $param4 AND this4.current = $param5)
+            })
             CALL {
                 WITH this
                 MATCH (this)-[this6:HAS_NAME]->(this7:NameDetails)
