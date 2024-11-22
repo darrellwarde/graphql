@@ -74,7 +74,7 @@ describe("authorization warning", () => {
     });
 });
 
-describe("valid list fields in @node types", () => {
+describe("valid list fields in @node and @relationshipProperties types", () => {
     test("should raise when a list of nullable elements is found", () => {
         const doc = gql`
             type Movie @node {

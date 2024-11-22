@@ -224,7 +224,6 @@ function runValidationRulesOnFilteredDocument({
             ValidDirectiveInheritance,
             DirectiveArgumentOfCorrectType(false),
             WarnIfAuthorizationFeatureDisabled(features?.authorization),
-            ValidListInNodeType,
             ErrorIfSingleRelationships,
             WarnIfAMaxLimitCanBeBypassedThroughInterface(),
             WarnObjectFieldsWithoutResolver({
