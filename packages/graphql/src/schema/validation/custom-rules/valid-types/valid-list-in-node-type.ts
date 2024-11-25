@@ -26,7 +26,6 @@ import {
     relationshipDirective,
     relationshipPropertiesDirective,
 } from "../../../../graphql/directives";
-
 import { assertValid, createGraphQLError, DocumentValidationError } from "../utils/document-validation-error";
 import { getInnerTypeName } from "../utils/utils";
 
