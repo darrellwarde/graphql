@@ -82,7 +82,7 @@ describe("Date", () => {
             const typeDefs = /* GraphQL */ `
                 type ${Movie} @node {
                   id: ID
-                  dates: [Date]
+                  dates: [Date!]
                 }
             `;
 
@@ -98,8 +98,8 @@ describe("Date", () => {
             const create = /* GraphQL */ `
                 mutation {
                     ${Movie.operations.create}(input: [{ id: "${id}", dates: ["${
-                date.toISOString().split("T")[0]
-            }", "${date.toISOString()}", "${date.toISOString()}"] }]) {
+                        date.toISOString().split("T")[0]
+                    }", "${date.toISOString()}", "${date.toISOString()}"] }]) {
                         ${Movie.plural} {
                             dates
                         }

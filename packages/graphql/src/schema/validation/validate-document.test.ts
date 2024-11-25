@@ -74,57 +74,147 @@ describe("authorization warning", () => {
     });
 });
 
-describe("list of lists warning", () => {
-    let warn: jest.SpyInstance;
-
-    beforeEach(() => {
-        warn = jest.spyOn(console, "warn").mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-        warn.mockReset();
-    });
-
-    test("list of lists warning only occurs once for multiple fields", () => {
+describe("valid list fields in @node and @relationshipProperties types", () => {
+    test("should raise when a list of nullable elements is found", () => {
         const doc = gql`
             type Movie @node {
-                id: [[ID]]
+                id: [ID]
+            }
+        `;
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+
+        const errors = getError(executeValidate);
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+        expect(errors[0]).toHaveProperty(
+            "message",
+            'List of nullable elements are not supported in "@node" types. Found: [ID]'
+        );
+        expect(errors[0]).toHaveProperty("path", ["Movie", "id"]);
+    });
+
+    test("should raise when a list of nullable elements is found on relationship properties", () => {
+        const relationshipProps = gql`
+            type ActedIn @relationshipProperties {
+                roles: [String]
+            }
+        `;
+        const doc = gql`
+            ${relationshipProps}
+            type Movie @node {
+                title: String
             }
 
             type Actor @node {
-                name: [[String]]
+                name: String
+                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
         `;
+        const objects = relationshipProps.definitions as ObjectTypeDefinitionNode[];
+        const executeValidate = () =>
+            validateDocument({
+                document: doc,
+                features: {},
+                additionalDefinitions: { enums: [], interfaces: [], unions: [], objects },
+            });
 
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
-
-        expect(warn).toHaveBeenCalledWith(
-            "Encountered list field definition(s) with list elements. This is not supported by Neo4j, however, you can ignore this warning if the field is only used in the result of custom resolver/Cypher."
+        const errors = getError(executeValidate);
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+        expect(errors[0]).toHaveProperty(
+            "message",
+            'List of nullable elements are not supported in "@relationshipProperties" types. Found: [String]'
         );
-        expect(warn).toHaveBeenCalledOnce();
+        expect(errors[0]).toHaveProperty("path", ["ActedIn", "roles"]);
     });
 
-    test("works for non-nullable lists", () => {
+    test("should not raise when a list of nullable elements is found on relationship properties", () => {
+        const relationshipProps = gql`
+            type ActedIn @relationshipProperties {
+                roles: [String!]
+            }
+        `;
+        const doc = gql`
+            ${relationshipProps}
+            type Movie @node {
+                title: String
+            }
+
+            type Actor @node {
+                name: String
+                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+            }
+        `;
+        const objects = relationshipProps.definitions as ObjectTypeDefinitionNode[];
+        const executeValidate = () =>
+            validateDocument({
+                document: doc,
+                features: {},
+                additionalDefinitions: { enums: [], interfaces: [], unions: [], objects },
+            });
+
+        const errors = getError(executeValidate);
+
+        expect(errors).toBeInstanceOf(NoErrorThrownError);
+    });
+
+    test("should raise when a list of list is found", () => {
         const doc = gql`
             type Movie @node {
-                id: [[ID!]!]!
+                id: [[ID]!]
+            }
+        `;
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+
+        const errors = getError(executeValidate);
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+        expect(errors[0]).toHaveProperty(
+            "message",
+            'List of nullable elements are not supported in "@node" types. Found: [[ID]!]'
+        );
+        expect(errors[0]).toHaveProperty("path", ["Movie", "id"]);
+    });
+
+    test("should not raise when a list of non-nullable elements is found", () => {
+        const doc = gql`
+            type Movie @node {
+                id: [ID!]
+            }
+        `;
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+
+        const errors = getError(executeValidate);
+
+        expect(errors).toBeInstanceOf(NoErrorThrownError);
+    });
+
+    test("should not raise when a list of non-nullable elements is found on @cypher fields", () => {
+        const doc = gql`
+            type Movie @node {
+                id: [ID] @cypher(statement: "RETURN [1,2,3] as ids", columnName: "ids")
             }
         `;
 
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
 
-        expect(warn).toHaveBeenCalledWith(
-            "Encountered list field definition(s) with list elements. This is not supported by Neo4j, however, you can ignore this warning if the field is only used in the result of custom resolver/Cypher."
-        );
-        expect(warn).toHaveBeenCalledOnce();
+        const errors = getError(executeValidate);
+
+        expect(errors).toBeInstanceOf(NoErrorThrownError);
+    });
+
+    test("should not raise when a list of non-nullable elements is found on non @node types", () => {
+        const doc = gql`
+            type Movie {
+                id: [ID]
+            }
+        `;
+
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+
+        const errors = getError(executeValidate);
+
+        expect(errors).toBeInstanceOf(NoErrorThrownError);
     });
 });
 
@@ -1225,7 +1315,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @default(value: "dummy")
+                        statuses: [Status!] @default(value: "dummy")
                     }
                 `;
 
@@ -1259,7 +1349,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @default(value: ["dummy"])
+                        statuses: [Status!] @default(value: ["dummy"])
                     }
                 `;
 
@@ -1293,7 +1383,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @default(value: [PENDING])
+                        statuses: [Status!] @default(value: [PENDING])
                     }
                 `;
                 const enums = enumTypes.definitions as EnumTypeDefinitionNode[];
@@ -1350,7 +1440,7 @@ describe("validation 2.0", () => {
             test("@default on int list must be list of int values", () => {
                 const doc = gql`
                     type User @node {
-                        ages: [Int] @default(value: ["dummy"])
+                        ages: [Int!] @default(value: ["dummy"])
                     }
                 `;
 
@@ -1374,7 +1464,7 @@ describe("validation 2.0", () => {
             test("@default on int list must be list of int values correct", () => {
                 const doc = gql`
                     type User @node {
-                        ages: [Int] @default(value: [12])
+                        ages: [Int!] @default(value: [12])
                     }
                 `;
 
@@ -1429,7 +1519,7 @@ describe("validation 2.0", () => {
             test("@default on float list must be list of float values", () => {
                 const doc = gql`
                     type User @node {
-                        avgs: [Float] @default(value: [1])
+                        avgs: [Float!] @default(value: [1])
                     }
                 `;
 
@@ -1453,7 +1543,7 @@ describe("validation 2.0", () => {
             test("@default on float list must be list of float values correct", () => {
                 const doc = gql`
                     type User @node {
-                        avgs: [Float] @default(value: [1.2])
+                        avgs: [Float!] @default(value: [1.2])
                     }
                 `;
 
@@ -1508,7 +1598,7 @@ describe("validation 2.0", () => {
             test("@default on boolean list must be list of boolean values", () => {
                 const doc = gql`
                     type User @node {
-                        statuses: [Boolean] @default(value: [2])
+                        statuses: [Boolean!] @default(value: [2])
                     }
                 `;
 
@@ -1532,7 +1622,7 @@ describe("validation 2.0", () => {
             test("@default on boolean list must be list of boolean values correct", () => {
                 const doc = gql`
                     type User @node {
-                        statuses: [Boolean] @default(value: [true])
+                        statuses: [Boolean!] @default(value: [true])
                     }
                 `;
 
@@ -1587,7 +1677,7 @@ describe("validation 2.0", () => {
             test("@default on string list must be list of string values", () => {
                 const doc = gql`
                     type User @node {
-                        names: [String] @default(value: [2])
+                        names: [String!] @default(value: [2])
                     }
                 `;
 
@@ -1611,7 +1701,7 @@ describe("validation 2.0", () => {
             test("@default on string list must be list of string values correct", () => {
                 const doc = gql`
                     type User @node {
-                        names: [String] @default(value: ["Bob"])
+                        names: [String!] @default(value: ["Bob"])
                     }
                 `;
 
@@ -1649,7 +1739,7 @@ describe("validation 2.0", () => {
             test("@default on ID list must be list of ID values", () => {
                 const doc = gql`
                     type User @node {
-                        ids: [ID] @default(value: [2])
+                        ids: [ID!] @default(value: [2])
                     }
                 `;
 
@@ -1673,7 +1763,7 @@ describe("validation 2.0", () => {
             test("@default on ID list must be list of ID values correct", () => {
                 const doc = gql`
                     type User @node {
-                        ids: [ID] @default(value: ["123-223"])
+                        ids: [ID!] @default(value: ["123-223"])
                     }
                 `;
 
@@ -1856,7 +1946,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @coalesce(value: "dummy")
+                        statuses: [Status!] @coalesce(value: "dummy")
                     }
                 `;
 
@@ -1890,7 +1980,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @coalesce(value: ["dummy"])
+                        statuses: [Status!] @coalesce(value: ["dummy"])
                     }
                 `;
 
@@ -1924,7 +2014,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @coalesce(value: [PENDING])
+                        statuses: [Status!] @coalesce(value: [PENDING])
                     }
                 `;
 
@@ -1982,7 +2072,7 @@ describe("validation 2.0", () => {
             test("@coalesce on int list must be list of int values", () => {
                 const doc = gql`
                     type User @node {
-                        ages: [Int] @coalesce(value: ["dummy"])
+                        ages: [Int!] @coalesce(value: ["dummy"])
                     }
                 `;
 
@@ -2006,7 +2096,7 @@ describe("validation 2.0", () => {
             test("@coalesce on int list must be list of int values correct", () => {
                 const doc = gql`
                     type User @node {
-                        ages: [Int] @coalesce(value: [12])
+                        ages: [Int!] @coalesce(value: [12])
                     }
                 `;
 
@@ -2061,7 +2151,7 @@ describe("validation 2.0", () => {
             test("@coalesce on float list must be list of float values", () => {
                 const doc = gql`
                     type User @node {
-                        avgs: [Float] @coalesce(value: [1])
+                        avgs: [Float!] @coalesce(value: [1])
                     }
                 `;
 
@@ -2085,7 +2175,7 @@ describe("validation 2.0", () => {
             test("@coalesce on float list must be list of float values correct", () => {
                 const doc = gql`
                     type User @node {
-                        avgs: [Float] @coalesce(value: [1.2])
+                        avgs: [Float!] @coalesce(value: [1.2])
                     }
                 `;
 
@@ -2143,7 +2233,7 @@ describe("validation 2.0", () => {
             test("@coalesce on boolean list must be list of boolean values", () => {
                 const doc = gql`
                     type User @node {
-                        statuses: [Boolean] @coalesce(value: [2])
+                        statuses: [Boolean!] @coalesce(value: [2])
                     }
                 `;
 
@@ -2167,7 +2257,7 @@ describe("validation 2.0", () => {
             test("@coalesce on boolean list must be list of boolean values correct", () => {
                 const doc = gql`
                     type User @node {
-                        statuses: [Boolean] @coalesce(value: [true])
+                        statuses: [Boolean!] @coalesce(value: [true])
                     }
                 `;
 
@@ -2222,7 +2312,7 @@ describe("validation 2.0", () => {
             test("@coalesce on string list must be list of string values", () => {
                 const doc = gql`
                     type User @node {
-                        names: [String] @coalesce(value: [2])
+                        names: [String!] @coalesce(value: [2])
                     }
                 `;
 
@@ -2246,7 +2336,7 @@ describe("validation 2.0", () => {
             test("@coalesce on string list must be list of string values correct", () => {
                 const doc = gql`
                     type User @node {
-                        names: [String] @coalesce(value: ["Bob"])
+                        names: [String!] @coalesce(value: ["Bob"])
                     }
                 `;
 
@@ -2284,7 +2374,7 @@ describe("validation 2.0", () => {
             test("@coalesce on ID list must be list of ID values", () => {
                 const doc = gql`
                     type User @node {
-                        ids: [ID] @coalesce(value: [2])
+                        ids: [ID!] @coalesce(value: [2])
                     }
                 `;
 
@@ -2308,7 +2398,7 @@ describe("validation 2.0", () => {
             test("@coalesce on ID list must be list of ID values correct", () => {
                 const doc = gql`
                     type User @node {
-                        ids: [ID] @coalesce(value: ["123-223"])
+                        ids: [ID!] @coalesce(value: ["123-223"])
                     }
                 `;
 
@@ -3081,7 +3171,7 @@ describe("validation 2.0", () => {
         test("should throw cannot auto-generate an array", () => {
             const doc = gql`
                 type Movie @node {
-                    name: [ID] @id
+                    name: [ID!] @id
                 }
             `;
 
@@ -3109,7 +3199,7 @@ describe("validation 2.0", () => {
             test("@timestamp cannot autogenerate array", () => {
                 const doc = gql`
                     type User @node {
-                        lastSeenAt: [DateTime] @timestamp
+                        lastSeenAt: [DateTime!] @timestamp
                     }
                 `;
 
@@ -3125,7 +3215,7 @@ describe("validation 2.0", () => {
             test("should throw cannot timestamp on array of DateTime", () => {
                 const doc = gql`
                     type Movie @node {
-                        name: [DateTime] @timestamp(operations: [CREATE])
+                        name: [DateTime!] @timestamp(operations: [CREATE])
                     }
                 `;
 
@@ -3173,7 +3263,7 @@ describe("validation 2.0", () => {
             test("@id autogenerate cannot autogenerate array", () => {
                 const doc = gql`
                     type User @node {
-                        uid: [ID] @id
+                        uid: [ID!] @id
                     }
                 `;
 
@@ -5245,7 +5335,7 @@ describe("validation 2.0", () => {
                     const relationshipProperties = gql`
                         type ActedIn @relationshipProperties {
                             id: ID @cypher(statement: "RETURN id(this) as id", columnName: "id")
-                            roles: [String]
+                            roles: [String!]
                         }
                     `;
                     const doc = gql`
@@ -5518,7 +5608,7 @@ describe("validation 2.0", () => {
                 test("simple list", () => {
                     const doc = gql`
                         type Post @node {
-                            titles: [String]
+                            titles: [String!]
                         }
                     `;
 
