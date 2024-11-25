@@ -27,7 +27,7 @@ import {
     relationshipPropertiesDirective,
 } from "../../../../graphql/directives";
 import { assertValid, createGraphQLError, DocumentValidationError } from "../utils/document-validation-error";
-import { getInnerTypeName } from "../utils/utils";
+import { getInnerTypeName, getPrettyName } from "../utils/utils";
 
 /**
  * Validates that list types used in type annotated with the node directive are supported by Neo4j
@@ -41,8 +41,12 @@ export function ValidListInNodeType(context: SDLValidationContext): ASTVisitor {
             const relationshipPropertiesUsage = directives?.find(
                 (directive) => directive.name.value === relationshipPropertiesDirective.name
             );
-            if (!directives || (!nodeUsage && !relationshipPropertiesUsage)) {
-                return; // Skip non-node types or relationshipProperties types
+            if (!directives) {
+                return; // Skip when no directives are present
+            }
+
+            if (!nodeUsage && !relationshipPropertiesUsage) {
+                return; // Skip if is the type is neither annotated with node nor relationshipProperties
             }
 
             objectTypeDefinitionNode.fields?.forEach((fieldDefinitionNode) => {
@@ -66,7 +70,7 @@ export function ValidListInNodeType(context: SDLValidationContext): ASTVisitor {
                             [Kind.NON_NULL_TYPE, Kind.LIST_TYPE, Kind.NON_NULL_TYPE, wrappedType],
                         ];
                         if (!findTypePathInTypePaths(typePath, validTypePaths)) {
-                            const typeStr = typeNodeToString(type);
+                            const typeStr = getPrettyName(type);
 
                             const directiveName = (nodeUsage ?? relationshipPropertiesUsage)?.name?.value;
                             throw new DocumentValidationError(
@@ -89,15 +93,6 @@ export function ValidListInNodeType(context: SDLValidationContext): ASTVisitor {
             });
         },
     };
-}
-
-function typeNodeToString(typeNode: TypeNode): string {
-    if (typeNode.kind === Kind.NON_NULL_TYPE) {
-        return `${typeNodeToString(typeNode.type)}!`;
-    } else if (typeNode.kind === Kind.LIST_TYPE) {
-        return `[${typeNodeToString(typeNode.type)}]`;
-    }
-    return typeNode.name.value;
 }
 
 function getTypePath(typeNode: TypeNode, currentPath: string[] = []): string[] {
