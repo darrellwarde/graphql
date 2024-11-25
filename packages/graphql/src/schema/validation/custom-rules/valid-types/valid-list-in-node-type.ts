@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-import type { ASTVisitor, ObjectTypeDefinitionNode, TypeNode } from "graphql";
-import { Kind } from "graphql";
+import { Kind, type ASTVisitor, type ObjectTypeDefinitionNode, type TypeNode } from "graphql";
+
 import type { SDLValidationContext } from "graphql/validation/ValidationContext";
 import {
     cypherDirective,
@@ -61,7 +61,7 @@ export function ValidListInNodeType(context: SDLValidationContext): ASTVisitor {
                     const typePath = getTypePath(type);
                     if (typePath.includes(Kind.LIST_TYPE)) {
                         const wrappedType = getInnerTypeName(type);
-                        const validTypePaths: TypePath[] = [
+                        const validTypePaths: string[][] = [
                             [Kind.LIST_TYPE, Kind.NON_NULL_TYPE, wrappedType],
                             [Kind.NON_NULL_TYPE, Kind.LIST_TYPE, Kind.NON_NULL_TYPE, wrappedType],
                         ];
@@ -91,8 +91,6 @@ export function ValidListInNodeType(context: SDLValidationContext): ASTVisitor {
     };
 }
 
-type TypePath = (string | Kind.LIST_TYPE | Kind.NON_NULL_TYPE)[];
-
 function typeNodeToString(typeNode: TypeNode): string {
     if (typeNode.kind === Kind.NON_NULL_TYPE) {
         return `${typeNodeToString(typeNode.type)}!`;
@@ -102,14 +100,14 @@ function typeNodeToString(typeNode: TypeNode): string {
     return typeNode.name.value;
 }
 
-function getTypePath(typeNode: TypeNode, currentPath: TypePath = []): TypePath {
+function getTypePath(typeNode: TypeNode, currentPath: string[] = []): string[] {
     if (typeNode.kind === Kind.NON_NULL_TYPE || typeNode.kind === Kind.LIST_TYPE) {
         return getTypePath(typeNode.type, [...currentPath, typeNode.kind]);
     }
     return [...currentPath, typeNode.name.value];
 }
 
-function findTypePathInTypePaths(typePathToFind: TypePath, typePaths: TypePath[]): boolean {
+function findTypePathInTypePaths(typePathToFind: string[], typePaths: string[][]): boolean {
     const typePathString = typePathToFind.join();
     return typePaths.some((typePath) => typePathString === typePath.join());
 }
