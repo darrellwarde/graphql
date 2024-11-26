@@ -109,6 +109,7 @@ describe("Create Subscription", () => {
             },
         ]);
     });
+
     test("create subscription with where", async () => {
         await wsClient.subscribe(`
             subscription {
