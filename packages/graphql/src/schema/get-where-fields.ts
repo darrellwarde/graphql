@@ -27,6 +27,76 @@ import { DEPRECATE_NOT } from "./constants";
 import { shouldAddDeprecatedFields } from "./generation/utils";
 import { graphqlDirectivesToCompose } from "./to-compose";
 
+function addCypherFieldFilters({
+    field,
+    type,
+    result,
+    deprecatedDirectives,
+    features,
+}: {
+    field: AttributeAdapter;
+    type: string;
+    result: Record<
+        string,
+        {
+            type: string;
+            directives: Directive[];
+        }
+    >;
+    deprecatedDirectives: Directive[];
+    features: Neo4jFeaturesSettings | undefined;
+}) {
+    result[field.name] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+
+    if (shouldAddDeprecatedFields(features, "negationFilters")) {
+        result[`${field.name}_NOT`] = {
+            type,
+            directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_NOT],
+        };
+    }
+}
+
+function addCypherListFieldFilters({
+    field,
+    type,
+    result,
+    deprecatedDirectives,
+}: {
+    field: AttributeAdapter;
+    type: string;
+    result: Record<
+        string,
+        {
+            type: string;
+            directives: Directive[];
+        }
+    >;
+    deprecatedDirectives: Directive[];
+}) {
+    result[`${field.name}_ALL`] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+
+    result[`${field.name}_NONE`] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+
+    result[`${field.name}_SINGLE`] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+
+    result[`${field.name}_SOME`] = {
+        type,
+        directives: deprecatedDirectives,
+    };
+}
+
 // TODO: refactoring needed!
 // isWhereField, isFilterable, ... extracted out into attributes category
 export function getWhereFieldsForAttributes({
@@ -73,17 +143,27 @@ export function getWhereFieldsForAttributes({
 
             if (field.annotations.cypher.targetEntity) {
                 const targetEntityAdapter = new ConcreteEntityAdapter(field.annotations.cypher.targetEntity);
-                result[field.name] = {
-                    type: targetEntityAdapter.operations.whereInputTypeName,
-                    directives: deprecatedDirectives,
-                };
+                const type = targetEntityAdapter.operations.whereInputTypeName;
 
-                if (shouldAddDeprecatedFields(features, "negationFilters")) {
-                    result[`${field.name}_NOT`] = {
-                        type: targetEntityAdapter.operations.whereInputTypeName,
-                        directives: deprecatedDirectives.length ? deprecatedDirectives : [DEPRECATE_NOT],
-                    };
+                // Always add base where field filters (e.g. name, name_NOT)
+                addCypherFieldFilters({
+                    field,
+                    type,
+                    result,
+                    deprecatedDirectives,
+                    features,
+                });
+
+                // Add list where field filters (e.g. name_ALL, name_NONE, name_SINGLE, name_SOME)
+                if (field.typeHelper.isList()) {
+                    addCypherListFieldFilters({
+                        field,
+                        type,
+                        result,
+                        deprecatedDirectives,
+                    });
                 }
+
                 continue;
             }
         }
