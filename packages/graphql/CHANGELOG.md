@@ -1,5 +1,11 @@
 # @neo4j/graphql
 
+## 5.11.0
+
+### Minor Changes
+
+-   [#5848](https://github.com/neo4j/graphql/pull/5848) [`5a13bf5`](https://github.com/neo4j/graphql/commit/5a13bf5135f96ddaccf492fa8710894119cade16) Thanks [@mjfwebb](https://github.com/mjfwebb)! - Add filtering on many to many relationship custom cypher fields
+
 ## 5.10.0
 
 ### Minor Changes
