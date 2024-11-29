@@ -2059,10 +2059,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@neo4j/cypher-builder@npm:^2.0.0":
-  version: 2.0.1
-  resolution: "@neo4j/cypher-builder@npm:2.0.1"
-  checksum: 10c0/bafb72a477ba7eabc105cbbdeb8f8ad85bd75e085f96eaee9137f84bc02a41781ab5014249fac4c9524b0957219db8eb3ce3f86c0a104b8a0e4f8aed7046484f
+"@neo4j/cypher-builder@npm:2.0.2":
+  version: 2.0.2
+  resolution: "@neo4j/cypher-builder@npm:2.0.2"
+  checksum: 10c0/776f7204df4c226bf26c1e9e8db472b6498d85b7aacf4ca67ec210ca4c6e884a1c08e5bd7779dccadef4b79a22775c9f7d99b73cba9c8d38e518551792a38f03
   languageName: node
   linkType: hard
 
@@ -2072,7 +2072,7 @@ __metadata:
   languageName: node
   linkType: soft
 
-"@neo4j/graphql@npm:^6.0.0, @neo4j/graphql@npm:^6.1.1, @neo4j/graphql@workspace:packages/graphql":
+"@neo4j/graphql@npm:^6.0.0, @neo4j/graphql@npm:^6.2.0, @neo4j/graphql@workspace:packages/graphql":
   version: 0.0.0-use.local
   resolution: "@neo4j/graphql@workspace:packages/graphql"
   dependencies:
@@ -2083,7 +2083,7 @@ __metadata:
     "@graphql-tools/resolvers-composition": "npm:^7.0.0"
     "@graphql-tools/schema": "npm:^10.0.0"
     "@graphql-tools/utils": "npm:^10.0.0"
-    "@neo4j/cypher-builder": "npm:^2.0.0"
+    "@neo4j/cypher-builder": "npm:2.0.2"
     "@types/deep-equal": "npm:1.0.4"
     "@types/is-uuid": "npm:1.0.2"
     "@types/jest": "npm:29.5.14"
@@ -3842,7 +3842,7 @@ __metadata:
     "@apollo/federation-subgraph-compatibility": "npm:2.2.0"
     "@apollo/server": "npm:^4.7.0"
     "@graphql-tools/wrap": "npm:^10.0.0"
-    "@neo4j/graphql": "npm:^6.1.1"
+    "@neo4j/graphql": "npm:^6.2.0"
     fork-ts-checker-webpack-plugin: "npm:9.0.2"
     graphql: "npm:16.9.0"
     graphql-tag: "npm:^2.12.6"
