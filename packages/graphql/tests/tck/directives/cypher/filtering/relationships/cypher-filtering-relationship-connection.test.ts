@@ -540,7 +540,10 @@ describe("Connection API - cypher directive filtering - Relationship", () => {
             query {
                 moviesConnection(
                     where: {
-                        OR: [{ actors_SOME: { name_EQ: "Jada Pinkett Smith" } }, { genres: { name_EQ: "Romance" } }]
+                        OR: [
+                            { actors_SOME: { name_EQ: "Jada Pinkett Smith" } }
+                            { genres_SOME: { name_EQ: "Romance" } }
+                        ]
                     }
                 ) {
                     edges {
