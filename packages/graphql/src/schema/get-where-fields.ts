@@ -111,12 +111,6 @@ export function getWhereFieldsForAttributes({
                 const targetEntityAdapter = new ConcreteEntityAdapter(field.annotations.cypher.targetEntity);
                 const type = targetEntityAdapter.operations.whereInputTypeName;
 
-                // Always add base where field filter (e.g. name)
-                result[field.name] = {
-                    type,
-                    directives: deprecatedDirectives,
-                };
-
                 // Add list where field filters (e.g. name_ALL, name_NONE, name_SINGLE, name_SOME)
                 if (field.typeHelper.isList()) {
                     addCypherListFieldFilters({
@@ -125,6 +119,12 @@ export function getWhereFieldsForAttributes({
                         result,
                         deprecatedDirectives,
                     });
+                } else {
+                    // Add base where field filter (e.g. name)
+                    result[field.name] = {
+                        type,
+                        directives: deprecatedDirectives,
+                    };
                 }
 
                 continue;

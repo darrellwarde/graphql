@@ -331,7 +331,6 @@ describe("Interfaces", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              customQuery: MovieWhere
               customQuery_ALL: MovieWhere
               customQuery_NONE: MovieWhere
               customQuery_SINGLE: MovieWhere
@@ -733,7 +732,6 @@ describe("Interfaces", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              customQuery: MovieWhere
               customQuery_ALL: MovieWhere
               customQuery_NONE: MovieWhere
               customQuery_SINGLE: MovieWhere

@@ -859,7 +859,6 @@ describe("Cypher", () => {
               NOT: BlogWhere
               OR: [BlogWhere!]
               post: PostWhere
-              posts: PostWhere
               posts_ALL: PostWhere
               posts_NONE: PostWhere
               posts_SINGLE: PostWhere
@@ -1111,7 +1110,6 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
-              movies: MovieWhere
               movies_ALL: MovieWhere
               movies_NONE: MovieWhere
               movies_SINGLE: MovieWhere
@@ -1188,7 +1186,6 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
-              actors: ActorWhere
               actors_ALL: ActorWhere
               actors_NONE: ActorWhere
               actors_SINGLE: ActorWhere
@@ -1384,7 +1381,6 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
-              movies: MovieWhere
               movies_ALL: MovieWhere
               movies_NONE: MovieWhere
               movies_SINGLE: MovieWhere
@@ -1461,7 +1457,6 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
-              actors: ActorWhere
               actors_ALL: ActorWhere
               actors_NONE: ActorWhere
               actors_SINGLE: ActorWhere
