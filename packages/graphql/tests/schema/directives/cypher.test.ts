@@ -859,6 +859,11 @@ describe("Cypher", () => {
               NOT: BlogWhere
               OR: [BlogWhere!]
               post: PostWhere
+              posts: PostWhere
+              posts_ALL: PostWhere
+              posts_NONE: PostWhere
+              posts_SINGLE: PostWhere
+              posts_SOME: PostWhere
               title_CONTAINS: String
               title_ENDS_WITH: String
               title_EQ: String
@@ -1106,6 +1111,11 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
+              movies: MovieWhere
+              movies_ALL: MovieWhere
+              movies_NONE: MovieWhere
+              movies_SINGLE: MovieWhere
+              movies_SOME: MovieWhere
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1178,6 +1188,11 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
+              actors: ActorWhere
+              actors_ALL: ActorWhere
+              actors_NONE: ActorWhere
+              actors_SINGLE: ActorWhere
+              actors_SOME: ActorWhere
             }
 
             type MoviesConnection {
@@ -1369,6 +1384,11 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
+              movies: MovieWhere
+              movies_ALL: MovieWhere
+              movies_NONE: MovieWhere
+              movies_SINGLE: MovieWhere
+              movies_SOME: MovieWhere
               name_CONTAINS: String
               name_ENDS_WITH: String
               name_EQ: String
@@ -1441,6 +1461,11 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
+              actors: ActorWhere
+              actors_ALL: ActorWhere
+              actors_NONE: ActorWhere
+              actors_SINGLE: ActorWhere
+              actors_SOME: ActorWhere
             }
 
             type MoviesConnection {
