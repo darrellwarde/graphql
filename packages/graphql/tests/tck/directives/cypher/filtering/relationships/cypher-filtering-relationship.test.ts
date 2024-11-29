@@ -21,71 +21,6 @@ import { Neo4jGraphQL } from "../../../../../../src";
 import { formatCypher, formatParams, translateQuery } from "../../../../utils/tck-test-utils";
 
 describe("cypher directive filtering - Relationship", () => {
-    test("relationship with single property filter", async () => {
-        const typeDefs = /* GraphQL */ `
-            type Movie @node {
-                title: String
-                actors: [Actor!]!
-                    @cypher(
-                        statement: """
-                        MATCH (this)<-[:ACTED_IN]-(actor:Actor)
-                        RETURN actor
-                        """
-                        columnName: "actor"
-                    )
-            }
-
-            type Actor @node {
-                name: String
-                movies: [Movie!]!
-                    @cypher(
-                        statement: """
-                        MATCH (this)-[:ACTED_IN]->(movie:Movie)
-                        RETURN movie
-                        """
-                        columnName: "movie"
-                    )
-            }
-        `;
-
-        const neoSchema: Neo4jGraphQL = new Neo4jGraphQL({
-            typeDefs,
-        });
-
-        const query = /* GraphQL */ `
-            query {
-                movies(where: { actors: { name_EQ: "Jada Pinkett Smith" } }) {
-                    title
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "MATCH (this:Movie)
-            CALL {
-                WITH this
-                CALL {
-                    WITH this
-                    WITH this AS this
-                    MATCH (this)<-[:ACTED_IN]-(actor:Actor)
-                    RETURN actor
-                }
-                WITH actor AS this0
-                RETURN collect(this0) AS this1
-            }
-            WITH *
-            WHERE any(this2 IN this1 WHERE this2.name = $param0)
-            RETURN this { .title } AS this"
-        `);
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"param0\\": \\"Jada Pinkett Smith\\"
-            }"
-        `);
-    });
-
     test("relationship with single property filter NOT", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
@@ -119,7 +54,7 @@ describe("cypher directive filtering - Relationship", () => {
 
         const query = /* GraphQL */ `
             query {
-                movies(where: { NOT: { actors: { name_EQ: "Jada Pinkett Smith" } } }) {
+                movies(where: { NOT: { actors_SOME: { name_EQ: "Jada Pinkett Smith" } } }) {
                     title
                 }
             }
@@ -464,7 +399,12 @@ describe("cypher directive filtering - Relationship", () => {
         const query = /* GraphQL */ `
             query {
                 movies(
-                    where: { OR: [{ actors: { name_EQ: "Jada Pinkett Smith" } }, { genres: { name_EQ: "Romance" } }] }
+                    where: {
+                        OR: [
+                            { actors_SOME: { name_EQ: "Jada Pinkett Smith" } }
+                            { genres_SOME: { name_EQ: "Romance" } }
+                        ]
+                    }
                 ) {
                     title
                 }

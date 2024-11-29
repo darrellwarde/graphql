@@ -26,86 +26,6 @@ describe("cypher directive filtering - Relationship", () => {
         await testHelper.close();
     });
 
-    test("relationship with single property filter", async () => {
-        const Movie = testHelper.createUniqueType("Movie");
-        const Actor = testHelper.createUniqueType("Actor");
-
-        const typeDefs = /* GraphQL */ `
-            type ${Movie} @node {
-                title: String
-                actors: [${Actor}!]!
-                    @cypher(
-                        statement: """
-                        MATCH (this)<-[:ACTED_IN]-(actor:${Actor})
-                        RETURN actor
-                        """
-                        columnName: "actor"
-                    )
-            }
-
-            type ${Actor} @node {
-                name: String
-                movies: [${Movie}!]!
-                    @cypher(
-                        statement: """
-                        MATCH (this)-[:ACTED_IN]->(movie:${Movie})
-                        RETURN movie
-                        """
-                        columnName: "movie"
-                    )
-            }
-        `;
-
-        await testHelper.initNeo4jGraphQL({ typeDefs });
-        await testHelper.executeCypher(
-            `
-            CREATE (m:${Movie} { title: "The Matrix" })
-            CREATE (m2:${Movie} { title: "The Matrix Reloaded" })
-            CREATE (m3:${Movie} { title: "The Matrix Revolutions" })
-            CREATE (a:${Actor} { name: "Keanu Reeves" })
-            CREATE (a)-[:ACTED_IN]->(m)
-            CREATE (a)-[:ACTED_IN]->(m2)
-            CREATE (a)-[:ACTED_IN]->(m3)
-            CREATE (a2:${Actor} { name: "Carrie-Anne Moss" })
-            CREATE (a2)-[:ACTED_IN]->(m)
-            CREATE (a2)-[:ACTED_IN]->(m2)
-            CREATE (a2)-[:ACTED_IN]->(m3)
-            CREATE (a3:${Actor} { name: "Jada Pinkett Smith" })
-            CREATE (a3)-[:ACTED_IN]->(m2)
-            CREATE (a3)-[:ACTED_IN]->(m3)
-            `,
-            {}
-        );
-
-        const query = /* GraphQL */ `
-            query {
-                ${Movie.plural}(
-                    where: {
-                        actors: {
-                            name_EQ: "Jada Pinkett Smith"
-                        } 
-                    }
-                ) {
-                    title
-                }
-            }
-        `;
-
-        const gqlResult = await testHelper.executeGraphQL(query);
-
-        expect(gqlResult.errors).toBeFalsy();
-        expect(gqlResult?.data).toEqual({
-            [Movie.plural]: expect.toIncludeSameMembers([
-                {
-                    title: "The Matrix Reloaded",
-                },
-                {
-                    title: "The Matrix Revolutions",
-                },
-            ]),
-        });
-    });
-
     test("relationship with single property filter NOT", async () => {
         const Movie = testHelper.createUniqueType("Movie");
         const Actor = testHelper.createUniqueType("Actor");
@@ -162,7 +82,7 @@ describe("cypher directive filtering - Relationship", () => {
                 ${Movie.plural}(
                     where: {
                         NOT: {
-                            actors: {
+                            actors_SOME: {
                                 name_EQ: "Jada Pinkett Smith"
                             }   
                         }
@@ -553,8 +473,8 @@ describe("cypher directive filtering - Relationship", () => {
                 ${Movie.plural}(
                     where: { 
                         OR: [
-                            { actors: { name_EQ: "Jada Pinkett Smith" } },
-                            { genres: { name_EQ: "Romance" } }
+                            { actors_SOME: { name_EQ: "Jada Pinkett Smith" } },
+                            { genres_SOME: { name_EQ: "Romance" } }
                         ]
                     }
                 )

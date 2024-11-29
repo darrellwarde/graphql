@@ -26,7 +26,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const typeDefs = /* GraphQL */ `
             type Movie
                 @node
-                @authorization(filter: [{ where: { node: { actors: { name_EQ: "$jwt.custom_value" } } } }]) {
+                @authorization(filter: [{ where: { node: { actors_SOME: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [Actor!]!
@@ -118,7 +118,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const typeDefs = /* GraphQL */ `
             type Movie
                 @node
-                @authorization(filter: [{ where: { node: { actors: { name_EQ: "$jwt.custom_value" } } } }]) {
+                @authorization(filter: [{ where: { node: { actors_SOME: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [Actor!]!
@@ -210,7 +210,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const typeDefs = /* GraphQL */ `
             type Movie
                 @node
-                @authorization(validate: [{ where: { node: { actors: { name_EQ: "$jwt.custom_value" } } } }]) {
+                @authorization(validate: [{ where: { node: { actors_SOME: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [Actor!]!
@@ -302,7 +302,7 @@ describe("cypher directive filtering - relationship auth filter", () => {
         const typeDefs = /* GraphQL */ `
             type Movie
                 @node
-                @authorization(validate: [{ where: { node: { actors: { name_EQ: "$jwt.custom_value" } } } }]) {
+                @authorization(validate: [{ where: { node: { actors_SOME: { name_EQ: "$jwt.custom_value" } } } }]) {
                 title: String
                 rating: Float
                 actors: [Actor!]!
