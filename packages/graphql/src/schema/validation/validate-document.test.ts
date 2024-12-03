@@ -1847,8 +1847,11 @@ describe("validation 2.0", () => {
                 const errors = getError(executeValidate);
                 expect(errors).toHaveLength(1);
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@default is not supported by Spatial types.");
-                expect(errors[0]).toHaveProperty("path", ["User", "updatedAt", "@default", "value"]);
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@default directive can only be used on fields of type Int, Float, String, Boolean, ID, BigInt, DateTime, Date, Time, LocalDateTime or LocalTime."
+                );
+                expect(errors[0]).toHaveProperty("path", ["User", "updatedAt", "@default"]);
             });
 
             test("@default only supported on scalar types", () => {
@@ -1873,7 +1876,7 @@ describe("validation 2.0", () => {
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
                 expect(errors[0]).toHaveProperty(
                     "message",
-                    "@default directive can only be used on Temporal types and types: Int | Float | String | Boolean | ID | Enum"
+                    "@default directive can only be used on fields of type Int, Float, String, Boolean, ID, BigInt, DateTime, Date, Time, LocalDateTime or LocalTime."
                 );
                 expect(errors[0]).toHaveProperty("path", ["User", "post", "@default"]);
             });

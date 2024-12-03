@@ -336,7 +336,9 @@ describe("@default directive", () => {
             });
 
             await expect(neoSchema.getSchema()).rejects.toIncludeSameMembers([
-                new GraphQLError("@default is not supported by Spatial types."),
+                new GraphQLError(
+                    "@default directive can only be used on fields of type Int, Float, String, Boolean, ID, BigInt, DateTime, Date, Time, LocalDateTime or LocalTime."
+                ),
             ]);
         });
     });
