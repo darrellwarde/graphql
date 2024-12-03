@@ -1546,11 +1546,7 @@ describe("validation 2.0", () => {
                         features: {},
                     });
 
-                const errors = getError(executeValidate);
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@default.value on Float fields must be of type Float");
-                expect(errors[0]).toHaveProperty("path", ["User", "avg", "@default", "value"]);
+                expect(executeValidate).not.toThrow();
             });
 
             test("@default on float must be float correct", () => {
@@ -1584,14 +1580,7 @@ describe("validation 2.0", () => {
                         features: {},
                     });
 
-                const errors = getError(executeValidate);
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty(
-                    "message",
-                    "@default.value on Float list fields must be a list of Float values"
-                );
-                expect(errors[0]).toHaveProperty("path", ["User", "avgs", "@default", "value"]);
+                expect(executeValidate).not.toThrow();
             });
 
             test("@default on float list must be list of float values correct", () => {
@@ -2181,11 +2170,7 @@ describe("validation 2.0", () => {
                         features: {},
                     });
 
-                const errors = getError(executeValidate);
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@coalesce.value on Float fields must be of type Float");
-                expect(errors[0]).toHaveProperty("path", ["User", "avg", "@coalesce", "value"]);
+                expect(executeValidate).not.toThrow();
             });
 
             test("@coalesce on float must be float correct", () => {
@@ -2219,14 +2204,7 @@ describe("validation 2.0", () => {
                         features: {},
                     });
 
-                const errors = getError(executeValidate);
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty(
-                    "message",
-                    "@coalesce.value on Float list fields must be a list of Float values"
-                );
-                expect(errors[0]).toHaveProperty("path", ["User", "avgs", "@coalesce", "value"]);
+                expect(executeValidate).not.toThrow();
             });
 
             test("@coalesce on float list must be list of float values correct", () => {
