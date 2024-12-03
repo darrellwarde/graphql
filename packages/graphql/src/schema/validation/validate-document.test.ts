@@ -1215,6 +1215,74 @@ describe("validation 2.0", () => {
                 expect(executeValidate).not.toThrow();
             });
 
+            test("@default on LocalDateTime must be valid datetime correct", () => {
+                const doc = gql`
+                    type User @node {
+                        updatedAt: LocalDateTime @default(value: "2023-07-06T09:45:11.336")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on Time must be valid datetime correct", () => {
+                const doc = gql`
+                    type User @node {
+                        updatedAt: Time @default(value: "09:45:11.336Z")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on LocalTime must be valid datetime correct", () => {
+                const doc = gql`
+                    type User @node {
+                        updatedAt: LocalTime @default(value: "09:45:11.336")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on Date must be valid datetime correct", () => {
+                const doc = gql`
+                    type User @node {
+                        updatedAt: Date @default(value: "2023-07-06")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
             test("@default on enum must be enum", () => {
                 const enumTypes = gql`
                     enum Status {
