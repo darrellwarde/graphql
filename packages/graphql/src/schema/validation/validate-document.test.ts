@@ -1198,7 +1198,7 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["User", "updatedAt", "@default", "value"]);
             });
 
-            test("@default on datetime must be valid datetime correct", () => {
+            test("@default on DateTime must be valid, check with valid value", () => {
                 const doc = gql`
                     type User @node {
                         updatedAt: DateTime @default(value: "2023-07-06T09:45:11.336Z")
@@ -1215,7 +1215,7 @@ describe("validation 2.0", () => {
                 expect(executeValidate).not.toThrow();
             });
 
-            test("@default on LocalDateTime must be valid datetime correct", () => {
+            test("@default on LocalDateTime must be valid, check with valid value", () => {
                 const doc = gql`
                     type User @node {
                         updatedAt: LocalDateTime @default(value: "2023-07-06T09:45:11.336")
@@ -1232,7 +1232,7 @@ describe("validation 2.0", () => {
                 expect(executeValidate).not.toThrow();
             });
 
-            test("@default on Time must be valid datetime correct", () => {
+            test("@default on Time must be valid, check with valid value", () => {
                 const doc = gql`
                     type User @node {
                         updatedAt: Time @default(value: "09:45:11.336Z")
@@ -1249,7 +1249,7 @@ describe("validation 2.0", () => {
                 expect(executeValidate).not.toThrow();
             });
 
-            test("@default on LocalTime must be valid datetime correct", () => {
+            test("@default on LocalTime must be valid, check with valid value", () => {
                 const doc = gql`
                     type User @node {
                         updatedAt: LocalTime @default(value: "09:45:11.336")
@@ -1266,10 +1266,28 @@ describe("validation 2.0", () => {
                 expect(executeValidate).not.toThrow();
             });
 
-            test("@default on Date must be valid datetime correct", () => {
+            test("@default on Date must be valid, check with valid value", () => {
                 const doc = gql`
                     type User @node {
                         updatedAt: Date @default(value: "2023-07-06")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on BigInt must be valid, check with valid value", () => {
+                const doc = gql`
+                    type User @node {
+                        bigintnumber: BigInt @default(value: 0)
+                        bigintstring: BigInt @default(value: "0")
                     }
                 `;
 

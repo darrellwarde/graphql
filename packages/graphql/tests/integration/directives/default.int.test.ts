@@ -115,6 +115,7 @@ describe("@default directive", () => {
                 type ${Type} @node {
                     name: String!
                     float: Float @default(value: 0.1)
+                    floatint: Float @default(value: 0)
                 }
             `;
 
@@ -128,6 +129,7 @@ describe("@default directive", () => {
                         ${Type.plural} {
                             name
                             float
+                            floatint
                         }
                     }
                 }
@@ -142,6 +144,7 @@ describe("@default directive", () => {
                         {
                             name: "Thing",
                             float: 0.1,
+                            floatint: 0.0,
                         },
                     ],
                 },

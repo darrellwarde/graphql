@@ -77,5 +77,10 @@ function doTypesMatch(expectedType: string, argumentValueType: ValueNode, enums:
         const kind = fromValueKind(argumentValueType, enums, expectedType)?.toLowerCase();
         return !!(kind == "int" || kind == "string");
     }
+
+    if (expectedType.toLowerCase() === "float") {
+        const kind = fromValueKind(argumentValueType, enums, expectedType)?.toLowerCase();
+        return !!(kind == "int" || kind == "float");
+    }
     return fromValueKind(argumentValueType, enums, expectedType)?.toLowerCase() === expectedType.toLowerCase();
 }

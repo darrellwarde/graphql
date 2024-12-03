@@ -19,8 +19,9 @@
 import type { DirectiveNode, EnumTypeDefinitionNode, FieldDefinitionNode, StringValueNode } from "graphql";
 import { Kind } from "graphql";
 import { GRAPHQL_BUILTIN_SCALAR_TYPES } from "../../../../constants";
-import { parseLocalTime } from "../../../../graphql/scalars/LocalTime";
-import { parseTime } from "../../../../graphql/scalars/Time";
+import { GraphQLDate, GraphQLDateTime, GraphQLLocalDateTime } from "../../../../graphql/scalars";
+import { GraphQLLocalTime, parseLocalTime } from "../../../../graphql/scalars/LocalTime";
+import { GraphQLTime, parseTime } from "../../../../graphql/scalars/Time";
 import { DocumentValidationError } from "../utils/document-validation-error";
 import type { ObjectOrInterfaceWithExtensions } from "../utils/path-parser";
 import { assertArgumentHasSameTypeAsField } from "../utils/same-type-argument-as-field";
@@ -50,14 +51,14 @@ export function verifyDefault(enums: EnumTypeDefinitionNode[]) {
         }
 
         if (!isArrayType(traversedDef)) {
-            if (["DateTime", "LocalDateTime", "Date"].includes(expectedType)) {
+            if ([GraphQLDateTime.name, GraphQLLocalDateTime.name, GraphQLDate.name].includes(expectedType)) {
                 if (Number.isNaN(Date.parse((defaultArg?.value as StringValueNode).value))) {
                     throw new DocumentValidationError(
                         `@default.${defaultArg.name.value} is not a valid ${expectedType}`,
                         ["value"]
                     );
                 }
-            } else if (expectedType == "Time") {
+            } else if (expectedType === GraphQLTime.name) {
                 try {
                     parseTime((defaultArg?.value as StringValueNode).value);
                 } catch {
@@ -66,7 +67,7 @@ export function verifyDefault(enums: EnumTypeDefinitionNode[]) {
                         ["value"]
                     );
                 }
-            } else if (expectedType == "LocalTime") {
+            } else if (expectedType === GraphQLLocalTime.name) {
                 try {
                     parseLocalTime((defaultArg?.value as StringValueNode).value);
                 } catch {
@@ -78,7 +79,7 @@ export function verifyDefault(enums: EnumTypeDefinitionNode[]) {
             } else if (
                 !GRAPHQL_BUILTIN_SCALAR_TYPES.includes(expectedType) &&
                 !enums.some((x) => x.name.value === expectedType) &&
-                expectedType != "BigInt"
+                expectedType !== "BigInt"
             ) {
                 throw new DocumentValidationError(
                     `@default directive can only be used on fields of type Int, Float, String, Boolean, ID, BigInt, DateTime, Date, Time, LocalDateTime or LocalTime.`,

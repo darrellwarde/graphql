@@ -439,7 +439,7 @@ function getObjFieldMeta({
                                 primitiveField.defaultValue = parseInt(value.value, 10);
                                 break;
                             case "Float":
-                                if (value?.kind !== Kind.FLOAT) {
+                                if (value?.kind !== Kind.FLOAT && value?.kind !== Kind.INT) {
                                     throw new Error(typeError);
                                 }
                                 primitiveField.defaultValue = parseFloat(value.value);
