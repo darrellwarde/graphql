@@ -1,5 +1,13 @@
 # @neo4j/graphql
 
+## 6.2.1
+
+### Patch Changes
+
+-   [#5861](https://github.com/neo4j/graphql/pull/5861) [`f2e1575`](https://github.com/neo4j/graphql/commit/f2e15751657725abd9086b1fdce13b360bd72eab) Thanks [@darrellwarde](https://github.com/darrellwarde)! - Fixed bug where fields decorated with `@customResolver` were included in the projection of the generated Cypher query
+
+-   [#5865](https://github.com/neo4j/graphql/pull/5865) [`258ff53`](https://github.com/neo4j/graphql/commit/258ff53204746ce04828f6ff5ad6422260a3c895) Thanks [@darrellwarde](https://github.com/darrellwarde)! - `@default` directive fixed to work as expected on fields of temporal type, and `BigInt` fields
+
 ## 6.2.0
 
 ### Minor Changes

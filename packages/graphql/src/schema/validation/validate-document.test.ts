@@ -1230,10 +1230,96 @@ describe("validation 2.0", () => {
                 expect(errors[0]).toHaveProperty("path", ["User", "updatedAt", "@default", "value"]);
             });
 
-            test("@default on datetime must be valid datetime correct", () => {
+            test("@default on DateTime must be valid, check with valid value", () => {
                 const doc = gql`
                     type User @node {
                         updatedAt: DateTime @default(value: "2023-07-06T09:45:11.336Z")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on LocalDateTime must be valid, check with valid value", () => {
+                const doc = gql`
+                    type User @node {
+                        updatedAt: LocalDateTime @default(value: "2023-07-06T09:45:11.336")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on Time must be valid, check with valid value", () => {
+                const doc = gql`
+                    type User @node {
+                        updatedAt: Time @default(value: "09:45:11.336Z")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on LocalTime must be valid, check with valid value", () => {
+                const doc = gql`
+                    type User @node {
+                        updatedAt: LocalTime @default(value: "09:45:11.336")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on Date must be valid, check with valid value", () => {
+                const doc = gql`
+                    type User @node {
+                        updatedAt: Date @default(value: "2023-07-06")
+                    }
+                `;
+
+                const executeValidate = () =>
+                    validateDocument({
+                        document: doc,
+                        additionalDefinitions,
+                        features: {},
+                    });
+
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("@default on BigInt must be valid, check with valid value", () => {
+                const doc = gql`
+                    type User @node {
+                        bigintnumber: BigInt @default(value: 0)
+                        bigintstring: BigInt @default(value: "0")
                     }
                 `;
 
@@ -1492,11 +1578,7 @@ describe("validation 2.0", () => {
                         features: {},
                     });
 
-                const errors = getError(executeValidate);
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@default.value on Float fields must be of type Float");
-                expect(errors[0]).toHaveProperty("path", ["User", "avg", "@default", "value"]);
+                expect(executeValidate).not.toThrow();
             });
 
             test("@default on float must be float correct", () => {
@@ -1530,14 +1612,7 @@ describe("validation 2.0", () => {
                         features: {},
                     });
 
-                const errors = getError(executeValidate);
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty(
-                    "message",
-                    "@default.value on Float list fields must be a list of Float values"
-                );
-                expect(errors[0]).toHaveProperty("path", ["User", "avgs", "@default", "value"]);
+                expect(executeValidate).not.toThrow();
             });
 
             test("@default on float list must be list of float values correct", () => {
@@ -1811,8 +1886,11 @@ describe("validation 2.0", () => {
                 const errors = getError(executeValidate);
                 expect(errors).toHaveLength(1);
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@default is not supported by Spatial types.");
-                expect(errors[0]).toHaveProperty("path", ["User", "updatedAt", "@default", "value"]);
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@default directive can only be used on fields of type Int, Float, String, Boolean, ID, BigInt, DateTime, Date, Time, LocalDateTime or LocalTime."
+                );
+                expect(errors[0]).toHaveProperty("path", ["User", "updatedAt", "@default"]);
             });
 
             test("@default only supported on scalar types", () => {
@@ -1837,7 +1915,7 @@ describe("validation 2.0", () => {
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
                 expect(errors[0]).toHaveProperty(
                     "message",
-                    "@default directive can only be used on Temporal types and types: Int | Float | String | Boolean | ID | Enum"
+                    "@default directive can only be used on fields of type Int, Float, String, Boolean, ID, BigInt, DateTime, Date, Time, LocalDateTime or LocalTime."
                 );
                 expect(errors[0]).toHaveProperty("path", ["User", "post", "@default"]);
             });
@@ -2124,11 +2202,7 @@ describe("validation 2.0", () => {
                         features: {},
                     });
 
-                const errors = getError(executeValidate);
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@coalesce.value on Float fields must be of type Float");
-                expect(errors[0]).toHaveProperty("path", ["User", "avg", "@coalesce", "value"]);
+                expect(executeValidate).not.toThrow();
             });
 
             test("@coalesce on float must be float correct", () => {
@@ -2162,14 +2236,7 @@ describe("validation 2.0", () => {
                         features: {},
                     });
 
-                const errors = getError(executeValidate);
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty(
-                    "message",
-                    "@coalesce.value on Float list fields must be a list of Float values"
-                );
-                expect(errors[0]).toHaveProperty("path", ["User", "avgs", "@coalesce", "value"]);
+                expect(executeValidate).not.toThrow();
             });
 
             test("@coalesce on float list must be list of float values correct", () => {
