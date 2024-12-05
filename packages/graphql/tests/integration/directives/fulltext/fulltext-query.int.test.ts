@@ -1262,15 +1262,6 @@ describe("@fulltext directive", () => {
             expect((gqlResult.data?.[queryType] as any).edges[1].node).toEqual({
                 name: person1.name,
             });
-            // expect((gqlResult.data?.[queryType] as any).edges[2].node).toEqual({
-            //     name: person3.name,
-            // });
-            // expect((gqlResult.data?.[queryType] as any).edges[0][SCORE_FIELD]).toBeGreaterThanOrEqual(
-            //     (gqlResult.data?.[queryType] as any).edges[1][SCORE_FIELD]
-            // );
-            // expect((gqlResult.data?.[queryType] as any).edges[1][SCORE_FIELD]).toBeGreaterThanOrEqual(
-            //     (gqlResult.data?.[queryType] as any).edges[2][SCORE_FIELD]
-            // );
         });
 
         test("Limit argument not provided", async () => {
