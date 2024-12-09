@@ -448,6 +448,7 @@ export type Neo4jFeaturesSettings = {
      **/
     excludeDeprecatedFields?: Record<string, never>;
     vector?: Neo4jVectorSettings;
+    limitRequired?: boolean;
 };
 
 /** Parsed features used in context */
