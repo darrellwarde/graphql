@@ -19,8 +19,9 @@
 
 import type { UniqueType } from "../../../utils/graphql-types";
 import { TestHelper } from "../../../utils/tests-helper";
+import { TestSubscriptionsEngine } from "../../../utils/TestSubscriptionsEngine";
 
-describe("query-direction", () => {
+describe.each([true, false])("queryDirection subscriptions %s", (subscriptionsEnabled: boolean) => {
     const testHelper = new TestHelper();
     let Person: UniqueType;
     let stefan: string;
@@ -48,15 +49,23 @@ describe("query-direction", () => {
         await testHelper.close();
     });
 
-    describe("DIRECTED", () => {
+    describe("DIRECTED_ONLY", () => {
         beforeEach(async () => {
             const typeDefs = /* GraphQL */ `
                 type ${Person} @node {
                     name: String!
-                    friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DIRECTED)
+                    friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DIRECTED_ONLY)
                 }
             `;
-            await testHelper.initNeo4jGraphQL({ typeDefs });
+
+            if (subscriptionsEnabled) {
+                await testHelper.initNeo4jGraphQL({
+                    typeDefs,
+                    features: { subscriptions: new TestSubscriptionsEngine() },
+                });
+            } else {
+                await testHelper.initNeo4jGraphQL({ typeDefs });
+            }
         });
 
         test("should return related node using the queryDirection DIRECTED", async () => {
@@ -266,7 +275,15 @@ describe("query-direction", () => {
                     friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DEFAULT_DIRECTED)
                 }
             `;
-            await testHelper.initNeo4jGraphQL({ typeDefs });
+
+            if (subscriptionsEnabled) {
+                await testHelper.initNeo4jGraphQL({
+                    typeDefs,
+                    features: { subscriptions: new TestSubscriptionsEngine() },
+                });
+            } else {
+                await testHelper.initNeo4jGraphQL({ typeDefs });
+            }
         });
 
         test("should return related node using the queryDirection DIRECTED", async () => {
@@ -468,15 +485,23 @@ describe("query-direction", () => {
         });
     });
 
-    describe("UNDIRECTED", () => {
+    describe("UNDIRECTED_ONLY", () => {
         beforeEach(async () => {
             const typeDefs = /* GraphQL */ `
                 type ${Person} @node {
                     name: String!
-                    friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: UNDIRECTED)
+                    friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: UNDIRECTED_ONLY)
                 }
             `;
-            await testHelper.initNeo4jGraphQL({ typeDefs });
+
+            if (subscriptionsEnabled) {
+                await testHelper.initNeo4jGraphQL({
+                    typeDefs,
+                    features: { subscriptions: new TestSubscriptionsEngine() },
+                });
+            } else {
+                await testHelper.initNeo4jGraphQL({ typeDefs });
+            }
         });
 
         test("should return related node using the queryDirection UNDIRECTED", async () => {
@@ -692,7 +717,15 @@ describe("query-direction", () => {
                     friends: [${Person}!]! @relationship(type: "HAS_FRIEND", direction: OUT, queryDirection: DEFAULT_UNDIRECTED)
                 }
             `;
-            await testHelper.initNeo4jGraphQL({ typeDefs });
+
+            if (subscriptionsEnabled) {
+                await testHelper.initNeo4jGraphQL({
+                    typeDefs,
+                    features: { subscriptions: new TestSubscriptionsEngine() },
+                });
+            } else {
+                await testHelper.initNeo4jGraphQL({ typeDefs });
+            }
         });
 
         test("should return related node using the queryDirection UNDIRECTED", async () => {

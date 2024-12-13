@@ -1150,7 +1150,7 @@ describe("queryDirection in relationships", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:User)
                 WHERE EXISTS {
-                    MATCH (this)-[:FRIENDS_WITH]->(this0:User)
+                    MATCH (this)-[:FRIENDS_WITH]-(this0:User)
                     WHERE this0.name = $param0
                 }
                 CALL {
@@ -1191,7 +1191,7 @@ describe("queryDirection in relationships", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:User)
                 WHERE EXISTS {
-                    MATCH (this)-[:FRIENDS_WITH]->(this0:User)
+                    MATCH (this)-[:FRIENDS_WITH]-(this0:User)
                     WHERE this0.name = $param0
                 }
                 WITH this
@@ -1267,7 +1267,7 @@ describe("queryDirection in relationships", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:User)
                 WHERE EXISTS {
-                    MATCH (this)-[:FRIENDS_WITH]->(this0:User)
+                    MATCH (this)-[:FRIENDS_WITH]-(this0:User)
                     WHERE this0.name = $param0
                 }
                 WITH *
@@ -1347,7 +1347,7 @@ describe("queryDirection in relationships", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:User)
                 WHERE EXISTS {
-                    MATCH (this)-[:FRIENDS_WITH]->(this0:User)
+                    MATCH (this)-[:FRIENDS_WITH]-(this0:User)
                     WHERE this0.name = $param0
                 }
                 WITH this
@@ -1415,7 +1415,7 @@ describe("queryDirection in relationships", () => {
             expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
                 "MATCH (this:User)
                 WHERE EXISTS {
-                    MATCH (this)-[:FRIENDS_WITH]->(this0:User)
+                    MATCH (this)-[:FRIENDS_WITH]-(this0:User)
                     WHERE this0.name = $param0
                 }
                 WITH *
