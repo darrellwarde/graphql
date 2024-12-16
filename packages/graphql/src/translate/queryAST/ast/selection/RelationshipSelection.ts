@@ -26,7 +26,7 @@ import type { QueryASTContext } from "../QueryASTContext";
 import { EntitySelection, type SelectionClause } from "./EntitySelection";
 
 export class RelationshipSelection extends EntitySelection {
-    protected relationship: RelationshipAdapter;
+    private relationship: RelationshipAdapter;
     // Overrides relationship target for composite entities
     private targetOverride: ConcreteEntityAdapter | undefined;
     private alias: string | undefined;
