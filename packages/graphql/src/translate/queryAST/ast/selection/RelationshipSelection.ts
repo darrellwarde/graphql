@@ -87,6 +87,7 @@ export class RelationshipSelection extends EntitySelection {
     }
 }
 
+/** Enforces direction on the relationship selection, regardless of direction configuration **/
 export class DirectedRelationshipSelection extends RelationshipSelection {
     protected getRelationshipDirection(): "left" | "right" {
         return this.relationship.cypherDirectionFromRelDirection();
