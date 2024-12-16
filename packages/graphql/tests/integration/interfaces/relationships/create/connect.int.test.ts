@@ -76,7 +76,7 @@ describe("interface relationships", () => {
         await testHelper.close();
     });
 
-    test("should nested create connect using interface relationship fields", async () => {
+    test("create->connect->connect should connect using interface relationship fields", async () => {
         const actorName1 = generate({
             readable: true,
             charset: "alphabetic",
@@ -164,7 +164,7 @@ describe("interface relationships", () => {
         });
     });
 
-    test("should nested create connect a new relationship using interface relationship fields", async () => {
+    test("create->connect->connect should create a new relationship using interface relationship fields", async () => {
         const actorName1 = generate({
             readable: true,
             charset: "alphabetic",
