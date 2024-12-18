@@ -21,6 +21,7 @@ import Cypher from "@neo4j/cypher-builder";
 import pluralize from "pluralize";
 import type { Node, Relationship } from "../classes";
 import type { CallbackBucket } from "../classes/CallbackBucket";
+import { RelationshipQueryDirectionOption } from "../constants";
 import type { BaseField } from "../types";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import { caseWhere } from "../utils/case-where";
@@ -117,8 +118,16 @@ export default function createUpdateAndParams({
                 refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
             }
 
-            const inStr = relationField.direction === "IN" ? "<-" : "-";
-            const outStr = relationField.direction === "OUT" ? "->" : "-";
+            const inStr =
+                relationField.direction === "IN" &&
+                relationField.queryDirection !== RelationshipQueryDirectionOption.UNDIRECTED
+                    ? "<-"
+                    : "-";
+            const outStr =
+                relationField.direction === "OUT" &&
+                relationField.queryDirection !== RelationshipQueryDirectionOption.UNDIRECTED
+                    ? "->"
+                    : "-";
 
             const subqueries: string[] = [];
             const intermediateWithMetaStatements: string[] = [];

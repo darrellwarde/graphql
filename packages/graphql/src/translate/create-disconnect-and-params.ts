@@ -19,6 +19,7 @@
 
 import Cypher from "@neo4j/cypher-builder";
 import type { Node, Relationship } from "../classes";
+import { RelationshipQueryDirectionOption } from "../constants";
 import type { RelationField } from "../types";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import { caseWhere } from "../utils/case-where";
@@ -67,8 +68,16 @@ function createDisconnectAndParams({
         checkAuthentication({ context, node: relatedNode, targetOperations: ["DELETE_RELATIONSHIP"] });
 
         const variableName = `${varName}${index}`;
-        const inStr = relationField.direction === "IN" ? "<-" : "-";
-        const outStr = relationField.direction === "OUT" ? "->" : "-";
+        const inStr =
+            relationField.direction === "IN" &&
+            relationField.queryDirection !== RelationshipQueryDirectionOption.UNDIRECTED
+                ? "<-"
+                : "-";
+        const outStr =
+            relationField.direction === "OUT" &&
+            relationField.queryDirection !== RelationshipQueryDirectionOption.UNDIRECTED
+                ? "->"
+                : "-";
         const relVarName = `${variableName}_rel`;
         const relTypeStr = `[${relVarName}:${relationField.type}]`;
         const subquery: string[] = [];

@@ -19,6 +19,7 @@
 
 import Cypher from "@neo4j/cypher-builder";
 import type { Node, Relationship } from "../classes";
+import { RelationshipQueryDirectionOption } from "../constants";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import { caseWhere } from "../utils/case-where";
 import { checkAuthentication } from "./authorization/check-authentication";
@@ -77,8 +78,16 @@ function createDeleteAndParams({
                 refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
             }
 
-            const inStr = relationField.direction === "IN" ? "<-" : "-";
-            const outStr = relationField.direction === "OUT" ? "->" : "-";
+            const inStr =
+                relationField.direction === "IN" &&
+                relationField.queryDirection !== RelationshipQueryDirectionOption.UNDIRECTED
+                    ? "<-"
+                    : "-";
+            const outStr =
+                relationField.direction === "OUT" &&
+                relationField.queryDirection !== RelationshipQueryDirectionOption.UNDIRECTED
+                    ? "->"
+                    : "-";
 
             refNodes.forEach((refNode) => {
                 checkAuthentication({ context, node: refNode, targetOperations: ["DELETE"] });
