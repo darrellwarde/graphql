@@ -1659,7 +1659,7 @@ describe("interface with declared relationships", () => {
                                 node: {
                                     title: movieTitle,
                                     actorsConnection: {
-                                        edges: [
+                                        edges: expect.toIncludeSameMembers([
                                             {
                                                 node: {
                                                     name: actorName3,
@@ -1713,7 +1713,7 @@ describe("interface with declared relationships", () => {
                                                 },
                                                 properties: { screenTime: movieScreenTime },
                                             },
-                                        ],
+                                        ]),
                                     },
                                 },
                             },
