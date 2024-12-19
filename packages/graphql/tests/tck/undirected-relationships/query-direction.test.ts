@@ -483,7 +483,7 @@ describe("queryDirection in relationships", () => {
                 WITH this
                 CALL {
                 WITH this
-                OPTIONAL MATCH (this)-[this_friends0_disconnect0_rel:FRIENDS_WITH]->(this_friends0_disconnect0:User)
+                OPTIONAL MATCH (this)-[this_friends0_disconnect0_rel:FRIENDS_WITH]-(this_friends0_disconnect0:User)
                 WHERE this_friends0_disconnect0.name = $updateUsers_args_update_friends0_disconnect0_where_User_this_friends0_disconnect0param0
                 CALL {
                 	WITH this_friends0_disconnect0, this_friends0_disconnect0_rel, this
@@ -559,7 +559,7 @@ describe("queryDirection in relationships", () => {
                 WITH *
                 CALL {
                 WITH *
-                OPTIONAL MATCH (this)-[this_friends0_delete0_relationship:FRIENDS_WITH]->(this_friends0_delete0:User)
+                OPTIONAL MATCH (this)-[this_friends0_delete0_relationship:FRIENDS_WITH]-(this_friends0_delete0:User)
                 WHERE this_friends0_delete0.name = $updateUsers_args_update_friends0_delete0_where_this_friends0_delete0param0
                 WITH this_friends0_delete0_relationship, collect(DISTINCT this_friends0_delete0) AS this_friends0_delete0_to_delete
                 CALL {
@@ -639,7 +639,7 @@ describe("queryDirection in relationships", () => {
                 WITH this
                 CALL {
                 	WITH this
-                	MATCH (this)-[this_friends_with0_relationship:FRIENDS_WITH]->(this_friends0:User)
+                	MATCH (this)-[this_friends_with0_relationship:FRIENDS_WITH]-(this_friends0:User)
                 	WHERE this_friends0.name = $updateUsers_args_update_friends0_where_this_friends0param0
                 	SET this_friends0.name = $this_update_friends0_name_SET
                 	RETURN count(*) AS update_this_friends0

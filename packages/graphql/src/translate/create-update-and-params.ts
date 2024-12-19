@@ -43,6 +43,7 @@ import { assertNonAmbiguousUpdate } from "./utils/assert-non-ambiguous-update";
 import { addCallbackAndSetParam } from "./utils/callback-utils";
 import { getAuthorizationStatements } from "./utils/get-authorization-statements";
 import { getMutationFieldStatements } from "./utils/get-mutation-field-statements";
+import { getRelationshipDirection } from "./utils/get-relationship-direction";
 import { indentBlock } from "./utils/indent-block";
 import { parseMutableField } from "./utils/parse-mutable-field";
 import createConnectionWhereAndParams from "./where/create-connection-where-and-params";
@@ -117,8 +118,7 @@ export default function createUpdateAndParams({
                 refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
             }
 
-            const inStr = relationField.direction === "IN" ? "<-" : "-";
-            const outStr = relationField.direction === "OUT" ? "->" : "-";
+            const { inStr, outStr } = getRelationshipDirection(relationField);
 
             const subqueries: string[] = [];
             const intermediateWithMetaStatements: string[] = [];
