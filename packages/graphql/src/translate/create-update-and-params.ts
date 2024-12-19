@@ -21,7 +21,6 @@ import Cypher from "@neo4j/cypher-builder";
 import pluralize from "pluralize";
 import type { Node, Relationship } from "../classes";
 import type { CallbackBucket } from "../classes/CallbackBucket";
-import { RelationshipQueryDirectionOption } from "../constants";
 import type { BaseField } from "../types";
 import type { Neo4jGraphQLTranslationContext } from "../types/neo4j-graphql-translation-context";
 import { caseWhere } from "../utils/case-where";
@@ -44,6 +43,7 @@ import { assertNonAmbiguousUpdate } from "./utils/assert-non-ambiguous-update";
 import { addCallbackAndSetParam } from "./utils/callback-utils";
 import { getAuthorizationStatements } from "./utils/get-authorization-statements";
 import { getMutationFieldStatements } from "./utils/get-mutation-field-statements";
+import { getRelationshipDirection } from "./utils/get-relationship-direction";
 import { indentBlock } from "./utils/indent-block";
 import { parseMutableField } from "./utils/parse-mutable-field";
 import createConnectionWhereAndParams from "./where/create-connection-where-and-params";
@@ -118,16 +118,7 @@ export default function createUpdateAndParams({
                 refNodes.push(context.nodes.find((x) => x.name === relationField.typeMeta.name) as Node);
             }
 
-            const inStr =
-                relationField.direction === "IN" &&
-                relationField.queryDirection !== RelationshipQueryDirectionOption.UNDIRECTED
-                    ? "<-"
-                    : "-";
-            const outStr =
-                relationField.direction === "OUT" &&
-                relationField.queryDirection !== RelationshipQueryDirectionOption.UNDIRECTED
-                    ? "->"
-                    : "-";
+            const { inStr, outStr } = getRelationshipDirection(relationField);
 
             const subqueries: string[] = [];
             const intermediateWithMetaStatements: string[] = [];
