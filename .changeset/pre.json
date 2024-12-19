@@ -1,0 +1,12 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "apollo-federation-subgraph-compatibility": "1.0.0",
+    "@neo4j/graphql": "6.2.1",
+    "server_perf": "1.0.0",
+    "@neo4j/introspector": "4.0.0",
+    "@neo4j/package-tests": "1.0.0"
+  },
+  "changesets": []
+}
