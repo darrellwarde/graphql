@@ -41,7 +41,7 @@ describe("Update Subscriptions", () => {
          type ${typeMovie} @node {
             id: ID
             title: String
-            similarTitles: [String]
+            similarTitles: [String!]
             releasedIn: Int
             averageRating: Float
             fileSize: BigInt
@@ -894,8 +894,8 @@ describe("Update Subscriptions", () => {
                 query: `
                         mutation {
                             ${typeMovie.operations.update}(where: { ${fieldName}_EQ: ${makeTypedFieldValue(
-                    oldValue
-                )} }, update: { ${fieldName}: ${makeTypedFieldValue(newValue)} }) {
+                                oldValue
+                            )} }, update: { ${fieldName}_SET: ${makeTypedFieldValue(newValue)} }) {
                                 ${typeMovie.plural} {
                                     title
                                     releasedIn

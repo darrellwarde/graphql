@@ -82,15 +82,6 @@ describe("Enum", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -99,17 +90,17 @@ describe("Enum", () => {
             }
 
             input MovieUpdateInput {
-              status: Status @deprecated(reason: \\"Please use the explicit _SET field\\")
-              status_SET: Status
+              status: StatusEnumScalarMutations
+              status_SET: Status @deprecated(reason: \\"Please use the generic mutation 'status: { set: ... } }' instead.\\")
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              status: Status @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              status_EQ: Status
-              status_IN: [Status]
+              status: StatusEnumScalarFilters
+              status_EQ: Status @deprecated(reason: \\"Please use the relevant generic filter status: { eq: ... }\\")
+              status_IN: [Status] @deprecated(reason: \\"Please use the relevant generic filter status: { in: ... }\\")
             }
 
             type MoviesConnection {
@@ -133,7 +124,7 @@ describe("Enum", () => {
             }
 
             type Query {
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
@@ -150,6 +141,17 @@ describe("Enum", () => {
               ACTIVE
               INACTIVE
               PENDING
+            }
+
+            \\"\\"\\"Status filters\\"\\"\\"
+            input StatusEnumScalarFilters {
+              eq: Status
+              in: [Status!]
+            }
+
+            \\"\\"\\"Status mutations\\"\\"\\"
+            input StatusEnumScalarMutations {
+              set: Status
             }
 
             \\"\\"\\"

@@ -18,6 +18,7 @@
  */
 
 import { printSchemaWithDirectives } from "@graphql-tools/utils";
+import { GraphQLError } from "graphql";
 import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
@@ -78,7 +79,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              techs(limit: Int, offset: Int, options: TechOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TechSort!], where: TechWhere): [Tech!]!
+              techs(limit: Int, offset: Int, sort: [TechSort!], where: TechWhere): [Tech!]!
               techsAggregate(where: TechWhere): TechAggregateSelection!
               techsConnection(after: String, first: Int, sort: [TechSort!], where: TechWhere): TechsConnection!
             }
@@ -94,6 +95,20 @@ describe("Plural option", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type Tech {
@@ -117,15 +132,6 @@ describe("Plural option", () => {
               node: Tech!
             }
 
-            input TechOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TechSort objects to sort Techs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TechSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Techs by. The order in which sorts are applied is not guaranteed when specifying many fields in one TechSort object.
             \\"\\"\\"
@@ -135,28 +141,28 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              value_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
+              value: StringScalarMutations
+              value_SET: String @deprecated(reason: \\"Please use the generic mutation 'value: { set: ... } }' instead.\\")
             }
 
             input TechWhere {
               AND: [TechWhere!]
               NOT: TechWhere
               OR: [TechWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String]
-              name_STARTS_WITH: String
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              value_CONTAINS: String
-              value_ENDS_WITH: String
-              value_EQ: String
-              value_IN: [String]
-              value_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
+              value: StringScalarFilters
+              value_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter value: { contains: ... }\\")
+              value_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter value: { endsWith: ... }\\")
+              value_EQ: String @deprecated(reason: \\"Please use the relevant generic filter value: { eq: ... }\\")
+              value_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter value: { in: ... }\\")
+              value_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter value: { startsWith: ... }\\")
             }
 
             type TechsConnection {
@@ -237,7 +243,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              techs(limit: Int, offset: Int, options: TechOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TechSort!], where: TechWhere): [Tech!]!
+              techs(limit: Int, offset: Int, sort: [TechSort!], where: TechWhere): [Tech!]!
               techsAggregate(where: TechWhere): TechAggregateSelection!
               techsConnection(after: String, first: Int, sort: [TechSort!], where: TechWhere): TechsConnection!
             }
@@ -253,6 +259,20 @@ describe("Plural option", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type Tech {
@@ -276,15 +296,6 @@ describe("Plural option", () => {
               node: Tech!
             }
 
-            input TechOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TechSort objects to sort Techs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TechSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Techs by. The order in which sorts are applied is not guaranteed when specifying many fields in one TechSort object.
             \\"\\"\\"
@@ -294,28 +305,28 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              value_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
+              value: StringScalarMutations
+              value_SET: String @deprecated(reason: \\"Please use the generic mutation 'value: { set: ... } }' instead.\\")
             }
 
             input TechWhere {
               AND: [TechWhere!]
               NOT: TechWhere
               OR: [TechWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String]
-              name_STARTS_WITH: String
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              value_CONTAINS: String
-              value_ENDS_WITH: String
-              value_EQ: String
-              value_IN: [String]
-              value_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
+              value: StringScalarFilters
+              value_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter value: { contains: ... }\\")
+              value_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter value: { endsWith: ... }\\")
+              value_EQ: String @deprecated(reason: \\"Please use the relevant generic filter value: { eq: ... }\\")
+              value_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter value: { in: ... }\\")
+              value_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter value: { startsWith: ... }\\")
             }
 
             type TechsConnection {
@@ -396,7 +407,7 @@ describe("Plural option", () => {
             }
 
             type Query {
-              technologies(limit: Int, offset: Int, options: TechOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TechSort!], where: TechWhere): [Tech!]!
+              technologies(limit: Int, offset: Int, sort: [TechSort!], where: TechWhere): [Tech!]!
               technologiesAggregate(where: TechWhere): TechAggregateSelection!
               technologiesConnection(after: String, first: Int, sort: [TechSort!], where: TechWhere): TechnologiesConnection!
             }
@@ -412,6 +423,20 @@ describe("Plural option", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type Tech {
@@ -435,15 +460,6 @@ describe("Plural option", () => {
               node: Tech!
             }
 
-            input TechOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TechSort objects to sort Technologies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TechSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Technologies by. The order in which sorts are applied is not guaranteed when specifying many fields in one TechSort object.
             \\"\\"\\"
@@ -453,28 +469,28 @@ describe("Plural option", () => {
             }
 
             input TechUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              value_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
+              value: StringScalarMutations
+              value_SET: String @deprecated(reason: \\"Please use the generic mutation 'value: { set: ... } }' instead.\\")
             }
 
             input TechWhere {
               AND: [TechWhere!]
               NOT: TechWhere
               OR: [TechWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String]
-              name_STARTS_WITH: String
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              value_CONTAINS: String
-              value_ENDS_WITH: String
-              value_EQ: String
-              value_IN: [String]
-              value_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
+              value: StringScalarFilters
+              value_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter value: { contains: ... }\\")
+              value_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter value: { endsWith: ... }\\")
+              value_EQ: String @deprecated(reason: \\"Please use the relevant generic filter value: { eq: ... }\\")
+              value_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter value: { in: ... }\\")
+              value_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter value: { startsWith: ... }\\")
             }
 
             type TechnologiesConnection {
@@ -500,153 +516,6 @@ describe("Plural option", () => {
         `);
     });
 
-    test("Collision between Type and plural", async () => {
-        const typeDefs = gql`
-            type Tech @plural(value: "Techs") @node {
-                name: String
-            }
-
-            type Techs @node {
-                value: String
-            }
-        `;
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
-
-        expect(printedSchema).toMatchInlineSnapshot(`
-            "schema {
-              query: Query
-              mutation: Mutation
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created during a create mutation
-            \\"\\"\\"
-            type CreateInfo {
-              nodesCreated: Int!
-              relationshipsCreated: Int!
-            }
-
-            type CreateTechsMutationResponse {
-              info: CreateInfo!
-              techs: [Techs!]!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships deleted during a delete mutation
-            \\"\\"\\"
-            type DeleteInfo {
-              nodesDeleted: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type Mutation {
-              createTechs(input: [TechsCreateInput!]!): CreateTechsMutationResponse!
-              deleteTechs(where: TechsWhere): DeleteInfo!
-              updateTechs(update: TechsUpdateInput, where: TechsWhere): UpdateTechsMutationResponse!
-            }
-
-            \\"\\"\\"Pagination information (Relay)\\"\\"\\"
-            type PageInfo {
-              endCursor: String
-              hasNextPage: Boolean!
-              hasPreviousPage: Boolean!
-              startCursor: String
-            }
-
-            type Query {
-              techs(limit: Int, offset: Int, options: TechsOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [TechsSort!], where: TechsWhere): [Techs!]!
-              techsAggregate(where: TechsWhere): TechsAggregateSelection!
-              techsConnection(after: String, first: Int, sort: [TechsSort!], where: TechsWhere): TechsConnection!
-            }
-
-            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
-            enum SortDirection {
-              \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
-              ASC
-              \\"\\"\\"Sort by field values in descending order.\\"\\"\\"
-              DESC
-            }
-
-            type StringAggregateSelection {
-              longest: String
-              shortest: String
-            }
-
-            type Techs {
-              value: String
-            }
-
-            type TechsAggregateSelection {
-              count: Int!
-              value: StringAggregateSelection!
-            }
-
-            type TechsConnection {
-              edges: [TechsEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            input TechsCreateInput {
-              value: String
-            }
-
-            type TechsEdge {
-              cursor: String!
-              node: Techs!
-            }
-
-            input TechsOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more TechsSort objects to sort Techs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [TechsSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort Techs by. The order in which sorts are applied is not guaranteed when specifying many fields in one TechsSort object.
-            \\"\\"\\"
-            input TechsSort {
-              value: SortDirection
-            }
-
-            input TechsUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              value_SET: String
-            }
-
-            input TechsWhere {
-              AND: [TechsWhere!]
-              NOT: TechsWhere
-              OR: [TechsWhere!]
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              value_CONTAINS: String
-              value_ENDS_WITH: String
-              value_EQ: String
-              value_IN: [String]
-              value_STARTS_WITH: String
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created and deleted during an update mutation
-            \\"\\"\\"
-            type UpdateInfo {
-              nodesCreated: Int!
-              nodesDeleted: Int!
-              relationshipsCreated: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type UpdateTechsMutationResponse {
-              info: UpdateInfo!
-              techs: [Techs!]!
-            }"
-        `);
-    });
-
     test("Same plural on multiple nodes", async () => {
         const typeDefs = gql`
             type Tech @plural(value: "Techs") @node {
@@ -657,288 +526,13 @@ describe("Plural option", () => {
                 value: String
             }
         `;
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
 
-        expect(printedSchema).toMatchInlineSnapshot(`
-            "schema {
-              query: Query
-              mutation: Mutation
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created during a create mutation
-            \\"\\"\\"
-            type CreateInfo {
-              nodesCreated: Int!
-              relationshipsCreated: Int!
-            }
-
-            type CreateTechsMutationResponse {
-              info: CreateInfo!
-              techs: [User!]!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships deleted during a delete mutation
-            \\"\\"\\"
-            type DeleteInfo {
-              nodesDeleted: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type Mutation {
-              createTechs(input: [UserCreateInput!]!): CreateTechsMutationResponse!
-              deleteTechs(where: UserWhere): DeleteInfo!
-              updateTechs(update: UserUpdateInput, where: UserWhere): UpdateTechsMutationResponse!
-            }
-
-            \\"\\"\\"Pagination information (Relay)\\"\\"\\"
-            type PageInfo {
-              endCursor: String
-              hasNextPage: Boolean!
-              hasPreviousPage: Boolean!
-              startCursor: String
-            }
-
-            type Query {
-              techs(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
-              techsAggregate(where: UserWhere): UserAggregateSelection!
-              techsConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): TechsConnection!
-            }
-
-            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
-            enum SortDirection {
-              \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
-              ASC
-              \\"\\"\\"Sort by field values in descending order.\\"\\"\\"
-              DESC
-            }
-
-            type StringAggregateSelection {
-              longest: String
-              shortest: String
-            }
-
-            type TechsConnection {
-              edges: [UserEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created and deleted during an update mutation
-            \\"\\"\\"
-            type UpdateInfo {
-              nodesCreated: Int!
-              nodesDeleted: Int!
-              relationshipsCreated: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type UpdateTechsMutationResponse {
-              info: UpdateInfo!
-              techs: [User!]!
-            }
-
-            type User {
-              value: String
-            }
-
-            type UserAggregateSelection {
-              count: Int!
-              value: StringAggregateSelection!
-            }
-
-            input UserCreateInput {
-              value: String
-            }
-
-            type UserEdge {
-              cursor: String!
-              node: User!
-            }
-
-            input UserOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UserSort objects to sort Techs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UserSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort Techs by. The order in which sorts are applied is not guaranteed when specifying many fields in one UserSort object.
-            \\"\\"\\"
-            input UserSort {
-              value: SortDirection
-            }
-
-            input UserUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              value_SET: String
-            }
-
-            input UserWhere {
-              AND: [UserWhere!]
-              NOT: UserWhere
-              OR: [UserWhere!]
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              value_CONTAINS: String
-              value_ENDS_WITH: String
-              value_EQ: String
-              value_IN: [String]
-              value_STARTS_WITH: String
-            }"
-        `);
-    });
-
-    test("Collision with pluralize", async () => {
-        const typeDefs = gql`
-            type Tech @plural(value: "Users") @node {
-                name: String
-            }
-
-            type User @node {
-                value: String
-            }
-        `;
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
-
-        expect(printedSchema).toMatchInlineSnapshot(`
-            "schema {
-              query: Query
-              mutation: Mutation
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created during a create mutation
-            \\"\\"\\"
-            type CreateInfo {
-              nodesCreated: Int!
-              relationshipsCreated: Int!
-            }
-
-            type CreateUsersMutationResponse {
-              info: CreateInfo!
-              users: [User!]!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships deleted during a delete mutation
-            \\"\\"\\"
-            type DeleteInfo {
-              nodesDeleted: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type Mutation {
-              createUsers(input: [UserCreateInput!]!): CreateUsersMutationResponse!
-              deleteUsers(where: UserWhere): DeleteInfo!
-              updateUsers(update: UserUpdateInput, where: UserWhere): UpdateUsersMutationResponse!
-            }
-
-            \\"\\"\\"Pagination information (Relay)\\"\\"\\"
-            type PageInfo {
-              endCursor: String
-              hasNextPage: Boolean!
-              hasPreviousPage: Boolean!
-              startCursor: String
-            }
-
-            type Query {
-              users(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
-              usersAggregate(where: UserWhere): UserAggregateSelection!
-              usersConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): UsersConnection!
-            }
-
-            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
-            enum SortDirection {
-              \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
-              ASC
-              \\"\\"\\"Sort by field values in descending order.\\"\\"\\"
-              DESC
-            }
-
-            type StringAggregateSelection {
-              longest: String
-              shortest: String
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created and deleted during an update mutation
-            \\"\\"\\"
-            type UpdateInfo {
-              nodesCreated: Int!
-              nodesDeleted: Int!
-              relationshipsCreated: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type UpdateUsersMutationResponse {
-              info: UpdateInfo!
-              users: [User!]!
-            }
-
-            type User {
-              value: String
-            }
-
-            type UserAggregateSelection {
-              count: Int!
-              value: StringAggregateSelection!
-            }
-
-            input UserCreateInput {
-              value: String
-            }
-
-            type UserEdge {
-              cursor: String!
-              node: User!
-            }
-
-            input UserOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UserSort objects to sort Users by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UserSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort Users by. The order in which sorts are applied is not guaranteed when specifying many fields in one UserSort object.
-            \\"\\"\\"
-            input UserSort {
-              value: SortDirection
-            }
-
-            input UserUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              value_SET: String
-            }
-
-            input UserWhere {
-              AND: [UserWhere!]
-              NOT: UserWhere
-              OR: [UserWhere!]
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              value_CONTAINS: String
-              value_ENDS_WITH: String
-              value_EQ: String
-              value_IN: [String]
-              value_STARTS_WITH: String
-            }
-
-            type UsersConnection {
-              edges: [UserEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }"
-        `);
+        await expect(async () => {
+            const neoSchema = new Neo4jGraphQL({
+                typeDefs,
+            });
+            await neoSchema.getSchema();
+        }).rejects.toIncludeSameMembers([new GraphQLError(`Ambiguous plural "techs" in "User"`)]);
     });
 
     test("Type collision with pluralize", async () => {
@@ -951,140 +545,11 @@ describe("Plural option", () => {
                 value: String
             }
         `;
-        const neoSchema = new Neo4jGraphQL({ typeDefs });
-        const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
-
-        expect(printedSchema).toMatchInlineSnapshot(`
-            "schema {
-              query: Query
-              mutation: Mutation
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created during a create mutation
-            \\"\\"\\"
-            type CreateInfo {
-              nodesCreated: Int!
-              relationshipsCreated: Int!
-            }
-
-            type CreateUsersMutationResponse {
-              info: CreateInfo!
-              users: [Users!]!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships deleted during a delete mutation
-            \\"\\"\\"
-            type DeleteInfo {
-              nodesDeleted: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type Mutation {
-              createUsers(input: [UsersCreateInput!]!): CreateUsersMutationResponse!
-              deleteUsers(where: UsersWhere): DeleteInfo!
-              updateUsers(update: UsersUpdateInput, where: UsersWhere): UpdateUsersMutationResponse!
-            }
-
-            \\"\\"\\"Pagination information (Relay)\\"\\"\\"
-            type PageInfo {
-              endCursor: String
-              hasNextPage: Boolean!
-              hasPreviousPage: Boolean!
-              startCursor: String
-            }
-
-            type Query {
-              users(limit: Int, offset: Int, options: UsersOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UsersSort!], where: UsersWhere): [Users!]!
-              usersAggregate(where: UsersWhere): UsersAggregateSelection!
-              usersConnection(after: String, first: Int, sort: [UsersSort!], where: UsersWhere): UsersConnection!
-            }
-
-            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
-            enum SortDirection {
-              \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
-              ASC
-              \\"\\"\\"Sort by field values in descending order.\\"\\"\\"
-              DESC
-            }
-
-            type StringAggregateSelection {
-              longest: String
-              shortest: String
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created and deleted during an update mutation
-            \\"\\"\\"
-            type UpdateInfo {
-              nodesCreated: Int!
-              nodesDeleted: Int!
-              relationshipsCreated: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type UpdateUsersMutationResponse {
-              info: UpdateInfo!
-              users: [Users!]!
-            }
-
-            type Users {
-              value: String
-            }
-
-            type UsersAggregateSelection {
-              count: Int!
-              value: StringAggregateSelection!
-            }
-
-            type UsersConnection {
-              edges: [UsersEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            input UsersCreateInput {
-              value: String
-            }
-
-            type UsersEdge {
-              cursor: String!
-              node: Users!
-            }
-
-            input UsersOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UsersSort objects to sort Users by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UsersSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort Users by. The order in which sorts are applied is not guaranteed when specifying many fields in one UsersSort object.
-            \\"\\"\\"
-            input UsersSort {
-              value: SortDirection
-            }
-
-            input UsersUpdateInput {
-              value: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              value_SET: String
-            }
-
-            input UsersWhere {
-              AND: [UsersWhere!]
-              NOT: UsersWhere
-              OR: [UsersWhere!]
-              value: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              value_CONTAINS: String
-              value_ENDS_WITH: String
-              value_EQ: String
-              value_IN: [String]
-              value_STARTS_WITH: String
-            }"
-        `);
+        await expect(async () => {
+            const neoSchema = new Neo4jGraphQL({
+                typeDefs,
+            });
+            await neoSchema.getSchema();
+        }).rejects.toIncludeSameMembers([new GraphQLError(`Ambiguous plural "users" in "Users"`)]);
     });
 });

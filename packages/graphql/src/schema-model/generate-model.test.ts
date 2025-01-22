@@ -393,7 +393,7 @@ describe("Relationship", () => {
         expect(accounts).toBeDefined();
         expect(accounts?.type).toBe("HAS_ACCOUNT");
         expect(accounts?.direction).toBe("OUT");
-        expect(accounts?.queryDirection).toBe("DEFAULT_DIRECTED");
+        expect(accounts?.queryDirection).toBe("DIRECTED");
         expect(accounts?.nestedOperations).toEqual([
             "CREATE",
             "UPDATE",
@@ -427,7 +427,7 @@ describe("Relationship", () => {
         expect(actors).toBeDefined();
         expect(actors?.type).toBe("STARED_IN");
         expect(actors?.direction).toBe("OUT");
-        expect(actors?.queryDirection).toBe("DEFAULT_DIRECTED");
+        expect(actors?.queryDirection).toBe("DIRECTED");
         expect(actors?.nestedOperations).toEqual([
             "CREATE",
             "UPDATE",

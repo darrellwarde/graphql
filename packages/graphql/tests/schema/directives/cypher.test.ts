@@ -112,6 +112,15 @@ describe("Cypher", () => {
                         columnName: "list_of_durations"
                     )
                 actor: Actor @cypher(statement: "MATCH (this)-[:ACTED_IN]->(a:Actor) RETURN a", columnName: "a")
+                actors_no_args: [Actor]
+                    @cypher(
+                        statement: """
+                        MATCH (a:Actor {title: $title})
+                        RETURN a
+                        LIMIT 1
+                        """
+                        columnName: "a"
+                    )
                 actors(title: String): [Actor]
                     @cypher(
                         statement: """
@@ -150,13 +159,15 @@ describe("Cypher", () => {
               node: Actor!
             }
 
-            input ActorOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ActorSort!]
+            input ActorRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Actors match this filter\\"\\"\\"
+              all: ActorWhere
+              \\"\\"\\"Filter type where none of the related Actors match this filter\\"\\"\\"
+              none: ActorWhere
+              \\"\\"\\"Filter type where one of the related Actors match this filter\\"\\"\\"
+              single: ActorWhere
+              \\"\\"\\"Filter type where some of the related Actors match this filter\\"\\"\\"
+              some: ActorWhere
             }
 
             \\"\\"\\"
@@ -167,20 +178,20 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
             }
 
             input ActorWhere {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String]
-              name_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
             }
 
             type ActorsConnection {
@@ -193,6 +204,41 @@ describe("Cypher", () => {
             A BigInt value up to 64 bits in size, which can be a number or a string if used inline, or a string only if used as a variable. Always returned as a string.
             \\"\\"\\"
             scalar BigInt
+
+            \\"\\"\\"BigInt list filters\\"\\"\\"
+            input BigIntListFilters {
+              eq: [BigInt!]
+              includes: BigInt
+            }
+
+            \\"\\"\\"BigInt filters\\"\\"\\"
+            input BigIntScalarFilters {
+              eq: BigInt
+              gt: BigInt
+              gte: BigInt
+              in: [BigInt!]
+              lt: BigInt
+              lte: BigInt
+            }
+
+            \\"\\"\\"Boolean list filters\\"\\"\\"
+            input BooleanListFilters {
+              eq: [Boolean!]
+            }
+
+            \\"\\"\\"Boolean filters\\"\\"\\"
+            input BooleanScalarFilters {
+              eq: Boolean
+            }
+
+            \\"\\"\\"Distance filters for cartesian points\\"\\"\\"
+            input CartesianDistancePointFilters {
+              from: CartesianPointInput!
+              gt: Float
+              gte: Float
+              lt: Float
+              lte: Float
+            }
 
             \\"\\"\\"
             A point in a two- or three-dimensional Cartesian coordinate system or in a three-dimensional cylindrical coordinate system. For more information, see https://neo4j.com/docs/graphql/4/type-definitions/types/spatial/#cartesian-point
@@ -211,11 +257,24 @@ describe("Cypher", () => {
               point: CartesianPointInput!
             }
 
+            \\"\\"\\"Cartesian Point filters\\"\\"\\"
+            input CartesianPointFilters {
+              distance: CartesianDistancePointFilters
+              eq: CartesianPointInput
+              in: [CartesianPointInput!]
+            }
+
             \\"\\"\\"Input type for a cartesian point\\"\\"\\"
             input CartesianPointInput {
               x: Float!
               y: Float!
               z: Float
+            }
+
+            \\"\\"\\"CartesianPoint list filters\\"\\"\\"
+            input CartesianPointListFilters {
+              eq: [CartesianPointInput!]
+              includes: CartesianPointInput
             }
 
             type CreateActorsMutationResponse {
@@ -239,8 +298,40 @@ describe("Cypher", () => {
             \\"\\"\\"A date, represented as a 'yyyy-mm-dd' string\\"\\"\\"
             scalar Date
 
+            \\"\\"\\"Date list filters\\"\\"\\"
+            input DateListFilters {
+              eq: [Date!]
+              includes: Date
+            }
+
+            \\"\\"\\"Date filters\\"\\"\\"
+            input DateScalarFilters {
+              eq: Date
+              gt: Date
+              gte: Date
+              in: [Date!]
+              lt: Date
+              lte: Date
+            }
+
             \\"\\"\\"A date and time, represented as an ISO-8601 string\\"\\"\\"
             scalar DateTime
+
+            \\"\\"\\"DateTime list filters\\"\\"\\"
+            input DateTimeListFilters {
+              eq: [DateTime!]
+              includes: DateTime
+            }
+
+            \\"\\"\\"DateTime filters\\"\\"\\"
+            input DateTimeScalarFilters {
+              eq: DateTime
+              gt: DateTime
+              gte: DateTime
+              in: [DateTime!]
+              lt: DateTime
+              lte: DateTime
+            }
 
             \\"\\"\\"
             Information about the number of nodes and relationships deleted during a delete mutation
@@ -253,22 +344,118 @@ describe("Cypher", () => {
             \\"\\"\\"A duration, represented as an ISO 8601 duration string\\"\\"\\"
             scalar Duration
 
-            type IDAggregateSelection {
-              longest: ID
-              shortest: ID
+            \\"\\"\\"Duration list filters\\"\\"\\"
+            input DurationListFilters {
+              eq: [Duration!]
+              includes: Duration
+            }
+
+            \\"\\"\\"Duration filters\\"\\"\\"
+            input DurationScalarFilters {
+              eq: Duration
+              gt: Duration
+              gte: Duration
+              in: [Duration!]
+              lt: Duration
+              lte: Duration
+            }
+
+            \\"\\"\\"Float list filters\\"\\"\\"
+            input FloatListFilters {
+              eq: [Float!]
+              includes: Float
+            }
+
+            \\"\\"\\"Float filters\\"\\"\\"
+            input FloatScalarFilters {
+              eq: Float
+              gt: Float
+              gte: Float
+              in: [Float!]
+              lt: Float
+              lte: Float
+            }
+
+            \\"\\"\\"ID list filters\\"\\"\\"
+            input IDListFilters {
+              eq: [ID!]
+              includes: ID
+            }
+
+            \\"\\"\\"ID filters\\"\\"\\"
+            input IDScalarFilters {
+              contains: ID
+              endsWith: ID
+              eq: ID
+              in: [ID!]
+              startsWith: ID
+            }
+
+            \\"\\"\\"ID mutations\\"\\"\\"
+            input IDScalarMutations {
+              set: ID
+            }
+
+            \\"\\"\\"Int list filters\\"\\"\\"
+            input IntListFilters {
+              eq: [Int!]
+              includes: Int
+            }
+
+            \\"\\"\\"Int filters\\"\\"\\"
+            input IntScalarFilters {
+              eq: Int
+              gt: Int
+              gte: Int
+              in: [Int!]
+              lt: Int
+              lte: Int
             }
 
             \\"\\"\\"A local datetime, represented as 'YYYY-MM-DDTHH:MM:SS'\\"\\"\\"
             scalar LocalDateTime
+
+            \\"\\"\\"LocalDateTime list filters\\"\\"\\"
+            input LocalDateTimeListFilters {
+              eq: [LocalDateTime!]
+              includes: LocalDateTime
+            }
+
+            \\"\\"\\"LocalDateTime filters\\"\\"\\"
+            input LocalDateTimeScalarFilters {
+              eq: LocalDateTime
+              gt: LocalDateTime
+              gte: LocalDateTime
+              in: [LocalDateTime!]
+              lt: LocalDateTime
+              lte: LocalDateTime
+            }
 
             \\"\\"\\"
             A local time, represented as a time string without timezone information
             \\"\\"\\"
             scalar LocalTime
 
+            \\"\\"\\"LocalTime list filters\\"\\"\\"
+            input LocalTimeListFilters {
+              eq: [LocalTime!]
+              includes: LocalTime
+            }
+
+            \\"\\"\\"LocalTime filters\\"\\"\\"
+            input LocalTimeScalarFilters {
+              eq: LocalTime
+              gt: LocalTime
+              gte: LocalTime
+              in: [LocalTime!]
+              lt: LocalTime
+              lte: LocalTime
+            }
+
             type Movie {
               actor: Actor
               actors(title: String): [Actor]
+              actors_no_args: [Actor]
               custom_big_int: BigInt
               custom_boolean: Boolean
               custom_cartesian_point: CartesianPoint
@@ -302,7 +489,6 @@ describe("Cypher", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             input MovieCreateInput {
@@ -312,15 +498,6 @@ describe("Cypher", () => {
             type MovieEdge {
               cursor: String!
               node: Movie!
-            }
-
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
             }
 
             \\"\\"\\"
@@ -345,8 +522,8 @@ describe("Cypher", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: ID
+              id: IDScalarMutations
+              id_SET: ID @deprecated(reason: \\"Please use the generic mutation 'id: { set: ... } }' instead.\\")
             }
 
             input MovieWhere {
@@ -354,146 +531,151 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
-              custom_big_int: BigInt @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_big_int_EQ: BigInt
-              custom_big_int_GT: BigInt
-              custom_big_int_GTE: BigInt
-              custom_big_int_IN: [BigInt]
-              custom_big_int_LT: BigInt
-              custom_big_int_LTE: BigInt
-              custom_boolean: Boolean @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_boolean_EQ: Boolean
-              custom_cartesian_point: CartesianPointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_cartesian_point_DISTANCE: CartesianPointDistance
-              custom_cartesian_point_EQ: CartesianPointInput
-              custom_cartesian_point_GT: CartesianPointDistance
-              custom_cartesian_point_GTE: CartesianPointDistance
-              custom_cartesian_point_IN: [CartesianPointInput]
-              custom_cartesian_point_LT: CartesianPointDistance
-              custom_cartesian_point_LTE: CartesianPointDistance
-              custom_date: Date @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_date_EQ: Date
-              custom_date_GT: Date
-              custom_date_GTE: Date
-              custom_date_IN: [Date]
-              custom_date_LT: Date
-              custom_date_LTE: Date
-              custom_datetime: DateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_datetime_EQ: DateTime
-              custom_datetime_GT: DateTime
-              custom_datetime_GTE: DateTime
-              custom_datetime_IN: [DateTime]
-              custom_datetime_LT: DateTime
-              custom_datetime_LTE: DateTime
-              custom_duration: Duration @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_duration_EQ: Duration
-              custom_duration_GT: Duration
-              custom_duration_GTE: Duration
-              custom_duration_IN: [Duration]
-              custom_duration_LT: Duration
-              custom_duration_LTE: Duration
-              custom_float: Float @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_float_EQ: Float
-              custom_float_GT: Float
-              custom_float_GTE: Float
-              custom_float_IN: [Float]
-              custom_float_LT: Float
-              custom_float_LTE: Float
-              custom_id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_id_CONTAINS: ID
-              custom_id_ENDS_WITH: ID
-              custom_id_EQ: ID
-              custom_id_IN: [ID]
-              custom_id_STARTS_WITH: ID
-              custom_int: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_int_EQ: Int
-              custom_int_GT: Int
-              custom_int_GTE: Int
-              custom_int_IN: [Int]
-              custom_int_LT: Int
-              custom_int_LTE: Int
-              custom_localdatetime: LocalDateTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_localdatetime_EQ: LocalDateTime
-              custom_localdatetime_GT: LocalDateTime
-              custom_localdatetime_GTE: LocalDateTime
-              custom_localdatetime_IN: [LocalDateTime]
-              custom_localdatetime_LT: LocalDateTime
-              custom_localdatetime_LTE: LocalDateTime
-              custom_localtime: LocalTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_localtime_EQ: LocalTime
-              custom_localtime_GT: LocalTime
-              custom_localtime_GTE: LocalTime
-              custom_localtime_IN: [LocalTime]
-              custom_localtime_LT: LocalTime
-              custom_localtime_LTE: LocalTime
-              custom_point: PointInput @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_point_DISTANCE: PointDistance
-              custom_point_EQ: PointInput
-              custom_point_GT: PointDistance
-              custom_point_GTE: PointDistance
-              custom_point_IN: [PointInput]
-              custom_point_LT: PointDistance
-              custom_point_LTE: PointDistance
-              custom_string: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_string_CONTAINS: String
-              custom_string_ENDS_WITH: String
-              custom_string_EQ: String
-              custom_string_IN: [String]
-              custom_string_STARTS_WITH: String
-              custom_time: Time @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_time_EQ: Time
-              custom_time_GT: Time
-              custom_time_GTE: Time
-              custom_time_IN: [Time]
-              custom_time_LT: Time
-              custom_time_LTE: Time
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: ID
-              id_ENDS_WITH: ID
-              id_EQ: ID
-              id_IN: [ID]
-              id_STARTS_WITH: ID
-              list_custom_of_ids: [ID] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_custom_of_ids_EQ: [ID]
-              list_custom_of_ids_INCLUDES: ID
-              list_of_custom_big_ints: [BigInt] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_big_ints_EQ: [BigInt]
-              list_of_custom_big_ints_INCLUDES: BigInt
-              list_of_custom_booleans: [Boolean] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_booleans_EQ: [Boolean]
-              list_of_custom_cartesian_points: [CartesianPointInput] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_cartesian_points_EQ: [CartesianPointInput]
-              list_of_custom_cartesian_points_INCLUDES: CartesianPointInput
-              list_of_custom_dates: [Date] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_dates_EQ: [Date]
-              list_of_custom_dates_INCLUDES: Date
-              list_of_custom_datetimes: [DateTime] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_datetimes_EQ: [DateTime]
-              list_of_custom_datetimes_INCLUDES: DateTime
-              list_of_custom_durations: [Duration] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_durations_EQ: [Duration]
-              list_of_custom_durations_INCLUDES: Duration
-              list_of_custom_floats: [Float] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_floats_EQ: [Float]
-              list_of_custom_floats_INCLUDES: Float
-              list_of_custom_ints: [Int] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_ints_EQ: [Int]
-              list_of_custom_ints_INCLUDES: Int
-              list_of_custom_localdatetimes: [LocalDateTime] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_localdatetimes_EQ: [LocalDateTime]
-              list_of_custom_localdatetimes_INCLUDES: LocalDateTime
-              list_of_custom_localtimes: [LocalTime] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_localtimes_EQ: [LocalTime]
-              list_of_custom_localtimes_INCLUDES: LocalTime
-              list_of_custom_points: [PointInput] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_points_EQ: [PointInput]
-              list_of_custom_points_INCLUDES: PointInput
-              list_of_custom_strings: [String] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_strings_EQ: [String]
-              list_of_custom_strings_INCLUDES: String
-              list_of_custom_times: [Time] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              list_of_custom_times_EQ: [Time]
-              list_of_custom_times_INCLUDES: Time
+              actors_no_args: ActorRelationshipFilters
+              actors_no_args_ALL: ActorWhere
+              actors_no_args_NONE: ActorWhere
+              actors_no_args_SINGLE: ActorWhere
+              actors_no_args_SOME: ActorWhere
+              custom_big_int: BigIntScalarFilters
+              custom_big_int_EQ: BigInt @deprecated(reason: \\"Please use the relevant generic filter custom_big_int: { eq: ... }\\")
+              custom_big_int_GT: BigInt @deprecated(reason: \\"Please use the relevant generic filter custom_big_int: { gt: ... }\\")
+              custom_big_int_GTE: BigInt @deprecated(reason: \\"Please use the relevant generic filter custom_big_int: { gte: ... }\\")
+              custom_big_int_IN: [BigInt] @deprecated(reason: \\"Please use the relevant generic filter custom_big_int: { in: ... }\\")
+              custom_big_int_LT: BigInt @deprecated(reason: \\"Please use the relevant generic filter custom_big_int: { lt: ... }\\")
+              custom_big_int_LTE: BigInt @deprecated(reason: \\"Please use the relevant generic filter custom_big_int: { lte: ... }\\")
+              custom_boolean: BooleanScalarFilters
+              custom_boolean_EQ: Boolean @deprecated(reason: \\"Please use the relevant generic filter custom_boolean: { eq: ... }\\")
+              custom_cartesian_point: CartesianPointFilters
+              custom_cartesian_point_DISTANCE: CartesianPointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_cartesian_point: { distance: ... }\\")
+              custom_cartesian_point_EQ: CartesianPointInput @deprecated(reason: \\"Please use the relevant generic filter custom_cartesian_point: { eq: ... }\\")
+              custom_cartesian_point_GT: CartesianPointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_cartesian_point: { gt: ... }\\")
+              custom_cartesian_point_GTE: CartesianPointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_cartesian_point: { gte: ... }\\")
+              custom_cartesian_point_IN: [CartesianPointInput] @deprecated(reason: \\"Please use the relevant generic filter custom_cartesian_point: { in: ... }\\")
+              custom_cartesian_point_LT: CartesianPointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_cartesian_point: { lt: ... }\\")
+              custom_cartesian_point_LTE: CartesianPointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_cartesian_point: { lte: ... }\\")
+              custom_date: DateScalarFilters
+              custom_date_EQ: Date @deprecated(reason: \\"Please use the relevant generic filter custom_date: { eq: ... }\\")
+              custom_date_GT: Date @deprecated(reason: \\"Please use the relevant generic filter custom_date: { gt: ... }\\")
+              custom_date_GTE: Date @deprecated(reason: \\"Please use the relevant generic filter custom_date: { gte: ... }\\")
+              custom_date_IN: [Date] @deprecated(reason: \\"Please use the relevant generic filter custom_date: { in: ... }\\")
+              custom_date_LT: Date @deprecated(reason: \\"Please use the relevant generic filter custom_date: { lt: ... }\\")
+              custom_date_LTE: Date @deprecated(reason: \\"Please use the relevant generic filter custom_date: { lte: ... }\\")
+              custom_datetime: DateTimeScalarFilters
+              custom_datetime_EQ: DateTime @deprecated(reason: \\"Please use the relevant generic filter custom_datetime: { eq: ... }\\")
+              custom_datetime_GT: DateTime @deprecated(reason: \\"Please use the relevant generic filter custom_datetime: { gt: ... }\\")
+              custom_datetime_GTE: DateTime @deprecated(reason: \\"Please use the relevant generic filter custom_datetime: { gte: ... }\\")
+              custom_datetime_IN: [DateTime] @deprecated(reason: \\"Please use the relevant generic filter custom_datetime: { in: ... }\\")
+              custom_datetime_LT: DateTime @deprecated(reason: \\"Please use the relevant generic filter custom_datetime: { lt: ... }\\")
+              custom_datetime_LTE: DateTime @deprecated(reason: \\"Please use the relevant generic filter custom_datetime: { lte: ... }\\")
+              custom_duration: DurationScalarFilters
+              custom_duration_EQ: Duration @deprecated(reason: \\"Please use the relevant generic filter custom_duration: { eq: ... }\\")
+              custom_duration_GT: Duration @deprecated(reason: \\"Please use the relevant generic filter custom_duration: { gt: ... }\\")
+              custom_duration_GTE: Duration @deprecated(reason: \\"Please use the relevant generic filter custom_duration: { gte: ... }\\")
+              custom_duration_IN: [Duration] @deprecated(reason: \\"Please use the relevant generic filter custom_duration: { in: ... }\\")
+              custom_duration_LT: Duration @deprecated(reason: \\"Please use the relevant generic filter custom_duration: { lt: ... }\\")
+              custom_duration_LTE: Duration @deprecated(reason: \\"Please use the relevant generic filter custom_duration: { lte: ... }\\")
+              custom_float: FloatScalarFilters
+              custom_float_EQ: Float @deprecated(reason: \\"Please use the relevant generic filter custom_float: { eq: ... }\\")
+              custom_float_GT: Float @deprecated(reason: \\"Please use the relevant generic filter custom_float: { gt: ... }\\")
+              custom_float_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter custom_float: { gte: ... }\\")
+              custom_float_IN: [Float] @deprecated(reason: \\"Please use the relevant generic filter custom_float: { in: ... }\\")
+              custom_float_LT: Float @deprecated(reason: \\"Please use the relevant generic filter custom_float: { lt: ... }\\")
+              custom_float_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter custom_float: { lte: ... }\\")
+              custom_id: IDScalarFilters
+              custom_id_CONTAINS: ID @deprecated(reason: \\"Please use the relevant generic filter custom_id: { contains: ... }\\")
+              custom_id_ENDS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter custom_id: { endsWith: ... }\\")
+              custom_id_EQ: ID @deprecated(reason: \\"Please use the relevant generic filter custom_id: { eq: ... }\\")
+              custom_id_IN: [ID] @deprecated(reason: \\"Please use the relevant generic filter custom_id: { in: ... }\\")
+              custom_id_STARTS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter custom_id: { startsWith: ... }\\")
+              custom_int: IntScalarFilters
+              custom_int_EQ: Int @deprecated(reason: \\"Please use the relevant generic filter custom_int: { eq: ... }\\")
+              custom_int_GT: Int @deprecated(reason: \\"Please use the relevant generic filter custom_int: { gt: ... }\\")
+              custom_int_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter custom_int: { gte: ... }\\")
+              custom_int_IN: [Int] @deprecated(reason: \\"Please use the relevant generic filter custom_int: { in: ... }\\")
+              custom_int_LT: Int @deprecated(reason: \\"Please use the relevant generic filter custom_int: { lt: ... }\\")
+              custom_int_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter custom_int: { lte: ... }\\")
+              custom_localdatetime: LocalDateTimeScalarFilters
+              custom_localdatetime_EQ: LocalDateTime @deprecated(reason: \\"Please use the relevant generic filter custom_localdatetime: { eq: ... }\\")
+              custom_localdatetime_GT: LocalDateTime @deprecated(reason: \\"Please use the relevant generic filter custom_localdatetime: { gt: ... }\\")
+              custom_localdatetime_GTE: LocalDateTime @deprecated(reason: \\"Please use the relevant generic filter custom_localdatetime: { gte: ... }\\")
+              custom_localdatetime_IN: [LocalDateTime] @deprecated(reason: \\"Please use the relevant generic filter custom_localdatetime: { in: ... }\\")
+              custom_localdatetime_LT: LocalDateTime @deprecated(reason: \\"Please use the relevant generic filter custom_localdatetime: { lt: ... }\\")
+              custom_localdatetime_LTE: LocalDateTime @deprecated(reason: \\"Please use the relevant generic filter custom_localdatetime: { lte: ... }\\")
+              custom_localtime: LocalTimeScalarFilters
+              custom_localtime_EQ: LocalTime @deprecated(reason: \\"Please use the relevant generic filter custom_localtime: { eq: ... }\\")
+              custom_localtime_GT: LocalTime @deprecated(reason: \\"Please use the relevant generic filter custom_localtime: { gt: ... }\\")
+              custom_localtime_GTE: LocalTime @deprecated(reason: \\"Please use the relevant generic filter custom_localtime: { gte: ... }\\")
+              custom_localtime_IN: [LocalTime] @deprecated(reason: \\"Please use the relevant generic filter custom_localtime: { in: ... }\\")
+              custom_localtime_LT: LocalTime @deprecated(reason: \\"Please use the relevant generic filter custom_localtime: { lt: ... }\\")
+              custom_localtime_LTE: LocalTime @deprecated(reason: \\"Please use the relevant generic filter custom_localtime: { lte: ... }\\")
+              custom_point: PointFilters
+              custom_point_DISTANCE: PointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_point: { distance: ... }\\")
+              custom_point_EQ: PointInput @deprecated(reason: \\"Please use the relevant generic filter custom_point: { eq: ... }\\")
+              custom_point_GT: PointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_point: { gt: ... }\\")
+              custom_point_GTE: PointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_point: { gte: ... }\\")
+              custom_point_IN: [PointInput] @deprecated(reason: \\"Please use the relevant generic filter custom_point: { in: ... }\\")
+              custom_point_LT: PointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_point: { lt: ... }\\")
+              custom_point_LTE: PointDistance @deprecated(reason: \\"Please use the relevant generic filter custom_point: { lte: ... }\\")
+              custom_string: StringScalarFilters
+              custom_string_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter custom_string: { contains: ... }\\")
+              custom_string_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter custom_string: { endsWith: ... }\\")
+              custom_string_EQ: String @deprecated(reason: \\"Please use the relevant generic filter custom_string: { eq: ... }\\")
+              custom_string_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter custom_string: { in: ... }\\")
+              custom_string_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter custom_string: { startsWith: ... }\\")
+              custom_time: TimeScalarFilters
+              custom_time_EQ: Time @deprecated(reason: \\"Please use the relevant generic filter custom_time: { eq: ... }\\")
+              custom_time_GT: Time @deprecated(reason: \\"Please use the relevant generic filter custom_time: { gt: ... }\\")
+              custom_time_GTE: Time @deprecated(reason: \\"Please use the relevant generic filter custom_time: { gte: ... }\\")
+              custom_time_IN: [Time] @deprecated(reason: \\"Please use the relevant generic filter custom_time: { in: ... }\\")
+              custom_time_LT: Time @deprecated(reason: \\"Please use the relevant generic filter custom_time: { lt: ... }\\")
+              custom_time_LTE: Time @deprecated(reason: \\"Please use the relevant generic filter custom_time: { lte: ... }\\")
+              id: IDScalarFilters
+              id_CONTAINS: ID @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: ID @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [ID] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
+              list_custom_of_ids: IDListFilters
+              list_custom_of_ids_EQ: [ID] @deprecated(reason: \\"Please use the relevant generic filter list_custom_of_ids: { eq: ... }\\")
+              list_custom_of_ids_INCLUDES: ID @deprecated(reason: \\"Please use the relevant generic filter list_custom_of_ids: { includes: ... }\\")
+              list_of_custom_big_ints: BigIntListFilters
+              list_of_custom_big_ints_EQ: [BigInt] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_big_ints: { eq: ... }\\")
+              list_of_custom_big_ints_INCLUDES: BigInt @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_big_ints: { includes: ... }\\")
+              list_of_custom_booleans: BooleanListFilters
+              list_of_custom_booleans_EQ: [Boolean] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_booleans: { eq: ... }\\")
+              list_of_custom_cartesian_points: CartesianPointListFilters
+              list_of_custom_cartesian_points_EQ: [CartesianPointInput] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_cartesian_points: { eq: ... }\\")
+              list_of_custom_cartesian_points_INCLUDES: CartesianPointInput @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_cartesian_points: { includes: ... }\\")
+              list_of_custom_dates: DateListFilters
+              list_of_custom_dates_EQ: [Date] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_dates: { eq: ... }\\")
+              list_of_custom_dates_INCLUDES: Date @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_dates: { includes: ... }\\")
+              list_of_custom_datetimes: DateTimeListFilters
+              list_of_custom_datetimes_EQ: [DateTime] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_datetimes: { eq: ... }\\")
+              list_of_custom_datetimes_INCLUDES: DateTime @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_datetimes: { includes: ... }\\")
+              list_of_custom_durations: DurationListFilters
+              list_of_custom_durations_EQ: [Duration] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_durations: { eq: ... }\\")
+              list_of_custom_durations_INCLUDES: Duration @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_durations: { includes: ... }\\")
+              list_of_custom_floats: FloatListFilters
+              list_of_custom_floats_EQ: [Float] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_floats: { eq: ... }\\")
+              list_of_custom_floats_INCLUDES: Float @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_floats: { includes: ... }\\")
+              list_of_custom_ints: IntListFilters
+              list_of_custom_ints_EQ: [Int] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_ints: { eq: ... }\\")
+              list_of_custom_ints_INCLUDES: Int @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_ints: { includes: ... }\\")
+              list_of_custom_localdatetimes: LocalDateTimeListFilters
+              list_of_custom_localdatetimes_EQ: [LocalDateTime] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_localdatetimes: { eq: ... }\\")
+              list_of_custom_localdatetimes_INCLUDES: LocalDateTime @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_localdatetimes: { includes: ... }\\")
+              list_of_custom_localtimes: LocalTimeListFilters
+              list_of_custom_localtimes_EQ: [LocalTime] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_localtimes: { eq: ... }\\")
+              list_of_custom_localtimes_INCLUDES: LocalTime @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_localtimes: { includes: ... }\\")
+              list_of_custom_points: PointListFilters
+              list_of_custom_points_EQ: [PointInput] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_points: { eq: ... }\\")
+              list_of_custom_points_INCLUDES: PointInput @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_points: { includes: ... }\\")
+              list_of_custom_strings: StringListFilters
+              list_of_custom_strings_EQ: [String] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_strings: { eq: ... }\\")
+              list_of_custom_strings_INCLUDES: String @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_strings: { includes: ... }\\")
+              list_of_custom_times: TimeListFilters
+              list_of_custom_times_EQ: [Time] @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_times: { eq: ... }\\")
+              list_of_custom_times_INCLUDES: Time @deprecated(reason: \\"Please use the relevant generic filter list_of_custom_times: { includes: ... }\\")
             }
 
             type MoviesConnection {
@@ -537,6 +719,23 @@ describe("Cypher", () => {
               point: PointInput!
             }
 
+            \\"\\"\\"Distance filters\\"\\"\\"
+            input PointDistanceFilters {
+              eq: Float
+              from: PointInput!
+              gt: Float
+              gte: Float
+              lt: Float
+              lte: Float
+            }
+
+            \\"\\"\\"Point filters\\"\\"\\"
+            input PointFilters {
+              distance: PointDistanceFilters
+              eq: PointInput
+              in: [PointInput!]
+            }
+
             \\"\\"\\"Input type for a point\\"\\"\\"
             input PointInput {
               height: Float
@@ -544,11 +743,17 @@ describe("Cypher", () => {
               longitude: Float!
             }
 
+            \\"\\"\\"Point list filters\\"\\"\\"
+            input PointListFilters {
+              eq: [PointInput!]
+              includes: PointInput
+            }
+
             type Query {
-              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
               actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
@@ -566,8 +771,44 @@ describe("Cypher", () => {
               shortest: String
             }
 
+            \\"\\"\\"String list filters\\"\\"\\"
+            input StringListFilters {
+              eq: [String!]
+              includes: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
+            }
+
             \\"\\"\\"A time, represented as an RFC3339 time string\\"\\"\\"
             scalar Time
+
+            \\"\\"\\"Time list filters\\"\\"\\"
+            input TimeListFilters {
+              eq: [Time!]
+              includes: Time
+            }
+
+            \\"\\"\\"Time filters\\"\\"\\"
+            input TimeScalarFilters {
+              eq: Time
+              gt: Time
+              gte: Time
+              in: [Time!]
+              lt: Time
+              lte: Time
+            }
 
             type UpdateActorsMutationResponse {
               actors: [Actor!]!
@@ -648,11 +889,6 @@ describe("Cypher", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-            }
-
             input MovieUpdateInput {
               \\"\\"\\"
               Appears because this input type would be empty otherwise because this type is composed of just generated and/or relationship properties. See https://neo4j.com/docs/graphql-manual/current/troubleshooting/faqs/
@@ -664,9 +900,9 @@ describe("Cypher", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              custom_cypher_string_list: [String] @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_cypher_string_list_EQ: [String]
-              custom_cypher_string_list_INCLUDES: String
+              custom_cypher_string_list: StringListFilters
+              custom_cypher_string_list_EQ: [String] @deprecated(reason: \\"Please use the relevant generic filter custom_cypher_string_list: { eq: ... }\\")
+              custom_cypher_string_list_INCLUDES: String @deprecated(reason: \\"Please use the relevant generic filter custom_cypher_string_list: { includes: ... }\\")
             }
 
             type MoviesConnection {
@@ -690,9 +926,15 @@ describe("Cypher", () => {
             }
 
             type Query {
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, where: MovieWhere): MoviesConnection!
+            }
+
+            \\"\\"\\"String list filters\\"\\"\\"
+            input StringListFilters {
+              eq: [String!]
+              includes: String
             }
 
             \\"\\"\\"
@@ -769,15 +1011,6 @@ describe("Cypher", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -819,7 +1052,7 @@ describe("Cypher", () => {
             }
 
             type Query {
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
@@ -908,15 +1141,6 @@ describe("Cypher", () => {
               node: Blog!
             }
 
-            input BlogOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more BlogSort objects to sort Blogs by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [BlogSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Blogs by. The order in which sorts are applied is not guaranteed when specifying many fields in one BlogSort object.
             \\"\\"\\"
@@ -925,8 +1149,8 @@ describe("Cypher", () => {
             }
 
             input BlogUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              title_SET: String
+              title: StringScalarMutations
+              title_SET: String @deprecated(reason: \\"Please use the generic mutation 'title: { set: ... } }' instead.\\")
             }
 
             input BlogWhere {
@@ -934,17 +1158,17 @@ describe("Cypher", () => {
               NOT: BlogWhere
               OR: [BlogWhere!]
               post: PostWhere
-              posts: PostWhere
+              posts: PostRelationshipFilters
               posts_ALL: PostWhere
               posts_NONE: PostWhere
               posts_SINGLE: PostWhere
               posts_SOME: PostWhere
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              title_CONTAINS: String
-              title_ENDS_WITH: String
-              title_EQ: String
-              title_IN: [String]
-              title_STARTS_WITH: String
+              title: StringScalarFilters
+              title_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter title: { contains: ... }\\")
+              title_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter title: { endsWith: ... }\\")
+              title_EQ: String @deprecated(reason: \\"Please use the relevant generic filter title: { eq: ... }\\")
+              title_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter title: { in: ... }\\")
+              title_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter title: { startsWith: ... }\\")
             }
 
             type BlogsConnection {
@@ -1021,13 +1245,15 @@ describe("Cypher", () => {
               node: Post!
             }
 
-            input PostOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more PostSort objects to sort Posts by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [PostSort!]
+            input PostRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Posts match this filter\\"\\"\\"
+              all: PostWhere
+              \\"\\"\\"Filter type where none of the related Posts match this filter\\"\\"\\"
+              none: PostWhere
+              \\"\\"\\"Filter type where one of the related Posts match this filter\\"\\"\\"
+              single: PostWhere
+              \\"\\"\\"Filter type where some of the related Posts match this filter\\"\\"\\"
+              some: PostWhere
             }
 
             \\"\\"\\"
@@ -1038,20 +1264,20 @@ describe("Cypher", () => {
             }
 
             input PostUpdateInput {
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              content_SET: String
+              content: StringScalarMutations
+              content_SET: String @deprecated(reason: \\"Please use the generic mutation 'content: { set: ... } }' instead.\\")
             }
 
             input PostWhere {
               AND: [PostWhere!]
               NOT: PostWhere
               OR: [PostWhere!]
-              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              content_CONTAINS: String
-              content_ENDS_WITH: String
-              content_EQ: String
-              content_IN: [String]
-              content_STARTS_WITH: String
+              content: StringScalarFilters
+              content_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter content: { contains: ... }\\")
+              content_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter content: { endsWith: ... }\\")
+              content_EQ: String @deprecated(reason: \\"Please use the relevant generic filter content: { eq: ... }\\")
+              content_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter content: { in: ... }\\")
+              content_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter content: { startsWith: ... }\\")
             }
 
             type PostsConnection {
@@ -1061,19 +1287,13 @@ describe("Cypher", () => {
             }
 
             type Query {
-              blogs(limit: Int, offset: Int, options: BlogOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [BlogSort!], where: BlogWhere): [Blog!]!
+              blogs(limit: Int, offset: Int, sort: [BlogSort!], where: BlogWhere): [Blog!]!
               blogsAggregate(where: BlogWhere): BlogAggregateSelection!
               blogsConnection(after: String, first: Int, sort: [BlogSort!], where: BlogWhere): BlogsConnection!
-              contents(limit: Int, offset: Int, options: QueryOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: ContentWhere): [Content!]!
-              posts(limit: Int, offset: Int, options: PostOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PostSort!], where: PostWhere): [Post!]!
+              contents(limit: Int, offset: Int, where: ContentWhere): [Content!]!
+              posts(limit: Int, offset: Int, sort: [PostSort!], where: PostWhere): [Post!]!
               postsAggregate(where: PostWhere): PostAggregateSelection!
               postsConnection(after: String, first: Int, sort: [PostSort!], where: PostWhere): PostsConnection!
-            }
-
-            \\"\\"\\"Input type for options that can be specified on a query operation.\\"\\"\\"
-            input QueryOptions {
-              limit: Int
-              offset: Int
             }
 
             \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
@@ -1087,6 +1307,20 @@ describe("Cypher", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type UpdateBlogsMutationResponse {
@@ -1188,13 +1422,15 @@ describe("Cypher", () => {
               node: Actor!
             }
 
-            input ActorOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ActorSort!]
+            input ActorRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Actors match this filter\\"\\"\\"
+              all: ActorWhere
+              \\"\\"\\"Filter type where none of the related Actors match this filter\\"\\"\\"
+              none: ActorWhere
+              \\"\\"\\"Filter type where one of the related Actors match this filter\\"\\"\\"
+              single: ActorWhere
+              \\"\\"\\"Filter type where some of the related Actors match this filter\\"\\"\\"
+              some: ActorWhere
             }
 
             \\"\\"\\"
@@ -1205,8 +1441,8 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
             }
 
             input ActorWhere {
@@ -1214,17 +1450,17 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
-              movies: MovieWhere
+              movies: MovieRelationshipFilters
               movies_ALL: MovieWhere
               movies_NONE: MovieWhere
               movies_SINGLE: MovieWhere
               movies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String]
-              name_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
             }
 
             type ActorsConnection {
@@ -1280,9 +1516,15 @@ describe("Cypher", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
+            input MovieRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Movies match this filter\\"\\"\\"
+              all: MovieWhere
+              \\"\\"\\"Filter type where none of the related Movies match this filter\\"\\"\\"
+              none: MovieWhere
+              \\"\\"\\"Filter type where one of the related Movies match this filter\\"\\"\\"
+              single: MovieWhere
+              \\"\\"\\"Filter type where some of the related Movies match this filter\\"\\"\\"
+              some: MovieWhere
             }
 
             input MovieUpdateInput {
@@ -1297,7 +1539,7 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
-              actors: ActorWhere
+              actors: ActorRelationshipFilters
               actors_ALL: ActorWhere
               actors_NONE: ActorWhere
               actors_SINGLE: ActorWhere
@@ -1345,17 +1587,11 @@ describe("Cypher", () => {
               Movie
             }
 
-            input ProductionOptions {
-              limit: Int
-              offset: Int
-            }
-
             input ProductionWhere {
               AND: [ProductionWhere!]
               NOT: ProductionWhere
               OR: [ProductionWhere!]
               typename: [ProductionImplementation!]
-              typename_IN: [ProductionImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type ProductionsConnection {
@@ -1365,13 +1601,13 @@ describe("Cypher", () => {
             }
 
             type Query {
-              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
               actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, where: MovieWhere): MoviesConnection!
-              productions(limit: Int, offset: Int, options: ProductionOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: ProductionWhere): [Production!]!
+              productions(limit: Int, offset: Int, where: ProductionWhere): [Production!]!
               productionsAggregate(where: ProductionWhere): ProductionAggregateSelection!
               productionsConnection(after: String, first: Int, where: ProductionWhere): ProductionsConnection!
             }
@@ -1387,6 +1623,20 @@ describe("Cypher", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type UpdateActorsMutationResponse {
@@ -1411,7 +1661,7 @@ describe("Cypher", () => {
         `);
     });
 
-    test("Filters should be generated on 1:1 and *:* Relationship/Object custom cypher fields", async () => {
+    test("Filters should be generated only on 1:1 Relationship/Object custom cypher fields", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
                 actors: [Actor]
@@ -1483,13 +1733,15 @@ describe("Cypher", () => {
               node: Actor!
             }
 
-            input ActorOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ActorSort!]
+            input ActorRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Actors match this filter\\"\\"\\"
+              all: ActorWhere
+              \\"\\"\\"Filter type where none of the related Actors match this filter\\"\\"\\"
+              none: ActorWhere
+              \\"\\"\\"Filter type where one of the related Actors match this filter\\"\\"\\"
+              single: ActorWhere
+              \\"\\"\\"Filter type where some of the related Actors match this filter\\"\\"\\"
+              some: ActorWhere
             }
 
             \\"\\"\\"
@@ -1500,8 +1752,8 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
             }
 
             input ActorWhere {
@@ -1509,17 +1761,17 @@ describe("Cypher", () => {
               NOT: ActorWhere
               OR: [ActorWhere!]
               movie: MovieWhere
-              movies: MovieWhere
+              movies: MovieRelationshipFilters
               movies_ALL: MovieWhere
               movies_NONE: MovieWhere
               movies_SINGLE: MovieWhere
               movies_SOME: MovieWhere
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String]
-              name_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
             }
 
             type ActorsConnection {
@@ -1575,9 +1827,15 @@ describe("Cypher", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
+            input MovieRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Movies match this filter\\"\\"\\"
+              all: MovieWhere
+              \\"\\"\\"Filter type where none of the related Movies match this filter\\"\\"\\"
+              none: MovieWhere
+              \\"\\"\\"Filter type where one of the related Movies match this filter\\"\\"\\"
+              single: MovieWhere
+              \\"\\"\\"Filter type where some of the related Movies match this filter\\"\\"\\"
+              some: MovieWhere
             }
 
             input MovieUpdateInput {
@@ -1592,7 +1850,7 @@ describe("Cypher", () => {
               NOT: MovieWhere
               OR: [MovieWhere!]
               actor: ActorWhere
-              actors: ActorWhere
+              actors: ActorRelationshipFilters
               actors_ALL: ActorWhere
               actors_NONE: ActorWhere
               actors_SINGLE: ActorWhere
@@ -1623,10 +1881,10 @@ describe("Cypher", () => {
             }
 
             type Query {
-              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
               actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, where: MovieWhere): MoviesConnection!
             }
@@ -1642,6 +1900,20 @@ describe("Cypher", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type UpdateActorsMutationResponse {
@@ -1721,15 +1993,6 @@ describe("Cypher", () => {
               node: Actor!
             }
 
-            input ActorOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ActorSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
@@ -1739,27 +2002,27 @@ describe("Cypher", () => {
             }
 
             input ActorUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
             }
 
             input ActorWhere {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String]
-              name_STARTS_WITH: String
-              totalScreenTime: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              totalScreenTime_EQ: Int
-              totalScreenTime_GT: Int
-              totalScreenTime_GTE: Int
-              totalScreenTime_IN: [Int!]
-              totalScreenTime_LT: Int
-              totalScreenTime_LTE: Int
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
+              totalScreenTime: IntScalarFilters
+              totalScreenTime_EQ: Int @deprecated(reason: \\"Please use the relevant generic filter totalScreenTime: { eq: ... }\\")
+              totalScreenTime_GT: Int @deprecated(reason: \\"Please use the relevant generic filter totalScreenTime: { gt: ... }\\")
+              totalScreenTime_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter totalScreenTime: { gte: ... }\\")
+              totalScreenTime_IN: [Int!] @deprecated(reason: \\"Please use the relevant generic filter totalScreenTime: { in: ... }\\")
+              totalScreenTime_LT: Int @deprecated(reason: \\"Please use the relevant generic filter totalScreenTime: { lt: ... }\\")
+              totalScreenTime_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter totalScreenTime: { lte: ... }\\")
             }
 
             type ActorsConnection {
@@ -1794,9 +2057,28 @@ describe("Cypher", () => {
               relationshipsDeleted: Int!
             }
 
-            type IDAggregateSelection {
-              longest: ID
-              shortest: ID
+            \\"\\"\\"ID filters\\"\\"\\"
+            input IDScalarFilters {
+              contains: ID
+              endsWith: ID
+              eq: ID
+              in: [ID!]
+              startsWith: ID
+            }
+
+            \\"\\"\\"ID mutations\\"\\"\\"
+            input IDScalarMutations {
+              set: ID
+            }
+
+            \\"\\"\\"Int filters\\"\\"\\"
+            input IntScalarFilters {
+              eq: Int
+              gt: Int
+              gte: Int
+              in: [Int!]
+              lt: Int
+              lte: Int
             }
 
             type Movie {
@@ -1806,7 +2088,6 @@ describe("Cypher", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             input MovieCreateInput {
@@ -1818,15 +2099,6 @@ describe("Cypher", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -1835,20 +2107,20 @@ describe("Cypher", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: ID
+              id: IDScalarMutations
+              id_SET: ID @deprecated(reason: \\"Please use the generic mutation 'id: { set: ... } }' instead.\\")
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: ID
-              id_ENDS_WITH: ID
-              id_EQ: ID
-              id_IN: [ID]
-              id_STARTS_WITH: ID
+              id: IDScalarFilters
+              id_CONTAINS: ID @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: ID @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [ID] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
             }
 
             type MoviesConnection {
@@ -1875,10 +2147,10 @@ describe("Cypher", () => {
             }
 
             type Query {
-              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
               actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
@@ -1894,6 +2166,20 @@ describe("Cypher", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type UpdateActorsMutationResponse {
@@ -2000,15 +2286,6 @@ describe("Cypher", () => {
               title: String
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -2021,17 +2298,17 @@ describe("Cypher", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              title_CONTAINS: String
-              title_ENDS_WITH: String
-              title_EQ: String
-              title_IN: [String]
-              title_STARTS_WITH: String
+              title: StringScalarFilters
+              title_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter title: { contains: ... }\\")
+              title_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter title: { endsWith: ... }\\")
+              title_EQ: String @deprecated(reason: \\"Please use the relevant generic filter title: { eq: ... }\\")
+              title_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter title: { in: ... }\\")
+              title_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter title: { startsWith: ... }\\")
             }
 
             input MovieUpdateInput {
-              title: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              title_SET: String
+              title: StringScalarMutations
+              title_SET: String @deprecated(reason: \\"Please use the generic mutation 'title: { set: ... } }' instead.\\")
             }
 
             type MovieUpdatedEvent {
@@ -2045,18 +2322,18 @@ describe("Cypher", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              custom_title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_title_CONTAINS: String
-              custom_title_ENDS_WITH: String
-              custom_title_EQ: String
-              custom_title_IN: [String]
-              custom_title_STARTS_WITH: String
-              title: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              title_CONTAINS: String
-              title_ENDS_WITH: String
-              title_EQ: String
-              title_IN: [String]
-              title_STARTS_WITH: String
+              custom_title: StringScalarFilters
+              custom_title_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter custom_title: { contains: ... }\\")
+              custom_title_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter custom_title: { endsWith: ... }\\")
+              custom_title_EQ: String @deprecated(reason: \\"Please use the relevant generic filter custom_title: { eq: ... }\\")
+              custom_title_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter custom_title: { in: ... }\\")
+              custom_title_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter custom_title: { startsWith: ... }\\")
+              title: StringScalarFilters
+              title_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter title: { contains: ... }\\")
+              title_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter title: { endsWith: ... }\\")
+              title_EQ: String @deprecated(reason: \\"Please use the relevant generic filter title: { eq: ... }\\")
+              title_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter title: { in: ... }\\")
+              title_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter title: { startsWith: ... }\\")
             }
 
             type MoviesConnection {
@@ -2080,7 +2357,7 @@ describe("Cypher", () => {
             }
 
             type Query {
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
@@ -2096,6 +2373,20 @@ describe("Cypher", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type Subscription {

@@ -42,10 +42,12 @@ export function rootConnectionResolver({
     composer,
     entityAdapter,
     propagatedDirectives,
+    isLimitRequired,
 }: {
     composer: SchemaComposer;
     entityAdapter: InterfaceEntityAdapter | ConcreteEntityAdapter;
     propagatedDirectives: DirectiveNode[];
+    isLimitRequired: boolean | undefined;
 }) {
     async function resolve(_root: any, args: any, context: Neo4jGraphQLComposedContext, info: GraphQLResolveInfo) {
         const resolveTree = getNeo4jResolveTree(info, { args });
@@ -113,19 +115,10 @@ export function rootConnectionResolver({
         type: rootConnection.NonNull,
         resolve,
         args: {
-            first: GraphQLInt,
+            first: isLimitRequired ? new GraphQLNonNull(GraphQLInt) : GraphQLInt,
             after: GraphQLString,
             where: entityAdapter.operations.whereInputTypeName,
             ...(sortArg ? { sort: sortArg.NonNull.List } : {}),
-            ...(entityAdapter.annotations.fulltext
-                ? {
-                      fulltext: {
-                          type: entityAdapter.operations.fullTextInputTypeName,
-                          description:
-                              "Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.",
-                      },
-                  }
-                : {}),
         },
     };
 }

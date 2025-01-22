@@ -94,7 +94,6 @@ describe("Cypher directive on union", () => {
                 id: ID
                 title: String
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
-                topActor: Actor @relationship(type: "ACTED_IN", direction: IN)
             }
 
             type Query {
@@ -221,111 +220,13 @@ describe("Cypher directive on union", () => {
         `);
     });
 
-    test("top-level union with nested projection", async () => {
-        const query = /* GraphQL */ `
-            query {
-                moviesOrTVShows(title: "The Matrix") {
-                    ... on Movie {
-                        title
-                        actors {
-                            name
-                        }
-                        topActor {
-                            name
-                        }
-                    }
-                    ... on TVShow {
-                        title
-                        actors {
-                            name
-                        }
-                        topActor {
-                            name
-                        }
-                    }
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "CALL {
-                MATCH (n)
-                WHERE (n:TVShow OR n:Movie) AND ($param0 IS NULL OR n.title = $param0)
-                RETURN n
-            }
-            WITH n AS this0
-            CALL {
-                WITH this0
-                CALL {
-                    WITH *
-                    MATCH (this0)
-                    WHERE this0:Movie
-                    CALL {
-                        WITH this0
-                        MATCH (this0)<-[this1:ACTED_IN]-(this2:Actor)
-                        WITH this2 { .name } AS this2
-                        RETURN collect(this2) AS var3
-                    }
-                    CALL {
-                        WITH this0
-                        MATCH (this0)<-[this4:ACTED_IN]-(this5:Actor)
-                        WITH this5 { .name } AS this5
-                        RETURN head(collect(this5)) AS var6
-                    }
-                    WITH this0 { .title, actors: var3, topActor: var6, __resolveType: \\"Movie\\", __id: id(this0) } AS this0
-                    RETURN this0 AS var7
-                    UNION
-                    WITH *
-                    MATCH (this0)
-                    WHERE this0:TVShow
-                    CALL {
-                        WITH this0
-                        CALL {
-                            WITH this0
-                            WITH this0 AS this
-                            MATCH (a:Actor)
-                            RETURN a
-                        }
-                        WITH a AS this8
-                        WITH this8 { .name } AS this8
-                        RETURN collect(this8) AS var9
-                    }
-                    CALL {
-                        WITH this0
-                        CALL {
-                            WITH this0
-                            WITH this0 AS this
-                            MATCH (a:Actor)
-                            RETURN a
-                        }
-                        WITH a AS this10
-                        WITH this10 { .name } AS this10
-                        RETURN head(collect(this10)) AS var11
-                    }
-                    WITH this0 { .title, actors: var9, topActor: var11, __resolveType: \\"TVShow\\", __id: id(this0) } AS this0
-                    RETURN this0 AS var7
-                }
-                RETURN var7
-            }
-            RETURN var7 AS this0"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"param0\\": \\"The Matrix\\"
-            }"
-        `);
-    });
-
     test("top-level union with nested relationship parameters", async () => {
         const query = /* GraphQL */ `
             query {
                 moviesOrTVShows(title: "The Matrix") {
                     ... on Movie {
                         title
-                        actors(where: { name_EQ: "Keanu Reeves" }) {
+                        actors(where: { name: { eq: "Keanu Reeves" } }) {
                             name
                         }
                     }
@@ -361,6 +262,7 @@ describe("Cypher directive on union", () => {
                         WITH this0
                         MATCH (this0)<-[this1:ACTED_IN]-(this2:Actor)
                         WHERE this2.name = $param1
+                        WITH DISTINCT this2
                         WITH this2 { .name } AS this2
                         RETURN collect(this2) AS var3
                     }
@@ -508,112 +410,13 @@ describe("Cypher directive on union", () => {
         `);
     });
 
-    test("top-level single union with nested projection", async () => {
-        const query = /* GraphQL */ `
-            query {
-                movieOrTVShow(title: "The Matrix") {
-                    ... on Movie {
-                        title
-                        actors {
-                            name
-                        }
-                        topActor {
-                            name
-                        }
-                    }
-                    ... on TVShow {
-                        title
-                        actors {
-                            name
-                        }
-                        topActor {
-                            name
-                        }
-                    }
-                }
-            }
-        `;
-
-        const result = await translateQuery(neoSchema, query);
-
-        expect(formatCypher(result.cypher)).toMatchInlineSnapshot(`
-            "CALL {
-                MATCH (n)
-                WHERE (n:TVShow OR n:Movie) AND ($param0 IS NULL OR n.title = $param0)
-                RETURN n
-                LIMIT 1
-            }
-            WITH n AS this0
-            CALL {
-                WITH this0
-                CALL {
-                    WITH *
-                    MATCH (this0)
-                    WHERE this0:Movie
-                    CALL {
-                        WITH this0
-                        MATCH (this0)<-[this1:ACTED_IN]-(this2:Actor)
-                        WITH this2 { .name } AS this2
-                        RETURN collect(this2) AS var3
-                    }
-                    CALL {
-                        WITH this0
-                        MATCH (this0)<-[this4:ACTED_IN]-(this5:Actor)
-                        WITH this5 { .name } AS this5
-                        RETURN head(collect(this5)) AS var6
-                    }
-                    WITH this0 { .title, actors: var3, topActor: var6, __resolveType: \\"Movie\\", __id: id(this0) } AS this0
-                    RETURN this0 AS var7
-                    UNION
-                    WITH *
-                    MATCH (this0)
-                    WHERE this0:TVShow
-                    CALL {
-                        WITH this0
-                        CALL {
-                            WITH this0
-                            WITH this0 AS this
-                            MATCH (a:Actor)
-                            RETURN a
-                        }
-                        WITH a AS this8
-                        WITH this8 { .name } AS this8
-                        RETURN collect(this8) AS var9
-                    }
-                    CALL {
-                        WITH this0
-                        CALL {
-                            WITH this0
-                            WITH this0 AS this
-                            MATCH (a:Actor)
-                            RETURN a
-                        }
-                        WITH a AS this10
-                        WITH this10 { .name } AS this10
-                        RETURN head(collect(this10)) AS var11
-                    }
-                    WITH this0 { .title, actors: var9, topActor: var11, __resolveType: \\"TVShow\\", __id: id(this0) } AS this0
-                    RETURN this0 AS var7
-                }
-                RETURN var7
-            }
-            RETURN var7 AS this0"
-        `);
-
-        expect(formatParams(result.params)).toMatchInlineSnapshot(`
-            "{
-                \\"param0\\": \\"The Matrix\\"
-            }"
-        `);
-    });
-
     test("top-level single union with nested relationship parameters", async () => {
         const query = /* GraphQL */ `
             query {
                 moviesOrTVShows(title: "The Matrix") {
                     ... on Movie {
                         title
-                        actors(where: { name_EQ: "Keanu Reeves" }) {
+                        actors(where: { name: { eq: "Keanu Reeves" } }) {
                             name
                         }
                     }
@@ -649,6 +452,7 @@ describe("Cypher directive on union", () => {
                         WITH this0
                         MATCH (this0)<-[this1:ACTED_IN]-(this2:Actor)
                         WHERE this2.name = $param1
+                        WITH DISTINCT this2
                         WITH this2 { .name } AS this2
                         RETURN collect(this2) AS var3
                     }
@@ -706,7 +510,7 @@ describe("Cypher directive on union", () => {
                     moviesOrTVShows(title: "The Matrix") {
                         ... on Movie {
                             title
-                            actors(where: { name_EQ: "Keanu Reeves" }) {
+                            actors(where: { name: { eq: "Keanu Reeves" } }) {
                                 name
                             }
                         }
@@ -748,6 +552,7 @@ describe("Cypher directive on union", () => {
                             WITH this0
                             MATCH (this0)<-[this1:ACTED_IN]-(this2:Actor)
                             WHERE this2.name = $param1
+                            WITH DISTINCT this2
                             WITH this2 { .name } AS this2
                             RETURN collect(this2) AS var3
                         }

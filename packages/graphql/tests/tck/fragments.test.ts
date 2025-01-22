@@ -31,7 +31,7 @@ describe("Cypher Fragment", () => {
             }
 
             type User implements Entity @node {
-                id: ID! @id @unique
+                id: ID! @id
                 username: String!
                 owns: [OwnableType!]! @relationship(type: "OWNS", direction: OUT)
             }
@@ -40,17 +40,17 @@ describe("Cypher Fragment", () => {
 
             interface Ownable {
                 id: ID!
-                owner: User
+                owner: [User!]!
             }
 
             type Tile implements Ownable @node {
-                id: ID! @id @unique
-                owner: User! @relationship(type: "OWNS", direction: IN)
+                id: ID! @id
+                owner: [User!]! @relationship(type: "OWNS", direction: IN)
             }
 
             type Character implements Ownable @node {
-                id: ID! @id @unique
-                owner: User! @relationship(type: "OWNS", direction: IN)
+                id: ID! @id
+                owner: [User!]! @relationship(type: "OWNS", direction: IN)
             }
         `;
 
@@ -186,7 +186,7 @@ describe("Cypher Fragment", () => {
 
         const query = /* GraphQL */ `
             query {
-                actors(where: { name_EQ: "Keanu" }) {
+                actors(where: { name: { eq: "Keanu" } }) {
                     name
                     actedIn {
                         ...FragmentA

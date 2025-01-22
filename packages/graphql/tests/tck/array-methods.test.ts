@@ -182,7 +182,9 @@ describe("Arrays Methods", () => {
             type Movie @node {
                 title: String!
                 ratings: [Float!]!
-                    @authorization(validate: [{ operations: [UPDATE], where: { jwt: { roles_INCLUDES: "update" } } }])
+                    @authorization(
+                        validate: [{ operations: [UPDATE], where: { jwt: { roles: { includes: "update" } } } }]
+                    )
             }
         `;
 
@@ -336,7 +338,9 @@ describe("Arrays Methods", () => {
             type Movie @node {
                 title: String!
                 ratings: [Float!]!
-                    @authorization(validate: [{ operations: [UPDATE], where: { jwt: { roles_INCLUDES: "update" } } }])
+                    @authorization(
+                        validate: [{ operations: [UPDATE], where: { jwt: { roles: { includes: "update" } } } }]
+                    )
             }
         `;
 
@@ -451,7 +455,7 @@ describe("Arrays Methods", () => {
             }
 
             type ActedIn @relationshipProperties {
-                pay: [Float]
+                pay: [Float!]
             }
         `;
 
@@ -461,7 +465,7 @@ describe("Arrays Methods", () => {
 
         const query = /* GraphQL */ `
             mutation {
-                updateActors(where: { id_EQ: 1 }, update: { actedIn: [{ update: { edge: { pay_PUSH: 10 } } }] }) {
+                updateActors(where: { id: { eq: 1 } }, update: { actedIn: [{ update: { edge: { pay_PUSH: 10 } } }] }) {
                     actors {
                         name
                         actedIn {
@@ -495,6 +499,7 @@ describe("Arrays Methods", () => {
             CALL {
                 WITH this
                 MATCH (this)-[update_this0:ACTED_IN]->(update_this1:Movie)
+                WITH DISTINCT update_this1
                 WITH update_this1 { .title } AS update_this1
                 RETURN collect(update_this1) AS update_var2
             }
@@ -553,7 +558,7 @@ describe("Arrays Methods", () => {
             }
 
             type ActedIn @relationshipProperties {
-                pay: [Float]
+                pay: [Float!]
             }
         `;
 
@@ -563,7 +568,7 @@ describe("Arrays Methods", () => {
 
         const query = /* GraphQL */ `
             mutation {
-                updateActors(where: { id_EQ: 1 }, update: { actedIn: [{ update: { edge: { pay_POP: 1 } } }] }) {
+                updateActors(where: { id: { eq: 1 } }, update: { actedIn: [{ update: { edge: { pay_POP: 1 } } }] }) {
                     actors {
                         name
                         actedIn {
@@ -597,6 +602,7 @@ describe("Arrays Methods", () => {
             CALL {
                 WITH this
                 MATCH (this)-[update_this0:ACTED_IN]->(update_this1:Movie)
+                WITH DISTINCT update_this1
                 WITH update_this1 { .title } AS update_this1
                 RETURN collect(update_this1) AS update_var2
             }

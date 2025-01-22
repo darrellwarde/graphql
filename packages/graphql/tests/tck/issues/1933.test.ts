@@ -27,7 +27,7 @@ describe("https://github.com/neo4j/graphql/issues/1933", () => {
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
             type Employee @node {
-                employeeId: ID! @unique
+                employeeId: ID!
                 firstName: String! @settable(onCreate: false, onUpdate: false)
                 lastName: String @settable(onCreate: false, onUpdate: false)
                 projects: [Project!]!
@@ -39,7 +39,7 @@ describe("https://github.com/neo4j/graphql/issues/1933", () => {
             }
 
             type Project @node {
-                projectId: ID! @unique
+                projectId: ID!
                 name: String! @settable(onCreate: false, onUpdate: false)
                 description: String
                 employees: [Employee!]!
@@ -55,7 +55,7 @@ describe("https://github.com/neo4j/graphql/issues/1933", () => {
     test("should compare for SUM_LTE allocation in return statement rather than the WITH clause", async () => {
         const query = /* GraphQL */ `
             {
-                employees(where: { projectsAggregate: { edge: { allocation_SUM_LTE: 25 } } }) {
+                employees(where: { projectsAggregate: { edge: { allocation: { sum: { lte: 25 } } } } }) {
                     employeeId
                     firstName
                     lastName

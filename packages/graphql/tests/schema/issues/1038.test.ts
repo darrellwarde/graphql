@@ -65,15 +65,6 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               node: AWSAccount!
             }
 
-            input AWSAccountOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more AWSAccountSort objects to sort AwsAccounts by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [AWSAccountSort!]
-            }
-
             \\"\\"\\"
             Fields to sort AwsAccounts by. The order in which sorts are applied is not guaranteed when specifying many fields in one AWSAccountSort object.
             \\"\\"\\"
@@ -83,28 +74,28 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             input AWSAccountUpdateInput {
-              accountName: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              accountName_SET: String
-              code: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              code_SET: String
+              accountName: StringScalarMutations
+              accountName_SET: String @deprecated(reason: \\"Please use the generic mutation 'accountName: { set: ... } }' instead.\\")
+              code: StringScalarMutations
+              code_SET: String @deprecated(reason: \\"Please use the generic mutation 'code: { set: ... } }' instead.\\")
             }
 
             input AWSAccountWhere {
               AND: [AWSAccountWhere!]
               NOT: AWSAccountWhere
               OR: [AWSAccountWhere!]
-              accountName: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              accountName_CONTAINS: String
-              accountName_ENDS_WITH: String
-              accountName_EQ: String
-              accountName_IN: [String]
-              accountName_STARTS_WITH: String
-              code: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              code_CONTAINS: String
-              code_ENDS_WITH: String
-              code_EQ: String
-              code_IN: [String]
-              code_STARTS_WITH: String
+              accountName: StringScalarFilters
+              accountName_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter accountName: { contains: ... }\\")
+              accountName_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter accountName: { endsWith: ... }\\")
+              accountName_EQ: String @deprecated(reason: \\"Please use the relevant generic filter accountName: { eq: ... }\\")
+              accountName_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter accountName: { in: ... }\\")
+              accountName_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter accountName: { startsWith: ... }\\")
+              code: StringScalarFilters
+              code_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter code: { contains: ... }\\")
+              code_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter code: { endsWith: ... }\\")
+              code_EQ: String @deprecated(reason: \\"Please use the relevant generic filter code: { eq: ... }\\")
+              code_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter code: { in: ... }\\")
+              code_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter code: { startsWith: ... }\\")
             }
 
             type AwsAccountsConnection {
@@ -152,15 +143,6 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
               node: DNSZone!
             }
 
-            input DNSZoneOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more DNSZoneSort objects to sort DnsZones by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [DNSZoneSort!]
-            }
-
             \\"\\"\\"
             Fields to sort DnsZones by. The order in which sorts are applied is not guaranteed when specifying many fields in one DNSZoneSort object.
             \\"\\"\\"
@@ -170,28 +152,28 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             input DNSZoneUpdateInput {
-              awsId: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              awsId_SET: String
-              zoneType: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              zoneType_SET: String
+              awsId: StringScalarMutations
+              awsId_SET: String @deprecated(reason: \\"Please use the generic mutation 'awsId: { set: ... } }' instead.\\")
+              zoneType: StringScalarMutations
+              zoneType_SET: String @deprecated(reason: \\"Please use the generic mutation 'zoneType: { set: ... } }' instead.\\")
             }
 
             input DNSZoneWhere {
               AND: [DNSZoneWhere!]
               NOT: DNSZoneWhere
               OR: [DNSZoneWhere!]
-              awsId: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              awsId_CONTAINS: String
-              awsId_ENDS_WITH: String
-              awsId_EQ: String
-              awsId_IN: [String]
-              awsId_STARTS_WITH: String
-              zoneType: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              zoneType_CONTAINS: String
-              zoneType_ENDS_WITH: String
-              zoneType_EQ: String
-              zoneType_IN: [String]
-              zoneType_STARTS_WITH: String
+              awsId: StringScalarFilters
+              awsId_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter awsId: { contains: ... }\\")
+              awsId_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter awsId: { endsWith: ... }\\")
+              awsId_EQ: String @deprecated(reason: \\"Please use the relevant generic filter awsId: { eq: ... }\\")
+              awsId_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter awsId: { in: ... }\\")
+              awsId_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter awsId: { startsWith: ... }\\")
+              zoneType: StringScalarFilters
+              zoneType_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter zoneType: { contains: ... }\\")
+              zoneType_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter zoneType: { endsWith: ... }\\")
+              zoneType_EQ: String @deprecated(reason: \\"Please use the relevant generic filter zoneType: { eq: ... }\\")
+              zoneType_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter zoneType: { in: ... }\\")
+              zoneType_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter zoneType: { startsWith: ... }\\")
             }
 
             \\"\\"\\"
@@ -226,10 +208,10 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             }
 
             type Query {
-              awsAccounts(limit: Int, offset: Int, options: AWSAccountOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [AWSAccountSort!], where: AWSAccountWhere): [AWSAccount!]!
+              awsAccounts(limit: Int, offset: Int, sort: [AWSAccountSort!], where: AWSAccountWhere): [AWSAccount!]!
               awsAccountsAggregate(where: AWSAccountWhere): AWSAccountAggregateSelection!
               awsAccountsConnection(after: String, first: Int, sort: [AWSAccountSort!], where: AWSAccountWhere): AwsAccountsConnection!
-              dnsZones(limit: Int, offset: Int, options: DNSZoneOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [DNSZoneSort!], where: DNSZoneWhere): [DNSZone!]!
+              dnsZones(limit: Int, offset: Int, sort: [DNSZoneSort!], where: DNSZoneWhere): [DNSZone!]!
               dnsZonesAggregate(where: DNSZoneWhere): DNSZoneAggregateSelection!
               dnsZonesConnection(after: String, first: Int, sort: [DNSZoneSort!], where: DNSZoneWhere): DnsZonesConnection!
             }
@@ -245,6 +227,20 @@ describe("https://github.com/neo4j/graphql/issues/1038", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type UpdateAwsAccountsMutationResponse {

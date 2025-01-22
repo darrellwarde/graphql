@@ -81,6 +81,7 @@ describe("Node directive with additionalLabels", () => {
             CALL {
                 WITH this
                 MATCH (this)<-[this0:ACTED_IN]-(this1:Actor:Person)
+                WITH DISTINCT this1
                 WITH this1 { .name } AS this1
                 RETURN collect(this1) AS var2
             }
@@ -165,7 +166,7 @@ describe("Node directive with additionalLabels", () => {
     test("Delete Movie with additional additionalLabels", async () => {
         const query = /* GraphQL */ `
             mutation {
-                deleteMovies(where: { id_EQ: "123" }) {
+                deleteMovies(where: { id: { eq: "123" } }) {
                     nodesDeleted
                 }
             }
@@ -189,7 +190,7 @@ describe("Node directive with additionalLabels", () => {
     test("Update Movie with additional labels", async () => {
         const query = /* GraphQL */ `
             mutation {
-                updateMovies(where: { id_EQ: "1" }, update: { id_SET: "2" }) {
+                updateMovies(where: { id: { eq: "1" } }, update: { id_SET: "2" }) {
                     movies {
                         id
                     }

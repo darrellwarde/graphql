@@ -82,11 +82,6 @@ describe("Cypher Sort tests", () => {
 
         neoSchema = new Neo4jGraphQL({
             typeDefs,
-            features: {
-                excludeDeprecatedFields: {
-                    deprecatedOptionsArgument: true,
-                },
-            },
         });
     });
 
@@ -204,7 +199,7 @@ describe("Cypher Sort tests", () => {
                     sort: [{ numberOfActors: DESC }, { title: ASC }]
                     offset: 10
                     limit: 10
-                    where: { title_EQ: "The Matrix" }
+                    where: { title: { eq: "The Matrix" } }
                 ) {
                     id
                     title
@@ -267,6 +262,7 @@ describe("Cypher Sort tests", () => {
             CALL {
                 WITH this
                 MATCH (this)-[this0:HAS_GENRE]->(this1:Genre)
+                WITH DISTINCT this1
                 CALL {
                     WITH this1
                     CALL {

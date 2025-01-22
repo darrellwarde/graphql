@@ -40,7 +40,7 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             type CrewMember @node {
-                movies: Movie! @relationship(type: "WORKED_ON", direction: OUT, properties: "CrewPosition")
+                movies: [Movie!]! @relationship(type: "WORKED_ON", direction: OUT, properties: "CrewPosition")
             }
         `;
 
@@ -72,9 +72,9 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             type CrewMember {
-              movies(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): Movie!
-              moviesAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: MovieWhere): CrewMemberMovieMoviesAggregationSelection
-              moviesConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [CrewMemberMoviesConnectionSort!], where: CrewMemberMoviesConnectionWhere): CrewMemberMoviesConnection!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              moviesAggregate(where: MovieWhere): CrewMemberMovieMoviesAggregationSelection
+              moviesConnection(after: String, first: Int, sort: [CrewMemberMoviesConnectionSort!], where: CrewMemberMoviesConnectionWhere): CrewMemberMoviesConnection!
             }
 
             type CrewMemberAggregateSelection {
@@ -86,7 +86,7 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewMemberDeleteInput {
-              movies: CrewMemberMoviesDeleteFieldInput
+              movies: [CrewMemberMoviesDeleteFieldInput!]
             }
 
             type CrewMemberEdge {
@@ -107,7 +107,7 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               AND: [CrewMemberMoviesAggregateInput!]
               NOT: CrewMemberMoviesAggregateInput
               OR: [CrewMemberMoviesAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count: IntScalarFilters
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -118,10 +118,6 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
 
             input CrewMemberMoviesConnectFieldInput {
               edge: CrewPositionCreateInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: MovieConnectWhere
             }
 
@@ -129,6 +125,25 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               edges: [CrewMemberMoviesRelationship!]!
               pageInfo: PageInfo!
               totalCount: Int!
+            }
+
+            input CrewMemberMoviesConnectionFilters {
+              \\"\\"\\"
+              Return CrewMembers where all of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              all: CrewMemberMoviesConnectionWhere
+              \\"\\"\\"
+              Return CrewMembers where none of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              none: CrewMemberMoviesConnectionWhere
+              \\"\\"\\"
+              Return CrewMembers where one of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              single: CrewMemberMoviesConnectionWhere
+              \\"\\"\\"
+              Return CrewMembers where some of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              some: CrewMemberMoviesConnectionWhere
             }
 
             input CrewMemberMoviesConnectionSort {
@@ -158,29 +173,30 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewMemberMoviesFieldInput {
-              connect: CrewMemberMoviesConnectFieldInput
-              create: CrewMemberMoviesCreateFieldInput
+              connect: [CrewMemberMoviesConnectFieldInput!]
+              create: [CrewMemberMoviesCreateFieldInput!]
             }
 
             input CrewMemberMoviesNodeAggregationWhereInput {
               AND: [CrewMemberMoviesNodeAggregationWhereInput!]
               NOT: CrewMemberMoviesNodeAggregationWhereInput
               OR: [CrewMemberMoviesNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
+              name: StringScalarAggregationFilters
+              name_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { eq: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gte: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { eq: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { eq: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lte: ... } } }' instead.\\")
             }
 
             type CrewMemberMoviesRelationship {
@@ -195,30 +211,49 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input CrewMemberMoviesUpdateFieldInput {
-              connect: CrewMemberMoviesConnectFieldInput
-              create: CrewMemberMoviesCreateFieldInput
-              delete: CrewMemberMoviesDeleteFieldInput
-              disconnect: CrewMemberMoviesDisconnectFieldInput
+              connect: [CrewMemberMoviesConnectFieldInput!]
+              create: [CrewMemberMoviesCreateFieldInput!]
+              delete: [CrewMemberMoviesDeleteFieldInput!]
+              disconnect: [CrewMemberMoviesDisconnectFieldInput!]
               update: CrewMemberMoviesUpdateConnectionInput
               where: CrewMemberMoviesConnectionWhere
             }
 
-            input CrewMemberOptions {
-              limit: Int
-              offset: Int
-            }
-
             input CrewMemberUpdateInput {
-              movies: CrewMemberMoviesUpdateFieldInput
+              movies: [CrewMemberMoviesUpdateFieldInput!]
             }
 
             input CrewMemberWhere {
               AND: [CrewMemberWhere!]
               NOT: CrewMemberWhere
               OR: [CrewMemberWhere!]
-              movies: MovieWhere
+              movies: MovieRelationshipFilters
               moviesAggregate: CrewMemberMoviesAggregateInput
-              moviesConnection: CrewMemberMoviesConnectionWhere
+              moviesConnection: CrewMemberMoviesConnectionFilters
+              \\"\\"\\"
+              Return CrewMembers where all of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_ALL: CrewMemberMoviesConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'moviesConnection: { all: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return CrewMembers where none of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_NONE: CrewMemberMoviesConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'moviesConnection: { none: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return CrewMembers where one of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SINGLE: CrewMemberMoviesConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'moviesConnection: { single: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return CrewMembers where some of the related CrewMemberMoviesConnections match this filter
+              \\"\\"\\"
+              moviesConnection_SOME: CrewMemberMoviesConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'moviesConnection: { some: { node: ... } } }' instead.\\")
+              \\"\\"\\"Return CrewMembers where all of the related Movies match this filter\\"\\"\\"
+              movies_ALL: MovieWhere @deprecated(reason: \\"Please use the relevant generic filter 'movies: { all: ... }' instead.\\")
+              \\"\\"\\"Return CrewMembers where none of the related Movies match this filter\\"\\"\\"
+              movies_NONE: MovieWhere @deprecated(reason: \\"Please use the relevant generic filter 'movies: { none: ... }' instead.\\")
+              \\"\\"\\"Return CrewMembers where one of the related Movies match this filter\\"\\"\\"
+              movies_SINGLE: MovieWhere @deprecated(reason: \\"Please use the relevant generic filter 'movies: {  single: ... }' instead.\\")
+              \\"\\"\\"Return CrewMembers where some of the related Movies match this filter\\"\\"\\"
+              movies_SOME: MovieWhere @deprecated(reason: \\"Please use the relevant generic filter 'movies: {  some: ... }' instead.\\")
             }
 
             type CrewMembersConnection {
@@ -249,18 +284,29 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               KeyGrip
             }
 
+            \\"\\"\\"CrewPositionType filters\\"\\"\\"
+            input CrewPositionTypeEnumScalarFilters {
+              eq: CrewPositionType
+              in: [CrewPositionType!]
+            }
+
+            \\"\\"\\"CrewPositionType mutations\\"\\"\\"
+            input CrewPositionTypeEnumScalarMutations {
+              set: CrewPositionType
+            }
+
             input CrewPositionUpdateInput {
-              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _SET field\\")
-              position_SET: CrewPositionType
+              position: CrewPositionTypeEnumScalarMutations
+              position_SET: CrewPositionType @deprecated(reason: \\"Please use the generic mutation 'position: { set: ... } }' instead.\\")
             }
 
             input CrewPositionWhere {
               AND: [CrewPositionWhere!]
               NOT: CrewPositionWhere
               OR: [CrewPositionWhere!]
-              position: CrewPositionType @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              position_EQ: CrewPositionType
-              position_IN: [CrewPositionType]
+              position: CrewPositionTypeEnumScalarFilters
+              position_EQ: CrewPositionType @deprecated(reason: \\"Please use the relevant generic filter position: { eq: ... }\\")
+              position_IN: [CrewPositionType] @deprecated(reason: \\"Please use the relevant generic filter position: { in: ... }\\")
             }
 
             \\"\\"\\"
@@ -269,6 +315,26 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             type DeleteInfo {
               nodesDeleted: Int!
               relationshipsDeleted: Int!
+            }
+
+            \\"\\"\\"Float filters\\"\\"\\"
+            input FloatScalarFilters {
+              eq: Float
+              gt: Float
+              gte: Float
+              in: [Float!]
+              lt: Float
+              lte: Float
+            }
+
+            \\"\\"\\"Int filters\\"\\"\\"
+            input IntScalarFilters {
+              eq: Int
+              gt: Int
+              gte: Int
+              in: [Int!]
+              lt: Int
+              lte: Int
             }
 
             type Movie {
@@ -293,13 +359,15 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
+            input MovieRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Movies match this filter\\"\\"\\"
+              all: MovieWhere
+              \\"\\"\\"Filter type where none of the related Movies match this filter\\"\\"\\"
+              none: MovieWhere
+              \\"\\"\\"Filter type where one of the related Movies match this filter\\"\\"\\"
+              single: MovieWhere
+              \\"\\"\\"Filter type where some of the related Movies match this filter\\"\\"\\"
+              some: MovieWhere
             }
 
             \\"\\"\\"
@@ -310,20 +378,20 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             input MovieUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
             }
 
             type MoviesConnection {
@@ -350,10 +418,10 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             }
 
             type Query {
-              crewMembers(limit: Int, offset: Int, options: CrewMemberOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: CrewMemberWhere): [CrewMember!]!
+              crewMembers(limit: Int, offset: Int, where: CrewMemberWhere): [CrewMember!]!
               crewMembersAggregate(where: CrewMemberWhere): CrewMemberAggregateSelection!
               crewMembersConnection(after: String, first: Int, where: CrewMemberWhere): CrewMembersConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
@@ -369,6 +437,27 @@ describe("https://github.com/neo4j/graphql/issues/1614", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"Filters for an aggregation of a string field\\"\\"\\"
+            input StringScalarAggregationFilters {
+              averageLength: FloatScalarFilters
+              longestLength: IntScalarFilters
+              shortestLength: IntScalarFilters
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type UpdateCrewMembersMutationResponse {

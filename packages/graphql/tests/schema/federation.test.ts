@@ -34,7 +34,7 @@ describe("Apollo Federation", () => {
 
             type Post @node {
                 content: String!
-                author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
             }
         `;
 
@@ -95,6 +95,26 @@ describe("Apollo Federation", () => {
               relationshipsDeleted: Int!
             }
 
+            \\"\\"\\"Float filters\\"\\"\\"
+            input FloatScalarFilters {
+              eq: Float
+              gt: Float
+              gte: Float
+              in: [Float!]
+              lt: Float
+              lte: Float
+            }
+
+            \\"\\"\\"Int filters\\"\\"\\"
+            input IntScalarFilters {
+              eq: Int
+              gt: Int
+              gte: Int
+              in: [Int!]
+              lt: Int
+              lte: Int
+            }
+
             type Mutation {
               createPosts(input: [PostCreateInput!]!): CreatePostsMutationResponse!
               createUsers(input: [UserCreateInput!]!): CreateUsersMutationResponse! @shareable
@@ -113,9 +133,9 @@ describe("Apollo Federation", () => {
             }
 
             type Post {
-              author: User!
-              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): PostUserAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
+              author(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
+              authorAggregate(where: UserWhere): PostUserAuthorAggregationSelection
+              authorConnection(after: String, first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
               content: String!
             }
 
@@ -128,7 +148,7 @@ describe("Apollo Federation", () => {
               AND: [PostAuthorAggregateInput!]
               NOT: PostAuthorAggregateInput
               OR: [PostAuthorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count: IntScalarFilters
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -138,11 +158,7 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorConnectFieldInput {
-              connect: UserConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
+              connect: [UserConnectInput!]
               where: UserConnectWhere
             }
 
@@ -150,6 +166,25 @@ describe("Apollo Federation", () => {
               edges: [PostAuthorRelationship!]!
               pageInfo: PageInfo!
               totalCount: Int!
+            }
+
+            input PostAuthorConnectionFilters {
+              \\"\\"\\"
+              Return Posts where all of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              all: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where none of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              none: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where one of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              single: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where some of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              some: PostAuthorConnectionWhere
             }
 
             input PostAuthorConnectionSort {
@@ -178,29 +213,30 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
             }
 
             input PostAuthorNodeAggregationWhereInput {
               AND: [PostAuthorNodeAggregationWhereInput!]
               NOT: PostAuthorNodeAggregationWhereInput
               OR: [PostAuthorNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
+              name: StringScalarAggregationFilters
+              name_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { eq: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gte: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { eq: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { eq: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lte: ... } } }' instead.\\")
             }
 
             type PostAuthorRelationship {
@@ -213,16 +249,16 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorUpdateFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
-              delete: PostAuthorDeleteFieldInput
-              disconnect: PostAuthorDisconnectFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
+              delete: [PostAuthorDeleteFieldInput!]
+              disconnect: [PostAuthorDisconnectFieldInput!]
               update: PostAuthorUpdateConnectionInput
               where: PostAuthorConnectionWhere
             }
 
             input PostConnectInput {
-              author: PostAuthorConnectFieldInput
+              author: [PostAuthorConnectFieldInput!]
             }
 
             input PostConnectWhere {
@@ -235,11 +271,11 @@ describe("Apollo Federation", () => {
             }
 
             input PostDeleteInput {
-              author: PostAuthorDeleteFieldInput
+              author: [PostAuthorDeleteFieldInput!]
             }
 
             input PostDisconnectInput {
-              author: PostAuthorDisconnectFieldInput
+              author: [PostAuthorDisconnectFieldInput!]
             }
 
             type PostEdge {
@@ -247,13 +283,15 @@ describe("Apollo Federation", () => {
               node: Post!
             }
 
-            input PostOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more PostSort objects to sort Posts by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [PostSort!]
+            input PostRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Posts match this filter\\"\\"\\"
+              all: PostWhere
+              \\"\\"\\"Filter type where none of the related Posts match this filter\\"\\"\\"
+              none: PostWhere
+              \\"\\"\\"Filter type where one of the related Posts match this filter\\"\\"\\"
+              single: PostWhere
+              \\"\\"\\"Filter type where some of the related Posts match this filter\\"\\"\\"
+              some: PostWhere
             }
 
             \\"\\"\\"
@@ -264,9 +302,9 @@ describe("Apollo Federation", () => {
             }
 
             input PostUpdateInput {
-              author: PostAuthorUpdateFieldInput
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              content_SET: String
+              author: [PostAuthorUpdateFieldInput!]
+              content: StringScalarMutations
+              content_SET: String @deprecated(reason: \\"Please use the generic mutation 'content: { set: ... } }' instead.\\")
             }
 
             type PostUserAuthorAggregationSelection {
@@ -282,15 +320,39 @@ describe("Apollo Federation", () => {
               AND: [PostWhere!]
               NOT: PostWhere
               OR: [PostWhere!]
-              author: UserWhere
+              author: UserRelationshipFilters
               authorAggregate: PostAuthorAggregateInput
-              authorConnection: PostAuthorConnectionWhere
-              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              content_CONTAINS: String
-              content_ENDS_WITH: String
-              content_EQ: String
-              content_IN: [String!]
-              content_STARTS_WITH: String
+              authorConnection: PostAuthorConnectionFilters
+              \\"\\"\\"
+              Return Posts where all of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_ALL: PostAuthorConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'authorConnection: { all: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Posts where none of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_NONE: PostAuthorConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'authorConnection: { none: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Posts where one of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SINGLE: PostAuthorConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'authorConnection: { single: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Posts where some of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SOME: PostAuthorConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'authorConnection: { some: { node: ... } } }' instead.\\")
+              \\"\\"\\"Return Posts where all of the related Users match this filter\\"\\"\\"
+              author_ALL: UserWhere @deprecated(reason: \\"Please use the relevant generic filter 'author: { all: ... }' instead.\\")
+              \\"\\"\\"Return Posts where none of the related Users match this filter\\"\\"\\"
+              author_NONE: UserWhere @deprecated(reason: \\"Please use the relevant generic filter 'author: { none: ... }' instead.\\")
+              \\"\\"\\"Return Posts where one of the related Users match this filter\\"\\"\\"
+              author_SINGLE: UserWhere @deprecated(reason: \\"Please use the relevant generic filter 'author: {  single: ... }' instead.\\")
+              \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
+              author_SOME: UserWhere @deprecated(reason: \\"Please use the relevant generic filter 'author: {  some: ... }' instead.\\")
+              content: StringScalarFilters
+              content_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter content: { contains: ... }\\")
+              content_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter content: { endsWith: ... }\\")
+              content_EQ: String @deprecated(reason: \\"Please use the relevant generic filter content: { eq: ... }\\")
+              content_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter content: { in: ... }\\")
+              content_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter content: { startsWith: ... }\\")
             }
 
             type PostsConnection {
@@ -301,10 +363,10 @@ describe("Apollo Federation", () => {
 
             type Query {
               _service: _Service!
-              posts(limit: Int, offset: Int, options: PostOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PostSort!], where: PostWhere): [Post!]!
+              posts(limit: Int, offset: Int, sort: [PostSort!], where: PostWhere): [Post!]!
               postsAggregate(where: PostWhere): PostAggregateSelection!
               postsConnection(after: String, first: Int, sort: [PostSort!], where: PostWhere): PostsConnection!
-              users(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]! @shareable
+              users(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]! @shareable
               usersAggregate(where: UserWhere): UserAggregateSelection! @shareable
               usersConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): UsersConnection! @shareable
             }
@@ -320,6 +382,27 @@ describe("Apollo Federation", () => {
             type StringAggregateSelection @shareable {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"Filters for an aggregation of a string field\\"\\"\\"
+            input StringScalarAggregationFilters {
+              averageLength: FloatScalarFilters
+              longestLength: IntScalarFilters
+              shortestLength: IntScalarFilters
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             \\"\\"\\"
@@ -344,9 +427,9 @@ describe("Apollo Federation", () => {
 
             type User @shareable {
               name: String!
-              posts(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: PostOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PostSort!], where: PostWhere): [Post!]!
-              postsAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: PostWhere): UserPostPostsAggregationSelection
-              postsConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [UserPostsConnectionSort!], where: UserPostsConnectionWhere): UserPostsConnection!
+              posts(limit: Int, offset: Int, sort: [PostSort!], where: PostWhere): [Post!]!
+              postsAggregate(where: PostWhere): UserPostPostsAggregationSelection
+              postsConnection(after: String, first: Int, sort: [UserPostsConnectionSort!], where: UserPostsConnectionWhere): UserPostsConnection!
             }
 
             type UserAggregateSelection @shareable {
@@ -380,15 +463,6 @@ describe("Apollo Federation", () => {
               node: User!
             }
 
-            input UserOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UserSort objects to sort Users by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UserSort!]
-            }
-
             type UserPostPostsAggregationSelection {
               count: Int!
               node: UserPostPostsNodeAggregateSelection
@@ -402,7 +476,7 @@ describe("Apollo Federation", () => {
               AND: [UserPostsAggregateInput!]
               NOT: UserPostsAggregateInput
               OR: [UserPostsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count: IntScalarFilters
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -413,10 +487,6 @@ describe("Apollo Federation", () => {
 
             input UserPostsConnectFieldInput {
               connect: [PostConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PostConnectWhere
             }
 
@@ -424,6 +494,25 @@ describe("Apollo Federation", () => {
               edges: [UserPostsRelationship!]!
               pageInfo: PageInfo!
               totalCount: Int!
+            }
+
+            input UserPostsConnectionFilters {
+              \\"\\"\\"
+              Return Users where all of the related UserPostsConnections match this filter
+              \\"\\"\\"
+              all: UserPostsConnectionWhere
+              \\"\\"\\"
+              Return Users where none of the related UserPostsConnections match this filter
+              \\"\\"\\"
+              none: UserPostsConnectionWhere
+              \\"\\"\\"
+              Return Users where one of the related UserPostsConnections match this filter
+              \\"\\"\\"
+              single: UserPostsConnectionWhere
+              \\"\\"\\"
+              Return Users where some of the related UserPostsConnections match this filter
+              \\"\\"\\"
+              some: UserPostsConnectionWhere
             }
 
             input UserPostsConnectionSort {
@@ -460,21 +549,22 @@ describe("Apollo Federation", () => {
               AND: [UserPostsNodeAggregationWhereInput!]
               NOT: UserPostsNodeAggregationWhereInput
               OR: [UserPostsNodeAggregationWhereInput!]
-              content_AVERAGE_LENGTH_EQUAL: Float
-              content_AVERAGE_LENGTH_GT: Float
-              content_AVERAGE_LENGTH_GTE: Float
-              content_AVERAGE_LENGTH_LT: Float
-              content_AVERAGE_LENGTH_LTE: Float
-              content_LONGEST_LENGTH_EQUAL: Int
-              content_LONGEST_LENGTH_GT: Int
-              content_LONGEST_LENGTH_GTE: Int
-              content_LONGEST_LENGTH_LT: Int
-              content_LONGEST_LENGTH_LTE: Int
-              content_SHORTEST_LENGTH_EQUAL: Int
-              content_SHORTEST_LENGTH_GT: Int
-              content_SHORTEST_LENGTH_GTE: Int
-              content_SHORTEST_LENGTH_LT: Int
-              content_SHORTEST_LENGTH_LTE: Int
+              content: StringScalarAggregationFilters
+              content_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'content: { averageLength: { eq: ... } } }' instead.\\")
+              content_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'content: { averageLength: { gt: ... } } }' instead.\\")
+              content_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'content: { averageLength: { gte: ... } } }' instead.\\")
+              content_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'content: { averageLength: { lt: ... } } }' instead.\\")
+              content_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'content: { averageLength: { lte: ... } } }' instead.\\")
+              content_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { longestLength: { eq: ... } } }' instead.\\")
+              content_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { longestLength: { gt: ... } } }' instead.\\")
+              content_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { longestLength: { gte: ... } } }' instead.\\")
+              content_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { longestLength: { lt: ... } } }' instead.\\")
+              content_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { longestLength: { lte: ... } } }' instead.\\")
+              content_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { shortestLength: { eq: ... } } }' instead.\\")
+              content_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { shortestLength: { gt: ... } } }' instead.\\")
+              content_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { shortestLength: { gte: ... } } }' instead.\\")
+              content_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { shortestLength: { lt: ... } } }' instead.\\")
+              content_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'content: { shortestLength: { lte: ... } } }' instead.\\")
             }
 
             type UserPostsRelationship {
@@ -495,6 +585,17 @@ describe("Apollo Federation", () => {
               where: UserPostsConnectionWhere
             }
 
+            input UserRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Users match this filter\\"\\"\\"
+              all: UserWhere
+              \\"\\"\\"Filter type where none of the related Users match this filter\\"\\"\\"
+              none: UserWhere
+              \\"\\"\\"Filter type where one of the related Users match this filter\\"\\"\\"
+              single: UserWhere
+              \\"\\"\\"Filter type where some of the related Users match this filter\\"\\"\\"
+              some: UserWhere
+            }
+
             \\"\\"\\"
             Fields to sort Users by. The order in which sorts are applied is not guaranteed when specifying many fields in one UserSort object.
             \\"\\"\\"
@@ -503,8 +604,8 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
               posts: [UserPostsUpdateFieldInput!]
             }
 
@@ -512,37 +613,39 @@ describe("Apollo Federation", () => {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
+              posts: PostRelationshipFilters
               postsAggregate: UserPostsAggregateInput
+              postsConnection: UserPostsConnectionFilters
               \\"\\"\\"
               Return Users where all of the related UserPostsConnections match this filter
               \\"\\"\\"
-              postsConnection_ALL: UserPostsConnectionWhere
+              postsConnection_ALL: UserPostsConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'postsConnection: { all: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return Users where none of the related UserPostsConnections match this filter
               \\"\\"\\"
-              postsConnection_NONE: UserPostsConnectionWhere
+              postsConnection_NONE: UserPostsConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'postsConnection: { none: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return Users where one of the related UserPostsConnections match this filter
               \\"\\"\\"
-              postsConnection_SINGLE: UserPostsConnectionWhere
+              postsConnection_SINGLE: UserPostsConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'postsConnection: { single: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return Users where some of the related UserPostsConnections match this filter
               \\"\\"\\"
-              postsConnection_SOME: UserPostsConnectionWhere
+              postsConnection_SOME: UserPostsConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'postsConnection: { some: { node: ... } } }' instead.\\")
               \\"\\"\\"Return Users where all of the related Posts match this filter\\"\\"\\"
-              posts_ALL: PostWhere
+              posts_ALL: PostWhere @deprecated(reason: \\"Please use the relevant generic filter 'posts: { all: ... }' instead.\\")
               \\"\\"\\"Return Users where none of the related Posts match this filter\\"\\"\\"
-              posts_NONE: PostWhere
+              posts_NONE: PostWhere @deprecated(reason: \\"Please use the relevant generic filter 'posts: { none: ... }' instead.\\")
               \\"\\"\\"Return Users where one of the related Posts match this filter\\"\\"\\"
-              posts_SINGLE: PostWhere
+              posts_SINGLE: PostWhere @deprecated(reason: \\"Please use the relevant generic filter 'posts: {  single: ... }' instead.\\")
               \\"\\"\\"Return Users where some of the related Posts match this filter\\"\\"\\"
-              posts_SOME: PostWhere
+              posts_SOME: PostWhere @deprecated(reason: \\"Please use the relevant generic filter 'posts: {  some: ... }' instead.\\")
             }
 
             type UsersConnection @shareable {
@@ -584,7 +687,7 @@ describe("Apollo Federation", () => {
 
             type Post @node {
                 content: String!
-                author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
             }
         `;
 
@@ -645,6 +748,26 @@ describe("Apollo Federation", () => {
               relationshipsDeleted: Int!
             }
 
+            \\"\\"\\"Float filters\\"\\"\\"
+            input FloatScalarFilters {
+              eq: Float
+              gt: Float
+              gte: Float
+              in: [Float!]
+              lt: Float
+              lte: Float
+            }
+
+            \\"\\"\\"Int filters\\"\\"\\"
+            input IntScalarFilters {
+              eq: Int
+              gt: Int
+              gte: Int
+              in: [Int!]
+              lt: Int
+              lte: Int
+            }
+
             type Mutation {
               createPosts(input: [PostCreateInput!]!): CreatePostsMutationResponse!
               createUsers(input: [UserCreateInput!]!): CreateUsersMutationResponse!
@@ -663,9 +786,9 @@ describe("Apollo Federation", () => {
             }
 
             type Post {
-              author: User!
-              authorAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: UserWhere): PostUserAuthorAggregationSelection
-              authorConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
+              author(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
+              authorAggregate(where: UserWhere): PostUserAuthorAggregationSelection
+              authorConnection(after: String, first: Int, sort: [PostAuthorConnectionSort!], where: PostAuthorConnectionWhere): PostAuthorConnection!
               content: String!
             }
 
@@ -678,7 +801,7 @@ describe("Apollo Federation", () => {
               AND: [PostAuthorAggregateInput!]
               NOT: PostAuthorAggregateInput
               OR: [PostAuthorAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count: IntScalarFilters
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -688,10 +811,6 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorConnectFieldInput {
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: UserConnectWhere
             }
 
@@ -699,6 +818,25 @@ describe("Apollo Federation", () => {
               edges: [PostAuthorRelationship!]!
               pageInfo: PageInfo!
               totalCount: Int!
+            }
+
+            input PostAuthorConnectionFilters {
+              \\"\\"\\"
+              Return Posts where all of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              all: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where none of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              none: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where one of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              single: PostAuthorConnectionWhere
+              \\"\\"\\"
+              Return Posts where some of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              some: PostAuthorConnectionWhere
             }
 
             input PostAuthorConnectionSort {
@@ -725,29 +863,30 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
             }
 
             input PostAuthorNodeAggregationWhereInput {
               AND: [PostAuthorNodeAggregationWhereInput!]
               NOT: PostAuthorNodeAggregationWhereInput
               OR: [PostAuthorNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
+              name: StringScalarAggregationFilters
+              name_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { eq: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gte: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { eq: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { eq: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lte: ... } } }' instead.\\")
             }
 
             type PostAuthorRelationship {
@@ -760,10 +899,10 @@ describe("Apollo Federation", () => {
             }
 
             input PostAuthorUpdateFieldInput {
-              connect: PostAuthorConnectFieldInput
-              create: PostAuthorCreateFieldInput
-              delete: PostAuthorDeleteFieldInput
-              disconnect: PostAuthorDisconnectFieldInput
+              connect: [PostAuthorConnectFieldInput!]
+              create: [PostAuthorCreateFieldInput!]
+              delete: [PostAuthorDeleteFieldInput!]
+              disconnect: [PostAuthorDisconnectFieldInput!]
               update: PostAuthorUpdateConnectionInput
               where: PostAuthorConnectionWhere
             }
@@ -774,21 +913,12 @@ describe("Apollo Federation", () => {
             }
 
             input PostDeleteInput {
-              author: PostAuthorDeleteFieldInput
+              author: [PostAuthorDeleteFieldInput!]
             }
 
             type PostEdge {
               cursor: String!
               node: Post!
-            }
-
-            input PostOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more PostSort objects to sort Posts by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [PostSort!]
             }
 
             \\"\\"\\"
@@ -799,9 +929,9 @@ describe("Apollo Federation", () => {
             }
 
             input PostUpdateInput {
-              author: PostAuthorUpdateFieldInput
-              content: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              content_SET: String
+              author: [PostAuthorUpdateFieldInput!]
+              content: StringScalarMutations
+              content_SET: String @deprecated(reason: \\"Please use the generic mutation 'content: { set: ... } }' instead.\\")
             }
 
             type PostUserAuthorAggregationSelection {
@@ -817,15 +947,39 @@ describe("Apollo Federation", () => {
               AND: [PostWhere!]
               NOT: PostWhere
               OR: [PostWhere!]
-              author: UserWhere
+              author: UserRelationshipFilters
               authorAggregate: PostAuthorAggregateInput
-              authorConnection: PostAuthorConnectionWhere
-              content: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              content_CONTAINS: String
-              content_ENDS_WITH: String
-              content_EQ: String
-              content_IN: [String!]
-              content_STARTS_WITH: String
+              authorConnection: PostAuthorConnectionFilters
+              \\"\\"\\"
+              Return Posts where all of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_ALL: PostAuthorConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'authorConnection: { all: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Posts where none of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_NONE: PostAuthorConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'authorConnection: { none: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Posts where one of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SINGLE: PostAuthorConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'authorConnection: { single: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Posts where some of the related PostAuthorConnections match this filter
+              \\"\\"\\"
+              authorConnection_SOME: PostAuthorConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'authorConnection: { some: { node: ... } } }' instead.\\")
+              \\"\\"\\"Return Posts where all of the related Users match this filter\\"\\"\\"
+              author_ALL: UserWhere @deprecated(reason: \\"Please use the relevant generic filter 'author: { all: ... }' instead.\\")
+              \\"\\"\\"Return Posts where none of the related Users match this filter\\"\\"\\"
+              author_NONE: UserWhere @deprecated(reason: \\"Please use the relevant generic filter 'author: { none: ... }' instead.\\")
+              \\"\\"\\"Return Posts where one of the related Users match this filter\\"\\"\\"
+              author_SINGLE: UserWhere @deprecated(reason: \\"Please use the relevant generic filter 'author: {  single: ... }' instead.\\")
+              \\"\\"\\"Return Posts where some of the related Users match this filter\\"\\"\\"
+              author_SOME: UserWhere @deprecated(reason: \\"Please use the relevant generic filter 'author: {  some: ... }' instead.\\")
+              content: StringScalarFilters
+              content_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter content: { contains: ... }\\")
+              content_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter content: { endsWith: ... }\\")
+              content_EQ: String @deprecated(reason: \\"Please use the relevant generic filter content: { eq: ... }\\")
+              content_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter content: { in: ... }\\")
+              content_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter content: { startsWith: ... }\\")
             }
 
             type PostsConnection {
@@ -837,10 +991,10 @@ describe("Apollo Federation", () => {
             type Query {
               _entities(representations: [_Any!]!): [_Entity]!
               _service: _Service!
-              posts(limit: Int, offset: Int, options: PostOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PostSort!], where: PostWhere): [Post!]!
+              posts(limit: Int, offset: Int, sort: [PostSort!], where: PostWhere): [Post!]!
               postsAggregate(where: PostWhere): PostAggregateSelection!
               postsConnection(after: String, first: Int, sort: [PostSort!], where: PostWhere): PostsConnection!
-              users(limit: Int, offset: Int, options: UserOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [UserSort!], where: UserWhere): [User!]!
+              users(limit: Int, offset: Int, sort: [UserSort!], where: UserWhere): [User!]!
               usersAggregate(where: UserWhere): UserAggregateSelection!
               usersConnection(after: String, first: Int, sort: [UserSort!], where: UserWhere): UsersConnection!
             }
@@ -856,6 +1010,27 @@ describe("Apollo Federation", () => {
             type StringAggregateSelection @federation__shareable {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"Filters for an aggregation of a string field\\"\\"\\"
+            input StringScalarAggregationFilters {
+              averageLength: FloatScalarFilters
+              longestLength: IntScalarFilters
+              shortestLength: IntScalarFilters
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             \\"\\"\\"
@@ -900,13 +1075,15 @@ describe("Apollo Federation", () => {
               node: User!
             }
 
-            input UserOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more UserSort objects to sort Users by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [UserSort!]
+            input UserRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Users match this filter\\"\\"\\"
+              all: UserWhere
+              \\"\\"\\"Filter type where none of the related Users match this filter\\"\\"\\"
+              none: UserWhere
+              \\"\\"\\"Filter type where one of the related Users match this filter\\"\\"\\"
+              single: UserWhere
+              \\"\\"\\"Filter type where some of the related Users match this filter\\"\\"\\"
+              some: UserWhere
             }
 
             \\"\\"\\"
@@ -917,20 +1094,20 @@ describe("Apollo Federation", () => {
             }
 
             input UserUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
             }
 
             input UserWhere {
               AND: [UserWhere!]
               NOT: UserWhere
               OR: [UserWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
             }
 
             type UsersConnection {

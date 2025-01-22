@@ -29,19 +29,21 @@ describe("https://github.com/neo4j/graphql/issues/4095", () => {
     beforeAll(() => {
         typeDefs = /* GraphQL */ `
             type User @node {
-                id: ID! @unique
+                id: ID!
             }
 
             type Family @node {
-                id: ID! @id @unique
+                id: ID! @id
                 members: [Person!]! @relationship(type: "MEMBER_OF", direction: IN)
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN)
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN)
             }
 
-            type Person @authorization(filter: [{ where: { node: { creator: { id_EQ: "$jwt.uid" } } } }]) @node {
-                id: ID! @id @unique
-                creator: User! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
-                family: Family! @relationship(type: "MEMBER_OF", direction: OUT)
+            type Person
+                @authorization(filter: [{ where: { node: { creator: { some: { id: { eq: "$jwt.uid" } } } } } }])
+                @node {
+                id: ID! @id
+                creator: [User!]! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
+                family: [Family!]! @relationship(type: "MEMBER_OF", direction: OUT)
             }
             extend schema @authentication
         `;
@@ -75,13 +77,13 @@ describe("https://github.com/neo4j/graphql/issues/4095", () => {
             CALL {
                 WITH this
                 MATCH (this)<-[this0:MEMBER_OF]-(this1:Person)
-                OPTIONAL MATCH (this1)<-[:CREATOR_OF]-(this2:User)
-                WITH *, count(this2) AS var3
-                WITH *
-                WHERE ($isAuthenticated = true AND (var3 <> 0 AND ($jwt.uid IS NOT NULL AND this2.id = $jwt.uid)))
-                RETURN count(this1) AS var4
+                WHERE ($isAuthenticated = true AND EXISTS {
+                    MATCH (this1)<-[:CREATOR_OF]-(this2:User)
+                    WHERE ($jwt.uid IS NOT NULL AND this2.id = $jwt.uid)
+                })
+                RETURN count(this1) AS var3
             }
-            RETURN this { .id, membersAggregate: { count: var4 } } AS this"
+            RETURN this { .id, membersAggregate: { count: var3 } } AS this"
         `);
 
         expect(formatParams(result.params)).toMatchInlineSnapshot(`

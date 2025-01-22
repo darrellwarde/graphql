@@ -28,7 +28,7 @@ describe("https://github.com/neo4j/graphql/issues/2262", () => {
         typeDefs = /* GraphQL */ `
             type Component @node {
                 uuid: String
-                upstreamProcess: Process @relationship(type: "OUTPUT", direction: IN)
+                upstreamProcess: [Process!]! @relationship(type: "OUTPUT", direction: IN)
                 downstreamProcesses: [Process!]! @relationship(type: "INPUT", direction: OUT)
             }
 
@@ -47,7 +47,7 @@ describe("https://github.com/neo4j/graphql/issues/2262", () => {
     test("query nested relations under a root connection field", async () => {
         const query = /* GraphQL */ `
             query ComponentsProcesses {
-                components(where: { uuid_EQ: "c1" }) {
+                components(where: { uuid: { eq: "c1" } }) {
                     uuid
                     upstreamProcessConnection {
                         edges {

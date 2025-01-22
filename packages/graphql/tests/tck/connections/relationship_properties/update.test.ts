@@ -50,9 +50,11 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    where: { title_EQ: "Forrest Gump" }
+                    where: { title: { eq: "Forrest Gump" } }
                     update: {
-                        actors: [{ where: { node: { name_EQ: "Tom Hanks" } }, update: { edge: { screenTime: 60 } } }]
+                        actors: [
+                            { where: { node: { name: { eq: "Tom Hanks" } } }, update: { edge: { screenTime_SET: 60 } } }
+                        ]
                     }
                 ) {
                     movies {
@@ -72,7 +74,7 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
             	WITH this
             	MATCH (this)<-[this_acted_in0_relationship:ACTED_IN]-(this_actors0:Actor)
             	WHERE this_actors0.name = $updateMovies_args_update_actors0_where_this_actors0param0
-            	SET this_acted_in0_relationship.screenTime = $updateMovies.args.update.actors[0].update.edge.screenTime
+            	SET this_acted_in0_relationship.screenTime = $updateMovies.args.update.actors[0].update.edge.screenTime_SET
             	RETURN count(*) AS update_this_actors0
             }
             RETURN collect(DISTINCT this { .title }) AS data"
@@ -89,12 +91,14 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
                                 {
                                     \\"where\\": {
                                         \\"node\\": {
-                                            \\"name_EQ\\": \\"Tom Hanks\\"
+                                            \\"name\\": {
+                                                \\"eq\\": \\"Tom Hanks\\"
+                                            }
                                         }
                                     },
                                     \\"update\\": {
                                         \\"edge\\": {
-                                            \\"screenTime\\": {
+                                            \\"screenTime_SET\\": {
                                                 \\"low\\": 60,
                                                 \\"high\\": 0
                                             }
@@ -114,11 +118,11 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
         const query = /* GraphQL */ `
             mutation {
                 updateMovies(
-                    where: { title_EQ: "Forrest Gump" }
+                    where: { title: { eq: "Forrest Gump" } }
                     update: {
                         actors: [
                             {
-                                where: { node: { name_EQ: "Tom Hanks" } }
+                                where: { node: { name: { eq: "Tom Hanks" } } }
                                 update: { edge: { screenTime_SET: 60 }, node: { name_SET: "Tom Hanks" } }
                             }
                         ]
@@ -160,7 +164,9 @@ describe("Cypher -> Connections -> Relationship Properties -> Update", () => {
                                 {
                                     \\"where\\": {
                                         \\"node\\": {
-                                            \\"name_EQ\\": \\"Tom Hanks\\"
+                                            \\"name\\": {
+                                                \\"eq\\": \\"Tom Hanks\\"
+                                            }
                                         }
                                     },
                                     \\"update\\": {

@@ -22,18 +22,13 @@ import { gql } from "graphql-tag";
 import { lexicographicSortSchema } from "graphql/utilities";
 import { Neo4jGraphQL } from "../../../src";
 
-describe("3817", () => {
+describe("ttps://github.com/neo4j/graphql/issues/3817", () => {
     test("3817", async () => {
         const typeDefs = gql`
             type Person @node {
-                id: ID! @id @unique
+                id: ID! @id
                 friends: [Person!]!
-                    @relationship(
-                        type: "FRIEND_OF"
-                        direction: OUT
-                        queryDirection: UNDIRECTED_ONLY
-                        properties: "FriendOf"
-                    )
+                    @relationship(type: "FRIEND_OF", direction: OUT, queryDirection: UNDIRECTED, properties: "FriendOf")
             }
 
             type FriendOf @relationshipProperties {
@@ -87,6 +82,16 @@ describe("3817", () => {
               relationshipsDeleted: Int!
             }
 
+            \\"\\"\\"Float filters\\"\\"\\"
+            input FloatScalarFilters {
+              eq: Float
+              gt: Float
+              gte: Float
+              in: [Float!]
+              lt: Float
+              lte: Float
+            }
+
             \\"\\"\\"
             The edge properties for the following fields:
             * Person.friends
@@ -99,21 +104,22 @@ describe("3817", () => {
               AND: [FriendOfAggregationWhereInput!]
               NOT: FriendOfAggregationWhereInput
               OR: [FriendOfAggregationWhereInput!]
-              id_AVERAGE_LENGTH_EQUAL: Float
-              id_AVERAGE_LENGTH_GT: Float
-              id_AVERAGE_LENGTH_GTE: Float
-              id_AVERAGE_LENGTH_LT: Float
-              id_AVERAGE_LENGTH_LTE: Float
-              id_LONGEST_LENGTH_EQUAL: Int
-              id_LONGEST_LENGTH_GT: Int
-              id_LONGEST_LENGTH_GTE: Int
-              id_LONGEST_LENGTH_LT: Int
-              id_LONGEST_LENGTH_LTE: Int
-              id_SHORTEST_LENGTH_EQUAL: Int
-              id_SHORTEST_LENGTH_GT: Int
-              id_SHORTEST_LENGTH_GTE: Int
-              id_SHORTEST_LENGTH_LT: Int
-              id_SHORTEST_LENGTH_LTE: Int
+              id: StringScalarAggregationFilters
+              id_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { eq: ... } } }' instead.\\")
+              id_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { gt: ... } } }' instead.\\")
+              id_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { gte: ... } } }' instead.\\")
+              id_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { lt: ... } } }' instead.\\")
+              id_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { lte: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { eq: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { gt: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { gte: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { lt: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { lte: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { eq: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { gt: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { gte: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { lt: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { lte: ... } } }' instead.\\")
             }
 
             input FriendOfSort {
@@ -121,25 +127,39 @@ describe("3817", () => {
             }
 
             input FriendOfUpdateInput {
-              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: String
+              id: StringScalarMutations
+              id_SET: String @deprecated(reason: \\"Please use the generic mutation 'id: { set: ... } }' instead.\\")
             }
 
             input FriendOfWhere {
               AND: [FriendOfWhere!]
               NOT: FriendOfWhere
               OR: [FriendOfWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String]
-              id_STARTS_WITH: String
+              id: StringScalarFilters
+              id_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: String @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [String] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
             }
 
-            type IDAggregateSelection {
-              longest: ID
-              shortest: ID
+            \\"\\"\\"ID filters\\"\\"\\"
+            input IDScalarFilters {
+              contains: ID
+              endsWith: ID
+              eq: ID
+              in: [ID!]
+              startsWith: ID
+            }
+
+            \\"\\"\\"Int filters\\"\\"\\"
+            input IntScalarFilters {
+              eq: Int
+              gt: Int
+              gte: Int
+              in: [Int!]
+              lt: Int
+              lte: Int
             }
 
             type Mutation {
@@ -163,7 +183,7 @@ describe("3817", () => {
             }
 
             type Person {
-              friends(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+              friends(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
               friendsAggregate(where: PersonWhere): PersonPersonFriendsAggregationSelection
               friendsConnection(after: String, first: Int, sort: [PersonFriendsConnectionSort!], where: PersonFriendsConnectionWhere): PersonFriendsConnection!
               id: ID!
@@ -171,15 +191,10 @@ describe("3817", () => {
 
             type PersonAggregateSelection {
               count: Int!
-              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             input PersonConnectInput {
               friends: [PersonFriendsConnectFieldInput!]
-            }
-
-            input PersonConnectOrCreateWhere {
-              node: PersonUniqueWhere!
             }
 
             input PersonConnectWhere {
@@ -207,38 +222,43 @@ describe("3817", () => {
               AND: [PersonFriendsAggregateInput!]
               NOT: PersonFriendsAggregateInput
               OR: [PersonFriendsAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count: IntScalarFilters
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
               count_LT: Int
               count_LTE: Int
               edge: FriendOfAggregationWhereInput
-              node: PersonFriendsNodeAggregationWhereInput
             }
 
             input PersonFriendsConnectFieldInput {
               connect: [PersonConnectInput!]
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
               where: PersonConnectWhere
-            }
-
-            input PersonFriendsConnectOrCreateFieldInput {
-              onCreate: PersonFriendsConnectOrCreateFieldInputOnCreate!
-              where: PersonConnectOrCreateWhere!
-            }
-
-            input PersonFriendsConnectOrCreateFieldInputOnCreate {
-              node: PersonOnCreateInput!
             }
 
             type PersonFriendsConnection {
               edges: [PersonFriendsRelationship!]!
               pageInfo: PageInfo!
               totalCount: Int!
+            }
+
+            input PersonFriendsConnectionFilters {
+              \\"\\"\\"
+              Return People where all of the related PersonFriendsConnections match this filter
+              \\"\\"\\"
+              all: PersonFriendsConnectionWhere
+              \\"\\"\\"
+              Return People where none of the related PersonFriendsConnections match this filter
+              \\"\\"\\"
+              none: PersonFriendsConnectionWhere
+              \\"\\"\\"
+              Return People where one of the related PersonFriendsConnections match this filter
+              \\"\\"\\"
+              single: PersonFriendsConnectionWhere
+              \\"\\"\\"
+              Return People where some of the related PersonFriendsConnections match this filter
+              \\"\\"\\"
+              some: PersonFriendsConnectionWhere
             }
 
             input PersonFriendsConnectionSort {
@@ -270,24 +290,7 @@ describe("3817", () => {
 
             input PersonFriendsFieldInput {
               connect: [PersonFriendsConnectFieldInput!]
-              connectOrCreate: [PersonFriendsConnectOrCreateFieldInput!] @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
               create: [PersonFriendsCreateFieldInput!]
-            }
-
-            input PersonFriendsNodeAggregationWhereInput {
-              AND: [PersonFriendsNodeAggregationWhereInput!]
-              NOT: PersonFriendsNodeAggregationWhereInput
-              OR: [PersonFriendsNodeAggregationWhereInput!]
-              id_MAX_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MAX_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MAX_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MAX_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MAX_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MIN_EQUAL: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MIN_GT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MIN_GTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MIN_LT: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
-              id_MIN_LTE: ID @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             type PersonFriendsRelationship {
@@ -303,7 +306,6 @@ describe("3817", () => {
 
             input PersonFriendsUpdateFieldInput {
               connect: [PersonFriendsConnectFieldInput!]
-              connectOrCreate: [PersonFriendsConnectOrCreateFieldInput!]
               create: [PersonFriendsCreateFieldInput!]
               delete: [PersonFriendsDeleteFieldInput!]
               disconnect: [PersonFriendsDisconnectFieldInput!]
@@ -311,34 +313,24 @@ describe("3817", () => {
               where: PersonFriendsConnectionWhere
             }
 
-            input PersonOnCreateInput {
-              \\"\\"\\"
-              Appears because this input type would be empty otherwise because this type is composed of just generated and/or relationship properties. See https://neo4j.com/docs/graphql-manual/current/troubleshooting/faqs/
-              \\"\\"\\"
-              _emptyInput: Boolean
-            }
-
-            input PersonOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more PersonSort objects to sort People by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [PersonSort!]
-            }
-
             type PersonPersonFriendsAggregationSelection {
               count: Int!
               edge: PersonPersonFriendsEdgeAggregateSelection
-              node: PersonPersonFriendsNodeAggregateSelection
             }
 
             type PersonPersonFriendsEdgeAggregateSelection {
               id: StringAggregateSelection!
             }
 
-            type PersonPersonFriendsNodeAggregateSelection {
-              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
+            input PersonRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related People match this filter\\"\\"\\"
+              all: PersonWhere
+              \\"\\"\\"Filter type where none of the related People match this filter\\"\\"\\"
+              none: PersonWhere
+              \\"\\"\\"Filter type where one of the related People match this filter\\"\\"\\"
+              single: PersonWhere
+              \\"\\"\\"Filter type where some of the related People match this filter\\"\\"\\"
+              some: PersonWhere
             }
 
             \\"\\"\\"
@@ -346,11 +338,6 @@ describe("3817", () => {
             \\"\\"\\"
             input PersonSort {
               id: SortDirection
-            }
-
-            input PersonUniqueWhere {
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_EQ: ID
             }
 
             input PersonUpdateInput {
@@ -361,41 +348,43 @@ describe("3817", () => {
               AND: [PersonWhere!]
               NOT: PersonWhere
               OR: [PersonWhere!]
+              friends: PersonRelationshipFilters
               friendsAggregate: PersonFriendsAggregateInput
+              friendsConnection: PersonFriendsConnectionFilters
               \\"\\"\\"
               Return People where all of the related PersonFriendsConnections match this filter
               \\"\\"\\"
-              friendsConnection_ALL: PersonFriendsConnectionWhere
+              friendsConnection_ALL: PersonFriendsConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'friendsConnection: { all: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return People where none of the related PersonFriendsConnections match this filter
               \\"\\"\\"
-              friendsConnection_NONE: PersonFriendsConnectionWhere
+              friendsConnection_NONE: PersonFriendsConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'friendsConnection: { none: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return People where one of the related PersonFriendsConnections match this filter
               \\"\\"\\"
-              friendsConnection_SINGLE: PersonFriendsConnectionWhere
+              friendsConnection_SINGLE: PersonFriendsConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'friendsConnection: { single: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return People where some of the related PersonFriendsConnections match this filter
               \\"\\"\\"
-              friendsConnection_SOME: PersonFriendsConnectionWhere
+              friendsConnection_SOME: PersonFriendsConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'friendsConnection: { some: { node: ... } } }' instead.\\")
               \\"\\"\\"Return People where all of the related People match this filter\\"\\"\\"
-              friends_ALL: PersonWhere
+              friends_ALL: PersonWhere @deprecated(reason: \\"Please use the relevant generic filter 'friends: { all: ... }' instead.\\")
               \\"\\"\\"Return People where none of the related People match this filter\\"\\"\\"
-              friends_NONE: PersonWhere
+              friends_NONE: PersonWhere @deprecated(reason: \\"Please use the relevant generic filter 'friends: { none: ... }' instead.\\")
               \\"\\"\\"Return People where one of the related People match this filter\\"\\"\\"
-              friends_SINGLE: PersonWhere
+              friends_SINGLE: PersonWhere @deprecated(reason: \\"Please use the relevant generic filter 'friends: {  single: ... }' instead.\\")
               \\"\\"\\"Return People where some of the related People match this filter\\"\\"\\"
-              friends_SOME: PersonWhere
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: ID
-              id_ENDS_WITH: ID
-              id_EQ: ID
-              id_IN: [ID!]
-              id_STARTS_WITH: ID
+              friends_SOME: PersonWhere @deprecated(reason: \\"Please use the relevant generic filter 'friends: {  some: ... }' instead.\\")
+              id: IDScalarFilters
+              id_CONTAINS: ID @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: ID @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [ID!] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
             }
 
             type Query {
-              people(limit: Int, offset: Int, options: PersonOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [PersonSort!], where: PersonWhere): [Person!]!
+              people(limit: Int, offset: Int, sort: [PersonSort!], where: PersonWhere): [Person!]!
               peopleAggregate(where: PersonWhere): PersonAggregateSelection!
               peopleConnection(after: String, first: Int, sort: [PersonSort!], where: PersonWhere): PeopleConnection!
             }
@@ -411,6 +400,27 @@ describe("3817", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"Filters for an aggregation of a string field\\"\\"\\"
+            input StringScalarAggregationFilters {
+              averageLength: FloatScalarFilters
+              longestLength: IntScalarFilters
+              shortestLength: IntScalarFilters
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             \\"\\"\\"

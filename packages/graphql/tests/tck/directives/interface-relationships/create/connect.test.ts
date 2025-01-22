@@ -63,7 +63,10 @@ describe("Interface Relationships - Create connect", () => {
                         {
                             name: "Actor Name"
                             actedIn: {
-                                connect: { edge: { screenTime: 90 }, where: { node: { title_STARTS_WITH: "The " } } }
+                                connect: {
+                                    edge: { screenTime: 90 }
+                                    where: { node: { title: { startsWith: "The " } } }
+                                }
                             }
                         }
                     ]
@@ -102,7 +105,7 @@ describe("Interface Relationships - Create connect", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0
             			UNWIND connectedNodes as this0_actedIn_connect0_node
-            			MERGE (this0)-[this0_actedIn_connect0_relationship:ACTED_IN]->(this0_actedIn_connect0_node)
+            			CREATE (this0)-[this0_actedIn_connect0_relationship:ACTED_IN]->(this0_actedIn_connect0_node)
             			SET this0_actedIn_connect0_relationship.screenTime = $this0_actedIn_connect0_relationship_screenTime
             		}
             	}
@@ -120,7 +123,7 @@ describe("Interface Relationships - Create connect", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0
             			UNWIND connectedNodes as this0_actedIn_connect1_node
-            			MERGE (this0)-[this0_actedIn_connect1_relationship:ACTED_IN]->(this0_actedIn_connect1_node)
+            			CREATE (this0)-[this0_actedIn_connect1_relationship:ACTED_IN]->(this0_actedIn_connect1_node)
             			SET this0_actedIn_connect1_relationship.screenTime = $this0_actedIn_connect1_relationship_screenTime
             		}
             	}

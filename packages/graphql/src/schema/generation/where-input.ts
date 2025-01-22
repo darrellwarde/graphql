@@ -29,17 +29,13 @@ import type { EntityAdapter } from "../../schema-model/entity/EntityAdapter";
 import { ConcreteEntityAdapter } from "../../schema-model/entity/model-adapters/ConcreteEntityAdapter";
 import { InterfaceEntityAdapter } from "../../schema-model/entity/model-adapters/InterfaceEntityAdapter";
 import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/UnionEntityAdapter";
-import { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
+import type { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
+import { isUnionEntity } from "../../translate/queryAST/utils/is-union-entity";
 import type { Neo4jFeaturesSettings } from "../../types";
-import { DEPRECATE_IMPLICIT_EQUAL_FILTERS, DEPRECATE_TYPENAME_IN } from "../constants";
 import { getWhereFieldsForAttributes } from "../get-where-fields";
 import { withAggregateInputType } from "./aggregate-types";
-import {
-    augmentWhereInputTypeWithConnectionFields,
-    augmentWhereInputTypeWithRelationshipFields,
-} from "./augment-where-input";
-import { shouldAddDeprecatedFields } from "./utils";
+import { augmentWhereInputWithRelationshipFilters } from "./augment-where-input";
 
 function isEmptyObject(obj: Record<string, unknown>): boolean {
     return !Object.keys(obj).length;
@@ -48,24 +44,11 @@ function isEmptyObject(obj: Record<string, unknown>): boolean {
 export function withUniqueWhereInputType({
     concreteEntityAdapter,
     composer,
-    features,
 }: {
     concreteEntityAdapter: ConcreteEntityAdapter;
     composer: SchemaComposer;
-    features?: Neo4jFeaturesSettings;
 }): InputTypeComposer {
     const uniqueWhereFields: InputTypeComposerFieldConfigMapDefinition = {};
-    for (const attribute of concreteEntityAdapter.uniqueFields) {
-        if (shouldAddDeprecatedFields(features, "implicitEqualFilters")) {
-            uniqueWhereFields[attribute.name] = {
-                type: attribute.getFieldTypeName(),
-                directives: [DEPRECATE_IMPLICIT_EQUAL_FILTERS],
-            };
-        }
-        uniqueWhereFields[`${attribute.name}_EQ`] = {
-            type: attribute.getFieldTypeName(),
-        };
-    }
 
     const uniqueWhereInputType = composer.createInputTC({
         name: concreteEntityAdapter.operations.uniqueWhereInputTypeName,
@@ -105,32 +88,34 @@ export function withWhereInputType({
     if (composer.has(typeName)) {
         return composer.getITC(typeName);
     }
+
     const whereFields = makeWhereFields({
         entityAdapter,
         userDefinedFieldDirectives,
         features,
         ignoreCypherFieldFilters,
+        composer,
     });
+
     if (returnUndefinedIfEmpty && isEmptyObject(whereFields)) {
         return undefined;
     }
+
     const whereInputType = composer.createInputTC({
         name: typeName,
         fields: whereFields,
     });
 
-    const allowNesting =
-        alwaysAllowNesting ||
-        entityAdapter instanceof ConcreteEntityAdapter ||
-        entityAdapter instanceof RelationshipAdapter ||
-        entityAdapter instanceof InterfaceEntityAdapter;
+    const allowNesting = alwaysAllowNesting || !isUnionEntity(entityAdapter);
 
     if (allowNesting) {
         addLogicalOperatorsToWhereInputType(whereInputType);
     }
+
     if (entityAdapter instanceof ConcreteEntityAdapter && entityAdapter.isGlobalNode()) {
         whereInputType.addFields({ id: GraphQLID });
     }
+
     if (entityAdapter instanceof InterfaceEntityAdapter) {
         const enumValues = Object.fromEntries(
             entityAdapter.concreteEntities.map((concreteEntity) => [
@@ -143,12 +128,6 @@ export function withWhereInputType({
                 name: entityAdapter.operations.implementationEnumTypename,
                 values: enumValues,
             });
-            if (shouldAddDeprecatedFields(features, "typename_IN")) {
-                whereInputType.addFields({
-                    typename_IN: { type: interfaceImplementation.NonNull.List, directives: [DEPRECATE_TYPENAME_IN] },
-                });
-            }
-
             whereInputType.addFields({ typename: { type: interfaceImplementation.NonNull.List } });
         }
     }
@@ -160,11 +139,13 @@ function makeWhereFields({
     userDefinedFieldDirectives,
     features,
     ignoreCypherFieldFilters,
+    composer,
 }: {
     entityAdapter: EntityAdapter | RelationshipAdapter;
     userDefinedFieldDirectives?: Map<string, DirectiveNode[]>;
     features: Neo4jFeaturesSettings | undefined;
     ignoreCypherFieldFilters: boolean;
+    composer: SchemaComposer
 }): InputTypeComposerFieldConfigMapDefinition {
     if (entityAdapter instanceof UnionEntityAdapter) {
         const fields: InputTypeComposerFieldConfigMapDefinition = {};
@@ -179,6 +160,8 @@ function makeWhereFields({
         userDefinedFieldDirectives,
         features,
         ignoreCypherFieldFilters,
+        composer,
+        
     });
 }
 
@@ -198,11 +181,13 @@ export function withSourceWhereInputType({
     const relationshipTarget = relationshipAdapter.target;
     const relationshipSource = relationshipAdapter.source;
     const whereInput = composer.getITC(relationshipSource.operations.whereInputTypeName);
-    const fields = augmentWhereInputTypeWithRelationshipFields(relationshipAdapter, deprecatedDirectives);
-    whereInput.addFields(fields);
-
-    const connectionFields = augmentWhereInputTypeWithConnectionFields(relationshipAdapter, deprecatedDirectives);
-    whereInput.addFields(connectionFields);
+    augmentWhereInputWithRelationshipFilters({
+        whereInput,
+        relationshipAdapter,
+        deprecatedDirectives,
+        composer,
+        features,
+    });
 
     // TODO: Current unions are not supported as relationship targets beyond the above fields
     if (relationshipTarget instanceof UnionEntityAdapter) {

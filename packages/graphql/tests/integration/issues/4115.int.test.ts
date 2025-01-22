@@ -36,14 +36,14 @@ describe("https://github.com/neo4j/graphql/issues/4115", () => {
 
         const typeDefs = `
             type ${User} @node {
-                id: ID! @unique
+                id: ID!
                 roles: [String!]!
             }
 
             type ${Family} @node {
-                id: ID! @id @unique
+                id: ID! @id
                 members: [${Person}!]! @relationship(type: "MEMBER_OF", direction: IN)
-                creator: ${User}! @relationship(type: "CREATOR_OF", direction: IN)
+                creator: [${User}!]! @relationship(type: "CREATOR_OF", direction: IN)
             }
 
             type ${Person} @node
@@ -52,16 +52,16 @@ describe("https://github.com/neo4j/graphql/issues/4115", () => {
                         {
                             where: {
                                 AND: [
-                                    { node: { creator: { id_EQ: "$jwt.uid" } } }
-                                    { node: { family: { creator: { roles_INCLUDES: "plan:paid" } } } }
+                                    { node: { creator_SINGLE: { id_EQ: "$jwt.uid" } } }
+                                    { node: { family_SINGLE: { creator_SINGLE: { roles_INCLUDES: "plan:paid" } } } }
                                 ]
                             }
                         }
                     ]
                 ) {
-                id: ID! @id @unique
-                creator: ${User}! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
-                family: ${Family}! @relationship(type: "MEMBER_OF", direction: OUT)
+                id: ID! @id
+                creator: [${User}!]! @relationship(type: "CREATOR_OF", direction: IN, nestedOperations: [CONNECT])
+                family: [${Family}!]! @relationship(type: "MEMBER_OF", direction: OUT)
             }
 
             type JWT @jwt {

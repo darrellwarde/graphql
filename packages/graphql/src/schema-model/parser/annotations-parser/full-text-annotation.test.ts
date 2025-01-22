@@ -19,8 +19,8 @@
 
 import { makeDirectiveNode } from "@graphql-tools/utils";
 import type { DirectiveNode } from "graphql";
-import { parseFullTextAnnotation } from "./full-text-annotation";
 import { fulltextDirective } from "../../../graphql/directives";
+import { parseFulltextAnnotation } from "./full-text-annotation";
 
 describe("parseFullTextAnnotation", () => {
     it("should parse correctly", () => {
@@ -29,7 +29,7 @@ describe("parseFullTextAnnotation", () => {
             { indexes: [{ indexName: "ProductName", fields: ["name"] }] },
             fulltextDirective
         );
-        const fullTextAnnotation = parseFullTextAnnotation(directive);
+        const fullTextAnnotation = parseFulltextAnnotation(directive);
         expect(fullTextAnnotation).toEqual({
             name: "fulltext",
             indexes: [

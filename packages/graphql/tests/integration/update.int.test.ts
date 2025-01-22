@@ -21,7 +21,7 @@ import { generate } from "randomstring";
 import type { UniqueType } from "../utils/graphql-types";
 import { TestHelper } from "../utils/tests-helper";
 
-describe("update (deprecate implicit _SET)", () => {
+describe("update", () => {
     const testHelper = new TestHelper();
     let Movie: UniqueType;
     let Actor: UniqueType;
@@ -65,7 +65,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         const query = /* GraphQL */ `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id_EQ: $id }, update: { name_SET: $name }) {
+            ${Movie.operations.update}(where: { id: {eq: $id } }, update: { name: { set: $name }}) {
                 ${Movie.plural} {
                     id
                     name
@@ -107,7 +107,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         const query = /* GraphQL */ `
         mutation($id: ID, $name: String) {
-            ${Movie.operations.update}(where: { id_EQ: $id }, update: {name_SET: $name}) {
+            ${Movie.operations.update}(where: { id: {eq: $id } }, update: {name: {set: $name}}) {
                 ${Movie.plural} {
                     id
                     name
@@ -134,18 +134,19 @@ describe("update (deprecate implicit _SET)", () => {
 
         expect(gqlResult?.data?.[Movie.operations.update]).toEqual({ [Movie.plural]: [{ id, name: updatedName }] });
     });
+
     test("should connect through interface relationship", async () => {
         const typeDefs = /* GraphQL */ `
             type ${Movie} implements Production @subscription(events: []) @node {
                 title: String!
-                id: ID @unique
+                id: ID
                 director: [Creature!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
             type ${Series} implements Production @node {
                 title: String!
                 episode: Int!
-                id: ID @unique
+                id: ID
                 director: [Creature!]! @relationship(type: "DIRECTED", direction: IN)
             }
 
@@ -156,12 +157,12 @@ describe("update (deprecate implicit _SET)", () => {
 
             type ${Person} implements Creature @node {
                 id: ID
-                movies: Production! @relationship(type: "DIRECTED", direction: OUT)
+                movies: [Production!]! @relationship(type: "DIRECTED", direction: OUT)
             }
 
             interface Creature {
                 id: ID
-                movies: Production! @declareRelationship
+                movies: [Production!]! @declareRelationship
             }
         `;
 
@@ -171,16 +172,16 @@ describe("update (deprecate implicit _SET)", () => {
         const query = /* GraphQL */ `
         mutation {
             ${Movie.operations.update}(
-                where: { id_EQ: "1" }, 
+                where: { id: { eq: "1" } }, 
                 update: { director: { 
                     connect: {
-                    where: { node: { id_EQ: "2"} }, 
+                    where: { node: { id: { eq: "2" }} }, 
                     connect: { movies: {
-                        where: { node: { id_EQ: "3"} }, 
+                        where: { node: { id: { eq: "3" }} }, 
                         connect: { director: {
-                            where: { node: { id_EQ: "4"} }, 
+                            where: { node: { id: { eq: "4" }} }, 
                             connect: { movies: {
-                                where: { node: { id_EQ: "5" } }
+                                where: { node: { id: { eq: "5" } } }
                             } }
                         } }
                     }
@@ -217,7 +218,7 @@ describe("update (deprecate implicit _SET)", () => {
                 `
         );
 
-        expect(cypherResult.records).toHaveLength(1);
+        expect(cypherResult.records).toHaveLength(2);
 
         expect(gqlResult?.data?.[Movie.operations.update]).toEqual({
             [Movie.plural]: [{ id: "1", title: "Movie1" }],
@@ -256,7 +257,7 @@ describe("update (deprecate implicit _SET)", () => {
             ${Movie.operations.update}(
               where: { actorsConnection_SOME: { node: { name_EQ: $actorName } } },
               update: {
-                id_SET: $updatedMovieId
+                id: { set: $updatedMovieId }
               }
           ) {
               ${Movie.plural} {
@@ -312,7 +313,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         const query = /* GraphQL */ `
         mutation($id1: ID, $id2: ID, $name: String) {
-            ${Movie.operations.update}(where: { OR: [{ id_EQ: $id1 }, { id_EQ: $id2 }] }, update: {name_SET: $name}) {
+            ${Movie.operations.update}(where: { OR: [{ id_EQ: $id1 }, { id_EQ: $id2 }] }, update: {name: { set: $name }}) {
                 ${Movie.plural} {
                     id
                     name
@@ -380,7 +381,7 @@ describe("update (deprecate implicit _SET)", () => {
               update: {
                 actors: [{
                   where: { node: { name_EQ: $initialName } },
-                  update: { node: { name_SET: $updatedName } }
+                  update: { node: { name: { set: $updatedName } } }
                 }]
               }
           ) {
@@ -744,10 +745,10 @@ describe("update (deprecate implicit _SET)", () => {
                   where: { node: { name_EQ: "old actor name" } }
                   update: {
                     node: {
-                        name_SET: "new actor name"
+                        name: { set: "new actor name" }
                         movies: [{
                             where: { node: { title_EQ: "old movie title" } }
-                            update: { node: { title_SET: "new movie title" } }
+                            update: { node: { title: { set: "new movie title" } } }
                         }]
                     }
                   }
@@ -987,7 +988,7 @@ describe("update (deprecate implicit _SET)", () => {
 
             type ${Photo} @node {
                 id: ID
-                color: ${Color} @relationship(type: "OF_COLOR", direction: OUT)
+                color: [${Color}!]! @relationship(type: "OF_COLOR", direction: OUT)
             }
         `;
 
@@ -1053,7 +1054,7 @@ describe("update (deprecate implicit _SET)", () => {
         expect(gqlResult.errors).toBeFalsy();
 
         expect(gqlResult?.data?.[Product.operations.update]).toEqual({
-            [Product.plural]: [{ id: productId, photos: [{ id: photoId, color: null }] }],
+            [Product.plural]: [{ id: productId, photos: [{ id: photoId, color: [] }] }],
         });
     });
 
@@ -1074,7 +1075,7 @@ describe("update (deprecate implicit _SET)", () => {
            type ${Photo} @node {
              id: ID
              name: String
-             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
+             color: [${Color}!]! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
@@ -1118,7 +1119,7 @@ describe("update (deprecate implicit _SET)", () => {
                         where: { node: { name_EQ: "Green Photo", id_EQ: "${photo0Id}" } }
                         update: {
                             node: {
-                                name_SET: "Light Green Photo"
+                                name: { set: "Light Green Photo" }
                                 color: {
                                     connect: { where: { node: { name_EQ: "Light Green", id_EQ: "${photo0Color1Id}" } } }
                                     disconnect: { where: { node: { name_EQ: "Green", id_EQ: "${photo0Color0Id}" } } }
@@ -1130,7 +1131,7 @@ describe("update (deprecate implicit _SET)", () => {
                         where: { node: { name_EQ: "Yellow Photo", id_EQ: "${photo1Id}" } }
                         update: {
                             node: {
-                                name_SET: "Light Yellow Photo"
+                                name: { set: "Light Yellow Photo" }
                                 color: {
                                     connect: { where: { node: { name_EQ: "Light Yellow", id_EQ: "${photo1Color1Id}" } } }
                                     disconnect: { where: { node: { name_EQ: "Yellow", id_EQ: "${photo1Color0Id}" } } }
@@ -1196,7 +1197,7 @@ describe("update (deprecate implicit _SET)", () => {
         expect(greenPhoto).toMatchObject({
             id: photo0Id,
             name: "Light Green Photo",
-            color: { id: photo0Color1Id, name: "Light Green" },
+            color: [{ id: photo0Color1Id, name: "Light Green" }],
         });
 
         const yellowPhoto = photos.find((x) => x.id === photo1Id);
@@ -1204,7 +1205,7 @@ describe("update (deprecate implicit _SET)", () => {
         expect(yellowPhoto).toMatchObject({
             id: photo1Id,
             name: "Light Yellow Photo",
-            color: { id: photo1Color1Id, name: "Light Yellow" },
+            color: [{ id: photo1Color1Id, name: "Light Yellow" }],
         });
     });
 
@@ -1225,7 +1226,7 @@ describe("update (deprecate implicit _SET)", () => {
            type ${Photo} @node {
              id: ID
              name: String
-             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
+             color: [${Color}!]! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
@@ -1296,7 +1297,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         expect((gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0]).toMatchObject({
             id: productId,
-            photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
+            photos: [{ id: photoId, name: "Green Photo", color: [{ id: colorId, name: "Green" }] }],
         });
     });
 
@@ -1317,7 +1318,7 @@ describe("update (deprecate implicit _SET)", () => {
            type ${Photo} @node {
              id: ID
              name: String
-             color: ${Color}! @relationship(type: "OF_COLOR", direction: OUT)
+             color: [${Color}!]! @relationship(type: "OF_COLOR", direction: OUT)
            }
         `;
 
@@ -1386,7 +1387,7 @@ describe("update (deprecate implicit _SET)", () => {
 
         expect((gqlResult?.data?.[Product.operations.update]?.[Product.plural] as any[])[0]).toMatchObject({
             id: productId,
-            photos: [{ id: photoId, name: "Green Photo", color: { id: colorId, name: "Green" } }],
+            photos: [{ id: photoId, name: "Green Photo", color: [{ id: colorId, name: "Green" }] }],
         });
     });
 });

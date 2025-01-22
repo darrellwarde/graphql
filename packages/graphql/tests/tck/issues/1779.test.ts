@@ -48,7 +48,7 @@ describe("https://github.com/neo4j/graphql/issues/1779", () => {
             {
                 people {
                     name
-                    attends(where: { students_ALL: { age_GT: 23 } }) {
+                    attends(where: { students: { all: { age: { gt: 23 } } } }) {
                         name
                     }
                 }
@@ -69,6 +69,7 @@ describe("https://github.com/neo4j/graphql/issues/1779", () => {
                     MATCH (this1)<-[:attends]-(this2:Person)
                     WHERE NOT (this2.age > $param0)
                 }))
+                WITH DISTINCT this1
                 WITH this1 { .name } AS this1
                 RETURN collect(this1) AS var3
             }

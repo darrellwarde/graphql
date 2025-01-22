@@ -68,9 +68,33 @@ describe("Duration", () => {
               min: Duration
             }
 
-            type IDAggregateSelection {
-              longest: ID
-              shortest: ID
+            \\"\\"\\"Duration filters\\"\\"\\"
+            input DurationScalarFilters {
+              eq: Duration
+              gt: Duration
+              gte: Duration
+              in: [Duration!]
+              lt: Duration
+              lte: Duration
+            }
+
+            \\"\\"\\"Duration mutations\\"\\"\\"
+            input DurationScalarMutations {
+              set: Duration
+            }
+
+            \\"\\"\\"ID filters\\"\\"\\"
+            input IDScalarFilters {
+              contains: ID
+              endsWith: ID
+              eq: ID
+              in: [ID!]
+              startsWith: ID
+            }
+
+            \\"\\"\\"ID mutations\\"\\"\\"
+            input IDScalarMutations {
+              set: ID
             }
 
             type Movie {
@@ -81,7 +105,6 @@ describe("Duration", () => {
             type MovieAggregateSelection {
               count: Int!
               duration: DurationAggregateSelection!
-              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
             }
 
             input MovieCreateInput {
@@ -94,15 +117,6 @@ describe("Duration", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -112,29 +126,29 @@ describe("Duration", () => {
             }
 
             input MovieUpdateInput {
-              duration: Duration @deprecated(reason: \\"Please use the explicit _SET field\\")
-              duration_SET: Duration
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: ID
+              duration: DurationScalarMutations
+              duration_SET: Duration @deprecated(reason: \\"Please use the generic mutation 'duration: { set: ... } }' instead.\\")
+              id: IDScalarMutations
+              id_SET: ID @deprecated(reason: \\"Please use the generic mutation 'id: { set: ... } }' instead.\\")
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              duration: Duration @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              duration_EQ: Duration
-              duration_GT: Duration
-              duration_GTE: Duration
-              duration_IN: [Duration]
-              duration_LT: Duration
-              duration_LTE: Duration
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: ID
-              id_ENDS_WITH: ID
-              id_EQ: ID
-              id_IN: [ID]
-              id_STARTS_WITH: ID
+              duration: DurationScalarFilters
+              duration_EQ: Duration @deprecated(reason: \\"Please use the relevant generic filter duration: { eq: ... }\\")
+              duration_GT: Duration @deprecated(reason: \\"Please use the relevant generic filter duration: { gt: ... }\\")
+              duration_GTE: Duration @deprecated(reason: \\"Please use the relevant generic filter duration: { gte: ... }\\")
+              duration_IN: [Duration] @deprecated(reason: \\"Please use the relevant generic filter duration: { in: ... }\\")
+              duration_LT: Duration @deprecated(reason: \\"Please use the relevant generic filter duration: { lt: ... }\\")
+              duration_LTE: Duration @deprecated(reason: \\"Please use the relevant generic filter duration: { lte: ... }\\")
+              id: IDScalarFilters
+              id_CONTAINS: ID @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: ID @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [ID] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
             }
 
             type MoviesConnection {
@@ -158,7 +172,7 @@ describe("Duration", () => {
             }
 
             type Query {
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }

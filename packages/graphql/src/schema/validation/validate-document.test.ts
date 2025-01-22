@@ -74,57 +74,147 @@ describe("authorization warning", () => {
     });
 });
 
-describe("list of lists warning", () => {
-    let warn: jest.SpyInstance;
-
-    beforeEach(() => {
-        warn = jest.spyOn(console, "warn").mockImplementation(() => {});
-    });
-
-    afterEach(() => {
-        warn.mockReset();
-    });
-
-    test("list of lists warning only occurs once for multiple fields", () => {
+describe("valid list fields in @node and @relationshipProperties types", () => {
+    test("should raise when a list of nullable elements is found", () => {
         const doc = gql`
             type Movie @node {
-                id: [[ID]]
+                id: [ID]
+            }
+        `;
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+
+        const errors = getError(executeValidate);
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+        expect(errors[0]).toHaveProperty(
+            "message",
+            'List of nullable elements are not supported in "@node" types. Found: [ID]'
+        );
+        expect(errors[0]).toHaveProperty("path", ["Movie", "id"]);
+    });
+
+    test("should raise when a list of nullable elements is found on relationship properties", () => {
+        const relationshipProps = gql`
+            type ActedIn @relationshipProperties {
+                roles: [String]
+            }
+        `;
+        const doc = gql`
+            ${relationshipProps}
+            type Movie @node {
+                title: String
             }
 
             type Actor @node {
-                name: [[String]]
+                name: String
+                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
             }
         `;
+        const objects = relationshipProps.definitions as ObjectTypeDefinitionNode[];
+        const executeValidate = () =>
+            validateDocument({
+                document: doc,
+                features: {},
+                additionalDefinitions: { enums: [], interfaces: [], unions: [], objects },
+            });
 
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
-
-        expect(warn).toHaveBeenCalledWith(
-            "Encountered list field definition(s) with list elements. This is not supported by Neo4j, however, you can ignore this warning if the field is only used in the result of custom resolver/Cypher."
+        const errors = getError(executeValidate);
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+        expect(errors[0]).toHaveProperty(
+            "message",
+            'List of nullable elements are not supported in "@relationshipProperties" types. Found: [String]'
         );
-        expect(warn).toHaveBeenCalledOnce();
+        expect(errors[0]).toHaveProperty("path", ["ActedIn", "roles"]);
     });
 
-    test("works for non-nullable lists", () => {
+    test("should not raise when a list of nullable elements is found on relationship properties", () => {
+        const relationshipProps = gql`
+            type ActedIn @relationshipProperties {
+                roles: [String!]
+            }
+        `;
+        const doc = gql`
+            ${relationshipProps}
+            type Movie @node {
+                title: String
+            }
+
+            type Actor @node {
+                name: String
+                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+            }
+        `;
+        const objects = relationshipProps.definitions as ObjectTypeDefinitionNode[];
+        const executeValidate = () =>
+            validateDocument({
+                document: doc,
+                features: {},
+                additionalDefinitions: { enums: [], interfaces: [], unions: [], objects },
+            });
+
+        const errors = getError(executeValidate);
+
+        expect(errors).toBeInstanceOf(NoErrorThrownError);
+    });
+
+    test("should raise when a list of list is found", () => {
         const doc = gql`
             type Movie @node {
-                id: [[ID!]!]!
+                id: [[ID]!]
+            }
+        `;
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+
+        const errors = getError(executeValidate);
+        expect(errors).toHaveLength(1);
+        expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+        expect(errors[0]).toHaveProperty(
+            "message",
+            'List of nullable elements are not supported in "@node" types. Found: [[ID]!]'
+        );
+        expect(errors[0]).toHaveProperty("path", ["Movie", "id"]);
+    });
+
+    test("should not raise when a list of non-nullable elements is found", () => {
+        const doc = gql`
+            type Movie @node {
+                id: [ID!]
+            }
+        `;
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+
+        const errors = getError(executeValidate);
+
+        expect(errors).toBeInstanceOf(NoErrorThrownError);
+    });
+
+    test("should not raise when a list of non-nullable elements is found on @cypher fields", () => {
+        const doc = gql`
+            type Movie @node {
+                id: [ID] @cypher(statement: "RETURN [1,2,3] as ids", columnName: "ids")
             }
         `;
 
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
 
-        expect(warn).toHaveBeenCalledWith(
-            "Encountered list field definition(s) with list elements. This is not supported by Neo4j, however, you can ignore this warning if the field is only used in the result of custom resolver/Cypher."
-        );
-        expect(warn).toHaveBeenCalledOnce();
+        const errors = getError(executeValidate);
+
+        expect(errors).toBeInstanceOf(NoErrorThrownError);
+    });
+
+    test("should not raise when a list of non-nullable elements is found on non @node types", () => {
+        const doc = gql`
+            type Movie {
+                id: [ID]
+            }
+        `;
+
+        const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+
+        const errors = getError(executeValidate);
+
+        expect(errors).toBeInstanceOf(NoErrorThrownError);
     });
 });
 
@@ -137,30 +227,6 @@ describe("single relationship deprecation warning", () => {
 
     afterEach(() => {
         warn.mockReset();
-    });
-
-    test("deprecated warning triggers on single relationships", () => {
-        const doc = gql`
-            type Movie @node {
-                id: ID
-                topActor: Actor @relationship(type: "TOP_ACTOR", direction: OUT)
-            }
-
-            type Actor @node {
-                name: String
-            }
-        `;
-
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
-
-        expect(warn).toHaveBeenCalledWith(
-            "Using @relationship directive on a non-list element is deprecated and will be removed in next major version."
-        );
-        expect(warn).toHaveBeenCalledOnce();
     });
 
     test("deprecated warning does not trigger on list relationships", () => {
@@ -372,70 +438,6 @@ describe("warns if queryDirection deprecated values are used", () => {
         warn.mockReset();
     });
 
-    test("should warn if queryDirection with DEFAULT prefix is used", () => {
-        const doc = gql`
-            type Actor @node {
-                name: String
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
-            }
-            type Movie @node {
-                title: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN, queryDirection: DEFAULT_DIRECTED)
-            }
-        `;
-
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
-        expect(warn).toHaveBeenCalledExactlyOnceWith(
-            `Found @relationship argument "queryDirection" used with DEFAULT_DIRECTED which is deprecated. \n These default values were used to set a default for the "directed" argument, which is also now deprecated.`
-        );
-    });
-
-    test("should warn if queryDirection with DIRECTED_ONLY suffix is used", () => {
-        const doc = gql`
-            type Actor @node {
-                name: String
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
-            }
-            type Movie @node {
-                title: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN, queryDirection: DIRECTED_ONLY)
-            }
-        `;
-
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
-        expect(warn).toHaveBeenCalledExactlyOnceWith(
-            `Found @relationship argument "queryDirection" used with DIRECTED_ONLY which is deprecated. Please use "DIRECTED" or "UNDIRECTED" instead.`
-        );
-    });
-
-    test("should warn once if multiple deprecation values are used", () => {
-        const doc = gql`
-            type Actor @node {
-                name: String
-                actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN, queryDirection: DEFAULT_DIRECTED)
-            }
-            type Movie @node {
-                title: String
-                movies: [Movie!]! @relationship(type: "ACTED_IN", direction: IN, queryDirection: DIRECTED_ONLY)
-            }
-        `;
-
-        validateDocument({
-            document: doc,
-            additionalDefinitions,
-            features: {},
-        });
-        expect(warn).toHaveBeenCalledTimes(1);
-    });
-
     test("should not warn if no deprecation values are used", () => {
         const doc = gql`
             type Actor @node {
@@ -602,14 +604,16 @@ describe("validation 2.0", () => {
                         name: String
                     }
                 `;
-                // TODO: is "[FullTextInput]!" type exposed to the user?
+                // TODO: is "[FulltextInput]!" type exposed to the user?
                 expect(() => validateDocument({ document: doc, features: {}, additionalDefinitions })).toThrow(
-                    'Directive "@fulltext" argument "indexes" of type "[FullTextInput]!" is required, but it was not provided.'
+                    'Directive "@fulltext" argument "indexes" of type "[FulltextInput]!" is required, but it was not provided.'
                 );
             });
             test("@fulltext ok", () => {
                 const doc = gql`
-                    type User @fulltext(indexes: [{ fields: ["name"] }]) @node {
+                    type User
+                        @fulltext(indexes: [{ indexName: "UserIndex", queryName: "usersByName", fields: ["name"] }])
+                        @node {
                         name: String
                     }
                 `;
@@ -766,7 +770,7 @@ describe("validation 2.0", () => {
             test("@relationship properties required", () => {
                 const doc = gql`
                     type User @node {
-                        name: Post @relationship
+                        name: [Post!]! @relationship
                     }
                     type Post @node {
                         title: String
@@ -786,7 +790,7 @@ describe("validation 2.0", () => {
             test("@relationship type required", () => {
                 const doc = gql`
                     type User @node {
-                        name: Post @relationship(direction: IN)
+                        name: [Post!]! @relationship(direction: IN)
                     }
                     type Post @node {
                         title: String
@@ -806,7 +810,7 @@ describe("validation 2.0", () => {
             test("@relationship direction required", () => {
                 const doc = gql`
                     type User @node {
-                        name: Post @relationship(type: "HAS_POST")
+                        name: [Post!]! @relationship(type: "HAS_POST")
                     }
                     type Post @node {
                         title: String
@@ -826,7 +830,7 @@ describe("validation 2.0", () => {
             test("@relationship ok", () => {
                 const doc = gql`
                     type User @node {
-                        name: Post @relationship(direction: IN, type: "HAS_POST")
+                        name: [Post!]! @relationship(direction: IN, type: "HAS_POST")
                     }
                     type Post @node {
                         title: String
@@ -841,13 +845,41 @@ describe("validation 2.0", () => {
                     });
                 expect(executeValidate).not.toThrow();
             });
+
+            test("Error on 1-1 relationships", () => {
+                const doc = gql`
+                    type Movie @node {
+                        id: ID
+                        actors: Actor @relationship(type: "ACTED_IN", direction: OUT)
+                    }
+
+                    type Actor @node {
+                        name: String
+                        movie: Movie! @relationship(type: "ACTED_IN", direction: IN)
+                    }
+                `;
+
+                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+                const errors = getError(executeValidate);
+                expect(errors).toHaveLength(2);
+                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+                expect(errors[1]).not.toBeInstanceOf(NoErrorThrownError);
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    `Using @relationship directive on a non-list property "actors" is not supported.`
+                );
+                expect(errors[1]).toHaveProperty(
+                    "message",
+                    `Using @relationship directive on a non-list property "movie" is not supported.`
+                );
+            });
         });
     });
 
     describe("Directive Argument Type", () => {
         test("@fulltext.indexes property required", () => {
             const doc = gql`
-                type User @fulltext(indexes: [{ name: "something" }]) @node {
+                type User @fulltext(indexes: [{ indexName: "something", queryName: "something" }]) @node {
                     name: String
                 }
             `;
@@ -868,7 +900,7 @@ describe("validation 2.0", () => {
                 type User @node {
                     name: String
                 }
-                extend type User @fulltext(indexes: [{ name: "something" }])
+                extend type User @fulltext(indexes: [{ indexName: "something", queryName: "something" }])
             `;
 
             const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
@@ -885,7 +917,7 @@ describe("validation 2.0", () => {
         test("@relationship.direction property must be enum value", () => {
             const doc = gql`
                 type User @node {
-                    post: Post @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
+                    post: [Post!]! @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
                 }
                 type Post @node {
                     title: String
@@ -914,7 +946,7 @@ describe("validation 2.0", () => {
                     id: ID
                 }
                 extend type User {
-                    post: Post @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
+                    post: [Post!]! @relationship(direction: "EVERYWHERE", type: "HAS_NAME")
                 }
                 type Post @node {
                     title: String
@@ -940,7 +972,7 @@ describe("validation 2.0", () => {
         test("@relationship.type property must be string", () => {
             const doc = gql`
                 type User @node {
-                    post: Post @relationship(type: 42, direction: IN)
+                    post: [Post!]! @relationship(type: 42, direction: IN)
                 }
                 type Post @node {
                     title: String
@@ -971,7 +1003,7 @@ describe("validation 2.0", () => {
             `;
             const doc = gql`
                 type User implements Person @node {
-                    post: Post @relationship(type: 42, direction: IN)
+                    post: [Post!]! @relationship(type: 42, direction: IN)
                 }
                 type Post @node {
                     title: String
@@ -1008,7 +1040,7 @@ describe("validation 2.0", () => {
             const doc = gql`
                 type User implements Person @node {
                     id: ID
-                    post: Post @relationship(type: 42, direction: IN)
+                    post: [Post!]! @relationship(type: 42, direction: IN)
                 }
                 type Post @node {
                     title: String
@@ -1369,7 +1401,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @default(value: "dummy")
+                        statuses: [Status!] @default(value: "dummy")
                     }
                 `;
 
@@ -1403,7 +1435,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @default(value: ["dummy"])
+                        statuses: [Status!] @default(value: ["dummy"])
                     }
                 `;
 
@@ -1437,7 +1469,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @default(value: [PENDING])
+                        statuses: [Status!] @default(value: [PENDING])
                     }
                 `;
                 const enums = enumTypes.definitions as EnumTypeDefinitionNode[];
@@ -1494,7 +1526,7 @@ describe("validation 2.0", () => {
             test("@default on int list must be list of int values", () => {
                 const doc = gql`
                     type User @node {
-                        ages: [Int] @default(value: ["dummy"])
+                        ages: [Int!] @default(value: ["dummy"])
                     }
                 `;
 
@@ -1518,7 +1550,7 @@ describe("validation 2.0", () => {
             test("@default on int list must be list of int values correct", () => {
                 const doc = gql`
                     type User @node {
-                        ages: [Int] @default(value: [12])
+                        ages: [Int!] @default(value: [12])
                     }
                 `;
 
@@ -1569,7 +1601,7 @@ describe("validation 2.0", () => {
             test("@default on float list must be list of float values", () => {
                 const doc = gql`
                     type User @node {
-                        avgs: [Float] @default(value: [1])
+                        avgs: [Float!] @default(value: [1])
                     }
                 `;
 
@@ -1586,7 +1618,7 @@ describe("validation 2.0", () => {
             test("@default on float list must be list of float values correct", () => {
                 const doc = gql`
                     type User @node {
-                        avgs: [Float] @default(value: [1.2])
+                        avgs: [Float!] @default(value: [1.2])
                     }
                 `;
 
@@ -1641,7 +1673,7 @@ describe("validation 2.0", () => {
             test("@default on boolean list must be list of boolean values", () => {
                 const doc = gql`
                     type User @node {
-                        statuses: [Boolean] @default(value: [2])
+                        statuses: [Boolean!] @default(value: [2])
                     }
                 `;
 
@@ -1665,7 +1697,7 @@ describe("validation 2.0", () => {
             test("@default on boolean list must be list of boolean values correct", () => {
                 const doc = gql`
                     type User @node {
-                        statuses: [Boolean] @default(value: [true])
+                        statuses: [Boolean!] @default(value: [true])
                     }
                 `;
 
@@ -1720,7 +1752,7 @@ describe("validation 2.0", () => {
             test("@default on string list must be list of string values", () => {
                 const doc = gql`
                     type User @node {
-                        names: [String] @default(value: [2])
+                        names: [String!] @default(value: [2])
                     }
                 `;
 
@@ -1744,7 +1776,7 @@ describe("validation 2.0", () => {
             test("@default on string list must be list of string values correct", () => {
                 const doc = gql`
                     type User @node {
-                        names: [String] @default(value: ["Bob"])
+                        names: [String!] @default(value: ["Bob"])
                     }
                 `;
 
@@ -1782,7 +1814,7 @@ describe("validation 2.0", () => {
             test("@default on ID list must be list of ID values", () => {
                 const doc = gql`
                     type User @node {
-                        ids: [ID] @default(value: [2])
+                        ids: [ID!] @default(value: [2])
                     }
                 `;
 
@@ -1806,7 +1838,7 @@ describe("validation 2.0", () => {
             test("@default on ID list must be list of ID values correct", () => {
                 const doc = gql`
                     type User @node {
-                        ids: [ID] @default(value: ["123-223"])
+                        ids: [ID!] @default(value: ["123-223"])
                     }
                 `;
 
@@ -1992,7 +2024,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @coalesce(value: "dummy")
+                        statuses: [Status!] @coalesce(value: "dummy")
                     }
                 `;
 
@@ -2026,7 +2058,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @coalesce(value: ["dummy"])
+                        statuses: [Status!] @coalesce(value: ["dummy"])
                     }
                 `;
 
@@ -2060,7 +2092,7 @@ describe("validation 2.0", () => {
                 const doc = gql`
                     ${enumTypes}
                     type User @node {
-                        statuses: [Status] @coalesce(value: [PENDING])
+                        statuses: [Status!] @coalesce(value: [PENDING])
                     }
                 `;
 
@@ -2118,7 +2150,7 @@ describe("validation 2.0", () => {
             test("@coalesce on int list must be list of int values", () => {
                 const doc = gql`
                     type User @node {
-                        ages: [Int] @coalesce(value: ["dummy"])
+                        ages: [Int!] @coalesce(value: ["dummy"])
                     }
                 `;
 
@@ -2142,7 +2174,7 @@ describe("validation 2.0", () => {
             test("@coalesce on int list must be list of int values correct", () => {
                 const doc = gql`
                     type User @node {
-                        ages: [Int] @coalesce(value: [12])
+                        ages: [Int!] @coalesce(value: [12])
                     }
                 `;
 
@@ -2193,7 +2225,7 @@ describe("validation 2.0", () => {
             test("@coalesce on float list must be list of float values", () => {
                 const doc = gql`
                     type User @node {
-                        avgs: [Float] @coalesce(value: [1])
+                        avgs: [Float!] @coalesce(value: [1])
                     }
                 `;
 
@@ -2210,7 +2242,7 @@ describe("validation 2.0", () => {
             test("@coalesce on float list must be list of float values correct", () => {
                 const doc = gql`
                     type User @node {
-                        avgs: [Float] @coalesce(value: [1.2])
+                        avgs: [Float!] @coalesce(value: [1.2])
                     }
                 `;
 
@@ -2268,7 +2300,7 @@ describe("validation 2.0", () => {
             test("@coalesce on boolean list must be list of boolean values", () => {
                 const doc = gql`
                     type User @node {
-                        statuses: [Boolean] @coalesce(value: [2])
+                        statuses: [Boolean!] @coalesce(value: [2])
                     }
                 `;
 
@@ -2292,7 +2324,7 @@ describe("validation 2.0", () => {
             test("@coalesce on boolean list must be list of boolean values correct", () => {
                 const doc = gql`
                     type User @node {
-                        statuses: [Boolean] @coalesce(value: [true])
+                        statuses: [Boolean!] @coalesce(value: [true])
                     }
                 `;
 
@@ -2347,7 +2379,7 @@ describe("validation 2.0", () => {
             test("@coalesce on string list must be list of string values", () => {
                 const doc = gql`
                     type User @node {
-                        names: [String] @coalesce(value: [2])
+                        names: [String!] @coalesce(value: [2])
                     }
                 `;
 
@@ -2371,7 +2403,7 @@ describe("validation 2.0", () => {
             test("@coalesce on string list must be list of string values correct", () => {
                 const doc = gql`
                     type User @node {
-                        names: [String] @coalesce(value: ["Bob"])
+                        names: [String!] @coalesce(value: ["Bob"])
                     }
                 `;
 
@@ -2409,7 +2441,7 @@ describe("validation 2.0", () => {
             test("@coalesce on ID list must be list of ID values", () => {
                 const doc = gql`
                     type User @node {
-                        ids: [ID] @coalesce(value: [2])
+                        ids: [ID!] @coalesce(value: [2])
                     }
                 `;
 
@@ -2433,7 +2465,7 @@ describe("validation 2.0", () => {
             test("@coalesce on ID list must be list of ID values correct", () => {
                 const doc = gql`
                     type User @node {
-                        ids: [ID] @coalesce(value: ["123-223"])
+                        ids: [ID!] @coalesce(value: ["123-223"])
                     }
                 `;
 
@@ -2658,7 +2690,13 @@ describe("validation 2.0", () => {
             test("@fulltext duplicate index names", () => {
                 const doc = gql`
                     type User
-                        @fulltext(indexes: [{ indexName: "a", fields: ["name"] }, { indexName: "a", fields: ["id"] }]) {
+                        @node
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "a", queryName: "b", fields: ["id"] }
+                            ]
+                        ) {
                         name: String
                         id: ID
                     }
@@ -2669,7 +2707,10 @@ describe("validation 2.0", () => {
 
                 expect(errors).toHaveLength(1);
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@fulltext.indexes invalid value for: a. Duplicate name.");
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@fulltext.indexes invalid value for: a. Duplicate index name."
+                );
                 expect(errors[0]).toHaveProperty("path", ["User", "@fulltext", "indexes"]);
             });
 
@@ -2680,7 +2721,12 @@ describe("validation 2.0", () => {
                         id: ID
                     }
                     extend type User
-                        @fulltext(indexes: [{ indexName: "a", fields: ["name"] }, { indexName: "a", fields: ["id"] }])
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "a", queryName: "b", fields: ["id"] }
+                            ]
+                        )
                 `;
 
                 const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
@@ -2688,13 +2734,70 @@ describe("validation 2.0", () => {
 
                 expect(errors).toHaveLength(1);
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "@fulltext.indexes invalid value for: a. Duplicate name.");
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@fulltext.indexes invalid value for: a. Duplicate index name."
+                );
+                expect(errors[0]).toHaveProperty("path", ["User", "@fulltext", "indexes"]);
+            });
+
+            test("@fulltext duplicate query names", () => {
+                const doc = gql`
+                    type User
+                        @node
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "b", queryName: "a", fields: ["id"] }
+                            ]
+                        ) {
+                        name: String
+                        id: ID
+                    }
+                `;
+
+                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+                const errors = getError(executeValidate);
+
+                expect(errors).toHaveLength(1);
+                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@fulltext.indexes invalid value for: a. Duplicate query name."
+                );
+                expect(errors[0]).toHaveProperty("path", ["User", "@fulltext", "indexes"]);
+            });
+
+            test("@fulltext duplicate query names extension", () => {
+                const doc = gql`
+                    type User @node {
+                        name: String
+                        id: ID
+                    }
+                    extend type User
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "b", queryName: "a", fields: ["id"] }
+                            ]
+                        )
+                `;
+
+                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
+                const errors = getError(executeValidate);
+
+                expect(errors).toHaveLength(1);
+                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
+                expect(errors[0]).toHaveProperty(
+                    "message",
+                    "@fulltext.indexes invalid value for: a. Duplicate query name."
+                );
                 expect(errors[0]).toHaveProperty("path", ["User", "@fulltext", "indexes"]);
             });
 
             test("@fulltext index on type not String or ID", () => {
                 const doc = gql`
-                    type User @fulltext(indexes: [{ indexName: "a", fields: ["age"] }]) @node {
+                    type User @fulltext(indexes: [{ indexName: "a", queryName: "a", fields: ["age"] }]) @node {
                         age: Int
                     }
                 `;
@@ -2714,7 +2817,13 @@ describe("validation 2.0", () => {
             test("@fulltext correct usage", () => {
                 const doc = gql`
                     type User
-                        @fulltext(indexes: [{ indexName: "a", fields: ["name"] }, { indexName: "b", fields: ["id"] }]) {
+                        @node
+                        @fulltext(
+                            indexes: [
+                                { indexName: "a", queryName: "a", fields: ["name"] }
+                                { indexName: "b", queryName: "b", fields: ["id"] }
+                            ]
+                        ) {
                         id: ID
                         name: String
                     }
@@ -2933,7 +3042,7 @@ describe("validation 2.0", () => {
                         posts: [Post!]! @relationship(type: "HAS_POST", direction: OUT, properties: "Poster")
                         archived: [Post!]!
                             @relationship(type: "HAS_ARCHIVED_POST", direction: OUT, properties: "Poster")
-                        favorite: Post @relationship(type: "HAS_FAVORITE", direction: OUT)
+                        favorite: [Post!]! @relationship(type: "HAS_FAVORITE", direction: OUT)
                     }
                     type Post @node {
                         title: String
@@ -3110,38 +3219,6 @@ describe("validation 2.0", () => {
             });
         });
 
-        describe("@unique", () => {
-            test("@unique valid", () => {
-                const doc = gql`
-                    type User @node {
-                        name: String @unique
-                    }
-                `;
-
-                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
-                expect(executeValidate).not.toThrow();
-            });
-
-            test("@unique cannot be used on fields of Interface types", () => {
-                const doc = gql`
-                    interface IUser {
-                        name: String @unique
-                    }
-                `;
-
-                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
-                const errors = getError(executeValidate);
-
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty(
-                    "message",
-                    "Invalid directive usage: Directive @unique is not supported on fields of the IUser type."
-                );
-                expect(errors[0]).toHaveProperty("path", ["IUser", "name", "@unique"]);
-            });
-        });
-
         test("should throw cannot auto-generate a non ID field", () => {
             const doc = gql`
                 type Movie @node {
@@ -3161,7 +3238,7 @@ describe("validation 2.0", () => {
         test("should throw cannot auto-generate an array", () => {
             const doc = gql`
                 type Movie @node {
-                    name: [ID] @id
+                    name: [ID!] @id
                 }
             `;
 
@@ -3189,7 +3266,7 @@ describe("validation 2.0", () => {
             test("@timestamp cannot autogenerate array", () => {
                 const doc = gql`
                     type User @node {
-                        lastSeenAt: [DateTime] @timestamp
+                        lastSeenAt: [DateTime!] @timestamp
                     }
                 `;
 
@@ -3205,7 +3282,7 @@ describe("validation 2.0", () => {
             test("should throw cannot timestamp on array of DateTime", () => {
                 const doc = gql`
                     type Movie @node {
-                        name: [DateTime] @timestamp(operations: [CREATE])
+                        name: [DateTime!] @timestamp(operations: [CREATE])
                     }
                 `;
 
@@ -3253,7 +3330,7 @@ describe("validation 2.0", () => {
             test("@id autogenerate cannot autogenerate array", () => {
                 const doc = gql`
                     type User @node {
-                        uid: [ID] @id
+                        uid: [ID!] @id
                     }
                 `;
 
@@ -3324,7 +3401,7 @@ describe("validation 2.0", () => {
 
             test("@query and @mutation", () => {
                 const doc = gql`
-                    type User @query(read: false) {
+                    type User @node @query(read: false) {
                         id: ID
                         name: String
                     }
@@ -3336,36 +3413,6 @@ describe("validation 2.0", () => {
             });
         });
         describe("invalid", () => {
-            test("@unique can't be used with @relationship", () => {
-                const doc = gql`
-                    type Movie @node {
-                        id: ID
-                        actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT) @unique
-                    }
-
-                    type Actor @node {
-                        name: String
-                    }
-                `;
-
-                const executeValidate = () =>
-                    validateDocument({
-                        document: doc,
-                        additionalDefinitions,
-                        features: {},
-                    });
-
-                const errors = getError(executeValidate);
-
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty(
-                    "message",
-                    "Invalid directive usage: Directive @relationship cannot be used in combination with @unique"
-                );
-                expect(errors[0]).toHaveProperty("path", ["Movie", "actors"]);
-            });
-
             test("@authentication can't be used with @relationship", () => {
                 const doc = gql`
                     type Movie @node {
@@ -3610,7 +3657,7 @@ describe("validation 2.0", () => {
 
             test("@query both on extension and object", () => {
                 const doc = gql`
-                    type User @query(read: false) {
+                    type User @node @query(read: false) {
                         id: ID
                         name: String
                     }
@@ -3630,7 +3677,7 @@ describe("validation 2.0", () => {
 
             test("@query both on schema and object", () => {
                 const doc = gql`
-                    type User @query(read: false) {
+                    type User @node @query(read: false) {
                         id: ID
                         name: String
                     }
@@ -4027,29 +4074,6 @@ describe("validation 2.0", () => {
                 "Invalid directive usage: Directive @relationship is not supported on fields of interface types (Person). Since version 5.0.0, interface fields can only have @declareRelationship. Please add the @relationship directive to the fields in all types which implement it."
             );
             expect(errors[0]).toHaveProperty("path", ["Person", "actor", "@relationship"]);
-        });
-
-        test("@private ok to be used on the field of an interface type", () => {
-            const doc = gql`
-                interface Person {
-                    name: String @private
-                    id: ID
-                }
-
-                type Actor implements Person @node {
-                    name: String
-                    id: ID
-                }
-            `;
-
-            const executeValidate = () =>
-                validateDocument({
-                    document: doc,
-                    additionalDefinitions,
-                    features: {},
-                });
-
-            expect(executeValidate).not.toThrow();
         });
 
         test("@settable ok to be used on the field of an interface type", () => {
@@ -4913,137 +4937,6 @@ describe("validation 2.0", () => {
     });
 
     describe("Objects and Interfaces must have one or more fields", () => {
-        describe("@private", () => {
-            test("should throw error if @private would leave no fields in interface", () => {
-                const interfaceTypes = gql`
-                    interface UserInterface {
-                        private: String @private
-                    }
-                `;
-                const doc = gql`
-                    ${interfaceTypes}
-                    type User implements UserInterface @node {
-                        id: ID
-                        password: String @private
-                        private: String
-                    }
-                `;
-
-                const enums = [] as EnumTypeDefinitionNode[];
-                const interfaces = interfaceTypes.definitions as InterfaceTypeDefinitionNode[];
-                const unions = [] as UnionTypeDefinitionNode[];
-                const objects = [] as ObjectTypeDefinitionNode[];
-                const executeValidate = () =>
-                    validateDocument({
-                        document: doc,
-                        additionalDefinitions: { enums, interfaces, unions, objects },
-                        features: {},
-                    });
-                const errors = getError(executeValidate);
-
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "Objects and Interfaces must have one or more fields.");
-            });
-
-            test("should throw error if @private would leave no fields in object", () => {
-                const interfaceTypes = gql`
-                    interface UserInterface {
-                        private: String @private
-                    }
-                `;
-                const doc = gql`
-                    ${interfaceTypes}
-                    type User implements UserInterface @node {
-                        id: ID
-                        password: String @private
-                        private: String
-                    }
-                `;
-
-                const enums = [] as EnumTypeDefinitionNode[];
-                const interfaces = interfaceTypes.definitions as InterfaceTypeDefinitionNode[];
-                const unions = [] as UnionTypeDefinitionNode[];
-                const objects = [] as ObjectTypeDefinitionNode[];
-                const executeValidate = () =>
-                    validateDocument({
-                        document: doc,
-                        additionalDefinitions: { enums, interfaces, unions, objects },
-                        features: {},
-                    });
-                const errors = getError(executeValidate);
-
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "Objects and Interfaces must have one or more fields.");
-            });
-
-            test("should throw error if @private would leave no fields in object extension", () => {
-                const interfaceTypes = gql`
-                    interface UserInterface {
-                        private: String
-                    }
-                `;
-                const doc = gql`
-                    ${interfaceTypes}
-                    type User implements UserInterface @node {
-                        password: String @private
-                    }
-                    extend type User {
-                        private: String @private
-                    }
-                `;
-
-                const enums = [] as EnumTypeDefinitionNode[];
-                const interfaces = interfaceTypes.definitions as InterfaceTypeDefinitionNode[];
-                const unions = [] as UnionTypeDefinitionNode[];
-                const objects = [] as ObjectTypeDefinitionNode[];
-                const executeValidate = () =>
-                    validateDocument({
-                        document: doc,
-                        additionalDefinitions: { enums, interfaces, unions, objects },
-                        features: {},
-                    });
-                const errors = getError(executeValidate);
-
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "Objects and Interfaces must have one or more fields.");
-            });
-
-            test("Interfaces must have one or more fields", () => {
-                const doc = gql`
-                    interface Production
-                    type Movie implements Production @node {
-                        id: ID!
-                        title: String
-                    }
-                `;
-
-                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
-                const errors = getError(executeValidate);
-
-                expect(errors).toHaveLength(1);
-                expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                expect(errors[0]).toHaveProperty("message", "Objects and Interfaces must have one or more fields.");
-            });
-
-            test("valid", () => {
-                const doc = gql`
-                    type Movie implements Production @node {
-                        id: ID!
-                        title: String
-                        episodes: Int
-                    }
-                    interface Production {
-                        episodes: Int
-                    }
-                `;
-
-                const executeValidate = () => validateDocument({ document: doc, features: {}, additionalDefinitions });
-                expect(executeValidate).not.toThrow();
-            });
-        });
         describe("@authorization", () => {
             test("should throw error if there are no arguments", () => {
                 const doc = gql`
@@ -5164,7 +5057,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5206,7 +5099,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5244,7 +5137,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5282,7 +5175,7 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5315,13 +5208,13 @@ describe("validation 2.0", () => {
                 test("should throw error if @relationship is used on relationship property", () => {
                     const relationshipProperties = gql`
                         type ActedIn @relationshipProperties {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
                     `;
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5355,13 +5248,13 @@ describe("validation 2.0", () => {
                     const relationshipProperties = gql`
                         type ActedIn @relationshipProperties {
                             id: ID @cypher(statement: "RETURN id(this) as id", columnName: "id")
-                            roles: [String]
+                            roles: [String!]
                         }
                     `;
                     const doc = gql`
                         ${relationshipProperties}
                         type Movie @node {
-                            actors: Actor! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
+                            actors: [Actor!]! @relationship(type: "ACTED_IN", direction: OUT, properties: "ActedIn")
                         }
 
                         type Actor @node {
@@ -5601,7 +5494,6 @@ describe("validation 2.0", () => {
                     const doc = gql`
                         type User @node {
                             name: String
-                            posts: Int! @relationship(type: "HAS_POST", direction: OUT)
                             allPosts: [Int!] @relationship(type: "HAS_POST", direction: OUT)
                         }
                     `;
@@ -5614,19 +5506,14 @@ describe("validation 2.0", () => {
                         });
 
                     const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(2);
+                    expect(errors).toHaveLength(1);
                     expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[1]).not.toBeInstanceOf(NoErrorThrownError);
+
                     expect(errors[0]).toHaveProperty(
                         "message",
                         "Invalid field type: Scalar types cannot be relationship targets. Please use an Object type instead."
                     );
-                    expect(errors[1]).toHaveProperty(
-                        "message",
-                        "Invalid field type: Scalar types cannot be relationship targets. Please use an Object type instead."
-                    );
-                    expect(errors[0]).toHaveProperty("path", ["User", "posts"]);
-                    expect(errors[1]).toHaveProperty("path", ["User", "allPosts"]);
+                    expect(errors[0]).toHaveProperty("path", ["User", "allPosts"]);
                 });
             });
 
@@ -5634,7 +5521,7 @@ describe("validation 2.0", () => {
                 test("simple list", () => {
                     const doc = gql`
                         type Post @node {
-                            titles: [String]
+                            titles: [String!]
                         }
                     `;
 
@@ -6080,7 +5967,7 @@ describe("validation 2.0", () => {
             `;
 
             expect(() => validateDocument({ document: doc, features: undefined, additionalDefinitions })).toThrow(
-                'Directive "@fulltext" argument "indexes" of type "[FullTextInput]!" is required, but it was not provided.'
+                'Directive "@fulltext" argument "indexes" of type "[FulltextInput]!" is required, but it was not provided.'
             );
         });
 
@@ -6150,7 +6037,7 @@ describe("validation 2.0", () => {
                 }
 
                 type Post @node {
-                    id: ID! @id @unique
+                    id: ID! @id
                     title: String!
                     datetime: DateTime @timestamp(operations: [CREATE])
                 }
@@ -6234,7 +6121,7 @@ describe("validation 2.0", () => {
                     eligibleForBonus: Boolean
                     bonusPercentage: Float
                     salaryReviewDate: DateTime
-                    pays_salary: EmploymentRecord! @relationship(type: "PAYS_SALARY", direction: IN)
+                    pays_salary: [EmploymentRecord!]! @relationship(type: "PAYS_SALARY", direction: IN)
                 }
 
                 type EmploymentRecord @node {
@@ -6460,10 +6347,10 @@ describe("validation 2.0", () => {
             test("should not throw error on validation of schema", () => {
                 const doc = gql`
                     type Order @node {
-                        orderID: ID! @id @unique
+                        orderID: ID! @id
                         placedAt: DateTime @timestamp
-                        shipTo: Address! @relationship(type: "SHIPS_TO", direction: OUT)
-                        customer: Customer! @relationship(type: "PLACED", direction: IN)
+                        shipTo: [Address!]! @relationship(type: "SHIPS_TO", direction: OUT)
+                        customer: [Customer!]! @relationship(type: "PLACED", direction: IN)
                         books: [Book!]! @relationship(type: "CONTAINS", direction: OUT)
                     }
 
@@ -6495,7 +6382,7 @@ describe("validation 2.0", () => {
                     type Address @node {
                         address: String
                         location: Point
-                        order: Order @relationship(type: "SHIPS_TO", direction: IN)
+                        order: [Order!]! @relationship(type: "SHIPS_TO", direction: IN)
                     }
 
                     extend type Address {
@@ -6544,8 +6431,8 @@ describe("validation 2.0", () => {
                         rating: Int
                         text: String
                         createdAt: DateTime @timestamp
-                        book: Book! @relationship(type: "REVIEWS", direction: OUT)
-                        author: Customer! @relationship(type: "WROTE", direction: IN)
+                        book: [Book!]! @relationship(type: "REVIEWS", direction: OUT)
+                        author: [Customer!]! @relationship(type: "WROTE", direction: IN)
                     }
 
                     type Author @node {

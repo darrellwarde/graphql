@@ -17,11 +17,10 @@
  * limitations under the License.
  */
 
-import type { ConcreteEntityAdapter } from "../../entity/model-adapters/ConcreteEntityAdapter";
 import { upperFirst } from "../../../utils/upper-first";
-import { isUnionEntity } from "../../../translate/queryAST/utils/is-union-entity";
-import type { RelationshipDeclarationAdapter } from "./RelationshipDeclarationAdapter";
+import type { ConcreteEntityAdapter } from "../../entity/model-adapters/ConcreteEntityAdapter";
 import type { RelationshipAdapter } from "./RelationshipAdapter";
+import type { RelationshipDeclarationAdapter } from "./RelationshipDeclarationAdapter";
 
 export abstract class RelationshipBaseOperations<T extends RelationshipAdapter | RelationshipDeclarationAdapter> {
     protected constructor(protected readonly relationship: T) {}
@@ -105,24 +104,6 @@ export abstract class RelationshipBaseOperations<T extends RelationshipAdapter |
         }DisconnectFieldInput`;
     }
 
-    public getConnectOrCreateInputTypeName(): string {
-        return `${this.prefixForTypename}ConnectOrCreateInput`;
-    }
-
-    public getConnectOrCreateFieldInputTypeName(concreteTargetEntityAdapter?: ConcreteEntityAdapter): string {
-        if (isUnionEntity(this.relationship.target)) {
-            if (!concreteTargetEntityAdapter) {
-                throw new Error("missing concreteTargetEntityAdapter");
-            }
-            return `${this.prefixForTypename}${concreteTargetEntityAdapter.name}ConnectOrCreateFieldInput`;
-        }
-        return `${this.prefixForTypename}ConnectOrCreateFieldInput`;
-    }
-
-    public getConnectOrCreateOnCreateFieldInputTypeName(concreteTargetEntityAdapter: ConcreteEntityAdapter): string {
-        return `${this.getConnectOrCreateFieldInputTypeName(concreteTargetEntityAdapter)}OnCreate`;
-    }
-
     public get connectionFieldName(): string {
         return `${this.relationship.name}Connection`;
     }
@@ -198,13 +179,5 @@ export abstract class RelationshipBaseOperations<T extends RelationshipAdapter |
 
     public get edgeAggregationWhereInputTypeName(): string {
         return `${this.edgePrefix}AggregationWhereInput`;
-    }
-
-    public getConnectOrCreateInputFields(target: ConcreteEntityAdapter) {
-        // TODO: use this._target in the end; currently passed-in as argument because unions need this per refNode
-        return {
-            where: `${target.operations.connectOrCreateWhereInputTypeName}!`,
-            onCreate: `${this.getConnectOrCreateOnCreateFieldInputTypeName(target)}!`,
-        };
     }
 }

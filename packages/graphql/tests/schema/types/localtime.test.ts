@@ -60,9 +60,18 @@ describe("Localtime", () => {
               relationshipsDeleted: Int!
             }
 
-            type IDAggregateSelection {
-              longest: ID
-              shortest: ID
+            \\"\\"\\"ID filters\\"\\"\\"
+            input IDScalarFilters {
+              contains: ID
+              endsWith: ID
+              eq: ID
+              in: [ID!]
+              startsWith: ID
+            }
+
+            \\"\\"\\"ID mutations\\"\\"\\"
+            input IDScalarMutations {
+              set: ID
             }
 
             \\"\\"\\"
@@ -75,6 +84,21 @@ describe("Localtime", () => {
               min: LocalTime
             }
 
+            \\"\\"\\"LocalTime filters\\"\\"\\"
+            input LocalTimeScalarFilters {
+              eq: LocalTime
+              gt: LocalTime
+              gte: LocalTime
+              in: [LocalTime!]
+              lt: LocalTime
+              lte: LocalTime
+            }
+
+            \\"\\"\\"LocalTime mutations\\"\\"\\"
+            input LocalTimeScalarMutations {
+              set: LocalTime
+            }
+
             type Movie {
               id: ID
               time: LocalTime
@@ -82,7 +106,6 @@ describe("Localtime", () => {
 
             type MovieAggregateSelection {
               count: Int!
-              id: IDAggregateSelection! @deprecated(reason: \\"aggregation of ID fields are deprecated and will be removed\\")
               time: LocalTimeAggregateSelection!
             }
 
@@ -96,15 +119,6 @@ describe("Localtime", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -114,29 +128,29 @@ describe("Localtime", () => {
             }
 
             input MovieUpdateInput {
-              id: ID @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: ID
-              time: LocalTime @deprecated(reason: \\"Please use the explicit _SET field\\")
-              time_SET: LocalTime
+              id: IDScalarMutations
+              id_SET: ID @deprecated(reason: \\"Please use the generic mutation 'id: { set: ... } }' instead.\\")
+              time: LocalTimeScalarMutations
+              time_SET: LocalTime @deprecated(reason: \\"Please use the generic mutation 'time: { set: ... } }' instead.\\")
             }
 
             input MovieWhere {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              id: ID @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: ID
-              id_ENDS_WITH: ID
-              id_EQ: ID
-              id_IN: [ID]
-              id_STARTS_WITH: ID
-              time: LocalTime @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              time_EQ: LocalTime
-              time_GT: LocalTime
-              time_GTE: LocalTime
-              time_IN: [LocalTime]
-              time_LT: LocalTime
-              time_LTE: LocalTime
+              id: IDScalarFilters
+              id_CONTAINS: ID @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: ID @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [ID] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: ID @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
+              time: LocalTimeScalarFilters
+              time_EQ: LocalTime @deprecated(reason: \\"Please use the relevant generic filter time: { eq: ... }\\")
+              time_GT: LocalTime @deprecated(reason: \\"Please use the relevant generic filter time: { gt: ... }\\")
+              time_GTE: LocalTime @deprecated(reason: \\"Please use the relevant generic filter time: { gte: ... }\\")
+              time_IN: [LocalTime] @deprecated(reason: \\"Please use the relevant generic filter time: { in: ... }\\")
+              time_LT: LocalTime @deprecated(reason: \\"Please use the relevant generic filter time: { lt: ... }\\")
+              time_LTE: LocalTime @deprecated(reason: \\"Please use the relevant generic filter time: { lte: ... }\\")
             }
 
             type MoviesConnection {
@@ -160,7 +174,7 @@ describe("Localtime", () => {
             }
 
             type Query {
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }

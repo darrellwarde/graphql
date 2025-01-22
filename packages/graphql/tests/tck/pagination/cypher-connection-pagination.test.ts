@@ -86,11 +86,6 @@ describe("Cypher Connection pagination", () => {
 
         neoSchema = new Neo4jGraphQL({
             typeDefs,
-            features: {
-                excludeDeprecatedFields: {
-                    deprecatedOptionsArgument: true,
-                },
-            },
         });
     });
 
@@ -244,7 +239,7 @@ describe("Cypher Connection pagination", () => {
                     sort: [{ numberOfActors: DESC }, { title: ASC }]
                     first: 10
                     after: "some-cursor"
-                    where: { title_EQ: "The Matrix" }
+                    where: { title: { eq: "The Matrix" } }
                 ) {
                     edges {
                         cursor

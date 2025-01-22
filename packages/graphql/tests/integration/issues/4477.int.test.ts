@@ -43,7 +43,7 @@ describe("https://github.com/neo4j/graphql/issues/4477", () => {
             }
 
             type ${Service} @node {
-                collection: ${Collection} @relationship(type: "HAS_SERVICE", direction: IN)
+                collection: [${Collection}!]! @relationship(type: "HAS_SERVICE", direction: IN)
             }
         `;
 

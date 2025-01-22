@@ -26,7 +26,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
         typeDefs = /* GraphQL */ `
             type Episode @node {
                 runtime: Int!
-                series: Series! @relationship(type: "HAS_EPISODE", direction: IN)
+                series: [Series!]! @relationship(type: "HAS_EPISODE", direction: IN)
             }
 
             interface Production {
@@ -73,7 +73,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
                         actedIn: {
                             connect: {
                                 edge: { screenTime: 10 }
-                                where: { node: { title_EQ: "movieTitle", typename_IN: [Movie] } }
+                                where: { node: { title: { eq: "movieTitle" }, typename: [Movie] } }
                             }
                         }
                     }
@@ -103,7 +103,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0
             			UNWIND connectedNodes as this0_actedIn_connect0_node
-            			MERGE (this0)-[this0_actedIn_connect0_relationship:ACTED_IN]->(this0_actedIn_connect0_node)
+            			CREATE (this0)-[this0_actedIn_connect0_relationship:ACTED_IN]->(this0_actedIn_connect0_node)
             			SET this0_actedIn_connect0_relationship.screenTime = $this0_actedIn_connect0_relationship_screenTime
             		}
             	}
@@ -121,7 +121,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0
             			UNWIND connectedNodes as this0_actedIn_connect1_node
-            			MERGE (this0)-[this0_actedIn_connect1_relationship:ACTED_IN]->(this0_actedIn_connect1_node)
+            			CREATE (this0)-[this0_actedIn_connect1_relationship:ACTED_IN]->(this0_actedIn_connect1_node)
             			SET this0_actedIn_connect1_relationship.screenTime = $this0_actedIn_connect1_relationship_screenTime
             		}
             	}
@@ -166,7 +166,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
                         actedIn: {
                             connect: {
                                 edge: { screenTime: 10 }
-                                where: { node: { OR: [{ title_EQ: "movieTitle" }, { typename_IN: [Movie] }] } }
+                                where: { node: { OR: [{ title: { eq: "movieTitle" } }, { typename: [Movie] }] } }
                             }
                         }
                     }
@@ -196,7 +196,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0
             			UNWIND connectedNodes as this0_actedIn_connect0_node
-            			MERGE (this0)-[this0_actedIn_connect0_relationship:ACTED_IN]->(this0_actedIn_connect0_node)
+            			CREATE (this0)-[this0_actedIn_connect0_relationship:ACTED_IN]->(this0_actedIn_connect0_node)
             			SET this0_actedIn_connect0_relationship.screenTime = $this0_actedIn_connect0_relationship_screenTime
             		}
             	}
@@ -214,7 +214,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0
             			UNWIND connectedNodes as this0_actedIn_connect1_node
-            			MERGE (this0)-[this0_actedIn_connect1_relationship:ACTED_IN]->(this0_actedIn_connect1_node)
+            			CREATE (this0)-[this0_actedIn_connect1_relationship:ACTED_IN]->(this0_actedIn_connect1_node)
             			SET this0_actedIn_connect1_relationship.screenTime = $this0_actedIn_connect1_relationship_screenTime
             		}
             	}
@@ -259,11 +259,11 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
                         actedIn: {
                             connect: {
                                 edge: { screenTime: 10 }
-                                where: { node: { title_EQ: "movieTitle", typename_IN: [Movie] } }
+                                where: { node: { title: { eq: "movieTitle" }, typename: [Movie] } }
                                 connect: {
                                     actors: {
                                         edge: { StarredIn: { episodeNr: 10 }, ActedIn: { screenTime: 25 } }
-                                        where: { node: { name_EQ: "Second Actor" } }
+                                        where: { node: { name: { eq: "Second Actor" } } }
                                     }
                                 }
                             }
@@ -295,7 +295,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0
             			UNWIND connectedNodes as this0_actedIn_connect0_node
-            			MERGE (this0)-[this0_actedIn_connect0_relationship:ACTED_IN]->(this0_actedIn_connect0_node)
+            			CREATE (this0)-[this0_actedIn_connect0_relationship:ACTED_IN]->(this0_actedIn_connect0_node)
             			SET this0_actedIn_connect0_relationship.screenTime = $this0_actedIn_connect0_relationship_screenTime
             		}
             	}
@@ -311,7 +311,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0_actedIn_connect0_node
             			UNWIND connectedNodes as this0_actedIn_connect0_node_actors0_node
-            			MERGE (this0_actedIn_connect0_node)<-[this0_actedIn_connect0_node_actors0_relationship:ACTED_IN]-(this0_actedIn_connect0_node_actors0_node)
+            			CREATE (this0_actedIn_connect0_node)<-[this0_actedIn_connect0_node_actors0_relationship:ACTED_IN]-(this0_actedIn_connect0_node_actors0_node)
             			SET this0_actedIn_connect0_node_actors0_relationship.screenTime = $this0_actedIn_connect0_node_actors0_relationship_ActedIn_screenTime
             		}
             	}
@@ -331,7 +331,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0
             			UNWIND connectedNodes as this0_actedIn_connect1_node
-            			MERGE (this0)-[this0_actedIn_connect1_relationship:ACTED_IN]->(this0_actedIn_connect1_node)
+            			CREATE (this0)-[this0_actedIn_connect1_relationship:ACTED_IN]->(this0_actedIn_connect1_node)
             			SET this0_actedIn_connect1_relationship.screenTime = $this0_actedIn_connect1_relationship_screenTime
             		}
             	}
@@ -347,7 +347,7 @@ describe("https://github.com/neo4j/graphql/issues/4583", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this0_actedIn_connect1_node
             			UNWIND connectedNodes as this0_actedIn_connect1_node_actors0_node
-            			MERGE (this0_actedIn_connect1_node)<-[this0_actedIn_connect1_node_actors0_relationship:ACTED_IN]-(this0_actedIn_connect1_node_actors0_node)
+            			CREATE (this0_actedIn_connect1_node)<-[this0_actedIn_connect1_node_actors0_relationship:ACTED_IN]-(this0_actedIn_connect1_node_actors0_node)
             			SET this0_actedIn_connect1_node_actors0_relationship.episodeNr = $this0_actedIn_connect1_node_actors0_relationship_StarredIn_episodeNr
             		}
             	}

@@ -1,0 +1,39 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "apollo-federation-subgraph-compatibility": "1.0.0",
+    "@neo4j/graphql": "6.2.1",
+    "server_perf": "1.0.0",
+    "@neo4j/introspector": "4.0.0",
+    "@neo4j/package-tests": "1.0.0"
+  },
+  "changesets": [
+    "beige-poets-move",
+    "chatty-plants-dress",
+    "clean-hairs-pretend",
+    "clever-tomatoes-float",
+    "cyan-grapes-laugh",
+    "fair-elephants-yell",
+    "four-insects-repeat",
+    "green-jobs-jam",
+    "healthy-swans-shave",
+    "khaki-roses-raise",
+    "little-lemons-fail",
+    "loud-phones-march",
+    "nine-games-clap",
+    "perfect-zoos-push",
+    "quick-dolphins-accept",
+    "red-cows-shop",
+    "short-pillows-itch",
+    "silly-toys-sing",
+    "six-bottles-hear",
+    "sixty-clocks-design",
+    "slow-dolls-whisper",
+    "soft-planets-exercise",
+    "strong-jobs-eat",
+    "tame-melons-confess",
+    "ten-starfishes-attend",
+    "unlucky-spoons-trade"
+  ]
+}

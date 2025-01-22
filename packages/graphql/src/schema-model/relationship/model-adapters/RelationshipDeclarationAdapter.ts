@@ -21,7 +21,6 @@ import { RelationshipNestedOperationsOption } from "../../../constants";
 import type { Annotations } from "../../annotation/Annotation";
 import type { Argument } from "../../argument/Argument";
 import type { AttributeAdapter } from "../../attribute/model-adapters/AttributeAdapter";
-import { ListFiltersAdapter } from "../../attribute/model-adapters/ListFiltersAdapter";
 import type { Entity } from "../../entity/Entity";
 import type { EntityAdapter } from "../../entity/EntityAdapter";
 import { ConcreteEntityAdapter } from "../../entity/model-adapters/ConcreteEntityAdapter";
@@ -35,7 +34,6 @@ import { RelationshipAdapter } from "./RelationshipAdapter";
 import { RelationshipDeclarationOperations } from "./RelationshipDeclarationOperations";
 
 export class RelationshipDeclarationAdapter {
-    private _listFiltersModel: ListFiltersAdapter | undefined;
     public readonly name: string;
     public readonly source: EntityAdapter;
     private rawEntity: Entity;
@@ -89,16 +87,6 @@ export class RelationshipDeclarationAdapter {
             (r) => new RelationshipAdapter(r)
         );
         this.firstDeclaredInTypeName = firstDeclaredInTypeName;
-    }
-
-    public get listFiltersModel(): ListFiltersAdapter | undefined {
-        if (!this._listFiltersModel) {
-            if (!this.isList) {
-                return;
-            }
-            this._listFiltersModel = new ListFiltersAdapter(this);
-        }
-        return this._listFiltersModel;
     }
 
     public get operations(): RelationshipDeclarationOperations {
@@ -192,7 +180,7 @@ export class RelationshipDeclarationAdapter {
             // The connectOrCreate field is not generated if the related type does not have a unique field
             (this.nestedOperations.has(RelationshipNestedOperationsOption.CONNECT_OR_CREATE) &&
                 relationshipTarget instanceof ConcreteEntityAdapter &&
-                relationshipTarget.uniqueFields.length > 0)
+                false)
         );
     }
 
@@ -208,11 +196,10 @@ export class RelationshipDeclarationAdapter {
             if (!ifUnionRelationshipTargetEntity) {
                 throw new Error("Expected member entity");
             }
-            const onlyConnectOrCreateAndNoUniqueFields =
-                onlyConnectOrCreate && !ifUnionRelationshipTargetEntity.uniqueFields.length;
+            const onlyConnectOrCreateAndNoUniqueFields = onlyConnectOrCreate;
             return this.nestedOperations.size > 0 && !onlyConnectOrCreateAndNoUniqueFields;
         }
-        const onlyConnectOrCreateAndNoUniqueFields = onlyConnectOrCreate && !this.target.uniqueFields.length;
+        const onlyConnectOrCreateAndNoUniqueFields = onlyConnectOrCreate;
         return this.nestedOperations.size > 0 && !onlyConnectOrCreateAndNoUniqueFields;
     }
 }

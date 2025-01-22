@@ -25,7 +25,6 @@ import type { Neo4jGraphQLTranslationContext } from "../../../types/neo4j-graphq
 import { execute } from "../../../utils";
 import getNeo4jResolveTree from "../../../utils/get-neo4j-resolve-tree";
 import type { Neo4jGraphQLComposedContext } from "../composition/wrap-query-and-mutation";
-import { isConcreteEntity } from "../../../translate/queryAST/utils/is-concrete-entity";
 
 export function aggregateResolver({
     entityAdapter,
@@ -58,15 +57,6 @@ export function aggregateResolver({
         resolve,
         args: {
             where: entityAdapter.operations.whereInputTypeName,
-            ...(isConcreteEntity(entityAdapter) && entityAdapter.annotations.fulltext
-                ? {
-                      fulltext: {
-                          type: entityAdapter.operations.fullTextInputTypeName,
-                          description:
-                              "Query a full-text index. Allows for the aggregation of results, but does not return the query score. Use the root full-text query fields if you require the score.",
-                      },
-                  }
-                : {}),
         },
     };
 }

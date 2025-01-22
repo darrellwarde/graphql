@@ -17,29 +17,29 @@
  * limitations under the License.
  */
 
-import type { ASTVisitor, FieldDefinitionNode, ObjectTypeDefinitionNode } from "graphql";
-import { GraphQLError, parse } from "graphql";
+import type { ObjectTypeDefinitionNode } from "graphql";
+import { parse } from "graphql";
 import { gql } from "graphql-tag";
-import type { SDLValidationContext } from "graphql/validation/ValidationContext";
 import { NoErrorThrownError, getError } from "../../../tests/utils/get-error";
 import { Subgraph } from "../../classes/Subgraph";
 import { generateModel } from "../../schema-model/generate-model";
 import makeAugmentedSchema from "../make-augmented-schema";
 import { validateUserDefinition } from "./schema-validation";
+import { ComplexityEstimatorHelper } from "../../classes/ComplexityEstimatorHelper";
 
 describe("schema validation", () => {
     describe("JWT", () => {
         // TODO: authentication
         describe("JWT Payload", () => {
             test("should not returns errors when is correctly used", () => {
-                const jwtType = `
-                    type MyJWT  @jwt {
+                const jwtType = /* GraphQL */ `
+                    type MyJWT @jwt {
                         myClaim: String
                     }
                 `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @authorization(filter: [{ where: { jwt: { myClaim: "something" } } }]) @node {
+                    type User @authorization(filter: [{ where: { jwt: { myClaim: { eq: "something" } } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -50,14 +50,15 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
             });
 
             test("should not returns errors when is correctly used together with node", () => {
-                const jwtType = `
-                    type MyJWT  @jwt {
+                const jwtType = /* GraphQL */ `
+                    type MyJWT @jwt {
                         myClaim: String
                     }
                 `;
@@ -65,7 +66,9 @@ describe("schema validation", () => {
                     ${jwtType}
                     type User
                         @node
-                        @authorization(filter: [{ where: { jwt: { myClaim: "something" }, node: { name: "John" } } }]) {
+                        @authorization(
+                            filter: [{ where: { jwt: { myClaim_EQ: "something" }, node: { name_EQ: "John" } } }]
+                        ) {
                         id: ID!
                         name: String!
                     }
@@ -76,20 +79,23 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
             });
 
             test("should return errors when jwt field is not found", () => {
-                const jwtType = `
-                    type MyJWT  @jwt {
+                const jwtType = /* GraphQL */ `
+                    type MyJWT @jwt {
                         myClaim: String
                     }
                 `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authorization(filter: [{ where: { jwt: { thisClaimDoesNotExist: "something" } } }]) {
+                    type User
+                        @node
+                        @authorization(filter: [{ where: { jwt: { thisClaimDoesNotExist_EQ: "something" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -100,6 +106,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -108,14 +115,14 @@ describe("schema validation", () => {
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
                 expect(errors[0]).toHaveProperty(
                     "message",
-                    'Invalid argument: filter, error: Field "thisClaimDoesNotExist" is not defined by type.'
+                    'Invalid argument: filter, error: Field "thisClaimDoesNotExist_EQ" is not defined by type.'
                 );
                 expect(errors[0]).toHaveProperty("path", ["User", "@authorization", "filter", 0, "where", "jwt"]);
             });
 
             test("should return no error when jwt field iss is used", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { jwt: { iss: "Something" } } }]) {
+                    type User @authorization(filter: [{ where: { jwt: { iss_EQ: "Something" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -125,6 +132,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -138,7 +146,7 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @authorization(filter: [{ where: { jwt: { iss: "something" } } }]) @node {
+                    type User @authorization(filter: [{ where: { jwt: { iss_EQ: "something" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -149,6 +157,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -162,7 +171,7 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @authorization(filter: [{ where: { node: { myClaim: "something" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { myClaim_EQ: "something" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -173,6 +182,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -181,7 +191,7 @@ describe("schema validation", () => {
                 expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
                 expect(errors[0]).toHaveProperty(
                     "message",
-                    'Invalid argument: filter, error: Field "myClaim" is not defined by type.'
+                    'Invalid argument: filter, error: Field "myClaim_EQ" is not defined by type.'
                 );
                 expect(errors[0]).toHaveProperty("path", ["User", "@authorization", "filter", 0, "where", "node"]);
             });
@@ -207,6 +217,7 @@ describe("schema validation", () => {
             const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                 document: userDocument,
                 schemaModel,
+                complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
             });
             const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
             expect(executeValidate).not.toThrow();
@@ -220,7 +231,7 @@ describe("schema validation", () => {
                     }
                 `;
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testInt: "$jwt.intClaim" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testInt_EQ: "$jwt.intClaim" } } }]) {
                         id: ID!
                         name: String!
                         testInt: Int
@@ -232,6 +243,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -239,7 +251,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when is correctly used: standard field sub on OBJECT", () => {
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testStr: "$jwt.sub" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testStr_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                         testStr: String
@@ -250,6 +262,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -262,7 +275,7 @@ describe("schema validation", () => {
                     }
                 `;
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testInt: "$jwt.intClaim" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testInt_EQ: "$jwt.intClaim" } } }]) {
                         id: ID!
                         name: String!
                         testInt: [Int]
@@ -274,6 +287,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -286,7 +300,7 @@ describe("schema validation", () => {
                     }
                 `;
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testBool: "$jwt.boolClaim" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testBool_EQ: "$jwt.boolClaim" } } }]) {
                         id: ID!
                         name: String!
                         testBool: Boolean
@@ -298,6 +312,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -305,7 +320,7 @@ describe("schema validation", () => {
 
             test("should return error when types do not match: standard field sub on OBJECT", () => {
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testInt: "$jwt.sub" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testInt_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                         testInt: Int
@@ -316,6 +331,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 const errors = getError(executeValidate);
@@ -332,7 +348,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testInt",
+                    "testInt_EQ",
                 ]);
             });
 
@@ -343,7 +359,7 @@ describe("schema validation", () => {
                     }
                 `;
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testInts: "$jwt.intClaim" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testInts_EQ: "$jwt.intClaim" } } }]) {
                         id: ID!
                         name: String!
                         testInts: Int
@@ -355,6 +371,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 const errors = getError(executeValidate);
@@ -371,7 +388,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testInts",
+                    "testInts_EQ",
                 ]);
             });
 
@@ -382,7 +399,7 @@ describe("schema validation", () => {
                     }
                 `;
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testInt: "$jwt.stringClaim" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testInt_EQ: "$jwt.stringClaim" } } }]) {
                         id: ID!
                         name: String!
                         testInt: Int
@@ -394,6 +411,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 const errors = getError(executeValidate);
@@ -410,7 +428,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testInt",
+                    "testInt_EQ",
                 ]);
             });
 
@@ -422,7 +440,7 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @authorization(filter: [{ where: { node: { testInt: "$jwt.sub" } } }])
+                        id: ID! @authorization(filter: [{ where: { node: { testInt_EQ: "$jwt.sub" } } }])
                         name: String!
                         testInt: Int
                     }
@@ -433,6 +451,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
@@ -452,7 +471,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testInt",
+                    "testInt_EQ",
                 ]);
             });
 
@@ -464,7 +483,7 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @authorization(filter: [{ where: { node: { testStr: "$jwt.intClaim" } } }])
+                        id: ID! @authorization(filter: [{ where: { node: { testStr_EQ: "$jwt.intClaim" } } }])
                         name: String!
                         testStr: String
                     }
@@ -475,6 +494,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
@@ -494,7 +514,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testStr",
+                    "testStr_EQ",
                 ]);
             });
 
@@ -506,7 +526,7 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @authorization(filter: [{ where: { node: { testStr: "$jwt.intClaim" } } }])
+                        id: ID! @authorization(filter: [{ where: { node: { testStr_EQ: "$jwt.intClaim" } } }])
                         name: String!
                         testStr: String
                     }
@@ -517,6 +537,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
@@ -536,7 +557,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testStr",
+                    "testStr_EQ",
                 ]);
             });
 
@@ -548,7 +569,7 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @authorization(filter: [{ where: { node: { testStr: "$jwt.boolClaim" } } }])
+                        id: ID! @authorization(filter: [{ where: { node: { testStr_EQ: "$jwt.boolClaim" } } }])
                         name: String!
                         testStr: String
                     }
@@ -559,6 +580,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
@@ -578,7 +600,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testStr",
+                    "testStr_EQ",
                 ]);
             });
 
@@ -589,7 +611,7 @@ describe("schema validation", () => {
                     }
                 `;
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testBool: "$jwt.stringClaim" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testBool_EQ: "$jwt.stringClaim" } } }]) {
                         id: ID!
                         name: String!
                         testBool: Boolean
@@ -601,6 +623,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -618,7 +641,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testBool",
+                    "testBool_EQ",
                 ]);
             });
 
@@ -629,7 +652,7 @@ describe("schema validation", () => {
                     }
                 `;
                 const userDocument = gql`
-                    type User @node @authorization(filter: [{ where: { node: { testBool: "$jwt.intClaim" } } }]) {
+                    type User @node @authorization(filter: [{ where: { node: { testBool_EQ: "$jwt.intClaim" } } }]) {
                         id: ID!
                         name: String!
                         testBool: Boolean
@@ -641,6 +664,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -658,7 +682,7 @@ describe("schema validation", () => {
                     0,
                     "where",
                     "node",
-                    "testBool",
+                    "testBool_EQ",
                 ]);
             });
         });
@@ -668,7 +692,7 @@ describe("schema validation", () => {
         describe("on OBJECT", () => {
             test("should not returns errors when is correctly used", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -679,6 +703,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -686,7 +711,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when is correctly used, with specifiedDirective", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String! @deprecated(reason: "name is deprecated")
                     }
@@ -697,6 +722,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -704,12 +730,12 @@ describe("schema validation", () => {
 
             test("should not returns errors when used correctly in several place", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -720,6 +746,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -727,7 +754,9 @@ describe("schema validation", () => {
 
             test("should validate directive argument name", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User
+                        @node
+                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -738,6 +767,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument }); //
 
@@ -760,7 +790,7 @@ describe("schema validation", () => {
                     type User
                         @node
                         @plural(value: "Users")
-                        @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -771,6 +801,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -782,7 +813,7 @@ describe("schema validation", () => {
                     type User
                         @node
                         @plural(value: "Users")
-                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -793,6 +824,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -815,7 +847,7 @@ describe("schema validation", () => {
             test("should not returns errors with a correct usage", () => {
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        id: ID! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                         name: String!
                     }
                 `;
@@ -825,6 +857,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -834,7 +867,7 @@ describe("schema validation", () => {
             test("should validate directive argument name", () => {
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        id: ID! @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                         name: String!
                     }
                 `;
@@ -844,6 +877,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -868,7 +902,7 @@ describe("schema validation", () => {
                         name: String!
                         posts: [Post!]!
                             @relationship(type: "HAS_POSTS", direction: IN)
-                            @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                            @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
 
                     type Post @node {
@@ -881,6 +915,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -893,7 +928,7 @@ describe("schema validation", () => {
                         name: String!
                         posts: [Post!]!
                             @relationship(type: "HAS_POSTS", direction: IN)
-                            @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                            @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
 
                     type Post @node {
@@ -906,6 +941,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -932,12 +968,12 @@ describe("schema validation", () => {
                         name: String!
                     }
 
-                    interface Member @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    interface Member @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                     }
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -946,6 +982,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).toThrow(
@@ -961,7 +998,7 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend type User @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
@@ -969,6 +1006,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -976,7 +1014,7 @@ describe("schema validation", () => {
 
             test("should returns errors when used correctly in both type and extension", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -985,7 +1023,7 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend type User @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
@@ -993,6 +1031,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1009,7 +1048,7 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     type User @node {
                         id: ID!
-                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
 
                     type Post @node {
@@ -1017,7 +1056,7 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
                 `;
 
@@ -1026,6 +1065,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1040,7 +1080,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when used correctly in both type and an extension field", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -1050,7 +1090,7 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
                 `;
 
@@ -1059,6 +1099,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -1066,7 +1107,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when used correctly in multiple extension fields", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -1076,8 +1117,8 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        id: ID! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
-                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        id: ID! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
                 `;
 
@@ -1086,6 +1127,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -1093,7 +1135,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when used correctly in different type and field across several extensions", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -1104,11 +1146,11 @@ describe("schema validation", () => {
                     }
 
                     extend type User {
-                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
 
                     extend type User {
-                        id: String! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        id: String! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
                 `;
 
@@ -1117,25 +1159,26 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
             });
 
-            test("should returns errors when used correctly in more than one extension", () => {
+            test("should returns error when used correctly in more than one extension", () => {
                 const userDocument = gql`
                     type User @node {
                         id: ID!
                         name: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Post @node {
                         id: ID!
                         name: String!
                     }
-                    extend type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
-                    extend type User @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend type User @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                    extend type User @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
@@ -1143,6 +1186,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1161,7 +1205,8 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend type User
+                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
@@ -1169,6 +1214,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1194,7 +1240,7 @@ describe("schema validation", () => {
                     }
                     extend type User
                         @plural(value: "Users")
-                        @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
@@ -1202,6 +1248,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -1215,7 +1262,7 @@ describe("schema validation", () => {
                     }
                     extend type User
                         @plural(value: "Users")
-                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
@@ -1223,6 +1270,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1253,10 +1301,10 @@ describe("schema validation", () => {
                         id: ID!
                     }
                     extend interface Member
-                        @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -1265,6 +1313,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).toThrow(
@@ -1276,17 +1325,17 @@ describe("schema validation", () => {
         describe("mixed usage", () => {
             test("should not returns errors when used correctly in several place", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
-                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
-                        author: User!
+                        name: String! @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                        author: [User!]!
                             @relationship(type: "HAS_AUTHOR", direction: IN)
-                            @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                            @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
 
                     type Document implements File @node {
@@ -1299,7 +1348,7 @@ describe("schema validation", () => {
                     }
 
                     extend type Document
-                        @subscriptionsAuthorization(filter: [{ where: { node: { name: "$jwt.sub" } } }])
+                        @subscriptionsAuthorization(filter: [{ where: { node: { name_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
@@ -1307,24 +1356,25 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
             });
             test("should returns errors when incorrectly used in several place", () => {
                 const userDocument = gql`
-                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type User @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
-                            @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
-                        author: User!
+                            @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                        author: [User!]!
                             @relationship(type: "HAS_AUTHOR", direction: IN)
-                            @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                            @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
 
                     type Document implements File @node {
@@ -1337,7 +1387,7 @@ describe("schema validation", () => {
                     }
 
                     extend type Document
-                        @subscriptionsAuthorization(filter: [{ where: { node: { name: "$jwt.sub" } } }])
+                        @subscriptionsAuthorization(filter: [{ where: { node: { name_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
@@ -1345,6 +1395,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1371,14 +1422,14 @@ describe("schema validation", () => {
                     type User
                         @node
                         @shareable
-                        @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1388,6 +1439,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () =>
                     validateUserDefinition({
@@ -1406,14 +1458,14 @@ describe("schema validation", () => {
                     type User
                         @node
                         @shareable
-                        @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String! @deprecated(reason: "name is deprecated")
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1423,6 +1475,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () =>
                     validateUserDefinition({
@@ -1441,14 +1494,16 @@ describe("schema validation", () => {
                     type User
                         @node
                         @shareable
-                        @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @node @subscriptionsAuthorization(filter: [{ where: { node: { content: "$jwt.sub" } } }]) {
+                    type Post
+                        @node
+                        @subscriptionsAuthorization(filter: [{ where: { node: { content_EQ: "$jwt.sub" } } }]) {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1458,6 +1513,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () =>
                     validateUserDefinition({
@@ -1476,14 +1532,14 @@ describe("schema validation", () => {
                     type User
                         @node
                         @shareable
-                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1493,6 +1549,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () =>
                     validateUserDefinition({
@@ -1524,14 +1581,14 @@ describe("schema validation", () => {
                         @node
                         @plural(value: "Users")
                         @shareable
-                        @subscriptionsAuthorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @subscriptionsAuthorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1541,6 +1598,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () =>
                     validateUserDefinition({
@@ -1560,14 +1618,14 @@ describe("schema validation", () => {
                         @node
                         @plural(value: "Users")
                         @shareable
-                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @subscriptionsAuthorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -1577,6 +1635,7 @@ describe("schema validation", () => {
                     document: userDocument,
                     features: { subscriptions: true },
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () =>
                     validateUserDefinition({
@@ -1606,7 +1665,7 @@ describe("schema validation", () => {
         describe("on OBJECT", () => {
             test("should not returns errors when is correctly used", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -1616,6 +1675,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -1623,7 +1683,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when is correctly used, with specifiedDirective", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String! @deprecated(reason: "name is deprecated")
                     }
@@ -1633,6 +1693,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -1640,12 +1701,12 @@ describe("schema validation", () => {
 
             test("should not returns errors when used correctly in several place", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type Post @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -1655,6 +1716,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -1662,7 +1724,7 @@ describe("schema validation", () => {
 
             test("should validate directive argument name", () => {
                 const userDocument = gql`
-                    type User @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -1672,6 +1734,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1687,7 +1750,7 @@ describe("schema validation", () => {
             test("should validate operations value", () => {
                 const userDocument = gql`
                     type User
-                        @authorization(filter: [{ operations: [NEVER], where: { node: { id: "$jwt.sub" } } }])
+                        @authorization(filter: [{ operations: [NEVER], where: { node: { id_EQ: "$jwt.sub" } } }])
                         @node {
                         id: ID!
                         name: String!
@@ -1698,6 +1761,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1716,7 +1780,7 @@ describe("schema validation", () => {
                     type User
                         @node
                         @plural(value: "Users")
-                        @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -1726,6 +1790,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -1737,7 +1802,7 @@ describe("schema validation", () => {
                     type User
                         @node
                         @plural(value: "Users")
-                        @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
@@ -1747,6 +1812,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1764,7 +1830,7 @@ describe("schema validation", () => {
             test("should not returns errors with a correct usage", () => {
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        id: ID! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                         name: String!
                     }
                 `;
@@ -1773,6 +1839,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -1782,7 +1849,7 @@ describe("schema validation", () => {
             test("should validate directive argument name", () => {
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        id: ID! @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                         name: String!
                     }
                 `;
@@ -1791,6 +1858,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -1807,7 +1875,7 @@ describe("schema validation", () => {
             test("should validate when value", () => {
                 const userDocument = gql`
                     type User @node {
-                        id: ID! @authorization(validate: [{ when: [NEVER], where: { node: { id: "$jwt.sub" } } }])
+                        id: ID! @authorization(validate: [{ when: [NEVER], where: { node: { id_EQ: "$jwt.sub" } } }])
                         name: String!
                     }
                 `;
@@ -1816,6 +1884,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1833,31 +1902,8 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     type User @node {
                         id: ID!
-                        name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @authentication
-                        posts: [Post!]! @relationship(type: "HAS_POSTS", direction: IN)
-                    }
-
-                    type Post @node {
-                        id: ID!
-                    }
-                `;
-
-                const schemaModel = generateModel(userDocument);
-                const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                    document: userDocument,
-                    schemaModel,
-                });
-
-                const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
-                expect(executeValidate).not.toThrow();
-            });
-
-            test("should validate directive argument name, when used with other directives", () => {
-                const userDocument = gql`
-                    type User @node {
-                        id: ID!
                         name: String!
-                            @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                            @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                             @authentication
                         posts: [Post!]! @relationship(type: "HAS_POSTS", direction: IN)
                     }
@@ -1871,6 +1917,33 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
+                });
+
+                const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
+                expect(executeValidate).not.toThrow();
+            });
+
+            test("should validate directive argument name, when used with other directives", () => {
+                const userDocument = gql`
+                    type User @node {
+                        id: ID!
+                        name: String!
+                            @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                            @authentication
+                        posts: [Post!]! @relationship(type: "HAS_POSTS", direction: IN)
+                    }
+
+                    type Post @node {
+                        id: ID!
+                    }
+                `;
+
+                const schemaModel = generateModel(userDocument);
+                const { typeDefs: augmentedDocument } = makeAugmentedSchema({
+                    document: userDocument,
+                    schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -1893,12 +1966,12 @@ describe("schema validation", () => {
                         name: String!
                     }
 
-                    interface Member @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                    interface Member @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                     }
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!] @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -1906,6 +1979,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1923,13 +1997,14 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -1937,7 +2012,7 @@ describe("schema validation", () => {
 
             test("should returns errors when used correctly in both type and extension", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -1946,13 +2021,14 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1969,7 +2045,7 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     type User @node {
                         id: ID!
-                        name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        name: String! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
 
                     type Post @node {
@@ -1977,7 +2053,7 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        name: String! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
                 `;
 
@@ -1985,6 +2061,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -1999,7 +2076,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when used correctly in both type and an extension field", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -2009,7 +2086,7 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        name: String! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
                 `;
 
@@ -2017,6 +2094,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -2024,7 +2102,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when used correctly in multiple extension fields", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -2034,8 +2112,8 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        id: ID! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
-                        name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        id: ID! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                        name: String! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
                 `;
 
@@ -2043,6 +2121,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -2050,7 +2129,7 @@ describe("schema validation", () => {
 
             test("should not returns errors when used correctly in different type and field across several extensions", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
@@ -2061,11 +2140,11 @@ describe("schema validation", () => {
                     }
 
                     extend type User {
-                        name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        name: String! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
 
                     extend type User {
-                        id: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        id: String! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                     }
                 `;
 
@@ -2073,6 +2152,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -2083,21 +2163,22 @@ describe("schema validation", () => {
                     type User @node {
                         id: ID!
                         name: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Post @node {
                         id: ID!
                         name: String!
                     }
-                    extend type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
-                    extend type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                    extend type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -2116,13 +2197,14 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend type User @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -2143,13 +2225,14 @@ describe("schema validation", () => {
                     }
                     extend type User
                         @plural(value: "Users")
-                        @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -2164,13 +2247,14 @@ describe("schema validation", () => {
                     }
                     extend type User
                         @plural(value: "Users")
-                        @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
+                        @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 const errors = getError(executeValidate);
@@ -2194,10 +2278,10 @@ describe("schema validation", () => {
                     interface Member {
                         id: ID!
                     }
-                    extend interface Member @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                    extend interface Member @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -2205,6 +2289,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -2218,15 +2303,15 @@ describe("schema validation", () => {
         describe("mixed usage", () => {
             test("should not returns errors when used correctly in several place", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type Post @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
-                        name: String! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        name: String! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Document implements File @node {
@@ -2238,28 +2323,29 @@ describe("schema validation", () => {
                         name: String
                     }
 
-                    extend type Document @authorization(filter: [{ where: { node: { name: "$jwt.sub" } } }])
+                    extend type Document @authorization(filter: [{ where: { node: { name_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
             });
             test("should returns errors when incorrectly used in several place", () => {
                 const userDocument = gql`
-                    type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type Post @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
-                        name: String! @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }])
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        name: String! @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Document implements File @node {
@@ -2271,13 +2357,14 @@ describe("schema validation", () => {
                         name: String
                     }
 
-                    extend type Document @authorization(filter: [{ where: { node: { name: "$jwt.sub" } } }])
+                    extend type Document @authorization(filter: [{ where: { node: { name_EQ: "$jwt.sub" } } }])
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 const errors = getError(executeValidate);
@@ -2295,14 +2382,14 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @shareable @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @shareable @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2311,6 +2398,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -2327,14 +2415,14 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @shareable @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @shareable @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String! @deprecated(reason: "name is deprecated")
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2343,6 +2431,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -2359,14 +2448,14 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @shareable @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User @shareable @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @authorization(filter: [{ where: { node: { content: "$jwt.sub" } } }]) @node {
+                    type Post @authorization(filter: [{ where: { node: { content_EQ: "$jwt.sub" } } }]) @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2375,6 +2464,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -2391,14 +2481,18 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @node @shareable @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                    type User
+                        @node
+                        @shareable
+                        @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                        @node {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2407,6 +2501,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -2434,14 +2529,14 @@ describe("schema validation", () => {
                         @node
                         @plural(value: "Users")
                         @shareable
-                        @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2450,6 +2545,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -2470,14 +2566,14 @@ describe("schema validation", () => {
                         @node
                         @plural(value: "Users")
                         @shareable
-                        @authorization(wrongFilter: [{ where: { node: { id: "$jwt.sub" } } }]) {
+                        @authorization(wrongFilter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -2486,6 +2582,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -2521,6 +2618,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 expect(executeValidate).not.toThrow();
@@ -2534,7 +2632,7 @@ describe("schema validation", () => {
             `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String! @deprecated(reason: "name is deprecated")
                     }
@@ -2544,6 +2642,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -2557,12 +2656,12 @@ describe("schema validation", () => {
             `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type Post @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -2572,6 +2671,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -2589,6 +2689,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -2610,6 +2711,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -2631,7 +2733,10 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @plural(value: "Users") @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User
+                        @node
+                        @plural(value: "Users")
+                        @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -2641,6 +2746,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
@@ -2655,7 +2761,7 @@ describe("schema validation", () => {
                 `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @plural(value: "Users") @authentication(jwtWrongField: { sub: "test" }) {
+                    type User @node @plural(value: "Users") @authentication(jwtWrongField: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -2665,6 +2771,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -2691,6 +2798,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -2709,6 +2817,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -2731,6 +2840,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -2744,36 +2854,13 @@ describe("schema validation", () => {
                 expect(errors[0]).toHaveProperty("path", ["User", "@authentication", "operations", 0]);
             });
 
-            test("validation should works when used with other directives", () => {
-                const userDocument = gql`
-                    type User @node {
-                        id: ID! @authentication(operations: [CREATE]) @unique
-                        name: String!
-                        posts: [Post!]! @relationship(type: "HAS_POSTS", direction: IN)
-                    }
-
-                    type Post @node {
-                        id: ID!
-                    }
-                `;
-
-                const schemaModel = generateModel(userDocument);
-                const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                    document: userDocument,
-                    schemaModel,
-                });
-
-                const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
-                expect(executeValidate).not.toThrow();
-            });
-
             test("should validate directive argument name, when used with other directives", () => {
                 const userDocument = gql`
                     type User @node {
                         id: ID!
                         name: String!
-                            @authorization(validate: [{ where: { node: { id: "1" } } }])
-                            @authentication(wrongFieldName: { sub: "test" })
+                            @authorization(validate: [{ where: { node: { id_EQ: "1" } } }])
+                            @authentication(wrongFieldName: { sub_EQ: "test" })
                         posts: [Post!]! @relationship(type: "HAS_POSTS", direction: IN)
                     }
 
@@ -2786,6 +2873,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -2814,12 +2902,12 @@ describe("schema validation", () => {
                         name: String!
                     }
 
-                    interface Member @authentication(operations: [CREATE], jwt: { myClaim: "test" }) {
+                    interface Member @authentication(operations: [CREATE], jwt: { myClaim_EQ: "test" }) {
                         id: ID!
                     }
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -2829,6 +2917,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -2856,7 +2945,7 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @authentication(operations: [CREATE], jwt: { sub: "test" })
+                    extend type User @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
 
@@ -2864,6 +2953,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -2878,7 +2968,7 @@ describe("schema validation", () => {
 
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -2887,7 +2977,7 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @authentication(operations: [CREATE], jwt: { sub: "test" })
+                    extend type User @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                 `;
 
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -2896,6 +2986,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -2918,7 +3009,7 @@ describe("schema validation", () => {
                     ${jwtType}
                     type User @node {
                         id: ID!
-                        name: String! @authentication(operations: [CREATE], jwt: { sub: "test" })
+                        name: String! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                     }
 
                     type Post @node {
@@ -2926,7 +3017,7 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        name: String! @authentication(operations: [CREATE], jwt: { sub: "test" })
+                        name: String! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                     }
                 `;
 
@@ -2935,6 +3026,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -2955,7 +3047,7 @@ describe("schema validation", () => {
             `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -2965,7 +3057,7 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        name: String! @authentication(operations: [CREATE], jwt: { sub: "test" })
+                        name: String! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                     }
                 `;
 
@@ -2974,6 +3066,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -2987,7 +3080,7 @@ describe("schema validation", () => {
             `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -2997,8 +3090,8 @@ describe("schema validation", () => {
                         name: String!
                     }
                     extend type User {
-                        id: ID! @authentication(operations: [CREATE], jwt: { sub: "test" })
-                        name: String! @authentication(operations: [CREATE], jwt: { sub: "test" })
+                        id: ID! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
+                        name: String! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                     }
                 `;
 
@@ -3007,6 +3100,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -3020,7 +3114,7 @@ describe("schema validation", () => {
             `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
@@ -3031,11 +3125,11 @@ describe("schema validation", () => {
                     }
 
                     extend type User {
-                        name: String! @authentication(operations: [CREATE], jwt: { sub: "test" })
+                        name: String! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                     }
 
                     extend type User {
-                        id: String! @authentication(operations: [CREATE], jwt: { sub: "test" })
+                        id: String! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                     }
                 `;
 
@@ -3044,6 +3138,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -3054,7 +3149,7 @@ describe("schema validation", () => {
                     type User @node {
                         id: ID!
                         name: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Post @node {
@@ -3069,6 +3164,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -3094,6 +3190,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
 
@@ -3115,13 +3212,16 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @plural(value: "Users") @authentication(operations: [CREATE], jwt: { sub: "test" })
+                    extend type User
+                        @plural(value: "Users")
+                        @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
@@ -3134,13 +3234,14 @@ describe("schema validation", () => {
                         id: ID!
                         name: String!
                     }
-                    extend type User @plural(value: "Users") @authentication(wrongField: { sub: "test" })
+                    extend type User @plural(value: "Users") @authentication(wrongField: { sub_EQ: "test" })
                 `;
 
                 const schemaModel = generateModel(userDocument);
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
                 const errors = getError(executeValidate);
@@ -3170,10 +3271,10 @@ describe("schema validation", () => {
                     interface Member {
                         id: ID!
                     }
-                    extend interface Member @authentication(operations: [CREATE], jwt: { sub: "test" })
+                    extend interface Member @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
 
                     type Post @node {
-                        author: Member @relationship(type: "HAS_AUTHOR", direction: IN)
+                        author: [Member!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
                 `;
 
@@ -3182,6 +3283,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
 
@@ -3204,15 +3306,15 @@ describe("schema validation", () => {
             `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type Post @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
-                        name: String! @authentication(operations: [CREATE], jwt: { sub: "test" })
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        name: String! @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Document implements File @node {
@@ -3224,7 +3326,7 @@ describe("schema validation", () => {
                         name: String
                     }
 
-                    extend type Document @authentication(operations: [CREATE], jwt: { sub: "test" })
+                    extend type Document @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                 `;
 
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3232,6 +3334,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 expect(executeValidate).not.toThrow();
@@ -3244,15 +3347,15 @@ describe("schema validation", () => {
             `;
                 const userDocument = gql`
                     ${jwtType}
-                    type User @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type Post @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
-                        name: String! @authentication(ops: [CREATE], jwt: { sub: "test" })
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: IN)
+                        name: String! @authentication(ops: [CREATE], jwt: { sub_EQ: "test" })
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: IN)
                     }
 
                     type Document implements File @node {
@@ -3264,7 +3367,7 @@ describe("schema validation", () => {
                         name: String
                     }
 
-                    extend type Document @authentication(operations: [CREATE], jwt: { sub: "test" })
+                    extend type Document @authentication(operations: [CREATE], jwt: { sub_EQ: "test" })
                 `;
 
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3272,6 +3375,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
                 const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument, jwt });
                 const errors = getError(executeValidate);
@@ -3292,14 +3396,14 @@ describe("schema validation", () => {
                     ${jwtType}
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @node @shareable @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @shareable @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3309,6 +3413,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -3332,14 +3437,14 @@ describe("schema validation", () => {
                     ${jwtType}
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @node @shareable @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @shareable @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String! @deprecated(reason: "name is deprecated")
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3349,6 +3454,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -3372,14 +3478,14 @@ describe("schema validation", () => {
                     ${jwtType}
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @node @shareable @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type User @node @shareable @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
 
-                    type Post @node @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                    type Post @node @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3389,6 +3495,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -3406,14 +3513,14 @@ describe("schema validation", () => {
                 const userDocument = gql`
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
-                    type User @node @shareable @authentication(wrongField: { sub: "test" }) {
+                    type User @node @shareable @authentication(wrongField: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const subgraph = new Subgraph(userDocument);
@@ -3422,6 +3529,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -3455,14 +3563,14 @@ describe("schema validation", () => {
                         @node
                         @plural(value: "Users")
                         @shareable
-                        @authentication(operations: [CREATE], jwt: { sub: "test" }) {
+                        @authentication(operations: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3472,6 +3580,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -3495,14 +3604,18 @@ describe("schema validation", () => {
                     extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@shareable"])
 
                     ${jwtType}
-                    type User @node @plural(value: "Users") @shareable @authentication(ops: [CREATE], jwt: { sub: "test" }) {
+                    type User
+                        @node
+                        @plural(value: "Users")
+                        @shareable
+                        @authentication(ops: [CREATE], jwt: { sub_EQ: "test" }) {
                         id: ID!
                         name: String!
                     }
 
                     type Post @node {
                         content: String!
-                        author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
+                        author: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
                     }
                 `;
                 const jwt = parse(jwtType).definitions[0] as ObjectTypeDefinitionNode;
@@ -3512,6 +3625,7 @@ describe("schema validation", () => {
                 const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                     document: userDocument,
                     schemaModel,
+                    complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                 });
 
                 const executeValidate = () =>
@@ -3531,69 +3645,12 @@ describe("schema validation", () => {
         });
     });
 
-    describe("validate using custom rules", () => {
-        test("should not returns errors when is correctly used", () => {
-            const userDocument = gql`
-                type User @node {
-                    id: ID!
-                    name: String!
-                }
-            `;
-
-            const schemaModel = generateModel(userDocument);
-            const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                document: userDocument,
-                schemaModel,
-            });
-
-            const executeValidate = () =>
-                validateUserDefinition({
-                    userDocument,
-                    augmentedDocument,
-                    additionalDirectives: [],
-                    additionalTypes: [],
-                    rules: [noKeanuFields],
-                });
-            expect(executeValidate).not.toThrow();
-        });
-        test("should returns errors when is not correctly used", () => {
-            const userDocument = gql`
-                type User @node {
-                    id: ID!
-                    keanu: String!
-                }
-            `;
-
-            const schemaModel = generateModel(userDocument);
-            const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                document: userDocument,
-                schemaModel,
-            });
-
-            const executeValidate = () =>
-                validateUserDefinition({
-                    userDocument,
-                    augmentedDocument,
-                    additionalDirectives: [],
-                    additionalTypes: [],
-                    rules: [noKeanuFields],
-                });
-
-            const errors = getError(executeValidate);
-            expect(errors).toHaveLength(2);
-            expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-            expect(errors[0]).toHaveProperty("message", "Field cannot be named keanu");
-            expect(errors[1]).not.toBeInstanceOf(NoErrorThrownError);
-            expect(errors[1]).toHaveProperty("message", "Field cannot be named keanu");
-        });
-    });
-
     describe("input validation", () => {
         describe("on OBJECT", () => {
             describe("correct usage", () => {
                 test("should not returns errors with a valid @authorization filter argument", () => {
                     const userDocument = gql`
-                        type User @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }]) @node {
+                        type User @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }]) @node {
                             id: ID!
                             name: String!
                         }
@@ -3603,6 +3660,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -3626,64 +3684,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    expect(executeValidate).not.toThrow();
-                });
-
-                test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @authorization(filter: [{ where: { node: { author: { name: "Simone" } } } }]) @node {
-                            content: String!
-                            author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    expect(executeValidate).not.toThrow();
-                });
-
-                test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post
-                            @authorization(filter: [{ where: { node: { authors_SOME: { name: "Simone" } } } }])
-                            @node {
-                            content: String!
-                            authors: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -3699,7 +3700,9 @@ describe("schema validation", () => {
             describe("incorrect usage", () => {
                 test("should returns errors when an @authorization filter contains an unknown operation", () => {
                     const userDocument = gql`
-                        type User @authorization(filter: [{ seemsNotAWhereToMe: { node: { id: "$jwt.sub" } } }]) @node {
+                        type User
+                            @authorization(filter: [{ seemsNotAWhereToMe: { node: { id_EQ: "$jwt.sub" } } }])
+                            @node {
                             id: ID!
                             name: String!
                         }
@@ -3709,6 +3712,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -3732,8 +3736,8 @@ describe("schema validation", () => {
                         type User @node {
                             name: String!
                             id: ID!
-                                @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
-                                @subscriptionsAuthorization(filter: [{ where: { wrongNode: { id: "$jwt.sub" } } }])
+                                @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
+                                @subscriptionsAuthorization(filter: [{ where: { wrongNode: { id_EQ: "$jwt.sub" } } }])
                         }
                     `;
 
@@ -3742,6 +3746,7 @@ describe("schema validation", () => {
                         document: userDocument,
                         features: { subscriptions: true },
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
 
                     const executeValidate = () => validateUserDefinition({ userDocument, augmentedDocument });
@@ -3757,7 +3762,7 @@ describe("schema validation", () => {
 
                 test("should returns errors when an @authorization filter has a wrong where definition", () => {
                     const userDocument = gql`
-                        type User @authorization(filter: [{ where: { notANode: { id: "$jwt.sub" } } }]) @node {
+                        type User @authorization(filter: [{ where: { notANode: { id_EQ: "$jwt.sub" } } }]) @node {
                             id: ID!
                             name: String!
                         }
@@ -3767,6 +3772,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -3787,7 +3793,7 @@ describe("schema validation", () => {
 
                 test("should returns errors when an @authorization filter has a wrong where predicate", () => {
                     const userDocument = gql`
-                        type User @authorization(filter: [{ where: { node: { notAValidID: "$jwt.sub" } } }]) @node {
+                        type User @authorization(filter: [{ where: { node: { notAValidID_EQ: "$jwt.sub" } } }]) @node {
                             id: ID!
                             name: String!
                         }
@@ -3797,6 +3803,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -3810,92 +3817,9 @@ describe("schema validation", () => {
                     expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
                     expect(errors[0]).toHaveProperty(
                         "message",
-                        'Invalid argument: filter, error: Field "notAValidID" is not defined by type.'
+                        'Invalid argument: filter, error: Field "notAValidID_EQ" is not defined by type.'
                     );
                     expect(errors[0]).toHaveProperty("path", ["User", "@authorization", "filter", 0, "where", "node"]);
-                });
-
-                test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post
-                            @authorization(filter: [{ where: { node: { author: { content: "Simone" } } } }])
-                            @node {
-                            content: String!
-                            author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(1);
-                    expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[0]).toHaveProperty(
-                        "message",
-                        'Invalid argument: filter, error: Field "content" is not defined by type.'
-                    );
-                    expect(errors[0]).toHaveProperty("path", [
-                        "Post",
-                        "@authorization",
-                        "filter",
-                        0,
-                        "where",
-                        "node",
-                        "author",
-                    ]);
-                });
-
-                test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node
-                            @authorization(
-                                filter: [{ where: { node: { author_NOT_A_QUANTIFIER: { name: "Simone" } } } }]
-                            ) {
-                            content: String!
-                            authors: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(1);
-                    expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[0]).toHaveProperty(
-                        "message",
-                        'Invalid argument: filter, error: Field "author_NOT_A_QUANTIFIER" is not defined by type.'
-                    );
-                    expect(errors[0]).toHaveProperty("path", ["Post", "@authorization", "filter", 0, "where", "node"]);
                 });
             });
         });
@@ -3905,7 +3829,7 @@ describe("schema validation", () => {
                 test("should not returns errors with a valid @authorization filter argument", () => {
                     const userDocument = gql`
                         type User @node {
-                            id: ID! @authorization(filter: [{ where: { node: { id: "$jwt.sub" } } }])
+                            id: ID! @authorization(filter: [{ where: { node: { id_EQ: "$jwt.sub" } } }])
                             name: String!
                         }
                     `;
@@ -3914,6 +3838,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -3937,64 +3862,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    expect(executeValidate).not.toThrow();
-                });
-
-                test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node {
-                            content: String!
-                                @authorization(filter: [{ where: { node: { author: { name: "Simone" } } } }])
-                            author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    expect(executeValidate).not.toThrow();
-                });
-
-                test("should no returns errors when an @authorization filter has a correct where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node {
-                            content: String!
-                                @authorization(filter: [{ where: { node: { authors_SOME: { name: "Simone" } } } }])
-                            authors: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -4011,7 +3879,7 @@ describe("schema validation", () => {
                 test("should returns errors when an @authorization filter contains an unknown operation", () => {
                     const userDocument = gql`
                         type User @node {
-                            id: ID! @authorization(filter: [{ seemsNotAWhereToMe: { node: { id: "$jwt.sub" } } }])
+                            id: ID! @authorization(filter: [{ seemsNotAWhereToMe: { node: { id_EQ: "$jwt.sub" } } }])
                             name: String!
                         }
                     `;
@@ -4020,6 +3888,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -4041,7 +3910,7 @@ describe("schema validation", () => {
                 test("should returns errors when an @authorization filter has a wrong where definition", () => {
                     const userDocument = gql`
                         type User @node {
-                            id: ID! @authorization(filter: [{ where: { notANode: { id: "$jwt.sub" } } }])
+                            id: ID! @authorization(filter: [{ where: { notANode: { id_EQ: "$jwt.sub" } } }])
                             name: String!
                         }
                     `;
@@ -4050,6 +3919,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -4071,7 +3941,7 @@ describe("schema validation", () => {
                 test("should returns errors when an @authorization filter has a wrong where predicate", () => {
                     const userDocument = gql`
                         type User @node {
-                            id: ID! @authorization(filter: [{ where: { node: { notAValidID: "$jwt.sub" } } }])
+                            id: ID! @authorization(filter: [{ where: { node: { notAValidID_EQ: "$jwt.sub" } } }])
                             name: String!
                         }
                     `;
@@ -4080,6 +3950,7 @@ describe("schema validation", () => {
                     const { typeDefs: augmentedDocument } = makeAugmentedSchema({
                         document: userDocument,
                         schemaModel,
+                        complexityEstimatorHelper: new ComplexityEstimatorHelper(false),
                     });
                     const executeValidate = () =>
                         validateUserDefinition({
@@ -4093,7 +3964,7 @@ describe("schema validation", () => {
                     expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
                     expect(errors[0]).toHaveProperty(
                         "message",
-                        'Invalid argument: filter, error: Field "notAValidID" is not defined by type.'
+                        'Invalid argument: filter, error: Field "notAValidID_EQ" is not defined by type.'
                     );
                     expect(errors[0]).toHaveProperty("path", [
                         "User",
@@ -4105,109 +3976,7 @@ describe("schema validation", () => {
                         "node",
                     ]);
                 });
-
-                test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to 1 relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node {
-                            content: String!
-                                @authorization(filter: [{ where: { node: { author: { content: "Simone" } } } }])
-                            author: User! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-                    const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(1);
-                    expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[0]).toHaveProperty(
-                        "message",
-                        'Invalid argument: filter, error: Field "content" is not defined by type.'
-                    );
-                    expect(errors[0]).toHaveProperty("path", [
-                        "Post",
-                        "content",
-                        "@authorization",
-                        "filter",
-                        0,
-                        "where",
-                        "node",
-                        "author",
-                    ]);
-                });
-
-                test("should returns errors when an @authorization filter has an incorrect where predicate over a 1 to N relationship", () => {
-                    const userDocument = gql`
-                        type User @node {
-                            id: ID!
-                            name: String!
-                        }
-
-                        type Post @node {
-                            content: String!
-                                @authorization(
-                                    filter: [{ where: { node: { author_NOT_A_QUANTIFIER: { name: "Simone" } } } }]
-                                )
-                            authors: [User!]! @relationship(type: "HAS_AUTHOR", direction: OUT)
-                        }
-                    `;
-
-                    const schemaModel = generateModel(userDocument);
-                    const { typeDefs: augmentedDocument } = makeAugmentedSchema({
-                        document: userDocument,
-                        schemaModel,
-                    });
-                    const executeValidate = () =>
-                        validateUserDefinition({
-                            userDocument,
-                            augmentedDocument,
-                            additionalDirectives: [],
-                            additionalTypes: [],
-                        });
-
-                    const errors = getError(executeValidate);
-                    expect(errors).toHaveLength(1);
-                    expect(errors[0]).not.toBeInstanceOf(NoErrorThrownError);
-                    expect(errors[0]).toHaveProperty(
-                        "message",
-                        'Invalid argument: filter, error: Field "author_NOT_A_QUANTIFIER" is not defined by type.'
-                    );
-                    expect(errors[0]).toHaveProperty("path", [
-                        "Post",
-                        "content",
-                        "@authorization",
-                        "filter",
-                        0,
-                        "where",
-                        "node",
-                    ]);
-                });
             });
         });
     });
 });
-
-function noKeanuFields(context: SDLValidationContext): ASTVisitor {
-    return {
-        FieldDefinition(node: FieldDefinitionNode) {
-            if (node.name.value === "keanu") {
-                context.reportError(new GraphQLError("Field cannot be named keanu"));
-            }
-        },
-    };
-}

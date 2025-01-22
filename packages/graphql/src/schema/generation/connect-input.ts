@@ -30,7 +30,6 @@ import { InterfaceEntityAdapter } from "../../schema-model/entity/model-adapters
 import { UnionEntityAdapter } from "../../schema-model/entity/model-adapters/UnionEntityAdapter";
 import type { RelationshipAdapter } from "../../schema-model/relationship/model-adapters/RelationshipAdapter";
 import type { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
-import { overwrite } from "../create-relationship-fields/fields/overwrite";
 import { relationshipTargetHasRelationshipWithNestedOperation } from "./utils";
 import { withConnectWhereFieldInputType } from "./where-input";
 
@@ -216,7 +215,6 @@ function makeConnectFieldInputTypeFields({
     }
     if (relationshipAdapter.target instanceof ConcreteEntityAdapter) {
         fields["where"] = withConnectWhereFieldInputType(relationshipAdapter.target, composer);
-        fields["overwrite"] = overwrite;
         if (
             relationshipTargetHasRelationshipWithNestedOperation(
                 relationshipAdapter.target,

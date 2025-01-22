@@ -81,11 +81,13 @@ describe("aggregations-top_level authorization", () => {
 
             type Post @node {
                 content: String
-                creator: User! @relationship(type: "POSTED", direction: IN)
+                creator: [User!]! @relationship(type: "POSTED", direction: IN)
             }
 
             extend type Post
-                @authorization(filter: [{ operations: [AGGREGATE], where: { node: { creator: { id_EQ: "$jwt.sub" } } } }])
+                @authorization(
+                    filter: [{ operations: [AGGREGATE], where: { node: { creator_SINGLE: { id_EQ: "$jwt.sub" } } } }]
+                )
         `;
 
         const userId = generate({
@@ -130,9 +132,11 @@ describe("aggregations-top_level authorization", () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
                 id: ID
-                director: Person! @relationship(type: "DIRECTED", direction: IN)
+                director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
                 imdbRatingInt: Int
-                    @authorization(validate: [{ when: BEFORE, where: { node: { director: { id_EQ: "$jwt.sub" } } } }])
+                    @authorization(
+                        validate: [{ when: BEFORE, where: { node: { director_SINGLE: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
 
             type Person @node {
@@ -179,66 +183,16 @@ describe("aggregations-top_level authorization", () => {
         expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
     });
 
-    test("should throw when invalid allow when aggregating a ID field", async () => {
-        const typeDefs = /* GraphQL */ `
-            type Movie @node {
-                id: ID
-                director: Person! @relationship(type: "DIRECTED", direction: IN)
-                someId: ID
-                    @authorization(validate: [{ when: BEFORE, where: { node: { director: { id_EQ: "$jwt.sub" } } } }])
-            }
-
-            type Person @node {
-                id: ID
-            }
-        `;
-
-        const movieId = generate({
-            charset: "alphabetic",
-        });
-
-        const userId = generate({
-            charset: "alphabetic",
-        });
-
-        const query = `
-            {
-                moviesAggregate(where: {id_EQ: "${movieId}"}) {
-                    someId {
-                        shortest
-                        longest
-                    }
-                }
-            }
-        `;
-
-        await testHelper.initNeo4jGraphQL({
-            typeDefs,
-            features: {
-                authorization: {
-                    key: secret,
-                },
-            },
-        });
-
-        await testHelper.executeCypher(`
-                CREATE (:Person {id: "${userId}"})-[:DIRECTED]->(:Movie {id: "${movieId}", someId: "some-random-string"})
-            `);
-
-        const token = createBearerToken(secret, { sub: "invalid" });
-
-        const gqlResult = await testHelper.executeGraphQLWithToken(query, token);
-
-        expect((gqlResult.errors as any[])[0].message).toBe("Forbidden");
-    });
 
     test("should throw when invalid allow when aggregating a String field", async () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
                 id: ID
-                director: Person! @relationship(type: "DIRECTED", direction: IN)
+                director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
                 someString: String
-                    @authorization(validate: [{ when: BEFORE, where: { node: { director: { id_EQ: "$jwt.sub" } } } }])
+                    @authorization(
+                        validate: [{ when: BEFORE, where: { node: { director_SINGLE: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
 
             type Person @node {
@@ -289,9 +243,11 @@ describe("aggregations-top_level authorization", () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
                 id: ID
-                director: Person! @relationship(type: "DIRECTED", direction: IN)
+                director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
                 imdbRatingFloat: Float
-                    @authorization(validate: [{ when: BEFORE, where: { node: { director: { id_EQ: "$jwt.sub" } } } }])
+                    @authorization(
+                        validate: [{ when: BEFORE, where: { node: { director_SINGLE: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
 
             type Person @node {
@@ -342,9 +298,11 @@ describe("aggregations-top_level authorization", () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
                 id: ID
-                director: Person! @relationship(type: "DIRECTED", direction: IN)
+                director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
                 imdbRatingBigInt: BigInt
-                    @authorization(validate: [{ when: BEFORE, where: { node: { director: { id_EQ: "$jwt.sub" } } } }])
+                    @authorization(
+                        validate: [{ when: BEFORE, where: { node: { director_SINGLE: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
 
             type Person @node {
@@ -395,9 +353,11 @@ describe("aggregations-top_level authorization", () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
                 id: ID
-                director: Person! @relationship(type: "DIRECTED", direction: IN)
+                director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
                 createdAt: DateTime
-                    @authorization(validate: [{ when: BEFORE, where: { node: { director: { id_EQ: "$jwt.sub" } } } }])
+                    @authorization(
+                        validate: [{ when: BEFORE, where: { node: { director_SINGLE: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
 
             type Person @node {
@@ -448,9 +408,11 @@ describe("aggregations-top_level authorization", () => {
         const typeDefs = /* GraphQL */ `
             type Movie @node {
                 id: ID
-                director: Person! @relationship(type: "DIRECTED", direction: IN)
+                director: [Person!]! @relationship(type: "DIRECTED", direction: IN)
                 screenTime: Duration
-                    @authorization(validate: [{ when: BEFORE, where: { node: { director: { id_EQ: "$jwt.sub" } } } }])
+                    @authorization(
+                        validate: [{ when: BEFORE, where: { node: { director_SINGLE: { id_EQ: "$jwt.sub" } } } }]
+                    )
             }
 
             type Person @node {

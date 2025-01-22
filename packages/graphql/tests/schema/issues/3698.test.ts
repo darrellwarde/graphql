@@ -31,7 +31,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
                 id: String!
 
                 name: String!
-                genre: Genre!
+                genre: [Genre!]!
                 info: String!
             }
 
@@ -39,12 +39,12 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
                 id: String!
 
                 name: String!
-                genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT)
+                genre: [Genre!]! @relationship(type: "HAS_GENRE", direction: OUT)
                 info: String! @customResolver(requires: "id name")
             }
 
             type Genre @node {
-                name: String! @unique
+                name: String!
                 product: [IProduct!]! @relationship(type: "HAS_GENRE", direction: IN)
             }
         `;
@@ -105,11 +105,21 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               UPDATE
             }
 
+            \\"\\"\\"Float filters\\"\\"\\"
+            input FloatScalarFilters {
+              eq: Float
+              gt: Float
+              gte: Float
+              in: [Float!]
+              lt: Float
+              lte: Float
+            }
+
             type Genre {
               name: String!
-              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
+              product(limit: Int, offset: Int, sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              productAggregate(where: IProductWhere): GenreIProductProductAggregationSelection
+              productConnection(after: String, first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
             }
 
             type GenreAggregateSelection {
@@ -119,10 +129,6 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
 
             input GenreConnectInput {
               product: [GenreProductConnectFieldInput!]
-            }
-
-            input GenreConnectOrCreateWhere {
-              node: GenreUniqueWhere!
             }
 
             input GenreConnectWhere {
@@ -174,24 +180,11 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               name: StringAggregateSelection!
             }
 
-            input GenreOnCreateInput {
-              name: String!
-            }
-
-            input GenreOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more GenreSort objects to sort Genres by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [GenreSort!]
-            }
-
             input GenreProductAggregateInput {
               AND: [GenreProductAggregateInput!]
               NOT: GenreProductAggregateInput
               OR: [GenreProductAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count: IntScalarFilters
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -208,6 +201,25 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               edges: [GenreProductRelationship!]!
               pageInfo: PageInfo!
               totalCount: Int!
+            }
+
+            input GenreProductConnectionFilters {
+              \\"\\"\\"
+              Return Genres where all of the related GenreProductConnections match this filter
+              \\"\\"\\"
+              all: GenreProductConnectionWhere
+              \\"\\"\\"
+              Return Genres where none of the related GenreProductConnections match this filter
+              \\"\\"\\"
+              none: GenreProductConnectionWhere
+              \\"\\"\\"
+              Return Genres where one of the related GenreProductConnections match this filter
+              \\"\\"\\"
+              single: GenreProductConnectionWhere
+              \\"\\"\\"
+              Return Genres where some of the related GenreProductConnections match this filter
+              \\"\\"\\"
+              some: GenreProductConnectionWhere
             }
 
             input GenreProductConnectionSort {
@@ -242,51 +254,54 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               AND: [GenreProductNodeAggregationWhereInput!]
               NOT: GenreProductNodeAggregationWhereInput
               OR: [GenreProductNodeAggregationWhereInput!]
-              id_AVERAGE_LENGTH_EQUAL: Float
-              id_AVERAGE_LENGTH_GT: Float
-              id_AVERAGE_LENGTH_GTE: Float
-              id_AVERAGE_LENGTH_LT: Float
-              id_AVERAGE_LENGTH_LTE: Float
-              id_LONGEST_LENGTH_EQUAL: Int
-              id_LONGEST_LENGTH_GT: Int
-              id_LONGEST_LENGTH_GTE: Int
-              id_LONGEST_LENGTH_LT: Int
-              id_LONGEST_LENGTH_LTE: Int
-              id_SHORTEST_LENGTH_EQUAL: Int
-              id_SHORTEST_LENGTH_GT: Int
-              id_SHORTEST_LENGTH_GTE: Int
-              id_SHORTEST_LENGTH_LT: Int
-              id_SHORTEST_LENGTH_LTE: Int
-              info_AVERAGE_LENGTH_EQUAL: Float
-              info_AVERAGE_LENGTH_GT: Float
-              info_AVERAGE_LENGTH_GTE: Float
-              info_AVERAGE_LENGTH_LT: Float
-              info_AVERAGE_LENGTH_LTE: Float
-              info_LONGEST_LENGTH_EQUAL: Int
-              info_LONGEST_LENGTH_GT: Int
-              info_LONGEST_LENGTH_GTE: Int
-              info_LONGEST_LENGTH_LT: Int
-              info_LONGEST_LENGTH_LTE: Int
-              info_SHORTEST_LENGTH_EQUAL: Int
-              info_SHORTEST_LENGTH_GT: Int
-              info_SHORTEST_LENGTH_GTE: Int
-              info_SHORTEST_LENGTH_LT: Int
-              info_SHORTEST_LENGTH_LTE: Int
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
+              id: StringScalarAggregationFilters
+              id_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { eq: ... } } }' instead.\\")
+              id_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { gt: ... } } }' instead.\\")
+              id_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { gte: ... } } }' instead.\\")
+              id_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { lt: ... } } }' instead.\\")
+              id_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'id: { averageLength: { lte: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { eq: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { gt: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { gte: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { lt: ... } } }' instead.\\")
+              id_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { longestLength: { lte: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { eq: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { gt: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { gte: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { lt: ... } } }' instead.\\")
+              id_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'id: { shortestLength: { lte: ... } } }' instead.\\")
+              info: StringScalarAggregationFilters
+              info_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'info: { averageLength: { eq: ... } } }' instead.\\")
+              info_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'info: { averageLength: { gt: ... } } }' instead.\\")
+              info_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'info: { averageLength: { gte: ... } } }' instead.\\")
+              info_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'info: { averageLength: { lt: ... } } }' instead.\\")
+              info_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'info: { averageLength: { lte: ... } } }' instead.\\")
+              info_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { longestLength: { eq: ... } } }' instead.\\")
+              info_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { longestLength: { gt: ... } } }' instead.\\")
+              info_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { longestLength: { gte: ... } } }' instead.\\")
+              info_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { longestLength: { lt: ... } } }' instead.\\")
+              info_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { longestLength: { lte: ... } } }' instead.\\")
+              info_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { shortestLength: { eq: ... } } }' instead.\\")
+              info_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { shortestLength: { gt: ... } } }' instead.\\")
+              info_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { shortestLength: { gte: ... } } }' instead.\\")
+              info_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { shortestLength: { lt: ... } } }' instead.\\")
+              info_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'info: { shortestLength: { lte: ... } } }' instead.\\")
+              name: StringScalarAggregationFilters
+              name_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { eq: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gte: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { eq: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { eq: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lte: ... } } }' instead.\\")
             }
 
             type GenreProductRelationship {
@@ -307,6 +322,17 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               where: GenreProductConnectionWhere
             }
 
+            input GenreRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related Genres match this filter\\"\\"\\"
+              all: GenreWhere
+              \\"\\"\\"Filter type where none of the related Genres match this filter\\"\\"\\"
+              none: GenreWhere
+              \\"\\"\\"Filter type where one of the related Genres match this filter\\"\\"\\"
+              single: GenreWhere
+              \\"\\"\\"Filter type where some of the related Genres match this filter\\"\\"\\"
+              some: GenreWhere
+            }
+
             \\"\\"\\"
             Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
             \\"\\"\\"
@@ -318,22 +344,17 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               AND: [GenreSubscriptionWhere!]
               NOT: GenreSubscriptionWhere
               OR: [GenreSubscriptionWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            input GenreUniqueWhere {
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_EQ: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
             }
 
             input GenreUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
               product: [GenreProductUpdateFieldInput!]
             }
 
@@ -348,37 +369,39 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               AND: [GenreWhere!]
               NOT: GenreWhere
               OR: [GenreWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
+              product: IProductRelationshipFilters
               productAggregate: GenreProductAggregateInput
+              productConnection: GenreProductConnectionFilters
               \\"\\"\\"
               Return Genres where all of the related GenreProductConnections match this filter
               \\"\\"\\"
-              productConnection_ALL: GenreProductConnectionWhere
+              productConnection_ALL: GenreProductConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'productConnection: { all: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return Genres where none of the related GenreProductConnections match this filter
               \\"\\"\\"
-              productConnection_NONE: GenreProductConnectionWhere
+              productConnection_NONE: GenreProductConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'productConnection: { none: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return Genres where one of the related GenreProductConnections match this filter
               \\"\\"\\"
-              productConnection_SINGLE: GenreProductConnectionWhere
+              productConnection_SINGLE: GenreProductConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'productConnection: { single: { node: ... } } }' instead.\\")
               \\"\\"\\"
               Return Genres where some of the related GenreProductConnections match this filter
               \\"\\"\\"
-              productConnection_SOME: GenreProductConnectionWhere
+              productConnection_SOME: GenreProductConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'productConnection: { some: { node: ... } } }' instead.\\")
               \\"\\"\\"Return Genres where all of the related IProducts match this filter\\"\\"\\"
-              product_ALL: IProductWhere
+              product_ALL: IProductWhere @deprecated(reason: \\"Please use the relevant generic filter 'product: { all: ... }' instead.\\")
               \\"\\"\\"Return Genres where none of the related IProducts match this filter\\"\\"\\"
-              product_NONE: IProductWhere
+              product_NONE: IProductWhere @deprecated(reason: \\"Please use the relevant generic filter 'product: { none: ... }' instead.\\")
               \\"\\"\\"Return Genres where one of the related IProducts match this filter\\"\\"\\"
-              product_SINGLE: IProductWhere
+              product_SINGLE: IProductWhere @deprecated(reason: \\"Please use the relevant generic filter 'product: {  single: ... }' instead.\\")
               \\"\\"\\"Return Genres where some of the related IProducts match this filter\\"\\"\\"
-              product_SOME: IProductWhere
+              product_SOME: IProductWhere @deprecated(reason: \\"Please use the relevant generic filter 'product: {  some: ... }' instead.\\")
             }
 
             type GenresConnection {
@@ -388,7 +411,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             interface IProduct {
-              genre: Genre!
+              genre: [Genre!]!
               id: String!
               info: String!
               name: String!
@@ -418,13 +441,15 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               Movie
             }
 
-            input IProductOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more IProductSort objects to sort IProducts by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [IProductSort!]
+            input IProductRelationshipFilters {
+              \\"\\"\\"Filter type where all of the related IProducts match this filter\\"\\"\\"
+              all: IProductWhere
+              \\"\\"\\"Filter type where none of the related IProducts match this filter\\"\\"\\"
+              none: IProductWhere
+              \\"\\"\\"Filter type where one of the related IProducts match this filter\\"\\"\\"
+              single: IProductWhere
+              \\"\\"\\"Filter type where some of the related IProducts match this filter\\"\\"\\"
+              some: IProductWhere
             }
 
             \\"\\"\\"
@@ -437,38 +462,37 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input IProductUpdateInput {
-              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: String
-              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              info_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              id: StringScalarMutations
+              id_SET: String @deprecated(reason: \\"Please use the generic mutation 'id: { set: ... } }' instead.\\")
+              info: StringScalarMutations
+              info_SET: String @deprecated(reason: \\"Please use the generic mutation 'info: { set: ... } }' instead.\\")
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
             }
 
             input IProductWhere {
               AND: [IProductWhere!]
               NOT: IProductWhere
               OR: [IProductWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              info: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              info_CONTAINS: String
-              info_ENDS_WITH: String
-              info_EQ: String
-              info_IN: [String!]
-              info_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
+              id: StringScalarFilters
+              id_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: String @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
+              info: StringScalarFilters
+              info_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter info: { contains: ... }\\")
+              info_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter info: { endsWith: ... }\\")
+              info_EQ: String @deprecated(reason: \\"Please use the relevant generic filter info: { eq: ... }\\")
+              info_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter info: { in: ... }\\")
+              info_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter info: { startsWith: ... }\\")
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
               typename: [IProductImplementation!]
-              typename_IN: [IProductImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
             }
 
             type IProductsConnection {
@@ -477,10 +501,20 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               totalCount: Int!
             }
 
+            \\"\\"\\"Int filters\\"\\"\\"
+            input IntScalarFilters {
+              eq: Int
+              gt: Int
+              gte: Int
+              in: [Int!]
+              lt: Int
+              lte: Int
+            }
+
             type Movie implements IProduct {
-              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [MovieGenreConnectionSort!], where: MovieGenreConnectionWhere): MovieGenreConnection!
+              genre(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): [Genre!]!
+              genreAggregate(where: GenreWhere): MovieGenreGenreAggregationSelection
+              genreConnection(after: String, first: Int, sort: [MovieGenreConnectionSort!], where: MovieGenreConnectionWhere): MovieGenreConnection!
               id: String!
               info: String!
               name: String!
@@ -505,7 +539,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input MovieDeleteInput {
-              genre: MovieGenreDeleteFieldInput
+              genre: [MovieGenreDeleteFieldInput!]
             }
 
             type MovieDeletedEvent {
@@ -528,7 +562,7 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               AND: [MovieGenreAggregateInput!]
               NOT: MovieGenreAggregateInput
               OR: [MovieGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
+              count: IntScalarFilters
               count_EQ: Int
               count_GT: Int
               count_GTE: Int
@@ -538,27 +572,33 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input MovieGenreConnectFieldInput {
-              connect: GenreConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
+              connect: [GenreConnectInput!]
               where: GenreConnectWhere
-            }
-
-            input MovieGenreConnectOrCreateFieldInput {
-              onCreate: MovieGenreConnectOrCreateFieldInputOnCreate!
-              where: GenreConnectOrCreateWhere!
-            }
-
-            input MovieGenreConnectOrCreateFieldInputOnCreate {
-              node: GenreOnCreateInput!
             }
 
             type MovieGenreConnection {
               edges: [MovieGenreRelationship!]!
               pageInfo: PageInfo!
               totalCount: Int!
+            }
+
+            input MovieGenreConnectionFilters {
+              \\"\\"\\"
+              Return Movies where all of the related MovieGenreConnections match this filter
+              \\"\\"\\"
+              all: MovieGenreConnectionWhere
+              \\"\\"\\"
+              Return Movies where none of the related MovieGenreConnections match this filter
+              \\"\\"\\"
+              none: MovieGenreConnectionWhere
+              \\"\\"\\"
+              Return Movies where one of the related MovieGenreConnections match this filter
+              \\"\\"\\"
+              single: MovieGenreConnectionWhere
+              \\"\\"\\"
+              Return Movies where some of the related MovieGenreConnections match this filter
+              \\"\\"\\"
+              some: MovieGenreConnectionWhere
             }
 
             input MovieGenreConnectionSort {
@@ -587,9 +627,8 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input MovieGenreFieldInput {
-              connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
-              create: MovieGenreCreateFieldInput
+              connect: [MovieGenreConnectFieldInput!]
+              create: [MovieGenreCreateFieldInput!]
             }
 
             type MovieGenreGenreAggregationSelection {
@@ -605,21 +644,22 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               AND: [MovieGenreNodeAggregationWhereInput!]
               NOT: MovieGenreNodeAggregationWhereInput
               OR: [MovieGenreNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
+              name: StringScalarAggregationFilters
+              name_AVERAGE_LENGTH_EQUAL: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { eq: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_GTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { gte: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LT: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lt: ... } } }' instead.\\")
+              name_AVERAGE_LENGTH_LTE: Float @deprecated(reason: \\"Please use the relevant generic filter 'name: { averageLength: { lte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { eq: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { gte: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lt: ... } } }' instead.\\")
+              name_LONGEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { longestLength: { lte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_EQUAL: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { eq: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_GTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { gte: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LT: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lt: ... } } }' instead.\\")
+              name_SHORTEST_LENGTH_LTE: Int @deprecated(reason: \\"Please use the relevant generic filter 'name: { shortestLength: { lte: ... } } }' instead.\\")
             }
 
             type MovieGenreRelationship {
@@ -632,24 +672,14 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             input MovieGenreUpdateFieldInput {
-              connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput
-              create: MovieGenreCreateFieldInput
-              delete: MovieGenreDeleteFieldInput
-              disconnect: MovieGenreDisconnectFieldInput
+              connect: [MovieGenreConnectFieldInput!]
+              create: [MovieGenreCreateFieldInput!]
+              delete: [MovieGenreDeleteFieldInput!]
+              disconnect: [MovieGenreDisconnectFieldInput!]
               update: MovieGenreUpdateConnectionInput
               where: MovieGenreConnectionWhere
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
             \\"\\"\\"
@@ -662,26 +692,26 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               AND: [MovieSubscriptionWhere!]
               NOT: MovieSubscriptionWhere
               OR: [MovieSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
+              id: StringScalarFilters
+              id_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: String @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
             }
 
             input MovieUpdateInput {
-              genre: MovieGenreUpdateFieldInput
-              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
+              genre: [MovieGenreUpdateFieldInput!]
+              id: StringScalarMutations
+              id_SET: String @deprecated(reason: \\"Please use the generic mutation 'id: { set: ... } }' instead.\\")
+              name: StringScalarMutations
+              name_SET: String @deprecated(reason: \\"Please use the generic mutation 'name: { set: ... } }' instead.\\")
             }
 
             type MovieUpdatedEvent {
@@ -695,21 +725,45 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
               AND: [MovieWhere!]
               NOT: MovieWhere
               OR: [MovieWhere!]
-              genre: GenreWhere
+              genre: GenreRelationshipFilters
               genreAggregate: MovieGenreAggregateInput
-              genreConnection: MovieGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
+              genreConnection: MovieGenreConnectionFilters
+              \\"\\"\\"
+              Return Movies where all of the related MovieGenreConnections match this filter
+              \\"\\"\\"
+              genreConnection_ALL: MovieGenreConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'genreConnection: { all: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Movies where none of the related MovieGenreConnections match this filter
+              \\"\\"\\"
+              genreConnection_NONE: MovieGenreConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'genreConnection: { none: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Movies where one of the related MovieGenreConnections match this filter
+              \\"\\"\\"
+              genreConnection_SINGLE: MovieGenreConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'genreConnection: { single: { node: ... } } }' instead.\\")
+              \\"\\"\\"
+              Return Movies where some of the related MovieGenreConnections match this filter
+              \\"\\"\\"
+              genreConnection_SOME: MovieGenreConnectionWhere @deprecated(reason: \\"Please use the relevant generic filter 'genreConnection: { some: { node: ... } } }' instead.\\")
+              \\"\\"\\"Return Movies where all of the related Genres match this filter\\"\\"\\"
+              genre_ALL: GenreWhere @deprecated(reason: \\"Please use the relevant generic filter 'genre: { all: ... }' instead.\\")
+              \\"\\"\\"Return Movies where none of the related Genres match this filter\\"\\"\\"
+              genre_NONE: GenreWhere @deprecated(reason: \\"Please use the relevant generic filter 'genre: { none: ... }' instead.\\")
+              \\"\\"\\"Return Movies where one of the related Genres match this filter\\"\\"\\"
+              genre_SINGLE: GenreWhere @deprecated(reason: \\"Please use the relevant generic filter 'genre: {  single: ... }' instead.\\")
+              \\"\\"\\"Return Movies where some of the related Genres match this filter\\"\\"\\"
+              genre_SOME: GenreWhere @deprecated(reason: \\"Please use the relevant generic filter 'genre: {  some: ... }' instead.\\")
+              id: StringScalarFilters
+              id_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter id: { contains: ... }\\")
+              id_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter id: { endsWith: ... }\\")
+              id_EQ: String @deprecated(reason: \\"Please use the relevant generic filter id: { eq: ... }\\")
+              id_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter id: { in: ... }\\")
+              id_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter id: { startsWith: ... }\\")
+              name: StringScalarFilters
+              name_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter name: { contains: ... }\\")
+              name_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { endsWith: ... }\\")
+              name_EQ: String @deprecated(reason: \\"Please use the relevant generic filter name: { eq: ... }\\")
+              name_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter name: { in: ... }\\")
+              name_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter name: { startsWith: ... }\\")
             }
 
             type MoviesConnection {
@@ -736,13 +790,13 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             }
 
             type Query {
-              genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
+              genres(limit: Int, offset: Int, sort: [GenreSort!], where: GenreWhere): [Genre!]!
               genresAggregate(where: GenreWhere): GenreAggregateSelection!
               genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
-              iProducts(limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
+              iProducts(limit: Int, offset: Int, sort: [IProductSort!], where: IProductWhere): [IProduct!]!
               iProductsAggregate(where: IProductWhere): IProductAggregateSelection!
               iProductsConnection(after: String, first: Int, sort: [IProductSort!], where: IProductWhere): IProductsConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, sort: [MovieSort!], where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
             }
@@ -758,6 +812,27 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             type StringAggregateSelection {
               longest: String
               shortest: String
+            }
+
+            \\"\\"\\"Filters for an aggregation of a string field\\"\\"\\"
+            input StringScalarAggregationFilters {
+              averageLength: FloatScalarFilters
+              longestLength: IntScalarFilters
+              shortestLength: IntScalarFilters
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
+            }
+
+            \\"\\"\\"String mutations\\"\\"\\"
+            input StringScalarMutations {
+              set: String
             }
 
             type Subscription {
@@ -787,1974 +862,6 @@ describe("https://github.com/neo4j/graphql/issues/3698", () => {
             type UpdateMoviesMutationResponse {
               info: UpdateInfo!
               movies: [Movie!]!
-            }"
-        `);
-    });
-
-    test("Relationship declared in interface", async () => {
-        const typeDefs = gql`
-            interface IProduct {
-                id: String!
-
-                name: String!
-                genre: Genre! @declareRelationship
-                info: String!
-            }
-
-            type Movie implements IProduct @node {
-                id: String!
-
-                name: String!
-                genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT)
-                info: String! @customResolver(requires: "id name")
-            }
-
-            type Genre @node {
-                name: String! @unique
-                product: [IProduct!]! @relationship(type: "HAS_GENRE", direction: IN)
-            }
-        `;
-
-        const resolvers = {
-            Movie: {
-                info: ({ id, name }) => {
-                    return `${id}, ${name}`;
-                },
-            },
-        };
-        const neoSchema = new Neo4jGraphQL({ typeDefs, resolvers, features: { subscriptions: new TestCDCEngine() } });
-
-        const schema = await neoSchema.getSchema();
-        const errors = validateSchema(schema);
-        expect(errors).toHaveLength(0);
-
-        const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
-
-        expect(printedSchema).toMatchInlineSnapshot(`
-            "schema {
-              query: Query
-              mutation: Mutation
-              subscription: Subscription
-            }
-
-            type CreateGenresMutationResponse {
-              genres: [Genre!]!
-              info: CreateInfo!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created during a create mutation
-            \\"\\"\\"
-            type CreateInfo {
-              nodesCreated: Int!
-              relationshipsCreated: Int!
-            }
-
-            type CreateMoviesMutationResponse {
-              info: CreateInfo!
-              movies: [Movie!]!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships deleted during a delete mutation
-            \\"\\"\\"
-            type DeleteInfo {
-              nodesDeleted: Int!
-              relationshipsDeleted: Int!
-            }
-
-            enum EventType {
-              CREATE
-              CREATE_RELATIONSHIP
-              DELETE
-              DELETE_RELATIONSHIP
-              UPDATE
-            }
-
-            type Genre {
-              name: String!
-              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
-            }
-
-            type GenreAggregateSelection {
-              count: Int!
-              name: StringAggregateSelection!
-            }
-
-            input GenreConnectInput {
-              product: [GenreProductConnectFieldInput!]
-            }
-
-            input GenreConnectOrCreateWhere {
-              node: GenreUniqueWhere!
-            }
-
-            input GenreConnectWhere {
-              node: GenreWhere!
-            }
-
-            input GenreCreateInput {
-              name: String!
-              product: GenreProductFieldInput
-            }
-
-            type GenreCreatedEvent {
-              createdGenre: GenreEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            input GenreDeleteInput {
-              product: [GenreProductDeleteFieldInput!]
-            }
-
-            type GenreDeletedEvent {
-              deletedGenre: GenreEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            input GenreDisconnectInput {
-              product: [GenreProductDisconnectFieldInput!]
-            }
-
-            type GenreEdge {
-              cursor: String!
-              node: Genre!
-            }
-
-            type GenreEventPayload {
-              name: String!
-            }
-
-            type GenreIProductProductAggregationSelection {
-              count: Int!
-              node: GenreIProductProductNodeAggregateSelection
-            }
-
-            type GenreIProductProductNodeAggregateSelection {
-              id: StringAggregateSelection!
-              info: StringAggregateSelection!
-              name: StringAggregateSelection!
-            }
-
-            input GenreOnCreateInput {
-              name: String!
-            }
-
-            input GenreOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more GenreSort objects to sort Genres by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [GenreSort!]
-            }
-
-            input GenreProductAggregateInput {
-              AND: [GenreProductAggregateInput!]
-              NOT: GenreProductAggregateInput
-              OR: [GenreProductAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              count_EQ: Int
-              count_GT: Int
-              count_GTE: Int
-              count_LT: Int
-              count_LTE: Int
-              node: GenreProductNodeAggregationWhereInput
-            }
-
-            input GenreProductConnectFieldInput {
-              connect: IProductConnectInput
-              where: IProductConnectWhere
-            }
-
-            type GenreProductConnection {
-              edges: [GenreProductRelationship!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            input GenreProductConnectionSort {
-              node: IProductSort
-            }
-
-            input GenreProductConnectionWhere {
-              AND: [GenreProductConnectionWhere!]
-              NOT: GenreProductConnectionWhere
-              OR: [GenreProductConnectionWhere!]
-              node: IProductWhere
-            }
-
-            input GenreProductCreateFieldInput {
-              node: IProductCreateInput!
-            }
-
-            input GenreProductDeleteFieldInput {
-              delete: IProductDeleteInput
-              where: GenreProductConnectionWhere
-            }
-
-            input GenreProductDisconnectFieldInput {
-              disconnect: IProductDisconnectInput
-              where: GenreProductConnectionWhere
-            }
-
-            input GenreProductFieldInput {
-              connect: [GenreProductConnectFieldInput!]
-              create: [GenreProductCreateFieldInput!]
-            }
-
-            input GenreProductNodeAggregationWhereInput {
-              AND: [GenreProductNodeAggregationWhereInput!]
-              NOT: GenreProductNodeAggregationWhereInput
-              OR: [GenreProductNodeAggregationWhereInput!]
-              id_AVERAGE_LENGTH_EQUAL: Float
-              id_AVERAGE_LENGTH_GT: Float
-              id_AVERAGE_LENGTH_GTE: Float
-              id_AVERAGE_LENGTH_LT: Float
-              id_AVERAGE_LENGTH_LTE: Float
-              id_LONGEST_LENGTH_EQUAL: Int
-              id_LONGEST_LENGTH_GT: Int
-              id_LONGEST_LENGTH_GTE: Int
-              id_LONGEST_LENGTH_LT: Int
-              id_LONGEST_LENGTH_LTE: Int
-              id_SHORTEST_LENGTH_EQUAL: Int
-              id_SHORTEST_LENGTH_GT: Int
-              id_SHORTEST_LENGTH_GTE: Int
-              id_SHORTEST_LENGTH_LT: Int
-              id_SHORTEST_LENGTH_LTE: Int
-              info_AVERAGE_LENGTH_EQUAL: Float
-              info_AVERAGE_LENGTH_GT: Float
-              info_AVERAGE_LENGTH_GTE: Float
-              info_AVERAGE_LENGTH_LT: Float
-              info_AVERAGE_LENGTH_LTE: Float
-              info_LONGEST_LENGTH_EQUAL: Int
-              info_LONGEST_LENGTH_GT: Int
-              info_LONGEST_LENGTH_GTE: Int
-              info_LONGEST_LENGTH_LT: Int
-              info_LONGEST_LENGTH_LTE: Int
-              info_SHORTEST_LENGTH_EQUAL: Int
-              info_SHORTEST_LENGTH_GT: Int
-              info_SHORTEST_LENGTH_GTE: Int
-              info_SHORTEST_LENGTH_LT: Int
-              info_SHORTEST_LENGTH_LTE: Int
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
-            }
-
-            type GenreProductRelationship {
-              cursor: String!
-              node: IProduct!
-            }
-
-            input GenreProductUpdateConnectionInput {
-              node: IProductUpdateInput
-            }
-
-            input GenreProductUpdateFieldInput {
-              connect: [GenreProductConnectFieldInput!]
-              create: [GenreProductCreateFieldInput!]
-              delete: [GenreProductDeleteFieldInput!]
-              disconnect: [GenreProductDisconnectFieldInput!]
-              update: GenreProductUpdateConnectionInput
-              where: GenreProductConnectionWhere
-            }
-
-            \\"\\"\\"
-            Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
-            \\"\\"\\"
-            input GenreSort {
-              name: SortDirection
-            }
-
-            input GenreSubscriptionWhere {
-              AND: [GenreSubscriptionWhere!]
-              NOT: GenreSubscriptionWhere
-              OR: [GenreSubscriptionWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            input GenreUniqueWhere {
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_EQ: String
-            }
-
-            input GenreUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-              product: [GenreProductUpdateFieldInput!]
-            }
-
-            type GenreUpdatedEvent {
-              event: EventType!
-              previousState: GenreEventPayload!
-              timestamp: Float!
-              updatedGenre: GenreEventPayload!
-            }
-
-            input GenreWhere {
-              AND: [GenreWhere!]
-              NOT: GenreWhere
-              OR: [GenreWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-              productAggregate: GenreProductAggregateInput
-              \\"\\"\\"
-              Return Genres where all of the related GenreProductConnections match this filter
-              \\"\\"\\"
-              productConnection_ALL: GenreProductConnectionWhere
-              \\"\\"\\"
-              Return Genres where none of the related GenreProductConnections match this filter
-              \\"\\"\\"
-              productConnection_NONE: GenreProductConnectionWhere
-              \\"\\"\\"
-              Return Genres where one of the related GenreProductConnections match this filter
-              \\"\\"\\"
-              productConnection_SINGLE: GenreProductConnectionWhere
-              \\"\\"\\"
-              Return Genres where some of the related GenreProductConnections match this filter
-              \\"\\"\\"
-              productConnection_SOME: GenreProductConnectionWhere
-              \\"\\"\\"Return Genres where all of the related IProducts match this filter\\"\\"\\"
-              product_ALL: IProductWhere
-              \\"\\"\\"Return Genres where none of the related IProducts match this filter\\"\\"\\"
-              product_NONE: IProductWhere
-              \\"\\"\\"Return Genres where one of the related IProducts match this filter\\"\\"\\"
-              product_SINGLE: IProductWhere
-              \\"\\"\\"Return Genres where some of the related IProducts match this filter\\"\\"\\"
-              product_SOME: IProductWhere
-            }
-
-            type GenresConnection {
-              edges: [GenreEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            interface IProduct {
-              genre(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
-              genreConnection(after: String, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
-              id: String!
-              info: String!
-              name: String!
-            }
-
-            type IProductAggregateSelection {
-              count: Int!
-              id: StringAggregateSelection!
-              info: StringAggregateSelection!
-              name: StringAggregateSelection!
-            }
-
-            input IProductConnectInput {
-              genre: IProductGenreConnectFieldInput
-            }
-
-            input IProductConnectWhere {
-              node: IProductWhere!
-            }
-
-            input IProductCreateInput {
-              Movie: MovieCreateInput
-            }
-
-            input IProductDeleteInput {
-              genre: IProductGenreDeleteFieldInput
-            }
-
-            input IProductDisconnectInput {
-              genre: IProductGenreDisconnectFieldInput
-            }
-
-            type IProductEdge {
-              cursor: String!
-              node: IProduct!
-            }
-
-            input IProductGenreAggregateInput {
-              AND: [IProductGenreAggregateInput!]
-              NOT: IProductGenreAggregateInput
-              OR: [IProductGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              count_EQ: Int
-              count_GT: Int
-              count_GTE: Int
-              count_LT: Int
-              count_LTE: Int
-              node: IProductGenreNodeAggregationWhereInput
-            }
-
-            input IProductGenreConnectFieldInput {
-              connect: GenreConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
-              where: GenreConnectWhere
-            }
-
-            input IProductGenreConnectOrCreateFieldInput {
-              onCreate: IProductGenreConnectOrCreateFieldInputOnCreate!
-              where: GenreConnectOrCreateWhere!
-            }
-
-            input IProductGenreConnectOrCreateFieldInputOnCreate {
-              node: GenreOnCreateInput!
-            }
-
-            type IProductGenreConnection {
-              edges: [IProductGenreRelationship!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            input IProductGenreConnectionSort {
-              node: GenreSort
-            }
-
-            input IProductGenreConnectionWhere {
-              AND: [IProductGenreConnectionWhere!]
-              NOT: IProductGenreConnectionWhere
-              OR: [IProductGenreConnectionWhere!]
-              node: GenreWhere
-            }
-
-            input IProductGenreCreateFieldInput {
-              node: GenreCreateInput!
-            }
-
-            input IProductGenreDeleteFieldInput {
-              delete: GenreDeleteInput
-              where: IProductGenreConnectionWhere
-            }
-
-            input IProductGenreDisconnectFieldInput {
-              disconnect: GenreDisconnectInput
-              where: IProductGenreConnectionWhere
-            }
-
-            input IProductGenreNodeAggregationWhereInput {
-              AND: [IProductGenreNodeAggregationWhereInput!]
-              NOT: IProductGenreNodeAggregationWhereInput
-              OR: [IProductGenreNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
-            }
-
-            type IProductGenreRelationship {
-              cursor: String!
-              node: Genre!
-            }
-
-            input IProductGenreUpdateConnectionInput {
-              node: GenreUpdateInput
-            }
-
-            input IProductGenreUpdateFieldInput {
-              connect: IProductGenreConnectFieldInput
-              connectOrCreate: IProductGenreConnectOrCreateFieldInput
-              create: IProductGenreCreateFieldInput
-              delete: IProductGenreDeleteFieldInput
-              disconnect: IProductGenreDisconnectFieldInput
-              update: IProductGenreUpdateConnectionInput
-              where: IProductGenreConnectionWhere
-            }
-
-            enum IProductImplementation {
-              Movie
-            }
-
-            input IProductOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more IProductSort objects to sort IProducts by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [IProductSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort IProducts by. The order in which sorts are applied is not guaranteed when specifying many fields in one IProductSort object.
-            \\"\\"\\"
-            input IProductSort {
-              id: SortDirection
-              info: SortDirection
-              name: SortDirection
-            }
-
-            input IProductUpdateInput {
-              genre: IProductGenreUpdateFieldInput
-              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: String
-              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              info_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-            }
-
-            input IProductWhere {
-              AND: [IProductWhere!]
-              NOT: IProductWhere
-              OR: [IProductWhere!]
-              genre: GenreWhere
-              genreAggregate: IProductGenreAggregateInput
-              genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              info: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              info_CONTAINS: String
-              info_ENDS_WITH: String
-              info_EQ: String
-              info_IN: [String!]
-              info_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-              typename: [IProductImplementation!]
-              typename_IN: [IProductImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
-            }
-
-            type IProductsConnection {
-              edges: [IProductEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            type Movie implements IProduct {
-              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
-              id: String!
-              info: String!
-              name: String!
-            }
-
-            type MovieAggregateSelection {
-              count: Int!
-              id: StringAggregateSelection!
-              name: StringAggregateSelection!
-            }
-
-            input MovieCreateInput {
-              genre: MovieGenreFieldInput
-              id: String!
-              name: String!
-            }
-
-            type MovieCreatedEvent {
-              createdMovie: MovieEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            input MovieDeleteInput {
-              genre: IProductGenreDeleteFieldInput
-            }
-
-            type MovieDeletedEvent {
-              deletedMovie: MovieEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            type MovieEdge {
-              cursor: String!
-              node: Movie!
-            }
-
-            type MovieEventPayload {
-              id: String!
-              name: String!
-            }
-
-            input MovieGenreAggregateInput {
-              AND: [MovieGenreAggregateInput!]
-              NOT: MovieGenreAggregateInput
-              OR: [MovieGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              count_EQ: Int
-              count_GT: Int
-              count_GTE: Int
-              count_LT: Int
-              count_LTE: Int
-              node: MovieGenreNodeAggregationWhereInput
-            }
-
-            input MovieGenreConnectFieldInput {
-              connect: GenreConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
-              where: GenreConnectWhere
-            }
-
-            input MovieGenreConnectOrCreateFieldInput {
-              onCreate: MovieGenreConnectOrCreateFieldInputOnCreate!
-              where: GenreConnectOrCreateWhere!
-            }
-
-            input MovieGenreConnectOrCreateFieldInputOnCreate {
-              node: GenreOnCreateInput!
-            }
-
-            input MovieGenreCreateFieldInput {
-              node: GenreCreateInput!
-            }
-
-            input MovieGenreFieldInput {
-              connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
-              create: MovieGenreCreateFieldInput
-            }
-
-            type MovieGenreGenreAggregationSelection {
-              count: Int!
-              node: MovieGenreGenreNodeAggregateSelection
-            }
-
-            type MovieGenreGenreNodeAggregateSelection {
-              name: StringAggregateSelection!
-            }
-
-            input MovieGenreNodeAggregationWhereInput {
-              AND: [MovieGenreNodeAggregationWhereInput!]
-              NOT: MovieGenreNodeAggregationWhereInput
-              OR: [MovieGenreNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
-            }
-
-            input MovieGenreUpdateConnectionInput {
-              node: GenreUpdateInput
-            }
-
-            input MovieGenreUpdateFieldInput {
-              connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput
-              create: MovieGenreCreateFieldInput
-              delete: IProductGenreDeleteFieldInput
-              disconnect: IProductGenreDisconnectFieldInput
-              update: MovieGenreUpdateConnectionInput
-              where: IProductGenreConnectionWhere
-            }
-
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
-            \\"\\"\\"
-            input MovieSort {
-              id: SortDirection
-              name: SortDirection
-            }
-
-            input MovieSubscriptionWhere {
-              AND: [MovieSubscriptionWhere!]
-              NOT: MovieSubscriptionWhere
-              OR: [MovieSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            input MovieUpdateInput {
-              genre: MovieGenreUpdateFieldInput
-              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-            }
-
-            type MovieUpdatedEvent {
-              event: EventType!
-              previousState: MovieEventPayload!
-              timestamp: Float!
-              updatedMovie: MovieEventPayload!
-            }
-
-            input MovieWhere {
-              AND: [MovieWhere!]
-              NOT: MovieWhere
-              OR: [MovieWhere!]
-              genre: GenreWhere
-              genreAggregate: MovieGenreAggregateInput
-              genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            type MoviesConnection {
-              edges: [MovieEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            type Mutation {
-              createGenres(input: [GenreCreateInput!]!): CreateGenresMutationResponse!
-              createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
-              deleteGenres(delete: GenreDeleteInput, where: GenreWhere): DeleteInfo!
-              deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-              updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-            }
-
-            \\"\\"\\"Pagination information (Relay)\\"\\"\\"
-            type PageInfo {
-              endCursor: String
-              hasNextPage: Boolean!
-              hasPreviousPage: Boolean!
-              startCursor: String
-            }
-
-            type Query {
-              genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
-              genresAggregate(where: GenreWhere): GenreAggregateSelection!
-              genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
-              iProducts(limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
-              iProductsAggregate(where: IProductWhere): IProductAggregateSelection!
-              iProductsConnection(after: String, first: Int, sort: [IProductSort!], where: IProductWhere): IProductsConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
-              moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-            }
-
-            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
-            enum SortDirection {
-              \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
-              ASC
-              \\"\\"\\"Sort by field values in descending order.\\"\\"\\"
-              DESC
-            }
-
-            type StringAggregateSelection {
-              longest: String
-              shortest: String
-            }
-
-            type Subscription {
-              genreCreated(where: GenreSubscriptionWhere): GenreCreatedEvent!
-              genreDeleted(where: GenreSubscriptionWhere): GenreDeletedEvent!
-              genreUpdated(where: GenreSubscriptionWhere): GenreUpdatedEvent!
-              movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
-              movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-              movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
-            }
-
-            type UpdateGenresMutationResponse {
-              genres: [Genre!]!
-              info: UpdateInfo!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created and deleted during an update mutation
-            \\"\\"\\"
-            type UpdateInfo {
-              nodesCreated: Int!
-              nodesDeleted: Int!
-              relationshipsCreated: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type UpdateMoviesMutationResponse {
-              info: UpdateInfo!
-              movies: [Movie!]!
-            }"
-        `);
-    });
-
-    test("Relationship declared in interface, customResolver field in one implementation only", async () => {
-        const typeDefs = gql`
-            interface IProduct {
-                id: String!
-
-                name: String!
-                genre: Genre! @declareRelationship
-                info: String!
-            }
-
-            type Movie implements IProduct @node {
-                id: String!
-
-                name: String!
-                genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT)
-                info: String! @customResolver(requires: "id name")
-            }
-
-            type Series implements IProduct @node {
-                id: String!
-
-                name: String!
-                genre: Genre! @relationship(type: "HAS_GENRE", direction: OUT)
-                info: String!
-            }
-
-            type Genre @node {
-                name: String! @unique
-                product: [IProduct!]! @relationship(type: "HAS_GENRE", direction: IN)
-            }
-        `;
-
-        const resolvers = {
-            Movie: {
-                info: ({ id, name }) => {
-                    return `${id}, ${name}`;
-                },
-            },
-        };
-        const neoSchema = new Neo4jGraphQL({ typeDefs, resolvers, features: { subscriptions: new TestCDCEngine() } });
-
-        const schema = await neoSchema.getSchema();
-        const errors = validateSchema(schema);
-        expect(errors).toHaveLength(0);
-
-        const printedSchema = printSchemaWithDirectives(lexicographicSortSchema(await neoSchema.getSchema()));
-
-        expect(printedSchema).toMatchInlineSnapshot(`
-            "schema {
-              query: Query
-              mutation: Mutation
-              subscription: Subscription
-            }
-
-            type CreateGenresMutationResponse {
-              genres: [Genre!]!
-              info: CreateInfo!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created during a create mutation
-            \\"\\"\\"
-            type CreateInfo {
-              nodesCreated: Int!
-              relationshipsCreated: Int!
-            }
-
-            type CreateMoviesMutationResponse {
-              info: CreateInfo!
-              movies: [Movie!]!
-            }
-
-            type CreateSeriesMutationResponse {
-              info: CreateInfo!
-              series: [Series!]!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships deleted during a delete mutation
-            \\"\\"\\"
-            type DeleteInfo {
-              nodesDeleted: Int!
-              relationshipsDeleted: Int!
-            }
-
-            enum EventType {
-              CREATE
-              CREATE_RELATIONSHIP
-              DELETE
-              DELETE_RELATIONSHIP
-              UPDATE
-            }
-
-            type Genre {
-              name: String!
-              product(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
-              productAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: IProductWhere): GenreIProductProductAggregationSelection
-              productConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [GenreProductConnectionSort!], where: GenreProductConnectionWhere): GenreProductConnection!
-            }
-
-            type GenreAggregateSelection {
-              count: Int!
-              name: StringAggregateSelection!
-            }
-
-            input GenreConnectInput {
-              product: [GenreProductConnectFieldInput!]
-            }
-
-            input GenreConnectOrCreateWhere {
-              node: GenreUniqueWhere!
-            }
-
-            input GenreConnectWhere {
-              node: GenreWhere!
-            }
-
-            input GenreCreateInput {
-              name: String!
-              product: GenreProductFieldInput
-            }
-
-            type GenreCreatedEvent {
-              createdGenre: GenreEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            input GenreDeleteInput {
-              product: [GenreProductDeleteFieldInput!]
-            }
-
-            type GenreDeletedEvent {
-              deletedGenre: GenreEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            input GenreDisconnectInput {
-              product: [GenreProductDisconnectFieldInput!]
-            }
-
-            type GenreEdge {
-              cursor: String!
-              node: Genre!
-            }
-
-            type GenreEventPayload {
-              name: String!
-            }
-
-            type GenreIProductProductAggregationSelection {
-              count: Int!
-              node: GenreIProductProductNodeAggregateSelection
-            }
-
-            type GenreIProductProductNodeAggregateSelection {
-              id: StringAggregateSelection!
-              info: StringAggregateSelection!
-              name: StringAggregateSelection!
-            }
-
-            input GenreOnCreateInput {
-              name: String!
-            }
-
-            input GenreOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more GenreSort objects to sort Genres by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [GenreSort!]
-            }
-
-            input GenreProductAggregateInput {
-              AND: [GenreProductAggregateInput!]
-              NOT: GenreProductAggregateInput
-              OR: [GenreProductAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              count_EQ: Int
-              count_GT: Int
-              count_GTE: Int
-              count_LT: Int
-              count_LTE: Int
-              node: GenreProductNodeAggregationWhereInput
-            }
-
-            input GenreProductConnectFieldInput {
-              connect: IProductConnectInput
-              where: IProductConnectWhere
-            }
-
-            type GenreProductConnection {
-              edges: [GenreProductRelationship!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            input GenreProductConnectionSort {
-              node: IProductSort
-            }
-
-            input GenreProductConnectionWhere {
-              AND: [GenreProductConnectionWhere!]
-              NOT: GenreProductConnectionWhere
-              OR: [GenreProductConnectionWhere!]
-              node: IProductWhere
-            }
-
-            input GenreProductCreateFieldInput {
-              node: IProductCreateInput!
-            }
-
-            input GenreProductDeleteFieldInput {
-              delete: IProductDeleteInput
-              where: GenreProductConnectionWhere
-            }
-
-            input GenreProductDisconnectFieldInput {
-              disconnect: IProductDisconnectInput
-              where: GenreProductConnectionWhere
-            }
-
-            input GenreProductFieldInput {
-              connect: [GenreProductConnectFieldInput!]
-              create: [GenreProductCreateFieldInput!]
-            }
-
-            input GenreProductNodeAggregationWhereInput {
-              AND: [GenreProductNodeAggregationWhereInput!]
-              NOT: GenreProductNodeAggregationWhereInput
-              OR: [GenreProductNodeAggregationWhereInput!]
-              id_AVERAGE_LENGTH_EQUAL: Float
-              id_AVERAGE_LENGTH_GT: Float
-              id_AVERAGE_LENGTH_GTE: Float
-              id_AVERAGE_LENGTH_LT: Float
-              id_AVERAGE_LENGTH_LTE: Float
-              id_LONGEST_LENGTH_EQUAL: Int
-              id_LONGEST_LENGTH_GT: Int
-              id_LONGEST_LENGTH_GTE: Int
-              id_LONGEST_LENGTH_LT: Int
-              id_LONGEST_LENGTH_LTE: Int
-              id_SHORTEST_LENGTH_EQUAL: Int
-              id_SHORTEST_LENGTH_GT: Int
-              id_SHORTEST_LENGTH_GTE: Int
-              id_SHORTEST_LENGTH_LT: Int
-              id_SHORTEST_LENGTH_LTE: Int
-              info_AVERAGE_LENGTH_EQUAL: Float
-              info_AVERAGE_LENGTH_GT: Float
-              info_AVERAGE_LENGTH_GTE: Float
-              info_AVERAGE_LENGTH_LT: Float
-              info_AVERAGE_LENGTH_LTE: Float
-              info_LONGEST_LENGTH_EQUAL: Int
-              info_LONGEST_LENGTH_GT: Int
-              info_LONGEST_LENGTH_GTE: Int
-              info_LONGEST_LENGTH_LT: Int
-              info_LONGEST_LENGTH_LTE: Int
-              info_SHORTEST_LENGTH_EQUAL: Int
-              info_SHORTEST_LENGTH_GT: Int
-              info_SHORTEST_LENGTH_GTE: Int
-              info_SHORTEST_LENGTH_LT: Int
-              info_SHORTEST_LENGTH_LTE: Int
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
-            }
-
-            type GenreProductRelationship {
-              cursor: String!
-              node: IProduct!
-            }
-
-            input GenreProductUpdateConnectionInput {
-              node: IProductUpdateInput
-            }
-
-            input GenreProductUpdateFieldInput {
-              connect: [GenreProductConnectFieldInput!]
-              create: [GenreProductCreateFieldInput!]
-              delete: [GenreProductDeleteFieldInput!]
-              disconnect: [GenreProductDisconnectFieldInput!]
-              update: GenreProductUpdateConnectionInput
-              where: GenreProductConnectionWhere
-            }
-
-            \\"\\"\\"
-            Fields to sort Genres by. The order in which sorts are applied is not guaranteed when specifying many fields in one GenreSort object.
-            \\"\\"\\"
-            input GenreSort {
-              name: SortDirection
-            }
-
-            input GenreSubscriptionWhere {
-              AND: [GenreSubscriptionWhere!]
-              NOT: GenreSubscriptionWhere
-              OR: [GenreSubscriptionWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            input GenreUniqueWhere {
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_EQ: String
-            }
-
-            input GenreUpdateInput {
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-              product: [GenreProductUpdateFieldInput!]
-            }
-
-            type GenreUpdatedEvent {
-              event: EventType!
-              previousState: GenreEventPayload!
-              timestamp: Float!
-              updatedGenre: GenreEventPayload!
-            }
-
-            input GenreWhere {
-              AND: [GenreWhere!]
-              NOT: GenreWhere
-              OR: [GenreWhere!]
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-              productAggregate: GenreProductAggregateInput
-              \\"\\"\\"
-              Return Genres where all of the related GenreProductConnections match this filter
-              \\"\\"\\"
-              productConnection_ALL: GenreProductConnectionWhere
-              \\"\\"\\"
-              Return Genres where none of the related GenreProductConnections match this filter
-              \\"\\"\\"
-              productConnection_NONE: GenreProductConnectionWhere
-              \\"\\"\\"
-              Return Genres where one of the related GenreProductConnections match this filter
-              \\"\\"\\"
-              productConnection_SINGLE: GenreProductConnectionWhere
-              \\"\\"\\"
-              Return Genres where some of the related GenreProductConnections match this filter
-              \\"\\"\\"
-              productConnection_SOME: GenreProductConnectionWhere
-              \\"\\"\\"Return Genres where all of the related IProducts match this filter\\"\\"\\"
-              product_ALL: IProductWhere
-              \\"\\"\\"Return Genres where none of the related IProducts match this filter\\"\\"\\"
-              product_NONE: IProductWhere
-              \\"\\"\\"Return Genres where one of the related IProducts match this filter\\"\\"\\"
-              product_SINGLE: IProductWhere
-              \\"\\"\\"Return Genres where some of the related IProducts match this filter\\"\\"\\"
-              product_SOME: IProductWhere
-            }
-
-            type GenresConnection {
-              edges: [GenreEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            interface IProduct {
-              genre(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
-              genreConnection(after: String, first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
-              id: String!
-              info: String!
-              name: String!
-            }
-
-            type IProductAggregateSelection {
-              count: Int!
-              id: StringAggregateSelection!
-              info: StringAggregateSelection!
-              name: StringAggregateSelection!
-            }
-
-            input IProductConnectInput {
-              genre: IProductGenreConnectFieldInput
-            }
-
-            input IProductConnectWhere {
-              node: IProductWhere!
-            }
-
-            input IProductCreateInput {
-              Movie: MovieCreateInput
-              Series: SeriesCreateInput
-            }
-
-            input IProductDeleteInput {
-              genre: IProductGenreDeleteFieldInput
-            }
-
-            input IProductDisconnectInput {
-              genre: IProductGenreDisconnectFieldInput
-            }
-
-            type IProductEdge {
-              cursor: String!
-              node: IProduct!
-            }
-
-            input IProductGenreAggregateInput {
-              AND: [IProductGenreAggregateInput!]
-              NOT: IProductGenreAggregateInput
-              OR: [IProductGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              count_EQ: Int
-              count_GT: Int
-              count_GTE: Int
-              count_LT: Int
-              count_LTE: Int
-              node: IProductGenreNodeAggregationWhereInput
-            }
-
-            input IProductGenreConnectFieldInput {
-              connect: GenreConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
-              where: GenreConnectWhere
-            }
-
-            input IProductGenreConnectOrCreateFieldInput {
-              onCreate: IProductGenreConnectOrCreateFieldInputOnCreate!
-              where: GenreConnectOrCreateWhere!
-            }
-
-            input IProductGenreConnectOrCreateFieldInputOnCreate {
-              node: GenreOnCreateInput!
-            }
-
-            type IProductGenreConnection {
-              edges: [IProductGenreRelationship!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            input IProductGenreConnectionSort {
-              node: GenreSort
-            }
-
-            input IProductGenreConnectionWhere {
-              AND: [IProductGenreConnectionWhere!]
-              NOT: IProductGenreConnectionWhere
-              OR: [IProductGenreConnectionWhere!]
-              node: GenreWhere
-            }
-
-            input IProductGenreCreateFieldInput {
-              node: GenreCreateInput!
-            }
-
-            input IProductGenreDeleteFieldInput {
-              delete: GenreDeleteInput
-              where: IProductGenreConnectionWhere
-            }
-
-            input IProductGenreDisconnectFieldInput {
-              disconnect: GenreDisconnectInput
-              where: IProductGenreConnectionWhere
-            }
-
-            input IProductGenreNodeAggregationWhereInput {
-              AND: [IProductGenreNodeAggregationWhereInput!]
-              NOT: IProductGenreNodeAggregationWhereInput
-              OR: [IProductGenreNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
-            }
-
-            type IProductGenreRelationship {
-              cursor: String!
-              node: Genre!
-            }
-
-            input IProductGenreUpdateConnectionInput {
-              node: GenreUpdateInput
-            }
-
-            input IProductGenreUpdateFieldInput {
-              connect: IProductGenreConnectFieldInput
-              connectOrCreate: IProductGenreConnectOrCreateFieldInput
-              create: IProductGenreCreateFieldInput
-              delete: IProductGenreDeleteFieldInput
-              disconnect: IProductGenreDisconnectFieldInput
-              update: IProductGenreUpdateConnectionInput
-              where: IProductGenreConnectionWhere
-            }
-
-            enum IProductImplementation {
-              Movie
-              Series
-            }
-
-            input IProductOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more IProductSort objects to sort IProducts by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [IProductSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort IProducts by. The order in which sorts are applied is not guaranteed when specifying many fields in one IProductSort object.
-            \\"\\"\\"
-            input IProductSort {
-              id: SortDirection
-              info: SortDirection
-              name: SortDirection
-            }
-
-            input IProductUpdateInput {
-              genre: IProductGenreUpdateFieldInput
-              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: String
-              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              info_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-            }
-
-            input IProductWhere {
-              AND: [IProductWhere!]
-              NOT: IProductWhere
-              OR: [IProductWhere!]
-              genre: GenreWhere
-              genreAggregate: IProductGenreAggregateInput
-              genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              info: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              info_CONTAINS: String
-              info_ENDS_WITH: String
-              info_EQ: String
-              info_IN: [String!]
-              info_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-              typename: [IProductImplementation!]
-              typename_IN: [IProductImplementation!] @deprecated(reason: \\"The typename_IN filter is deprecated, please use the typename filter instead\\")
-            }
-
-            type IProductsConnection {
-              edges: [IProductEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            type Movie implements IProduct {
-              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): MovieGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
-              id: String!
-              info: String!
-              name: String!
-            }
-
-            type MovieAggregateSelection {
-              count: Int!
-              id: StringAggregateSelection!
-              name: StringAggregateSelection!
-            }
-
-            input MovieCreateInput {
-              genre: MovieGenreFieldInput
-              id: String!
-              name: String!
-            }
-
-            type MovieCreatedEvent {
-              createdMovie: MovieEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            input MovieDeleteInput {
-              genre: IProductGenreDeleteFieldInput
-            }
-
-            type MovieDeletedEvent {
-              deletedMovie: MovieEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            type MovieEdge {
-              cursor: String!
-              node: Movie!
-            }
-
-            type MovieEventPayload {
-              id: String!
-              name: String!
-            }
-
-            input MovieGenreAggregateInput {
-              AND: [MovieGenreAggregateInput!]
-              NOT: MovieGenreAggregateInput
-              OR: [MovieGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              count_EQ: Int
-              count_GT: Int
-              count_GTE: Int
-              count_LT: Int
-              count_LTE: Int
-              node: MovieGenreNodeAggregationWhereInput
-            }
-
-            input MovieGenreConnectFieldInput {
-              connect: GenreConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
-              where: GenreConnectWhere
-            }
-
-            input MovieGenreConnectOrCreateFieldInput {
-              onCreate: MovieGenreConnectOrCreateFieldInputOnCreate!
-              where: GenreConnectOrCreateWhere!
-            }
-
-            input MovieGenreConnectOrCreateFieldInputOnCreate {
-              node: GenreOnCreateInput!
-            }
-
-            input MovieGenreCreateFieldInput {
-              node: GenreCreateInput!
-            }
-
-            input MovieGenreFieldInput {
-              connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
-              create: MovieGenreCreateFieldInput
-            }
-
-            type MovieGenreGenreAggregationSelection {
-              count: Int!
-              node: MovieGenreGenreNodeAggregateSelection
-            }
-
-            type MovieGenreGenreNodeAggregateSelection {
-              name: StringAggregateSelection!
-            }
-
-            input MovieGenreNodeAggregationWhereInput {
-              AND: [MovieGenreNodeAggregationWhereInput!]
-              NOT: MovieGenreNodeAggregationWhereInput
-              OR: [MovieGenreNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
-            }
-
-            input MovieGenreUpdateConnectionInput {
-              node: GenreUpdateInput
-            }
-
-            input MovieGenreUpdateFieldInput {
-              connect: MovieGenreConnectFieldInput
-              connectOrCreate: MovieGenreConnectOrCreateFieldInput
-              create: MovieGenreCreateFieldInput
-              delete: IProductGenreDeleteFieldInput
-              disconnect: IProductGenreDisconnectFieldInput
-              update: MovieGenreUpdateConnectionInput
-              where: IProductGenreConnectionWhere
-            }
-
-            input MovieOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more MovieSort objects to sort Movies by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [MovieSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort Movies by. The order in which sorts are applied is not guaranteed when specifying many fields in one MovieSort object.
-            \\"\\"\\"
-            input MovieSort {
-              id: SortDirection
-              name: SortDirection
-            }
-
-            input MovieSubscriptionWhere {
-              AND: [MovieSubscriptionWhere!]
-              NOT: MovieSubscriptionWhere
-              OR: [MovieSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            input MovieUpdateInput {
-              genre: MovieGenreUpdateFieldInput
-              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-            }
-
-            type MovieUpdatedEvent {
-              event: EventType!
-              previousState: MovieEventPayload!
-              timestamp: Float!
-              updatedMovie: MovieEventPayload!
-            }
-
-            input MovieWhere {
-              AND: [MovieWhere!]
-              NOT: MovieWhere
-              OR: [MovieWhere!]
-              genre: GenreWhere
-              genreAggregate: MovieGenreAggregateInput
-              genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            type MoviesConnection {
-              edges: [MovieEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            type Mutation {
-              createGenres(input: [GenreCreateInput!]!): CreateGenresMutationResponse!
-              createMovies(input: [MovieCreateInput!]!): CreateMoviesMutationResponse!
-              createSeries(input: [SeriesCreateInput!]!): CreateSeriesMutationResponse!
-              deleteGenres(delete: GenreDeleteInput, where: GenreWhere): DeleteInfo!
-              deleteMovies(delete: MovieDeleteInput, where: MovieWhere): DeleteInfo!
-              deleteSeries(delete: SeriesDeleteInput, where: SeriesWhere): DeleteInfo!
-              updateGenres(update: GenreUpdateInput, where: GenreWhere): UpdateGenresMutationResponse!
-              updateMovies(update: MovieUpdateInput, where: MovieWhere): UpdateMoviesMutationResponse!
-              updateSeries(update: SeriesUpdateInput, where: SeriesWhere): UpdateSeriesMutationResponse!
-            }
-
-            \\"\\"\\"Pagination information (Relay)\\"\\"\\"
-            type PageInfo {
-              endCursor: String
-              hasNextPage: Boolean!
-              hasPreviousPage: Boolean!
-              startCursor: String
-            }
-
-            type Query {
-              genres(limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): [Genre!]!
-              genresAggregate(where: GenreWhere): GenreAggregateSelection!
-              genresConnection(after: String, first: Int, sort: [GenreSort!], where: GenreWhere): GenresConnection!
-              iProducts(limit: Int, offset: Int, options: IProductOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [IProductSort!], where: IProductWhere): [IProduct!]!
-              iProductsAggregate(where: IProductWhere): IProductAggregateSelection!
-              iProductsConnection(after: String, first: Int, sort: [IProductSort!], where: IProductWhere): IProductsConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [MovieSort!], where: MovieWhere): [Movie!]!
-              moviesAggregate(where: MovieWhere): MovieAggregateSelection!
-              moviesConnection(after: String, first: Int, sort: [MovieSort!], where: MovieWhere): MoviesConnection!
-              series(limit: Int, offset: Int, options: SeriesOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [SeriesSort!], where: SeriesWhere): [Series!]!
-              seriesAggregate(where: SeriesWhere): SeriesAggregateSelection!
-              seriesConnection(after: String, first: Int, sort: [SeriesSort!], where: SeriesWhere): SeriesConnection!
-            }
-
-            type Series implements IProduct {
-              genre(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), limit: Int, offset: Int, options: GenreOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [GenreSort!], where: GenreWhere): Genre!
-              genreAggregate(directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), where: GenreWhere): SeriesGenreGenreAggregationSelection
-              genreConnection(after: String, directed: Boolean = true @deprecated(reason: \\"The directed argument is deprecated, and the direction of the field will be configured in the GraphQL server\\"), first: Int, sort: [IProductGenreConnectionSort!], where: IProductGenreConnectionWhere): IProductGenreConnection!
-              id: String!
-              info: String!
-              name: String!
-            }
-
-            type SeriesAggregateSelection {
-              count: Int!
-              id: StringAggregateSelection!
-              info: StringAggregateSelection!
-              name: StringAggregateSelection!
-            }
-
-            type SeriesConnection {
-              edges: [SeriesEdge!]!
-              pageInfo: PageInfo!
-              totalCount: Int!
-            }
-
-            input SeriesCreateInput {
-              genre: SeriesGenreFieldInput
-              id: String!
-              info: String!
-              name: String!
-            }
-
-            type SeriesCreatedEvent {
-              createdSeries: SeriesEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            input SeriesDeleteInput {
-              genre: IProductGenreDeleteFieldInput
-            }
-
-            type SeriesDeletedEvent {
-              deletedSeries: SeriesEventPayload!
-              event: EventType!
-              timestamp: Float!
-            }
-
-            type SeriesEdge {
-              cursor: String!
-              node: Series!
-            }
-
-            type SeriesEventPayload {
-              id: String!
-              info: String!
-              name: String!
-            }
-
-            input SeriesGenreAggregateInput {
-              AND: [SeriesGenreAggregateInput!]
-              NOT: SeriesGenreAggregateInput
-              OR: [SeriesGenreAggregateInput!]
-              count: Int @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              count_EQ: Int
-              count_GT: Int
-              count_GTE: Int
-              count_LT: Int
-              count_LTE: Int
-              node: SeriesGenreNodeAggregationWhereInput
-            }
-
-            input SeriesGenreConnectFieldInput {
-              connect: GenreConnectInput
-              \\"\\"\\"
-              Whether or not to overwrite any matching relationship with the new properties.
-              \\"\\"\\"
-              overwrite: Boolean! = true @deprecated(reason: \\"The overwrite argument is deprecated and will be removed\\")
-              where: GenreConnectWhere
-            }
-
-            input SeriesGenreConnectOrCreateFieldInput {
-              onCreate: SeriesGenreConnectOrCreateFieldInputOnCreate!
-              where: GenreConnectOrCreateWhere!
-            }
-
-            input SeriesGenreConnectOrCreateFieldInputOnCreate {
-              node: GenreOnCreateInput!
-            }
-
-            input SeriesGenreCreateFieldInput {
-              node: GenreCreateInput!
-            }
-
-            input SeriesGenreFieldInput {
-              connect: SeriesGenreConnectFieldInput
-              connectOrCreate: SeriesGenreConnectOrCreateFieldInput @deprecated(reason: \\"The connectOrCreate operation is deprecated and will be removed\\")
-              create: SeriesGenreCreateFieldInput
-            }
-
-            type SeriesGenreGenreAggregationSelection {
-              count: Int!
-              node: SeriesGenreGenreNodeAggregateSelection
-            }
-
-            type SeriesGenreGenreNodeAggregateSelection {
-              name: StringAggregateSelection!
-            }
-
-            input SeriesGenreNodeAggregationWhereInput {
-              AND: [SeriesGenreNodeAggregationWhereInput!]
-              NOT: SeriesGenreNodeAggregationWhereInput
-              OR: [SeriesGenreNodeAggregationWhereInput!]
-              name_AVERAGE_LENGTH_EQUAL: Float
-              name_AVERAGE_LENGTH_GT: Float
-              name_AVERAGE_LENGTH_GTE: Float
-              name_AVERAGE_LENGTH_LT: Float
-              name_AVERAGE_LENGTH_LTE: Float
-              name_LONGEST_LENGTH_EQUAL: Int
-              name_LONGEST_LENGTH_GT: Int
-              name_LONGEST_LENGTH_GTE: Int
-              name_LONGEST_LENGTH_LT: Int
-              name_LONGEST_LENGTH_LTE: Int
-              name_SHORTEST_LENGTH_EQUAL: Int
-              name_SHORTEST_LENGTH_GT: Int
-              name_SHORTEST_LENGTH_GTE: Int
-              name_SHORTEST_LENGTH_LT: Int
-              name_SHORTEST_LENGTH_LTE: Int
-            }
-
-            input SeriesGenreUpdateConnectionInput {
-              node: GenreUpdateInput
-            }
-
-            input SeriesGenreUpdateFieldInput {
-              connect: SeriesGenreConnectFieldInput
-              connectOrCreate: SeriesGenreConnectOrCreateFieldInput
-              create: SeriesGenreCreateFieldInput
-              delete: IProductGenreDeleteFieldInput
-              disconnect: IProductGenreDisconnectFieldInput
-              update: SeriesGenreUpdateConnectionInput
-              where: IProductGenreConnectionWhere
-            }
-
-            input SeriesOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more SeriesSort objects to sort Series by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [SeriesSort!]
-            }
-
-            \\"\\"\\"
-            Fields to sort Series by. The order in which sorts are applied is not guaranteed when specifying many fields in one SeriesSort object.
-            \\"\\"\\"
-            input SeriesSort {
-              id: SortDirection
-              info: SortDirection
-              name: SortDirection
-            }
-
-            input SeriesSubscriptionWhere {
-              AND: [SeriesSubscriptionWhere!]
-              NOT: SeriesSubscriptionWhere
-              OR: [SeriesSubscriptionWhere!]
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              info: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              info_CONTAINS: String
-              info_ENDS_WITH: String
-              info_EQ: String
-              info_IN: [String!]
-              info_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            input SeriesUpdateInput {
-              genre: SeriesGenreUpdateFieldInput
-              id: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              id_SET: String
-              info: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              info_SET: String
-              name: String @deprecated(reason: \\"Please use the explicit _SET field\\")
-              name_SET: String
-            }
-
-            type SeriesUpdatedEvent {
-              event: EventType!
-              previousState: SeriesEventPayload!
-              timestamp: Float!
-              updatedSeries: SeriesEventPayload!
-            }
-
-            input SeriesWhere {
-              AND: [SeriesWhere!]
-              NOT: SeriesWhere
-              OR: [SeriesWhere!]
-              genre: GenreWhere
-              genreAggregate: SeriesGenreAggregateInput
-              genreConnection: IProductGenreConnectionWhere
-              id: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              id_CONTAINS: String
-              id_ENDS_WITH: String
-              id_EQ: String
-              id_IN: [String!]
-              id_STARTS_WITH: String
-              info: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              info_CONTAINS: String
-              info_ENDS_WITH: String
-              info_EQ: String
-              info_IN: [String!]
-              info_STARTS_WITH: String
-              name: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              name_CONTAINS: String
-              name_ENDS_WITH: String
-              name_EQ: String
-              name_IN: [String!]
-              name_STARTS_WITH: String
-            }
-
-            \\"\\"\\"An enum for sorting in either ascending or descending order.\\"\\"\\"
-            enum SortDirection {
-              \\"\\"\\"Sort by field values in ascending order.\\"\\"\\"
-              ASC
-              \\"\\"\\"Sort by field values in descending order.\\"\\"\\"
-              DESC
-            }
-
-            type StringAggregateSelection {
-              longest: String
-              shortest: String
-            }
-
-            type Subscription {
-              genreCreated(where: GenreSubscriptionWhere): GenreCreatedEvent!
-              genreDeleted(where: GenreSubscriptionWhere): GenreDeletedEvent!
-              genreUpdated(where: GenreSubscriptionWhere): GenreUpdatedEvent!
-              movieCreated(where: MovieSubscriptionWhere): MovieCreatedEvent!
-              movieDeleted(where: MovieSubscriptionWhere): MovieDeletedEvent!
-              movieUpdated(where: MovieSubscriptionWhere): MovieUpdatedEvent!
-              seriesCreated(where: SeriesSubscriptionWhere): SeriesCreatedEvent!
-              seriesDeleted(where: SeriesSubscriptionWhere): SeriesDeletedEvent!
-              seriesUpdated(where: SeriesSubscriptionWhere): SeriesUpdatedEvent!
-            }
-
-            type UpdateGenresMutationResponse {
-              genres: [Genre!]!
-              info: UpdateInfo!
-            }
-
-            \\"\\"\\"
-            Information about the number of nodes and relationships created and deleted during an update mutation
-            \\"\\"\\"
-            type UpdateInfo {
-              nodesCreated: Int!
-              nodesDeleted: Int!
-              relationshipsCreated: Int!
-              relationshipsDeleted: Int!
-            }
-
-            type UpdateMoviesMutationResponse {
-              info: UpdateInfo!
-              movies: [Movie!]!
-            }
-
-            type UpdateSeriesMutationResponse {
-              info: UpdateInfo!
-              series: [Series!]!
             }"
         `);
     });

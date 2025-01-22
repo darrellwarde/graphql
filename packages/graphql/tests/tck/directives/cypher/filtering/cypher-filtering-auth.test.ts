@@ -23,8 +23,10 @@ import { formatCypher, formatParams, translateQuery } from "../../../utils/tck-t
 
 describe("cypher directive filtering - Auth", () => {
     test("With authorization on type using @cypher return value", async () => {
-        const typeDefs = `
-            type Movie @node @authorization(filter: [{ where: { node: { custom_field: "$jwt.custom_value" } } }]) {
+        const typeDefs = /* GraphQL */ `
+            type Movie
+                @node
+                @authorization(filter: [{ where: { node: { custom_field: { eq: "$jwt.custom_value" } } } }]) {
                 title: String
                 custom_field: String
                     @cypher(
@@ -36,7 +38,7 @@ describe("cypher directive filtering - Auth", () => {
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -44,7 +46,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const token = createBearerToken("secret", { custom_value: "hello" });
 
-        const query = `
+        const query = /* GraphQL */ `
             query {
                 movies {
                     title
@@ -92,7 +94,7 @@ describe("cypher directive filtering - Auth", () => {
     });
 
     test("With authorization on @cypher field using @cypher return value", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type Movie @node {
                 title: String
                 custom_field: String
@@ -102,11 +104,11 @@ describe("cypher directive filtering - Auth", () => {
                         """
                         columnName: "s"
                     )
-                    @authorization(filter: [{ where: { node: { custom_field: "$jwt.custom_value" } } }])
+                    @authorization(filter: [{ where: { node: { custom_field: { eq: "$jwt.custom_value" } } } }])
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -114,7 +116,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const token = createBearerToken("secret", { custom_value: "hello" });
 
-        const query = `
+        const query = /* GraphQL */ `
             query {
                 movies {
                     custom_field
@@ -172,7 +174,7 @@ describe("cypher directive filtering - Auth", () => {
     });
 
     test("With authorization on @cypher field using different field return value", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type Movie @node {
                 title: String
                 custom_field: String
@@ -182,11 +184,11 @@ describe("cypher directive filtering - Auth", () => {
                         """
                         columnName: "s"
                     )
-                    @authorization(filter: [{ where: { node: { title: "$jwt.custom_value" } } }])
+                    @authorization(filter: [{ where: { node: { title: { eq: "$jwt.custom_value" } } } }])
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -194,7 +196,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const token = createBearerToken("secret", { custom_value: "hello" });
 
-        const query = `
+        const query = /* GraphQL */ `
             query {
                 movies {
                     title
@@ -222,7 +224,7 @@ describe("cypher directive filtering - Auth", () => {
     });
 
     test("With authorization on Actor type field using nested Movie's @cypher field return value", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type Movie @node {
                 title: String
                 custom_field: String
@@ -235,7 +237,11 @@ describe("cypher directive filtering - Auth", () => {
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Actor @authorization(filter: [{ where: { node: { movies_SOME: { custom_field: "$jwt.custom_value" } } } }]) {
+            type Actor
+                @node
+                @authorization(
+                    filter: [{ where: { node: { movies: { some: { custom_field: { eq: "$jwt.custom_value" } } } } } }]
+                ) {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -243,7 +249,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const token = createBearerToken("secret", { custom_value: "hello" });
 
-        const query = `
+        const query = /* GraphQL */ `
             query {
                 actors {
                     name
@@ -298,9 +304,10 @@ describe("cypher directive filtering - Auth", () => {
     });
 
     test("With authorization on a different field than the @cypher field", async () => {
-        const typeDefs = `
+        const typeDefs = /* GraphQL */ `
             type Movie @node {
-                title: String @authorization(filter: [{ where: { node: { custom_field: "$jwt.custom_value" } } }])
+                title: String
+                    @authorization(filter: [{ where: { node: { custom_field: { eq: "$jwt.custom_value" } } } }])
                 custom_field: String
                     @cypher(
                         statement: """
@@ -311,7 +318,7 @@ describe("cypher directive filtering - Auth", () => {
                 actors: [Actor!]! @relationship(type: "ACTED_IN", direction: IN)
             }
 
-            type Actor {
+            type Actor @node {
                 name: String
                 movies: [Movie!]! @relationship(type: "ACTED_IN", direction: OUT)
             }
@@ -319,7 +326,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const token = createBearerToken("secret", { custom_value: "hello" });
 
-        const query = `
+        const query = /* GraphQL */ `
             query {
                 movies {
                     title
@@ -368,7 +375,9 @@ describe("cypher directive filtering - Auth", () => {
 
     test("With authorization on type using @cypher return value, with validate", async () => {
         const typeDefs = /* GraphQL */ `
-            type Movie @node @authorization(validate: [{ where: { node: { custom_field: "$jwt.custom_value" } } }]) {
+            type Movie
+                @node
+                @authorization(validate: [{ where: { node: { custom_field: { eq: "$jwt.custom_value" } } } }]) {
                 title: String
                 custom_field: String
                     @cypher(
@@ -389,7 +398,7 @@ describe("cypher directive filtering - Auth", () => {
 
         const token = createBearerToken("secret", { custom_value: "hello" });
 
-        const query = `
+        const query = /* GraphQL */ `
             query {
                 movies {
                     title

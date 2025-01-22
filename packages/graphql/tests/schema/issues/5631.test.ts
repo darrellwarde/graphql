@@ -79,15 +79,6 @@ describe("https://github.com/neo4j/graphql/issues/5631", () => {
               node: Actor!
             }
 
-            input ActorOptions {
-              limit: Int
-              offset: Int
-              \\"\\"\\"
-              Specify one or more ActorSort objects to sort Actors by. The sorts will be applied in the order in which they are arranged in the array.
-              \\"\\"\\"
-              sort: [ActorSort!]
-            }
-
             \\"\\"\\"
             Fields to sort Actors by. The order in which sorts are applied is not guaranteed when specifying many fields in one ActorSort object.
             \\"\\"\\"
@@ -107,12 +98,12 @@ describe("https://github.com/neo4j/graphql/issues/5631", () => {
               AND: [ActorWhere!]
               NOT: ActorWhere
               OR: [ActorWhere!]
-              custom_string_with_zero_param: String @deprecated(reason: \\"Please use the explicit _EQ version\\")
-              custom_string_with_zero_param_CONTAINS: String
-              custom_string_with_zero_param_ENDS_WITH: String
-              custom_string_with_zero_param_EQ: String
-              custom_string_with_zero_param_IN: [String!]
-              custom_string_with_zero_param_STARTS_WITH: String
+              custom_string_with_zero_param: StringScalarFilters
+              custom_string_with_zero_param_CONTAINS: String @deprecated(reason: \\"Please use the relevant generic filter custom_string_with_zero_param: { contains: ... }\\")
+              custom_string_with_zero_param_ENDS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter custom_string_with_zero_param: { endsWith: ... }\\")
+              custom_string_with_zero_param_EQ: String @deprecated(reason: \\"Please use the relevant generic filter custom_string_with_zero_param: { eq: ... }\\")
+              custom_string_with_zero_param_IN: [String!] @deprecated(reason: \\"Please use the relevant generic filter custom_string_with_zero_param: { in: ... }\\")
+              custom_string_with_zero_param_STARTS_WITH: String @deprecated(reason: \\"Please use the relevant generic filter custom_string_with_zero_param: { startsWith: ... }\\")
             }
 
             type ActorsConnection {
@@ -169,11 +160,6 @@ describe("https://github.com/neo4j/graphql/issues/5631", () => {
               node: Movie!
             }
 
-            input MovieOptions {
-              limit: Int
-              offset: Int
-            }
-
             input MovieUpdateInput {
               \\"\\"\\"
               Appears because this input type would be empty otherwise because this type is composed of just generated and/or relationship properties. See https://neo4j.com/docs/graphql-manual/current/troubleshooting/faqs/
@@ -212,10 +198,10 @@ describe("https://github.com/neo4j/graphql/issues/5631", () => {
             }
 
             type Query {
-              actors(limit: Int, offset: Int, options: ActorOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), sort: [ActorSort!], where: ActorWhere): [Actor!]!
+              actors(limit: Int, offset: Int, sort: [ActorSort!], where: ActorWhere): [Actor!]!
               actorsAggregate(where: ActorWhere): ActorAggregateSelection!
               actorsConnection(after: String, first: Int, sort: [ActorSort!], where: ActorWhere): ActorsConnection!
-              movies(limit: Int, offset: Int, options: MovieOptions @deprecated(reason: \\"Query options argument is deprecated, please use pagination arguments like limit, offset and sort instead.\\"), where: MovieWhere): [Movie!]!
+              movies(limit: Int, offset: Int, where: MovieWhere): [Movie!]!
               moviesAggregate(where: MovieWhere): MovieAggregateSelection!
               moviesConnection(after: String, first: Int, where: MovieWhere): MoviesConnection!
             }
@@ -226,6 +212,15 @@ describe("https://github.com/neo4j/graphql/issues/5631", () => {
               ASC
               \\"\\"\\"Sort by field values in descending order.\\"\\"\\"
               DESC
+            }
+
+            \\"\\"\\"String filters\\"\\"\\"
+            input StringScalarFilters {
+              contains: String
+              endsWith: String
+              eq: String
+              in: [String!]
+              startsWith: String
             }
 
             type UpdateActorsMutationResponse {

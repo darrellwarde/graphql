@@ -29,13 +29,11 @@ import { RelationshipAdapter } from "../../schema-model/relationship/model-adapt
 import { RelationshipDeclarationAdapter } from "../../schema-model/relationship/model-adapters/RelationshipDeclarationAdapter";
 import type { Neo4jFeaturesSettings } from "../../types";
 import { FieldAggregationComposer } from "../aggregations/field-aggregation-composer";
-import { addDirectedArgument } from "../directed-argument";
 import {
     augmentObjectOrInterfaceTypeWithConnectionField,
     augmentObjectOrInterfaceTypeWithRelationshipField,
 } from "../generation/augment-object-or-interface";
 import { augmentConnectInputTypeWithConnectFieldInput } from "../generation/connect-input";
-import { withConnectOrCreateInputType } from "../generation/connect-or-create-input";
 import {
     augmentCreateInputTypeWithRelationshipsInput,
     withCreateInputType,
@@ -50,6 +48,7 @@ import { withSortInputType } from "../generation/sort-and-options-input";
 import { augmentUpdateInputTypeWithUpdateFieldInput, withUpdateInputType } from "../generation/update-input";
 import { withSourceWhereInputType, withWhereInputType } from "../generation/where-input";
 import { graphqlDirectivesToCompose } from "../to-compose";
+import { type ComplexityEstimatorHelper } from "../../classes/ComplexityEstimatorHelper";
 
 function doForRelationshipDeclaration({
     relationshipDeclarationAdapter,
@@ -146,7 +145,7 @@ function doForRelationshipPropertiesType({
         composer,
     });
     withSortInputType({ relationshipAdapter, userDefinedFieldDirectives, composer });
-    withUpdateInputType({ entityAdapter: relationshipAdapter, userDefinedFieldDirectives, composer });
+    withUpdateInputType({ entityAdapter: relationshipAdapter, userDefinedFieldDirectives, composer, features });
     withWhereInputType({
         entityAdapter: relationshipAdapter,
         userDefinedFieldDirectives,
@@ -167,6 +166,7 @@ export function createRelationshipFields({
     userDefinedDirectivesForNode,
     userDefinedFieldDirectivesForNode,
     features,
+    complexityEstimatorHelper,
 }: {
     entityAdapter: ConcreteEntityAdapter | InterfaceEntityAdapter;
     schemaComposer: SchemaComposer;
@@ -177,6 +177,7 @@ export function createRelationshipFields({
     userDefinedDirectivesForNode: Map<string, DirectiveNode[]>;
     userDefinedFieldDirectivesForNode: Map<string, Map<string, DirectiveNode[]>>;
     features?: Neo4jFeaturesSettings;
+    complexityEstimatorHelper: ComplexityEstimatorHelper;
 }): void {
     const relationships =
         entityAdapter instanceof ConcreteEntityAdapter
@@ -190,6 +191,12 @@ export function createRelationshipFields({
     relationships.forEach((relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter) => {
         if (!relationshipAdapter) {
             return;
+        }
+
+        if (!relationshipAdapter.isList) {
+            throw new Error(
+                `@relationship on non-list field [${relationshipAdapter.source.name}.${relationshipAdapter.name}] not supported`
+            );
         }
 
         // TODO: find a way to merge these 2 into 1 RelationshipProperties generation function
@@ -239,6 +246,7 @@ export function createRelationshipFields({
             userDefinedDirectivesOnTargetFields: Map<string, DirectiveNode[]> | undefined;
             subgraph?: Subgraph;
             features: Neo4jFeaturesSettings | undefined;
+            complexityEstimatorHelper: ComplexityEstimatorHelper;
         } = {
             relationshipAdapter,
             composer: schemaComposer,
@@ -247,6 +255,7 @@ export function createRelationshipFields({
             deprecatedDirectives,
             userDefinedDirectivesOnTargetFields,
             features,
+            complexityEstimatorHelper,
         };
 
         if (relationshipTarget instanceof UnionEntityAdapter) {
@@ -268,13 +277,11 @@ export function createRelationshipFields({
                 where: relationshipTarget.operations.whereInputTypeName,
             };
 
-            const aggregationFieldsArgs = addDirectedArgument(aggregationFieldsBaseArgs, relationshipAdapter, features);
-
             if (relationshipAdapter.aggregate) {
                 composeNode.addFields({
                     [relationshipAdapter.operations.aggregateTypeName]: {
                         type: aggregationTypeObject,
-                        args: aggregationFieldsArgs,
+                        args: aggregationFieldsBaseArgs,
                         directives: deprecatedDirectives,
                     },
                 });
@@ -298,6 +305,7 @@ function createRelationshipFieldsForTarget({
     userDefinedDirectivesOnTargetFields,
     subgraph, // only for concrete targets
     features,
+    complexityEstimatorHelper,
 }: {
     relationshipAdapter: RelationshipAdapter | RelationshipDeclarationAdapter;
     composer: SchemaComposer;
@@ -307,6 +315,7 @@ function createRelationshipFieldsForTarget({
     deprecatedDirectives: Directive[];
     subgraph?: Subgraph;
     features: Neo4jFeaturesSettings | undefined;
+    complexityEstimatorHelper: ComplexityEstimatorHelper;
 }) {
     withSourceWhereInputType({
         relationshipAdapter,
@@ -317,33 +326,23 @@ function createRelationshipFieldsForTarget({
     });
 
     if (relationshipAdapter.target instanceof InterfaceEntityAdapter) {
-        withFieldInputType({ relationshipAdapter, composer, userDefinedFieldDirectives, features });
-    } else {
-        withConnectOrCreateInputType({
-            relationshipAdapter,
-            composer,
-            userDefinedFieldDirectives,
-            deprecatedDirectives,
-        });
+        withFieldInputType({ relationshipAdapter, composer, userDefinedFieldDirectives });
     }
 
+    complexityEstimatorHelper.registerField(composeNode.getTypeName(), relationshipAdapter.name)
     composeNode.addFields(
         augmentObjectOrInterfaceTypeWithRelationshipField({
             relationshipAdapter,
             userDefinedFieldDirectives,
             subgraph,
-            features,
             composer,
+            features,
         })
     );
-
+    
+    complexityEstimatorHelper.registerField(composeNode.getTypeName(), relationshipAdapter.operations.connectionFieldName)
     composeNode.addFields(
-        augmentObjectOrInterfaceTypeWithConnectionField(
-            relationshipAdapter,
-            userDefinedFieldDirectives,
-            composer,
-            features
-        )
+        augmentObjectOrInterfaceTypeWithConnectionField(relationshipAdapter, userDefinedFieldDirectives, composer, features)
     );
 
     withRelationInputType({

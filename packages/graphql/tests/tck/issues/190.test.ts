@@ -48,7 +48,7 @@ describe("#190", () => {
     test("Example 1", async () => {
         const query = /* GraphQL */ `
             query {
-                users(where: { demographics_SOME: { type_EQ: "Gender", value_EQ: "Female" } }) {
+                users(where: { demographics: { some: { type: { eq: "Gender" }, value: { eq: "Female" } } } }) {
                     uid
                     demographics {
                         type
@@ -69,6 +69,7 @@ describe("#190", () => {
             CALL {
                 WITH this
                 MATCH (this)-[this1:HAS_DEMOGRAPHIC]->(this2:UserDemographics)
+                WITH DISTINCT this2
                 WITH this2 { .type, .value } AS this2
                 RETURN collect(this2) AS var3
             }
@@ -88,8 +89,14 @@ describe("#190", () => {
             query {
                 users(
                     where: {
-                        demographics_SOME: {
-                            OR: [{ type_EQ: "Gender", value_EQ: "Female" }, { type_EQ: "State" }, { type_EQ: "Age" }]
+                        demographics: {
+                            some: {
+                                OR: [
+                                    { type: { eq: "Gender" }, value: { eq: "Female" } }
+                                    { type: { eq: "State" } }
+                                    { type: { eq: "Age" } }
+                                ]
+                            }
                         }
                     }
                 ) {
@@ -113,6 +120,7 @@ describe("#190", () => {
             CALL {
                 WITH this
                 MATCH (this)-[this1:HAS_DEMOGRAPHIC]->(this2:UserDemographics)
+                WITH DISTINCT this2
                 WITH this2 { .type, .value } AS this2
                 RETURN collect(this2) AS var3
             }

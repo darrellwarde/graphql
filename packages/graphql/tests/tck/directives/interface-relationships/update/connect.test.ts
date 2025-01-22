@@ -64,7 +64,7 @@ describe("Interface Relationships - Update connect", () => {
                 updateActors(
                     update: {
                         actedIn: {
-                            connect: { edge: { screenTime: 90 }, where: { node: { title_STARTS_WITH: "The " } } }
+                            connect: { edge: { screenTime: 90 }, where: { node: { title: { startsWith: "The " } } } }
                         }
                     }
                 ) {
@@ -94,7 +94,7 @@ describe("Interface Relationships - Update connect", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this
             			UNWIND connectedNodes as this_actedIn0_connect0_node
-            			MERGE (this)-[this_actedIn0_connect0_relationship:ACTED_IN]->(this_actedIn0_connect0_node)
+            			CREATE (this)-[this_actedIn0_connect0_relationship:ACTED_IN]->(this_actedIn0_connect0_node)
             			SET this_actedIn0_connect0_relationship.screenTime = $this_actedIn0_connect0_relationship_screenTime
             		}
             	}
@@ -117,7 +117,7 @@ describe("Interface Relationships - Update connect", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this
             			UNWIND connectedNodes as this_actedIn0_connect0_node
-            			MERGE (this)-[this_actedIn0_connect0_relationship:ACTED_IN]->(this_actedIn0_connect0_node)
+            			CREATE (this)-[this_actedIn0_connect0_relationship:ACTED_IN]->(this_actedIn0_connect0_node)
             			SET this_actedIn0_connect0_relationship.screenTime = $this_actedIn0_connect0_relationship_screenTime
             		}
             	}
@@ -149,11 +149,11 @@ describe("Interface Relationships - Update connect", () => {
                         actedIn: {
                             connect: {
                                 edge: { screenTime: 90 }
-                                where: { node: { title_STARTS_WITH: "The " } }
+                                where: { node: { title: { startsWith: "The " } } }
                                 connect: {
                                     actors: {
                                         edge: { ActedIn: { screenTime: 90 } }
-                                        where: { node: { name_EQ: "Actor" } }
+                                        where: { node: { name: { eq: "Actor" } } }
                                     }
                                 }
                             }
@@ -186,7 +186,7 @@ describe("Interface Relationships - Update connect", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this
             			UNWIND connectedNodes as this_actedIn0_connect0_node
-            			MERGE (this)-[this_actedIn0_connect0_relationship:ACTED_IN]->(this_actedIn0_connect0_node)
+            			CREATE (this)-[this_actedIn0_connect0_relationship:ACTED_IN]->(this_actedIn0_connect0_node)
             			SET this_actedIn0_connect0_relationship.screenTime = $this_actedIn0_connect0_relationship_screenTime
             		}
             	}
@@ -202,7 +202,7 @@ describe("Interface Relationships - Update connect", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this_actedIn0_connect0_node
             			UNWIND connectedNodes as this_actedIn0_connect0_node_actors0_node
-            			MERGE (this_actedIn0_connect0_node)<-[this_actedIn0_connect0_node_actors0_relationship:ACTED_IN]-(this_actedIn0_connect0_node_actors0_node)
+            			CREATE (this_actedIn0_connect0_node)<-[this_actedIn0_connect0_node_actors0_relationship:ACTED_IN]-(this_actedIn0_connect0_node_actors0_node)
             			SET this_actedIn0_connect0_node_actors0_relationship.screenTime = $this_actedIn0_connect0_node_actors0_relationship_ActedIn_screenTime
             		}
             	}
@@ -227,7 +227,7 @@ describe("Interface Relationships - Update connect", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this
             			UNWIND connectedNodes as this_actedIn0_connect0_node
-            			MERGE (this)-[this_actedIn0_connect0_relationship:ACTED_IN]->(this_actedIn0_connect0_node)
+            			CREATE (this)-[this_actedIn0_connect0_relationship:ACTED_IN]->(this_actedIn0_connect0_node)
             			SET this_actedIn0_connect0_relationship.screenTime = $this_actedIn0_connect0_relationship_screenTime
             		}
             	}
@@ -243,7 +243,7 @@ describe("Interface Relationships - Update connect", () => {
             			WITH connectedNodes, parentNodes
             			UNWIND parentNodes as this_actedIn0_connect0_node
             			UNWIND connectedNodes as this_actedIn0_connect0_node_actors0_node
-            			MERGE (this_actedIn0_connect0_node)<-[this_actedIn0_connect0_node_actors0_relationship:ACTED_IN]-(this_actedIn0_connect0_node_actors0_node)
+            			CREATE (this_actedIn0_connect0_node)<-[this_actedIn0_connect0_node_actors0_relationship:ACTED_IN]-(this_actedIn0_connect0_node_actors0_node)
             			SET this_actedIn0_connect0_node_actors0_relationship.screenTime = $this_actedIn0_connect0_node_actors0_relationship_ActedIn_screenTime
             		}
             	}

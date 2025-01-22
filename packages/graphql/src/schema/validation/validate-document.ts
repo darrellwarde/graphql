@@ -46,9 +46,9 @@ import { Point } from "../../graphql/objects/Point";
 import * as scalars from "../../graphql/scalars";
 import type { Neo4jFeaturesSettings } from "../../types";
 import { isRootType } from "../../utils/is-root-type";
-import { DirectiveArgumentOfCorrectType } from "./custom-rules/directive-argument-of-correct-type";
 import { directiveIsValid } from "./custom-rules/directives/valid-directive";
 import { ValidDirectiveAtFieldLocation } from "./custom-rules/directives/valid-directive-field-location";
+import { ErrorIfSingleRelationships } from "./custom-rules/error-single-relationships";
 import { ValidJwtDirectives } from "./custom-rules/features/valid-jwt-directives";
 import { ValidRelationshipDeclaration } from "./custom-rules/features/valid-relationship-declaration";
 import { ValidRelationshipProperties } from "./custom-rules/features/valid-relationship-properties";
@@ -60,17 +60,13 @@ import {
     SchemaOrTypeDirectives,
 } from "./custom-rules/valid-types/valid-directive-combination";
 import { ValidFieldTypes } from "./custom-rules/valid-types/valid-field-types";
+import { ValidListInNodeType } from "./custom-rules/valid-types/valid-list-in-node-type";
 import { ValidObjectType } from "./custom-rules/valid-types/valid-object-type";
+import { ValidateNeo4jDirectiveArgumentsValue } from "./custom-rules/validate-neo4j-directive-arguments-value";
 import { WarnIfAuthorizationFeatureDisabled } from "./custom-rules/warnings/authorization-feature-disabled";
-import { WarnPrivateDeprecation } from "./custom-rules/warnings/deprecated-private";
-import { WarnUniqueDeprecation } from "./custom-rules/warnings/deprecated-unique";
 import { WarnIfAMaxLimitCanBeBypassedThroughInterface } from "./custom-rules/warnings/limit-max-can-be-bypassed";
-import { WarnIfListOfListsFieldDefinition } from "./custom-rules/warnings/list-of-lists";
 import { WarnObjectFieldsWithoutResolver } from "./custom-rules/warnings/object-fields-without-resolver";
-import { WarnIfQueryDirectionIsUsedWithDeprecatedValues } from "./custom-rules/warnings/query-direction-deprecated-values";
-import { WarnIfSingleRelationships } from "./custom-rules/warnings/single-relationship";
 import { WarnIfSubscriptionsAuthorizationMissing } from "./custom-rules/warnings/subscriptions-authorization-missing";
-import { WarnIfTypeIsNotMarkedAsNode } from "./custom-rules/warnings/warn-if-type-is-not-marked-as-node";
 import { validateSchemaCustomizations } from "./validate-schema-customizations";
 import { validateSDL } from "./validate-sdl";
 
@@ -226,19 +222,15 @@ function runValidationRulesOnFilteredDocument({
             ReservedTypeNames,
             ValidObjectType,
             ValidDirectiveInheritance,
-            DirectiveArgumentOfCorrectType(false),
+            ValidateNeo4jDirectiveArgumentsValue,
             WarnIfAuthorizationFeatureDisabled(features?.authorization),
-            WarnIfListOfListsFieldDefinition,
-            WarnIfSingleRelationships,
+            ErrorIfSingleRelationships,
             WarnIfAMaxLimitCanBeBypassedThroughInterface(),
             WarnObjectFieldsWithoutResolver({
                 customResolvers: asArray(userCustomResolvers ?? []),
             }),
+            ValidListInNodeType,
             WarnIfSubscriptionsAuthorizationMissing(Boolean(features?.subscriptions)),
-            WarnIfTypeIsNotMarkedAsNode(),
-            WarnIfQueryDirectionIsUsedWithDeprecatedValues,
-            WarnUniqueDeprecation(),
-            WarnPrivateDeprecation(),
         ],
         schema
     );
